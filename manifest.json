@@ -1,20 +1,20 @@
 {
     "name": "Zalihe - Upravljanje zalihama",
     "short_name": "Zalihe",
-    "start_url": "/",
-    "scope": "/",
+    "start_url": "/Household_supplies/",
+    "scope": "/Household_supplies/",
     "display": "standalone",
     "background_color": "#1a237e",
     "theme_color": "#1a237e",
     "orientation": "portrait",
     "icons": [
         {
-            "src": "icons/logo.png",
+            "src": "/Household_supplies/icons/logo.png",
             "sizes": "192x192",
             "type": "image/png"
         },
         {
-            "src": "icons/logo.png",
+            "src": "/Household_supplies/icons/logo.png",
             "sizes": "512x512",
             "type": "image/png"
         }
