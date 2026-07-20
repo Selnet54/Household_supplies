@@ -1767,6 +1767,25 @@ document.addEventListener('DOMContentLoaded', function() {
         renderShoppingList();
     });
 });
+<script>
+    // Forsiranje da sve radi - dodatak za GitHub Pages
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Stranica učitana!');
+        // Proveri da li login radi
+        const loginBtn = document.getElementById('loginBtn');
+        if (loginBtn) {
+            loginBtn.addEventListener('click', function() {
+                const phone = document.getElementById('phoneInput').value.trim();
+                if (phone.length >= 9) {
+                    document.getElementById('loginScreen').style.display = 'none';
+                    document.getElementById('languageScreen').style.display = 'flex';
+                    if (typeof renderLanguages === 'function') renderLanguages();
+                } else {
+                    alert('Unesite validan broj telefona!');
+                }
+            });
+        }
+    });
 </script>
 </body>
 </html>
