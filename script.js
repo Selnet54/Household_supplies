@@ -4,30 +4,95 @@
 
 console.log('✅ Script.js je učitan!');
 
-// ===== 1. EXIT FUNKCIJA =====
-function exitApp() {
+// Exit dugmad - direktno povezivanje
+document.getElementById('exitLoginBtn')?.addEventListener('click', function() {
     if (confirm('Da li želite da zatvorite aplikaciju?')) {
-        if (window.navigator && window.navigator.app) {
-            try { window.navigator.app.exitApp(); return; } catch(e) {}
-        }
-        try { window.close(); } catch(e) { window.location.href = 'about:blank'; }
-        setTimeout(function() { window.location.href = 'about:blank'; }, 500);
+        window.close();
     }
-}
+});
+document.getElementById('exitLangBtn')?.addEventListener('click', function() {
+    if (confirm('Da li želite da zatvorite aplikaciju?')) {
+        window.close();
+    }
+});
+document.getElementById('exitMainBtn')?.addEventListener('click', function() {
+    if (confirm('Da li želite da zatvorite aplikaciju?')) {
+        window.close();
+    }
+});
 
 // ===== 2. JEZICI =====
 const languages = [
-    { code: 'sr', name: 'Srpski', flag: 'icons/jezici/srpski.png' },
-    { code: 'en', name: 'English', flag: 'icons/jezici/engleski.png' },
-    { code: 'de', name: 'Deutsch', flag: 'icons/jezici/nemacki.png' },
-    { code: 'hu', name: 'Magyar', flag: 'icons/jezici/madjarski.png' },
-    { code: 'uk', name: 'Українська', flag: 'icons/jezici/ukrajinski.png' },
-    { code: 'ru', name: 'Русский', flag: 'icons/jezici/ruski.png' },
-    { code: 'zh', name: '中文', flag: 'icons/jezici/mandarinski.png' },
-    { code: 'es', name: 'Español', flag: 'icons/jezici/spanski.png' },
-    { code: 'pt', name: 'Português', flag: 'icons/jezici/portugalski.png' },
-    { code: 'fr', name: 'Français', flag: 'icons/jezici/francuski.png' }
+    { code: 'sr', name: 'Srpski', flag: '/Household_supplies/icons/jezici/srpski.png' },
+    { code: 'en', name: 'English', flag: '/Household_supplies/icons/jezici/engleski.png' },
+    { code: 'de', name: 'Deutsch', flag: '/Household_supplies/icons/jezici/nemacki.png' },
+    { code: 'hu', name: 'Magyar', flag: '/Household_supplies/icons/jezici/madjarski.png' },
+    { code: 'uk', name: 'Українська', flag: '/Household_supplies/icons/jezici/ukrajinski.png' },
+    { code: 'ru', name: 'Русский', flag: '/Household_supplies/icons/jezici/ruski.png' },
+    { code: 'zh', name: '中文', flag: '/Household_supplies/icons/jezici/mandarinski.png' },
+    { code: 'es', name: 'Español', flag: '/Household_supplies/icons/jezici/spanski.png' },
+    { code: 'pt', name: 'Português', flag: '/Household_supplies/icons/jezici/portugalski.png' },
+    { code: 'fr', name: 'Français', flag: '/Household_supplies/icons/jezici/francuski.png' }
 ];
+
+// ===== GLAVNI DOGAĐAJI =====
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('✅ DOM je spreman!');
+
+    // Login
+    const loginBtn = document.getElementById('loginBtn');
+    if (loginBtn) {
+        loginBtn.addEventListener('click', function() {
+            const phone = document.getElementById('phoneInput').value.trim();
+            if (phone.length >= 9) {
+                showScreen('languageScreen');
+                renderLanguages();
+            } else {
+                alert('Unesite validan broj telefona (9+ cifara)!');
+            }
+        });
+    }
+
+    // Enter na polju za telefon
+    document.getElementById('phoneInput')?.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') loginBtn?.click();
+    });
+
+    // Exit dugmad - DIREKTNO
+    document.getElementById('exitLoginBtn')?.addEventListener('click', function() {
+        if (confirm('Da li želite da zatvorite aplikaciju?')) {
+            window.close();
+        }
+    });
+    document.getElementById('exitLangBtn')?.addEventListener('click', function() {
+        if (confirm('Da li želite da zatvorite aplikaciju?')) {
+            window.close();
+        }
+    });
+    document.getElementById('exitMainBtn')?.addEventListener('click', function() {
+        if (confirm('Da li želite da zatvorite aplikaciju?')) {
+            window.close();
+        }
+    });
+
+    // Back
+    document.getElementById('backBtn')?.addEventListener('click', function() {
+        showScreen('languageScreen');
+        renderLanguages();
+    });
+
+    // Inventory
+    document.getElementById('inventoryBtn')?.addEventListener('click', function() {
+        renderInventory();
+    });
+
+    // Shopping
+    document.getElementById('shoppingBtn')?.addEventListener('click', function() {
+        renderShoppingList();
+    });
+
+    console.log('✅ Svi događaji povezani!');
+});
 
 // ===== 3. PREVODI =====
 const translations = {
