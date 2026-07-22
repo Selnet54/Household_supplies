@@ -1696,9 +1696,12 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('shoppingBtn').addEventListener('click', function() {
         renderShoppingList();
     });
-});
+</script>
+
 <script>
-    // Test funkcija za login
+    // ============================================
+    // TEST LOGIN FUNKCIJA
+    // ============================================
     function testLogin() {
         alert('Dugme radi!');
         const phone = document.getElementById('phoneInput').value.trim();
@@ -1714,6 +1717,17 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Unesite validan broj telefona (9+ cifara)!');
         }
     }
+
+    // ============================================
+    // DODATNO: Povezivanje dugmadi ako onclick ne radi
+    // ============================================
+    document.addEventListener('DOMContentLoaded', function() {
+        const loginBtn = document.getElementById('loginBtn');
+        if (loginBtn) {
+            loginBtn.addEventListener('click', testLogin);
+        }
+    });
 </script>
+
 </body>
 </html>
