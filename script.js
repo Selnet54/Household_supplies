@@ -692,5 +692,5 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ Svi događaji povezani!');
 });
 
-// ===== KRAJ SCRIPT.JS =====
-console.log('✅ Script.js je učitan!');
+    console.log('✅ Svi događaji povezani!');
+});
