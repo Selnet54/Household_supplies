@@ -4,23 +4,19 @@ console.log('✅ Script.js je učitan!');
 // Exit funkcija
 function exitApp() {
     if (confirm('Da li želite da zatvorite aplikaciju?')) {
-        // Za PWA (instaliranu aplikaciju) na Androidu
+        // Ako je instalirana PWA (Android)
         if (window.navigator && window.navigator.app) {
             try {
                 window.navigator.app.exitApp();
                 return;
             } catch(e) {}
         }
-        // Za browser - preusmeri na praznu stranicu
-        try {
-            window.close();
-        } catch(e) {
-            window.location.href = 'about:blank';
-        }
-        // Fallback - ako ništa ne radi
-        setTimeout(function() {
-            window.location.href = 'about:blank';
-        }, 500);
+        // Ako je u browser-u - vrati na login ekran
+        document.getElementById('mainScreen').style.display = 'none';
+        document.getElementById('languageScreen').style.display = 'none';
+        document.getElementById('loginScreen').style.display = 'flex';
+        document.getElementById('phoneInput').value = '';
+        document.getElementById('phoneInput').focus();
     }
 }
 
