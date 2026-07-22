@@ -4,7 +4,23 @@ console.log('✅ Script.js je učitan!');
 // Exit funkcija
 function exitApp() {
     if (confirm('Da li želite da zatvorite aplikaciju?')) {
-        window.close();
+        // Za PWA (instaliranu aplikaciju) na Androidu
+        if (window.navigator && window.navigator.app) {
+            try {
+                window.navigator.app.exitApp();
+                return;
+            } catch(e) {}
+        }
+        // Za browser - preusmeri na praznu stranicu
+        try {
+            window.close();
+        } catch(e) {
+            window.location.href = 'about:blank';
+        }
+        // Fallback - ako ništa ne radi
+        setTimeout(function() {
+            window.location.href = 'about:blank';
+        }, 500);
     }
 }
 
