@@ -3,6 +3,16 @@
 // ============================================
 
 console.log('✅ Script.js je učitan!');
+// ===== 0. EXIT FUNKCIJA (MORA BITI PRVA) =====
+function exitApp() {
+    if (confirm('Da li želite da zatvorite aplikaciju?')) {
+        try {
+            window.close();
+        } catch(e) {
+            window.location.href = 'about:blank';
+        }
+    }
+}
 
 // Exit dugmad - direktno povezivanje
 document.getElementById('exitLoginBtn')?.addEventListener('click', function() {
@@ -34,10 +44,6 @@ const languages = [
     { code: 'pt', name: 'Português', flag: '/Household_supplies/icons/jezici/portugalski.png' },
     { code: 'fr', name: 'Français', flag: '/Household_supplies/icons/jezici/francuski.png' }
 ];
-
-// ===== GLAVNI DOGAĐAJI =====
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('✅ DOM je spreman!');
 
     // Login
     const loginBtn = document.getElementById('loginBtn');
@@ -727,7 +733,7 @@ function renderShoppingList() {
     content.innerHTML = html;
 }
 
-// ===== 11. GLAVNI DOGAĐAJI =====
+// ===== GLAVNI DOGAĐAJI =====
 document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ DOM je spreman!');
 
@@ -757,8 +763,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Back
     document.getElementById('backBtn')?.addEventListener('click', function() {
-        showScreen('languageScreen');
-        renderLanguages();
+        window.historyStack = window.historyStack || [];
+        if (window.historyStack.length === 0) {
+            showScreen('languageScreen');
+            renderLanguages();
+            return;
+        }
+        const last = window.historyStack.pop();
+        if (last.type === 'categories') {
+            renderCategories();
+        } else if (last.type === 'subcategories') {
+            renderSubcategories(last.category);
+        } else if (last.type === 'productParts') {
+            renderProductParts(last.subcategory);
+        } else {
+            showScreen('languageScreen');
+            renderLanguages();
+        }
     });
 
     // Inventory
@@ -773,3 +794,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     console.log('✅ Svi događaji povezani!');
 });
+
+// ===== KRAJ SCRIPT.JS =====
+console.log('✅ Script.js je učitan!');
