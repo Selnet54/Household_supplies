@@ -1725,18 +1725,53 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // 2. EXIT DUGMAD
-        document.getElementById('exitLoginBtn')?.addEventListener('click', function() {
-            if (confirm('Da li želite da zatvorite aplikaciju?')) window.close();
-        });
-        document.getElementById('exitLangBtn')?.addEventListener('click', function() {
-            if (confirm('Da li želite da zatvorite aplikaciju?')) window.close();
-        });
-        document.getElementById('exitMainBtn')?.addEventListener('click', function() {
-            if (confirm('Da li želite da zatvorite aplikaciju?')) window.close();
+        const exitBtns = document.querySelectorAll('#exitLoginBtn, #exitLangBtn, #exitMainBtn');
+        exitBtns.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                if (confirm('Da li želite da zatvorite aplikaciju?')) {
+                    window.close();
+                }
+            });
         });
 
+        // 3. BACK DUGME
+        const backBtn = document.getElementById('backBtn');
+        if (backBtn) {
+            backBtn.addEventListener('click', function() {
+                document.getElementById('languageScreen').style.display = 'flex';
+                document.getElementById('mainScreen').style.display = 'none';
+                if (typeof renderLanguages === 'function') {
+                    renderLanguages();
+                }
+            });
+        }
+
+        // 4. INVENTORY DUGME
+        const inventoryBtn = document.getElementById('inventoryBtn');
+        if (inventoryBtn) {
+            inventoryBtn.addEventListener('click', function() {
+                if (typeof renderInventory === 'function') {
+                    renderInventory();
+                } else {
+                    alert('renderInventory nije definisana!');
+                }
+            });
+        }
+
+        // 5. SHOPPING DUGME (duplirano, ali ostavljamo)
+        const shoppingBtn = document.getElementById('shoppingBtn');
+        if (shoppingBtn) {
+            shoppingBtn.addEventListener('click', function() {
+                if (typeof renderShoppingList === 'function') {
+                    renderShoppingList();
+                } else {
+                    alert('renderShoppingList nije definisana!');
+                }
+            });
+        }
+
         console.log('✅ Svi događaji povezani!');
-    });   // <-- OVO JE JEDINO ZATVARANJE!
+    });
 </script>
 
 </body>
