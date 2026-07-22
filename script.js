@@ -732,25 +732,6 @@ function renderShoppingList() {
     html += `</div></div>`;
     content.innerHTML = html;
 }
-
-// ===== GLAVNI DOGAĐAJI =====
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('✅ DOM je spreman!');
-
-    // Login
-    const loginBtn = document.getElementById('loginBtn');
-    if (loginBtn) {
-        loginBtn.addEventListener('click', function() {
-            const phone = document.getElementById('phoneInput').value.trim();
-            if (phone.length >= 9) {
-                showScreen('languageScreen');
-                renderLanguages();
-            } else {
-                alert('Unesite validan broj telefona (9+ cifara)!');
-            }
-        });
-    }
-
     // Enter na polju za telefon
     document.getElementById('phoneInput')?.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') loginBtn?.click();
@@ -794,6 +775,3 @@ document.addEventListener('DOMContentLoaded', function() {
 
     console.log('✅ Svi događaji povezani!');
 });
-
-// ===== KRAJ SCRIPT.JS =====
-console.log('✅ Script.js je učitan!');
