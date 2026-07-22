@@ -694,4 +694,3 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ===== KRAJ SCRIPT.JS =====
 console.log('✅ Script.js je učitan!');
-window.historyStack = [];
