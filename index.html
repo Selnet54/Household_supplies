@@ -2,7 +2,6 @@
 <html lang="sr">
 <head>
     <meta charset="UTF-8">
-    <base href="/Household_supplies/">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Zalihe</title>
     <link rel="manifest" href="manifest.json">
@@ -116,7 +115,7 @@
             <div style="font-size:18px;color:#aaa;margin-bottom:15px;">Home inventory management</div>
             <h2>Login</h2>
             <input type="tel" id="phoneInput" placeholder="Enter phone number" maxlength="15">
-            <button id="loginBtn" class="btn btn-green">ENTER</button>
+            <button id="loginBtn" class="btn btn-green" onclick="testLogin()">ENTER</button>
             <button id="forgotBtn" class="btn btn-orange">Forgot your phone number?</button>
             <div class="login-limits">
                 <span>📱 4: Maximum number of phone numbers.</span>
@@ -600,6 +599,7 @@ const subcategories = {
         "Autre": ["Autre"]
     }
 };
+
 // ===== 9. DELOVI PROIZVODA (svi jezici) =====
 const productParts = {
     // ===== SRPSKI =====
@@ -1698,24 +1698,22 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 <script>
-    // Forsiranje da sve radi - dodatak za GitHub Pages
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('Stranica učitana!');
-        // Proveri da li login radi
-        const loginBtn = document.getElementById('loginBtn');
-        if (loginBtn) {
-            loginBtn.addEventListener('click', function() {
-                const phone = document.getElementById('phoneInput').value.trim();
-                if (phone.length >= 9) {
-                    document.getElementById('loginScreen').style.display = 'none';
-                    document.getElementById('languageScreen').style.display = 'flex';
-                    if (typeof renderLanguages === 'function') renderLanguages();
-                } else {
-                    alert('Unesite validan broj telefona!');
-                }
-            });
+    // Test funkcija za login
+    function testLogin() {
+        alert('Dugme radi!');
+        const phone = document.getElementById('phoneInput').value.trim();
+        if (phone.length >= 9) {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('languageScreen').style.display = 'flex';
+            if (typeof renderLanguages === 'function') {
+                renderLanguages();
+            } else {
+                alert('renderLanguages nije definisana!');
+            }
+        } else {
+            alert('Unesite validan broj telefona (9+ cifara)!');
         }
-    });
+    }
 </script>
 </body>
 </html>
