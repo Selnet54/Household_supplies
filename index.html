@@ -115,7 +115,7 @@
             <div style="font-size:18px;color:#aaa;margin-bottom:15px;">Home inventory management</div>
             <h2>Login</h2>
             <input type="tel" id="phoneInput" placeholder="Enter phone number" maxlength="15">
-            <button id="loginBtn" class="btn btn-green" onclick="testLogin()">ENTER</button>
+            <button id="loginBtn" class="btn btn-green">ENTER</button>
             <button id="forgotBtn" class="btn btn-orange">Forgot your phone number?</button>
             <div class="login-limits">
                 <span>📱 4: Maximum number of phone numbers.</span>
@@ -1700,32 +1700,42 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <script>
     // ============================================
-    // TEST LOGIN FUNKCIJA
-    // ============================================
-    function testLogin() {
-        alert('Dugme radi!');
-        const phone = document.getElementById('phoneInput').value.trim();
-        if (phone.length >= 9) {
-            document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('languageScreen').style.display = 'flex';
-            if (typeof renderLanguages === 'function') {
-                renderLanguages();
-            } else {
-                alert('renderLanguages nije definisana!');
-            }
-        } else {
-            alert('Unesite validan broj telefona (9+ cifara)!');
-        }
-    }
-
-    // ============================================
-    // DODATNO: Povezivanje dugmadi ako onclick ne radi
+    // SVE FUNKCIJE ZA DUGMAD
     // ============================================
     document.addEventListener('DOMContentLoaded', function() {
+        console.log('✅ Stranica učitana!');
+
+        // 1. LOGIN DUGME
         const loginBtn = document.getElementById('loginBtn');
         if (loginBtn) {
-            loginBtn.addEventListener('click', testLogin);
+            loginBtn.addEventListener('click', function() {
+                const phone = document.getElementById('phoneInput').value.trim();
+                if (phone.length >= 9) {
+                    document.getElementById('loginScreen').style.display = 'none';
+                    document.getElementById('languageScreen').style.display = 'flex';
+                    if (typeof renderLanguages === 'function') {
+                        renderLanguages();
+                    } else {
+                        alert('renderLanguages nije definisana!');
+                    }
+                } else {
+                    alert('Unesite validan broj telefona (9+ cifara)!');
+                }
+            });
         }
+
+        // 2. EXIT DUGMAD
+        document.getElementById('exitLoginBtn')?.addEventListener('click', function() {
+            if (confirm('Da li želite da zatvorite aplikaciju?')) window.close();
+        });
+        document.getElementById('exitLangBtn')?.addEventListener('click', function() {
+            if (confirm('Da li želite da zatvorite aplikaciju?')) window.close();
+        });
+        document.getElementById('exitMainBtn')?.addEventListener('click', function() {
+            if (confirm('Da li želite da zatvorite aplikaciju?')) window.close();
+        });
+
+        console.log('✅ Svi događaji povezani!');
     });
 </script>
 
