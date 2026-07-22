@@ -77,9 +77,29 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Back
     document.getElementById('backBtn')?.addEventListener('click', function() {
+    window.historyStack = window.historyStack || [];
+    
+    if (window.historyStack.length === 0) {
+        // Ako nema istorije, vrati na jezike
         showScreen('languageScreen');
         renderLanguages();
-    });
+        return;
+    }
+    
+    const last = window.historyStack.pop();
+    
+    if (last.type === 'categories') {
+        renderCategories();
+    } else if (last.type === 'subcategories') {
+        renderSubcategories(last.category);
+    } else if (last.type === 'productParts') {
+        renderProductParts(last.subcategory);
+    } else {
+        // Ako nešto nije u redu, vrati na jezike
+        showScreen('languageScreen');
+        renderLanguages();
+    }
+});
 
     // Inventory
     document.getElementById('inventoryBtn')?.addEventListener('click', function() {
@@ -446,11 +466,11 @@ function renderLanguages() {
 
 function selectLanguage(langCode) {
     currentLang = langCode;
+    window.historyStack = []; // Resetuj istoriju
     showScreen('mainScreen');
     updateHeaderTexts();
     renderCategories();
 }
-
 function renderCategories() {
     const content = document.getElementById('mainContent');
     if (!content) return;
@@ -479,6 +499,11 @@ function renderSubcategories(category) {
     });
     html += `</div>`;
     content.innerHTML = html;
+ // Sačuvaj trenutnu poziciju za "Nazad"
+    window.historyStack = window.historyStack || [];
+    window.historyStack.push({ 
+        type: 'categories'
+    });
 }
 
 function renderProductParts(subcategory) {
@@ -499,6 +524,12 @@ function renderProductParts(subcategory) {
     }
     html += `</div>`;
     content.innerHTML = html;
+// Sačuvaj trenutnu poziciju za "Nazad"
+    window.historyStack = window.historyStack || [];
+    window.historyStack.push({ 
+        type: 'subcategories', 
+        category: currentCategory 
+    });
 }
 
 function renderDataEntry(productName) {
@@ -566,6 +597,14 @@ function renderDataEntry(productName) {
     document.getElementById('shelfLifeInput')?.addEventListener('input', updateExpiryDate);
     document.getElementById('productInput')?.focus();
     updateExpiryDate();
+    // Sačuvaj trenutnu poziciju za "Nazad"
+    window.historyStack = window.historyStack || [];
+    window.historyStack.push({ 
+        type: 'productParts', 
+        category: currentCategory,
+        subcategory: currentSubcategory 
+    });
+}
 }
 
 function updateExpiryDate() {
