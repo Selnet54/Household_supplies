@@ -661,10 +661,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
 
-    // ukloni trenutni ekran
     window.historyStack.pop();
-
-    // uzmi prethodni
     const previous = window.historyStack.pop();
 
     if (!previous) {
@@ -674,7 +671,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     switch(previous.type) {
-
         case 'categories':
             renderCategories(false);
             break;
@@ -695,4 +691,14 @@ document.addEventListener('DOMContentLoaded', function() {
             showScreen('languageScreen');
             renderLanguages();
     }
+});
+    document.getElementById('inventoryBtn')?.addEventListener('click', function() {
+        renderInventory();
+    });
+
+    document.getElementById('shoppingBtn')?.addEventListener('click', function() {
+        renderShoppingList();
+    });
+
+    console.log('✅ Svi događaji povezani!');
 });
