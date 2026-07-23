@@ -388,7 +388,7 @@ function selectLanguage(langCode) {
     renderCategories();
 }
 
-function renderCategories() {
+function renderCategories(addHistory = true) {
     const content = document.getElementById('mainContent');
     if (!content) return;
     const catList = getMainCategories();
@@ -400,10 +400,10 @@ function renderCategories() {
     });
     html += `</div>`;
     content.innerHTML = html;
-    window.historyStack.push({ type: 'categories' });
+    if (addHistory) window.historyStack.push({ type: 'categories' });
 }
 
-function renderSubcategories(category) {
+function renderSubcategories(category, addHistory = true) {
     currentCategory = category;
     const content = document.getElementById('mainContent');
     const subList = getSubcategories(category);
@@ -417,9 +417,10 @@ function renderSubcategories(category) {
     });
     html += `</div>`;
     content.innerHTML = html;
-    window.historyStack.push({ type: 'subcategories', category: currentCategory });
+    if (addHistory) window.historyStack.push({ type: 'subcategories', category: currentCategory });
 }
-function renderProductParts(subcategory) {
+
+function renderProductParts(subcategory, addHistory = true) {
     currentSubcategory = subcategory;
     const content = document.getElementById('mainContent');
     const parts = getProductParts(subcategory);
@@ -437,9 +438,10 @@ function renderProductParts(subcategory) {
     }
     html += `</div>`;
     content.innerHTML = html;
-    window.historyStack.push({ type: 'productParts', subcategory: currentSubcategory });
+    if (addHistory) window.historyStack.push({ type: 'productParts', subcategory: currentSubcategory });
 }
-function renderDataEntry(productName) {
+
+function renderDataEntry(productName, addHistory = true) {
     const content = document.getElementById('mainContent');
     if (!content) return;
     const today = new Date().toISOString().split('T')[0];
@@ -504,8 +506,9 @@ function renderDataEntry(productName) {
     document.getElementById('shelfLifeInput')?.addEventListener('input', updateExpiryDate);
     document.getElementById('productInput')?.focus();
     updateExpiryDate();
-    window.historyStack.push({ type: 'dataEntry', subcategory: currentSubcategory });
+    if (addHistory) window.historyStack.push({ type: 'dataEntry', subcategory: currentSubcategory });
 }
+
 function updateExpiryDate() {
     const dateInput = document.getElementById('dateInput');
     const shelfLifeInput = document.getElementById('shelfLifeInput');
@@ -628,10 +631,9 @@ function renderShoppingList() {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ DOM je spreman!');
 
-    // === LOGIN DUGME (click + touch) ===
     const loginBtn = document.getElementById('loginBtn');
     if (loginBtn) {
-        function handleLogin() {
+        loginBtn.addEventListener('click', function() {
             const phone = document.getElementById('phoneInput').value.trim();
             if (phone.length >= 9) {
                 showScreen('languageScreen');
@@ -639,62 +641,60 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 alert('Unesite validan broj telefona (9+ cifara)!');
             }
-        }
-        loginBtn.addEventListener('click', handleLogin);
-        loginBtn.addEventListener('touchstart', handleLogin);
+        });
     }
 
-    // === ENTER na polju za telefon ===
     document.getElementById('phoneInput')?.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            const phone = this.value.trim();
-            if (phone.length >= 9) {
-                showScreen('languageScreen');
-                renderLanguages();
-            } else {
-                alert('Unesite validan broj telefona (9+ cifara)!');
-            }
-        }
+        if (e.key === 'Enter') loginBtn?.click();
     });
 
-    // === EXIT DUGMAD (click + touch) ===
-    function handleExit() {
-        if (confirm('Da li želite da zatvorite aplikaciju?')) {
-            document.getElementById('mainScreen').style.display = 'none';
-            document.getElementById('languageScreen').style.display = 'none';
-            document.getElementById('loginScreen').style.display = 'flex';
-            document.getElementById('phoneInput').value = '';
-        }
-    }
-    document.getElementById('exitLoginBtn')?.addEventListener('click', handleExit);
-    document.getElementById('exitLoginBtn')?.addEventListener('touchstart', handleExit);
-    document.getElementById('exitLangBtn')?.addEventListener('click', handleExit);
-    document.getElementById('exitLangBtn')?.addEventListener('touchstart', handleExit);
-    document.getElementById('exitMainBtn')?.addEventListener('click', handleExit);
-    document.getElementById('exitMainBtn')?.addEventListener('touchstart', handleExit);
+    document.getElementById('exitLoginBtn')?.addEventListener('click', exitApp);
+    document.getElementById('exitLangBtn')?.addEventListener('click', exitApp);
+    document.getElementById('exitMainBtn')?.addEventListener('click', exitApp);
 
-    // === BACK DUGME ===
-   document.getElementById('backBtn')?.addEventListener('click', function() {
-    if (window.historyStack.length === 0) {
+    document.getElementById('backBtn')?.addEventListener('click', function() {
+
+    if (window.historyStack.length <= 1) {
+        window.historyStack = [];
         showScreen('languageScreen');
         renderLanguages();
         return;
     }
-    
-    // Skloni poslednji korak
-    const last = window.historyStack.pop();
-    
-    // Vrati se na prethodni ekran
-    if (last.type === 'categories') {
-        renderCategories();
-    } else if (last.type === 'subcategories') {
-        renderSubcategories(last.category);
-    } else if (last.type === 'productParts') {
-        renderProductParts(last.subcategory);
-    } else if (last.type === 'dataEntry') {
-        renderProductParts(last.subcategory);
-    } else {
+
+    // ukloni trenutni ekran
+    window.historyStack.pop();
+
+    // uzmi prethodni
+    const previous = window.historyStack.pop();
+
+    if (!previous) {
         showScreen('languageScreen');
         renderLanguages();
+        return;
+    }
+
+    switch(previous.type) {
+
+        case 'categories':
+            renderCategories(false);
+            break;
+
+        case 'subcategories':
+            renderSubcategories(previous.category, false);
+            break;
+
+        case 'productParts':
+            renderProductParts(previous.subcategory, false);
+            break;
+
+        case 'dataEntry':
+            renderDataEntry('', false);
+            break;
+
+        default:
+            showScreen('languageScreen');
+            renderLanguages();
     }
 });
+
+                          
