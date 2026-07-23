@@ -388,7 +388,7 @@ function selectLanguage(langCode) {
     renderCategories();
 }
 
-function renderCategories() {
+function renderCategories(addHistory = true) {
     const content = document.getElementById('mainContent');
     if (!content) return;
     const catList = getMainCategories();
@@ -400,10 +400,10 @@ function renderCategories() {
     });
     html += `</div>`;
     content.innerHTML = html;
-    window.historyStack.push({ type: 'categories' });
+    if (addHistory) window.historyStack.push({ type: 'categories' });
 }
 
-function renderSubcategories(category) {
+function renderSubcategories(category, addHistory = true) {
     currentCategory = category;
     const content = document.getElementById('mainContent');
     const subList = getSubcategories(category);
@@ -417,10 +417,10 @@ function renderSubcategories(category) {
     });
     html += `</div>`;
     content.innerHTML = html;
-    window.historyStack.push({ type: 'subcategories', category: currentCategory });
+    if (addHistory) window.historyStack.push({ type: 'subcategories', category: currentCategory });
 }
 
-function renderProductParts(subcategory) {
+function renderProductParts(subcategory, addHistory = true) {
     currentSubcategory = subcategory;
     const content = document.getElementById('mainContent');
     const parts = getProductParts(subcategory);
@@ -438,10 +438,10 @@ function renderProductParts(subcategory) {
     }
     html += `</div>`;
     content.innerHTML = html;
-    window.historyStack.push({ type: 'productParts', subcategory: currentSubcategory });
+    if (addHistory) window.historyStack.push({ type: 'productParts', subcategory: currentSubcategory });
 }
 
-function renderDataEntry(productName) {
+function renderDataEntry(productName, addHistory = true) {
     const content = document.getElementById('mainContent');
     if (!content) return;
     const today = new Date().toISOString().split('T')[0];
@@ -506,7 +506,7 @@ function renderDataEntry(productName) {
     document.getElementById('shelfLifeInput')?.addEventListener('input', updateExpiryDate);
     document.getElementById('productInput')?.focus();
     updateExpiryDate();
-    window.historyStack.push({ type: 'dataEntry', subcategory: currentSubcategory });
+    if (addHistory) window.historyStack.push({ type: 'dataEntry', subcategory: currentSubcategory });
 }
 
 function updateExpiryDate() {
@@ -653,25 +653,43 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('exitMainBtn')?.addEventListener('click', exitApp);
 
     document.getElementById('backBtn')?.addEventListener('click', function() {
-    if (window.historyStack.length === 0) {
+
+    if (window.historyStack.length <= 1) {
+        window.historyStack = [];
         showScreen('languageScreen');
         renderLanguages();
         return;
     }
-    
-    const last = window.historyStack.pop();
-    
-    if (last.type === 'categories') {
-        renderCategories();
-    } else if (last.type === 'subcategories') {
-        renderSubcategories(last.category);
-    } else if (last.type === 'productParts') {
-        renderProductParts(last.subcategory);
-    } else if (last.type === 'dataEntry') {
-        renderProductParts(last.subcategory);
-    } else {
+
+    window.historyStack.pop();
+    const previous = window.historyStack.pop();
+
+    if (!previous) {
         showScreen('languageScreen');
         renderLanguages();
+        return;
+    }
+
+    switch(previous.type) {
+        case 'categories':
+            renderCategories(false);
+            break;
+
+        case 'subcategories':
+            renderSubcategories(previous.category, false);
+            break;
+
+        case 'productParts':
+            renderProductParts(previous.subcategory, false);
+            break;
+
+        case 'dataEntry':
+            renderDataEntry('', false);
+            break;
+
+        default:
+            showScreen('languageScreen');
+            renderLanguages();
     }
 });
     document.getElementById('inventoryBtn')?.addEventListener('click', function() {
