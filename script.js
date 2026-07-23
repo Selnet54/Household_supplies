@@ -569,36 +569,208 @@ function addProductToTable(product) {
     `;
     container.appendChild(row);
 }
-// ===== ZALIHE =====
+// ===== ZALIHE SA DUGMADIMA I CHECKBOX-OVIMA =====
 function renderInventory() {
     const content = document.getElementById('mainContent');
     if (!content) return;
     
     const zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
+    
     let html = `<div class="title">${t('stanje')}</div>`;
-    html += `<div class="table-container"><div class="table-title">📦 ${t('stanje')}</div>`;
-    html += `<div id="inventoryTable"><div class="table-row header-row">
-        <div class="cell">${t('naziv_proizvoda')}</div>
-        <div class="cell">${t('opis')}</div>
-        <div class="cell">${t('komad')}</div>
-        <div class="cell">${t('kolicina')}</div>
-        <div class="cell">${t('jedinica_mere')}</div>
-        <div class="cell">${t('rok_trajanja')}</div>
-        <div class="cell">${t('mesto_skladistenja')}</div>
-    </div>`;
+    
+    // Dugmad za akcije
+    html += `<div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;">`;
+    html += `<button onclick="azurirajZalihe()" style="background:#4CAF50; color:white; border:none; padding:10px 20px; border-radius:8px; font-size:16px; cursor:pointer;">✅ Ažuriraj</button>`;
+    html += `<button onclick="obrisiZalihe()" style="background:#666; color:white; border:none; padding:10px 20px; border-radius:8px; font-size:16px; cursor:pointer;">🗑️ Briši</button>`;
+    html += `<button onclick="renderCategories()" style="background:#f44336; color:white; border:none; padding:10px 20px; border-radius:8px; font-size:16px; cursor:pointer;">✖ Odustani</button>`;
+    html += `</div>`;
+    
+    // Tabela sa checkbox-ovima - SVE U JEDNOM REDU
+    html += `<div class="table-container" style="max-height:400px; overflow-y:auto;">`;
+    html += `<div class="table-title">📦 ${t('stanje')}</div>`;
+    html += `<div id="inventoryTable">`;
+    
+    // Header - 8 kolona (checkbox + 7 podataka)
+    html += `<div class="table-row header-row" style="display:grid; grid-template-columns:40px 1.2fr 1.2fr 0.8fr 0.8fr 0.8fr 0.8fr 1fr; gap:2px; background:#f0f0f0; font-weight:bold; border-bottom:2px solid #ccc; padding:5px 0;">`;
+    html += `<div class="cell" style="text-align:center;"><input type="checkbox" id="selectAll" onchange="toggleAllCheckboxes()"></div>`;
+    html += `<div class="cell">${t('naziv_proizvoda')}</div>`;
+    html += `<div class="cell">${t('opis')}</div>`;
+    html += `<div class="cell">${t('komad')}</div>`;
+    html += `<div class="cell">${t('kolicina')}</div>`;
+    html += `<div class="cell">${t('jedinica_mere')}</div>`;
+    html += `<div class="cell">${t('rok_trajanja')}</div>`;
+    html += `<div class="cell">${t('mesto_skladistenja')}</div>`;
+    html += `</div>`;
     
     if (zalihe.length === 0) {
-        html += `<div class="table-row"><div class="cell" style="grid-column:span 7;padding:30px;color:#999;">${t('nema_proizvoda')}</div></div>`;
+        html += `<div class="table-row"><div class="cell" style="grid-column:span 8;padding:30px;color:#999;text-align:center;">${t('nema_proizvoda')}</div></div>`;
     } else {
-        zalihe.forEach(p => {
+        zalihe.forEach((p, index) => {
             const expiry = new Date(p.entry_date);
             expiry.setMonth(expiry.getMonth() + p.shelf_life_months);
             const expiryDisplay = expiry.toLocaleDateString('sr-RS', { month: '2-digit', year: '2-digit' });
-            html += `<div class="table-row"><div class="cell">${p.product_name}</div><div class="cell">${p.description}</div><div class="cell">${p.piece}</div><div class="cell">${p.quantity}</div><div class="cell">${p.unit}</div><div class="cell">${expiryDisplay}</div><div class="cell">${p.storage_location}</div></div>`;
+            html += `<div class="table-row" style="display:grid; grid-template-columns:40px 1.2fr 1.2fr 0.8fr 0.8fr 0.8fr 0.8fr 1fr; gap:2px; border-bottom:1px solid #eee; padding:5px 0;">`;
+            html += `<div class="cell" style="text-align:center;"><input type="checkbox" class="row-checkbox" data-index="${index}"></div>`;
+            html += `<div class="cell">${p.product_name}</div>`;
+            html += `<div class="cell">${p.description || ''}</div>`;
+            html += `<div class="cell">${p.piece || '-'}</div>`;
+            html += `<div class="cell">${p.quantity}</div>`;
+            html += `<div class="cell">${p.unit}</div>`;
+            html += `<div class="cell">${expiryDisplay}</div>`;
+            html += `<div class="cell">${p.storage_location}</div>`;
+            html += `</div>`;
         });
     }
     html += `</div></div>`;
     content.innerHTML = html;
+}
+
+// ===== SELEKTOVANJE SVIH =====
+function toggleAllCheckboxes() {
+    const selectAll = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.row-checkbox');
+    checkboxes.forEach(cb => cb.checked = selectAll.checked);
+}
+
+// ===== BRISANJE ZALIHA =====
+function obrisiZalihe() {
+    const selected = document.querySelectorAll('.row-checkbox:checked');
+    if (selected.length === 0) {
+        alert('Niste označili nijedan red za brisanje!');
+        return;
+    }
+    if (!confirm(`Da li ste sigurni da želite da obrišete ${selected.length} stavku/ke?`)) return;
+    
+    const zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
+    const indices = Array.from(selected).map(cb => parseInt(cb.dataset.index));
+    indices.sort((a, b) => b - a);
+    indices.forEach(i => zalihe.splice(i, 1));
+    localStorage.setItem('zalihe', JSON.stringify(zalihe));
+    renderInventory();
+}
+
+// ===== AŽURIRANJE ZALIHA =====
+function azurirajZalihe() {
+    const selected = document.querySelectorAll('.row-checkbox:checked');
+    if (selected.length === 0) {
+        alert('Niste označili nijedan red za ažuriranje!');
+        return;
+    }
+    if (selected.length > 1) {
+        alert('Možete ažurirati samo jedan red odjednom!');
+        return;
+    }
+    
+    const index = parseInt(selected[0].dataset.index);
+    const zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
+    const proizvod = zalihe[index];
+    
+    renderUpdateEntry(proizvod, index);
+}
+
+// ===== EKRAN ZA AŽURIRANJE (bez pregleda unosa) =====
+function renderUpdateEntry(proizvod, index) {
+    const content = document.getElementById('mainContent');
+    if (!content) return;
+    
+    const today = proizvod.entry_date || new Date().toISOString().split('T')[0];
+    
+    content.innerHTML = `
+        <div class="title">✏️ Ažuriraj - ${proizvod.product_name}</div>
+        <div class="row"><label>${t('naziv_proizvoda')}</label><input type="text" id="updateProductInput" value="${proizvod.product_name || ''}"></div>
+        <div class="row"><label>${t('opis')}</label><input type="text" id="updateDescriptionInput" value="${proizvod.description || ''}"></div>
+        <div class="row">
+            <label>${t('komad')}</label>
+            <div class="inline-group">
+                <input type="text" id="updatePieceInput" value="${proizvod.piece || ''}">
+                <label>${t('kolicina')}</label>
+                <input type="number" id="updateQuantityInput" value="${proizvod.quantity || 1}" step="0.1">
+                <label>${t('jedinica_mere')}</label>
+                <select id="updateUnitSelect">
+                    <option value="kg" ${proizvod.unit === 'kg' ? 'selected' : ''}>${t('kg')}</option>
+                    <option value="g" ${proizvod.unit === 'g' ? 'selected' : ''}>${t('g')}</option>
+                    <option value="kom" ${proizvod.unit === 'kom' ? 'selected' : ''}>${t('kom')}</option>
+                    <option value="l" ${proizvod.unit === 'l' ? 'selected' : ''}>${t('l')}</option>
+                    <option value="ml" ${proizvod.unit === 'ml' ? 'selected' : ''}>${t('ml')}</option>
+                    <option value="pak" ${proizvod.unit === 'pak' ? 'selected' : ''}>${t('pak')}</option>
+                    <option value="kutija" ${proizvod.unit === 'kutija' ? 'selected' : ''}>${t('kutija')}</option>
+                </select>
+            </div>
+        </div>
+        <div class="row">
+            <label>${t('datum_unosa')}</label>
+            <div class="inline-group">
+                <input type="date" id="updateDateInput" value="${today}">
+                <label>${t('rok_trajanja')}</label>
+                <input type="number" id="updateShelfLifeInput" value="${proizvod.shelf_life_months || 12}">
+                <span style="font-size:18px;">mes</span>
+            </div>
+        </div>
+        <div class="row">
+            <label>${t('automatski_rok')}</label>
+            <div class="inline-group"><span id="updateExpiryDisplay">-</span></div>
+        </div>
+        <div class="row">
+            <label>${t('mesto_skladistenja')}</label>
+            <select id="updateStorageSelect">
+                <option value="${t('zamrzivac_1')}" ${proizvod.storage_location === t('zamrzivac_1') ? 'selected' : ''}>❄️ ${t('zamrzivac_1')}</option>
+                <option value="${t('zamrzivac_2')}" ${proizvod.storage_location === t('zamrzivac_2') ? 'selected' : ''}>❄️ ${t('zamrzivac_2')}</option>
+                <option value="${t('zamrzivac_3')}" ${proizvod.storage_location === t('zamrzivac_3') ? 'selected' : ''}>❄️ ${t('zamrzivac_3')}</option>
+                <option value="${t('frizider')}" ${proizvod.storage_location === t('frizider') ? 'selected' : ''}>🧊 ${t('frizider')}</option>
+                <option value="${t('ostava')}" ${proizvod.storage_location === t('ostava') ? 'selected' : ''}>🏠 ${t('ostava')}</option>
+                <option value="${t('Ostalo')}" ${proizvod.storage_location === t('Ostalo') ? 'selected' : ''}>📦 ${t('Ostalo')}</option>
+            </select>
+        </div>
+        <div class="btn-group">
+            <button class="btn-save" onclick="sacuvajAzuriranje(${index})">✅ Sačuvaj</button>
+            <button class="btn-cancel" onclick="renderInventory()">✖ Odustani</button>
+        </div>
+    `;
+    
+    // Update expiry date on change
+    document.getElementById('updateDateInput')?.addEventListener('change', updateUpdateExpiryDate);
+    document.getElementById('updateDateInput')?.addEventListener('input', updateUpdateExpiryDate);
+    document.getElementById('updateShelfLifeInput')?.addEventListener('change', updateUpdateExpiryDate);
+    document.getElementById('updateShelfLifeInput')?.addEventListener('input', updateUpdateExpiryDate);
+    updateUpdateExpiryDate();
+}
+
+function updateUpdateExpiryDate() {
+    const dateInput = document.getElementById('updateDateInput');
+    const shelfLifeInput = document.getElementById('updateShelfLifeInput');
+    const expiryDisplay = document.getElementById('updateExpiryDisplay');
+    if (!dateInput || !shelfLifeInput || !expiryDisplay) return;
+    const date = dateInput.value;
+    const months = parseInt(shelfLifeInput.value) || 0;
+    if (date && months > 0) {
+        const expiry = new Date(date);
+        expiry.setMonth(expiry.getMonth() + months);
+        expiryDisplay.textContent = expiry.toLocaleDateString('sr-RS', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    } else {
+        expiryDisplay.textContent = '-';
+    }
+}
+
+function sacuvajAzuriranje(index) {
+    const product = document.getElementById('updateProductInput')?.value.trim();
+    const quantity = document.getElementById('updateQuantityInput')?.value.trim();
+    if (!product) { alert('Unesite naziv proizvoda!'); return; }
+    if (!quantity || isNaN(parseFloat(quantity))) { alert('Unesite količinu!'); return; }
+    
+    const zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
+    zalihe[index] = {
+        product_name: product,
+        description: document.getElementById('updateDescriptionInput')?.value.trim() || '',
+        piece: document.getElementById('updatePieceInput')?.value.trim() || '-',
+        quantity: parseFloat(quantity),
+        unit: document.getElementById('updateUnitSelect')?.value || 'kg',
+        entry_date: document.getElementById('updateDateInput')?.value || new Date().toISOString().split('T')[0],
+        shelf_life_months: parseInt(document.getElementById('updateShelfLifeInput')?.value) || 12,
+        storage_location: document.getElementById('updateStorageSelect')?.value || 'Ostalo'
+    };
+    localStorage.setItem('zalihe', JSON.stringify(zalihe));
+    alert('✅ Proizvod ažuriran!');
+    renderInventory();
 }
 
 // ===== SPISAK POTREBA =====
