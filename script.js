@@ -1,5 +1,5 @@
 // ============================================
-// PUNI SCRIPT ZA APLIKACIJU
+// PUNI SCRIPT ZA APLIKACIJU - ČISTA VERZIJA
 // ============================================
 
 console.log('✅ Script.js je učitan!');
@@ -34,153 +34,73 @@ const languages = [
 const translations = {
     sr: {
         nazad: "Nazad", stanje: "Zalihe", spisak: "Spisak",
-        naziv_proizvoda: "Proizvod:", opis: "Opis:",
-        komad: "Komada:", kolicina: "Količina:", jedinica_mere: "Jed. mere:",
-        datum_unosa: "Datum unosa:", rok_trajanja: "Rok (meseci):",
-        automatski_rok: "Rok ističe:", mesto_skladistenja: "Skladište:",
-        unesi: "Unesi", odustani: "Odustani", pretrazi: "Pretraži",
         glavne_kategorije: "Glavne kategorije", podkategorije: "Podkategorije",
         delovi_proizvoda: "Delovi proizvoda", unos_podataka: "Unos podataka",
-        pregled_unosa: "Pregled unosa", nema_proizvoda: "Nema proizvoda",
-        spisak_potreba: "Spisak potreba",
-        zamrzivac_1: "Zamrzivač 1", zamrzivac_2: "Zamrzivač 2", zamrzivac_3: "Zamrzivač 3",
-        frizider: "Frižider", ostava: "Ostava", Ostalo: "Ostalo",
-        kg: "kg", g: "g", kom: "kom", l: "l", ml: "ml", pak: "pak", kutija: "kutija"
+        unesi: "Unesi", odustani: "Odustani", nema_proizvoda: "Nema proizvoda",
+        spisak_potreba: "Spisak potreba"
     },
     en: {
         nazad: "Back", stanje: "Inventory", spisak: "Shopping List",
-        naziv_proizvoda: "Product:", opis: "Description:",
-        komad: "Piece:", kolicina: "Quantity:", jedinica_mere: "Unit:",
-        datum_unosa: "Entry Date:", rok_trajanja: "Shelf Life (months):",
-        automatski_rok: "Auto Expiry:", mesto_skladistenja: "Storage:",
-        unesi: "Enter", odustani: "Cancel", pretrazi: "Search",
         glavne_kategorije: "Main Categories", podkategorije: "Subcategories",
         delovi_proizvoda: "Product Parts", unos_podataka: "Data Entry",
-        pregled_unosa: "Entry Review", nema_proizvoda: "No products",
-        spisak_potreba: "Shopping List",
-        zamrzivac_1: "Freezer 1", zamrzivac_2: "Freezer 2", zamrzivac_3: "Freezer 3",
-        frizider: "Refrigerator", ostava: "Pantry", Ostalo: "Other",
-        kg: "kg", g: "g", kom: "pcs", l: "l", ml: "ml", pak: "pck", kutija: "box"
+        unesi: "Enter", odustani: "Cancel", nema_proizvoda: "No products",
+        spisak_potreba: "Shopping List"
     },
     de: {
         nazad: "Zurück", stanje: "Bestand", spisak: "Einkaufsliste",
-        naziv_proizvoda: "Produkt:", opis: "Beschreibung:",
-        komad: "Stück:", kolicina: "Menge:", jedinica_mere: "Einheit:",
-        datum_unosa: "Eingangsdatum:", rok_trajanja: "Haltbarkeit (Monate):",
-        automatski_rok: "Auto Ablauf:", mesto_skladistenja: "Lager:",
-        unesi: "Eingeben", odustani: "Abbrechen", pretrazi: "Suchen",
         glavne_kategorije: "Hauptkategorien", podkategorije: "Unterkategorien",
         delovi_proizvoda: "Produktteile", unos_podataka: "Dateneingabe",
-        pregled_unosa: "Eingabeübersicht", nema_proizvoda: "Keine Produkte",
-        spisak_potreba: "Einkaufsliste",
-        zamrzivac_1: "Gefrierschrank 1", zamrzivac_2: "Gefrierschrank 2", zamrzivac_3: "Gefrierschrank 3",
-        frizider: "Kühlschrank", ostava: "Vorratskammer", Ostalo: "Andere",
-        kg: "kg", g: "g", kom: "Stk", l: "l", ml: "ml", pak: "Pck", kutija: "Karton"
+        unesi: "Eingeben", odustani: "Abbrechen", nema_proizvoda: "Keine Produkte",
+        spisak_potreba: "Einkaufsliste"
     },
     hu: {
         nazad: "Vissza", stanje: "Készlet", spisak: "Bevásárlólista",
-        naziv_proizvoda: "Termék:", opis: "Leírás:",
-        komad: "Darab:", kolicina: "Mennyiség:", jedinica_mere: "Mértékegység:",
-        datum_unosa: "Beírás dátuma:", rok_trajanja: "Szavatosság (hónap):",
-        automatski_rok: "Automatikus lejárat:", mesto_skladistenja: "Raktár:",
-        unesi: "Bevitel", odustani: "Mégsem", pretrazi: "Keresés",
         glavne_kategorije: "Fő kategóriák", podkategorije: "Alkategóriák",
         delovi_proizvoda: "Termék részei", unos_podataka: "Adatbevitel",
-        pregled_unosa: "Bevitel áttekintése", nema_proizvoda: "Nincsenek termékek",
-        spisak_potreba: "Bevásárlólista",
-        zamrzivac_1: "Mélyhűtő 1", zamrzivac_2: "Mélyhűtő 2", zamrzivac_3: "Mélyhűtő 3",
-        frizider: "Hűtőszekrény", ostava: "Spájz", Ostalo: "Egyéb",
-        kg: "kg", g: "g", kom: "db", l: "l", ml: "ml", pak: "csom", kutija: "doboz"
+        unesi: "Bevitel", odustani: "Mégsem", nema_proizvoda: "Nincsenek termékek",
+        spisak_potreba: "Bevásárlólista"
     },
     uk: {
         nazad: "Назад", stanje: "Запаси", spisak: "Список",
-        naziv_proizvoda: "Продукт:", opis: "Опис:",
-        komad: "Штука:", kolicina: "Кількість:", jedinica_mere: "Од. виміру:",
-        datum_unosa: "Дата внесення:", rok_trajanja: "Термін (місяці):",
-        automatski_rok: "Авто термін:", mesto_skladistenja: "Сховище:",
-        unesi: "Внести", odustani: "Скасувати", pretrazi: "Пошук",
         glavne_kategorije: "Основні категорії", podkategorije: "Підкатегорії",
         delovi_proizvoda: "Частини продукту", unos_podataka: "Введення даних",
-        pregled_unosa: "Огляд введення", nema_proizvoda: "Немає продуктів",
-        spisak_potreba: "Список потреб",
-        zamrzivac_1: "Морозилка 1", zamrzivac_2: "Морозилка 2", zamrzivac_3: "Морозилка 3",
-        frizider: "Холодильник", ostava: "Комора", Ostalo: "Інше",
-        kg: "кг", g: "г", kom: "шт", l: "л", ml: "мл", pak: "уп", kutija: "кор"
+        unesi: "Внести", odustani: "Скасувати", nema_proizvoda: "Немає продуктів",
+        spisak_potreba: "Список потреб"
     },
     ru: {
         nazad: "Назад", stanje: "Запасы", spisak: "Список",
-        naziv_proizvoda: "Продукт:", opis: "Описание:",
-        komad: "Штука:", kolicina: "Количество:", jedinica_mere: "Ед. изм.:",
-        datum_unosa: "Дата внесения:", rok_trajanja: "Срок (месяцы):",
-        automatski_rok: "Авто срок:", mesto_skladistenja: "Склад:",
-        unesi: "Внести", odustani: "Отмена", pretrazi: "Поиск",
         glavne_kategorije: "Основные категории", podkategorije: "Подкатегории",
         delovi_proizvoda: "Части продукта", unos_podataka: "Ввод данных",
-        pregled_unosa: "Обзор ввода", nema_proizvoda: "Нет продуктов",
-        spisak_potreba: "Список потребностей",
-        zamrzivac_1: "Морозилка 1", zamrzivac_2: "Морозилка 2", zamrzivac_3: "Морозилка 3",
-        frizider: "Холодильник", ostava: "Кладовая", Ostalo: "Другое",
-        kg: "кг", g: "г", kom: "шт", l: "л", ml: "мл", pak: "уп", kutija: "кор"
+        unesi: "Внести", odustani: "Отмена", nema_proizvoda: "Нет продуктов",
+        spisak_potreba: "Список потребностей"
     },
     zh: {
         nazad: "返回", stanje: "库存", spisak: "购物清单",
-        naziv_proizvoda: "产品:", opis: "描述:",
-        komad: "件:", kolicina: "数量:", jedinica_mere: "单位:",
-        datum_unosa: "录入日期:", rok_trajanja: "保质期(月):",
-        automatski_rok: "自动到期:", mesto_skladistenja: "存储:",
-        unesi: "输入", odustani: "取消", pretrazi: "搜索",
         glavne_kategorije: "主要类别", podkategorije: "子类别",
         delovi_proizvoda: "产品部件", unos_podataka: "数据输入",
-        pregled_unosa: "输入记录查看", nema_proizvoda: "没有产品",
-        spisak_potreba: "购物清单",
-        zamrzivac_1: "冷冻柜 1", zamrzivac_2: "冷冻柜 2", zamrzivac_3: "冷冻柜 3",
-        frizider: "冰箱", ostava: "储藏室", Ostalo: "其他",
-        kg: "公斤", g: "克", kom: "件", l: "升", ml: "毫升", pak: "包", kutija: "盒"
+        unesi: "输入", odustani: "取消", nema_proizvoda: "没有产品",
+        spisak_potreba: "购物清单"
     },
     es: {
         nazad: "Atrás", stanje: "Inventario", spisak: "Lista de Compras",
-        naziv_proizvoda: "Producto:", opis: "Descripción:",
-        komad: "Pieza:", kolicina: "Cantidad:", jedinica_mere: "Unidad:",
-        datum_unosa: "Fecha de Entrada:", rok_trajanja: "Caducidad (meses):",
-        automatski_rok: "Vencimiento Auto:", mesto_skladistenja: "Almacenamiento:",
-        unesi: "Ingresar", odustani: "Cancelar", pretrazi: "Buscar",
         glavne_kategorije: "Categorías Principales", podkategorije: "Subcategorías",
         delovi_proizvoda: "Partes del Producto", unos_podataka: "Entrada de Datos",
-        pregled_unosa: "Revisión de entrada", nema_proizvoda: "No hay productos",
-        spisak_potreba: "Lista de Compras",
-        zamrzivac_1: "Congelador 1", zamrzivac_2: "Congelador 2", zamrzivac_3: "Congelador 3",
-        frizider: "Refrigerador", ostava: "Despensa", Ostalo: "Otro",
-        kg: "kg", g: "g", kom: "pz", l: "l", ml: "ml", pak: "pq", kutija: "caja"
+        unesi: "Ingresar", odustani: "Cancelar", nema_proizvoda: "No hay productos",
+        spisak_potreba: "Lista de Compras"
     },
     pt: {
         nazad: "Voltar", stanje: "Estoque", spisak: "Lista de Compras",
-        naziv_proizvoda: "Produto:", opis: "Descrição:",
-        komad: "Peça:", kolicina: "Quantidade:", jedinica_mere: "Unidade:",
-        datum_unosa: "Data de Entrada:", rok_trajanja: "Validade (meses):",
-        automatski_rok: "Validade Auto:", mesto_skladistenja: "Armazenamento:",
-        unesi: "Inserir", odustani: "Cancelar", pretrazi: "Pesquisar",
         glavne_kategorije: "Categorias Principais", podkategorije: "Subcategorias",
         delovi_proizvoda: "Partes do Produto", unos_podataka: "Entrada de Dados",
-        pregled_unosa: "Revisão de entrada", nema_proizvoda: "Nenhum produto",
-        spisak_potreba: "Lista de Compras",
-        zamrzivac_1: "Congelador 1", zamrzivac_2: "Congelador 2", zamrzivac_3: "Congelador 3",
-        frizider: "Geladeira", ostava: "Despensa", Ostalo: "Outro",
-        kg: "kg", g: "g", kom: "pç", l: "l", ml: "ml", pak: "pc", kutija: "cx"
+        unesi: "Inserir", odustani: "Cancelar", nema_proizvoda: "Nenhum produto",
+        spisak_potreba: "Lista de Compras"
     },
     fr: {
         nazad: "Retour", stanje: "Stock", spisak: "Liste de Courses",
-        naziv_proizvoda: "Produit:", opis: "Description:",
-        komad: "Pièce:", kolicina: "Quantité:", jedinica_mere: "Unité:",
-        datum_unosa: "Date d'entrée:", rok_trajanja: "Durée (mois):",
-        automatski_rok: "Expiration Auto:", mesto_skladistenja: "Stockage:",
-        unesi: "Entrer", odustani: "Annuler", pretrazi: "Rechercher",
         glavne_kategorije: "Catégories Principales", podkategorije: "Sous-catégories",
         delovi_proizvoda: "Pièces du Produit", unos_podataka: "Saisie de Données",
-        pregled_unosa: "Aperçu des saisies", nema_proizvoda: "Aucun produit",
-        spisak_potreba: "Liste de Courses",
-        zamrzivac_1: "Congélateur 1", zamrzivac_2: "Congélateur 2", zamrzivac_3: "Congélateur 3",
-        frizider: "Réfrigérateur", ostava: "Garde-manger", Ostalo: "Autre",
-        kg: "kg", g: "g", kom: "pc", l: "l", ml: "ml", pak: "paq", kutija: "boîte"
+        unesi: "Entrer", odustani: "Annuler", nema_proizvoda: "Aucun produit",
+        spisak_potreba: "Liste de Courses"
     }
 };
 
@@ -301,7 +221,6 @@ const subcategories = {
 let currentLang = 'sr';
 let currentCategory = '';
 let currentSubcategory = '';
-let db = null;
 
 // ===== 7. POMOĆNE FUNKCIJE =====
 function t(key) {
@@ -400,8 +319,6 @@ function renderCategories() {
     });
     html += `</div>`;
     content.innerHTML = html;
-    
-    window.historyStack = window.historyStack || [];
     window.historyStack.push({ type: 'categories' });
 }
 
@@ -419,8 +336,6 @@ function renderSubcategories(category) {
     });
     html += `</div>`;
     content.innerHTML = html;
-    
-    window.historyStack = window.historyStack || [];
     window.historyStack.push({ type: 'subcategories', category: currentCategory });
 }
 
@@ -442,8 +357,6 @@ function renderProductParts(subcategory) {
     }
     html += `</div>`;
     content.innerHTML = html;
-    
-    window.historyStack = window.historyStack || [];
     window.historyStack.push({ type: 'productParts', subcategory: currentSubcategory });
 }
 
@@ -512,8 +425,6 @@ function renderDataEntry(productName) {
     document.getElementById('shelfLifeInput')?.addEventListener('input', updateExpiryDate);
     document.getElementById('productInput')?.focus();
     updateExpiryDate();
-    
-    window.historyStack = window.historyStack || [];
     window.historyStack.push({ type: 'productParts', subcategory: currentSubcategory });
 }
 
@@ -553,7 +464,6 @@ function saveProduct() {
     let zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
     zalihe.push(productData);
     localStorage.setItem('zalihe', JSON.stringify(zalihe));
-    
     addProductToTable(productData);
     document.getElementById('pieceInput').value = '';
     document.getElementById('quantityInput').value = '1';
@@ -662,7 +572,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('exitMainBtn')?.addEventListener('click', exitApp);
 
     document.getElementById('backBtn')?.addEventListener('click', function() {
-        window.historyStack = window.historyStack || [];
         if (window.historyStack.length === 0) {
             showScreen('languageScreen');
             renderLanguages();
@@ -688,9 +597,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('shoppingBtn')?.addEventListener('click', function() {
         renderShoppingList();
     });
-
-    console.log('✅ Svi događaji povezani!');
-});
 
     console.log('✅ Svi događaji povezani!');
 });
