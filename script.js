@@ -677,27 +677,26 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('exitMainBtn')?.addEventListener('touchstart', handleExit);
 
     // === BACK DUGME ===
-    document.getElementById('backBtn')?.addEventListener('click', function() {
-        if (window.historyStack.length === 0) {
-            showScreen('languageScreen');
-            renderLanguages();
-            return;
-        }
-        const last = window.historyStack.pop();
-        if (last.type === 'categories') {
-            renderCategories();
-        } else if (last.type === 'subcategories') {
-            renderSubcategories(last.category);
-        } else if (last.type === 'productParts') {
-            renderProductParts(last.subcategory);
-        } else if (last.type === 'dataEntry') {
-            renderProductParts(last.subcategory);
-        } else {
-            showScreen('languageScreen');
-            renderLanguages();
-        }
-    });
-
+   document.getElementById('backBtn')?.addEventListener('click', function() {
+    if (window.historyStack.length === 0) {
+        showScreen('languageScreen');
+        renderLanguages();
+        return;
+    }
+    const last = window.historyStack.pop();
+    if (last.type === 'categories') {
+        renderCategories();
+    } else if (last.type === 'subcategories') {
+        renderSubcategories(last.category);
+    } else if (last.type === 'productParts') {
+        renderProductParts(last.subcategory);
+    } else if (last.type === 'dataEntry') {
+        renderProductParts(last.subcategory);
+    } else {
+        showScreen('languageScreen');
+        renderLanguages();
+    }
+});
     // === ZALIHE DUGME ===
     document.getElementById('inventoryBtn')?.addEventListener('click', function() {
         renderInventory();
