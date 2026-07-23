@@ -506,7 +506,7 @@ function renderDataEntry(productName, addHistory = true) {
     document.getElementById('shelfLifeInput')?.addEventListener('input', updateExpiryDate);
     document.getElementById('productInput')?.focus();
     updateExpiryDate();
-    if (addHistory) window.historyStack.push({ type: 'dataEntry', subcategory: currentSubcategory });
+    window.historyStack.push({ type: 'dataEntry', subcategory: currentSubcategory });
 }
 
 function updateExpiryDate() {
