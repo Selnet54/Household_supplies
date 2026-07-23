@@ -425,7 +425,7 @@ function renderDataEntry(productName) {
     document.getElementById('shelfLifeInput')?.addEventListener('input', updateExpiryDate);
     document.getElementById('productInput')?.focus();
     updateExpiryDate();
-    window.historyStack.push({ type: 'productParts', subcategory: currentSubcategory });
+    window.historyStack.push({ type: 'dataEntry', subcategory: currentSubcategory });
 }
 
 function updateExpiryDate() {
