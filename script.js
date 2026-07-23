@@ -680,7 +680,11 @@ document.addEventListener('DOMContentLoaded', function() {
         renderLanguages();
         return;
     }
+    
+    // Skloni poslednji korak
     const last = window.historyStack.pop();
+    
+    // Vrati se na prethodni ekran
     if (last.type === 'categories') {
         renderCategories();
     } else if (last.type === 'subcategories') {
@@ -693,16 +697,4 @@ document.addEventListener('DOMContentLoaded', function() {
         showScreen('languageScreen');
         renderLanguages();
     }
-});
-    // === ZALIHE DUGME ===
-    document.getElementById('inventoryBtn')?.addEventListener('click', function() {
-        renderInventory();
-    });
-
-    // === SPISAK DUGME ===
-    document.getElementById('shoppingBtn')?.addEventListener('click', function() {
-        renderShoppingList();
-    });
-
-    console.log('✅ Svi događaji povezani!');
 });
