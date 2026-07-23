@@ -388,7 +388,7 @@ function selectLanguage(langCode) {
     renderCategories();
 }
 
-function renderCategories(addHistory = true) {
+function renderCategories() {
     const content = document.getElementById('mainContent');
     if (!content) return;
     const catList = getMainCategories();
@@ -403,7 +403,7 @@ function renderCategories(addHistory = true) {
     window.historyStack.push({ type: 'categories' });
 }
 
-function renderSubcategories(category, addHistory = true) {
+function renderSubcategories(category) {
     currentCategory = category;
     const content = document.getElementById('mainContent');
     const subList = getSubcategories(category);
@@ -419,8 +419,7 @@ function renderSubcategories(category, addHistory = true) {
     content.innerHTML = html;
     window.historyStack.push({ type: 'subcategories', category: currentCategory });
 }
-
-function renderProductParts(subcategory, addHistory = true) {
+function renderProductParts(subcategory) {
     currentSubcategory = subcategory;
     const content = document.getElementById('mainContent');
     const parts = getProductParts(subcategory);
@@ -440,8 +439,7 @@ function renderProductParts(subcategory, addHistory = true) {
     content.innerHTML = html;
     window.historyStack.push({ type: 'productParts', subcategory: currentSubcategory });
 }
-
-function renderDataEntry(productName, addHistory = true) {
+function renderDataEntry(productName) {
     const content = document.getElementById('mainContent');
     if (!content) return;
     const today = new Date().toISOString().split('T')[0];
@@ -508,7 +506,6 @@ function renderDataEntry(productName, addHistory = true) {
     updateExpiryDate();
     window.historyStack.push({ type: 'dataEntry', subcategory: currentSubcategory });
 }
-
 function updateExpiryDate() {
     const dateInput = document.getElementById('dateInput');
     const shelfLifeInput = document.getElementById('shelfLifeInput');
