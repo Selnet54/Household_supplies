@@ -400,7 +400,7 @@ function renderCategories(addHistory = true) {
     });
     html += `</div>`;
     content.innerHTML = html;
-    if (addHistory) window.historyStack.push({ type: 'categories' });
+    window.historyStack.push({ type: 'categories' });
 }
 
 function renderSubcategories(category, addHistory = true) {
@@ -417,7 +417,7 @@ function renderSubcategories(category, addHistory = true) {
     });
     html += `</div>`;
     content.innerHTML = html;
-    if (addHistory) window.historyStack.push({ type: 'subcategories', category: currentCategory });
+    window.historyStack.push({ type: 'subcategories', category: currentCategory });
 }
 
 function renderProductParts(subcategory, addHistory = true) {
@@ -438,7 +438,7 @@ function renderProductParts(subcategory, addHistory = true) {
     }
     html += `</div>`;
     content.innerHTML = html;
-    if (addHistory) window.historyStack.push({ type: 'productParts', subcategory: currentSubcategory });
+    window.historyStack.push({ type: 'productParts', subcategory: currentSubcategory });
 }
 
 function renderDataEntry(productName, addHistory = true) {
