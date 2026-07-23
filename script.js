@@ -5,6 +5,11 @@
 console.log('✅ Script.js je učitan!');
 window.historyStack = [];
 
+// ===== INICIJALIZACIJA SPISKA POTREBA =====
+if (!localStorage.getItem('spisak_potreba')) {
+    localStorage.setItem('spisak_potreba', JSON.stringify([]));
+}
+
 // ===== 0. EXIT FUNKCIJA =====
 function exitApp() {
     if (confirm('Da li želite da zatvorite aplikaciju?')) {
@@ -15,7 +20,6 @@ function exitApp() {
         document.getElementById('phoneInput').focus();
     }
 }
-
 // ===== 1. JEZICI =====
 const languages = {
     sr: { name: 'Srpski', flag: '/Household_supplies/icons/jezici/srpski.png' },
@@ -524,7 +528,7 @@ function updateExpiryDate() {
         expiryDisplay.textContent = '-';
     }
 }
-
+// ===== PROVERA KRITIČNIH ZALIHA =====
 function saveProduct() {
     const product = document.getElementById('productInput')?.value.trim();
     const quantity = document.getElementById('quantityInput')?.value.trim();
@@ -550,6 +554,9 @@ function saveProduct() {
     document.getElementById('quantityInput').value = '1';
     document.getElementById('quantityInput').focus();
     alert('✅ Proizvod sačuvan!');
+    
+    // PROVERI KRITIČNE ZALIHE (briše 0, dodaje u spisak)
+    proveriKriticneZalihe();
 }
 
 function addProductToTable(product) {
@@ -609,7 +616,20 @@ function renderInventory() {
             const expiry = new Date(p.entry_date);
             expiry.setMonth(expiry.getMonth() + p.shelf_life_months);
             const expiryDisplay = expiry.toLocaleDateString('sr-RS', { month: '2-digit', year: '2-digit' });
-            html += `<div class="table-row" style="display:grid; grid-template-columns:40px 1.2fr 1.2fr 0.8fr 0.8fr 0.8fr 0.8fr 1fr; gap:2px; border-bottom:1px solid #eee; padding:5px 0;">`;
+            
+            // ===== PROVERA KRITIČNE KOLIČINE =====
+            const qty = p.quantity;
+            const unit = p.unit;
+            const isKritican = (qty === 0) || 
+                               (unit === 'kom' && qty <= 2) || 
+                               (unit === 'pcs' && qty <= 2) ||
+                               (unit === 'g' && qty < 400) ||
+                               (unit === 'kg' && qty < 0.4);
+            
+            // Oker boja za kritične proizvode (osim ako je 0 - onda se briše)
+            const rowBg = (qty > 0 && isKritican) ? 'background:#F9AA65;' : '';
+            
+            html += `<div class="table-row" style="display:grid; grid-template-columns:40px 1.2fr 1.2fr 0.8fr 0.8fr 0.8fr 0.8fr 1fr; gap:2px; border-bottom:1px solid #eee; padding:5px 0; ${rowBg}">`;
             html += `<div class="cell" style="text-align:center;"><input type="checkbox" class="row-checkbox" data-index="${index}"></div>`;
             html += `<div class="cell">${p.product_name}</div>`;
             html += `<div class="cell">${p.description || ''}</div>`;
@@ -623,13 +643,6 @@ function renderInventory() {
     }
     html += `</div></div>`;
     content.innerHTML = html;
-}
-
-// ===== SELEKTOVANJE SVIH =====
-function toggleAllCheckboxes() {
-    const selectAll = document.getElementById('selectAll');
-    const checkboxes = document.querySelectorAll('.row-checkbox');
-    checkboxes.forEach(cb => cb.checked = selectAll.checked);
 }
 
 // ===== BRISANJE ZALIHA =====
@@ -778,16 +791,7 @@ function renderShoppingList() {
     const content = document.getElementById('mainContent');
     if (!content) return;
     
-    const zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
-    const kritični = zalihe.filter(p => {
-        const qty = p.quantity;
-        const unit = p.unit;
-        if (qty === 0) return true;
-        if (unit === 'g' && qty < 400) return true;
-        if (unit === 'kg' && qty < 0.4) return true;
-        if ((unit === 'kom' || unit === 'pcs') && qty <= 2) return true;
-        return false;
-    });
+    const spisak = JSON.parse(localStorage.getItem('spisak_potreba') || '[]');
     
     let html = `<div class="title">${t('spisak_potreba')}</div>`;
     html += `<div class="table-container"><div class="table-title">🛒 ${t('spisak_potreba')}</div>`;
@@ -798,15 +802,16 @@ function renderShoppingList() {
         <div class="cell">${t('jedinica_mere')}</div>
     </div>`;
     
-    if (kritični.length === 0) {
-        html += `<div class="table-row"><div class="cell" style="grid-column:span 4;padding:30px;color:#999;">${t('nema_proizvoda')}</div></div>`;
+    if (spisak.length === 0) {
+        html += `<div class="table-row"><div class="cell" style="grid-column:span 4;padding:30px;color:#999;text-align:center;">${t('nema_proizvoda')}</div></div>`;
     } else {
-        kritični.forEach(p => {
+        spisak.forEach(p => {
             html += `<div class="table-row"><div class="cell">${p.product_name}</div><div class="cell">${p.description}</div><div class="cell">${p.quantity}</div><div class="cell">${p.unit}</div></div>`;
         });
     }
     html += `</div></div>`;
     content.innerHTML = html;
+}
 }
 // ===== 10. GLAVNI DOGAĐAJI =====
 document.addEventListener('DOMContentLoaded', function() {
