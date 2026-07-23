@@ -17,7 +17,7 @@ function exitApp() {
 }
 
 // ===== 1. JEZICI =====
-const languages = [
+const languages = {
     { code: 'sr', name: 'Srpski', flag: '/Household_supplies/icons/jezici/srpski.png' },
     { code: 'en', name: 'English', flag: '/Household_supplies/icons/jezici/engleski.png' },
     { code: 'de', name: 'Deutsch', flag: '/Household_supplies/icons/jezici/nemacki.png' },
@@ -28,7 +28,7 @@ const languages = [
     { code: 'es', name: 'Español', flag: '/Household_supplies/icons/jezici/spanski.png' },
     { code: 'pt', name: 'Português', flag: '/Household_supplies/icons/jezici/portugalski.png' },
     { code: 'fr', name: 'Français', flag: '/Household_supplies/icons/jezici/francuski.png' }
-];
+{;
 
 // ===== 2. PREVODI =====
 const translations = {
