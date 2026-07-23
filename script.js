@@ -696,5 +696,3 @@ document.addEventListener('DOMContentLoaded', function() {
             renderLanguages();
     }
 });
-
-                          
