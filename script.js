@@ -631,9 +631,10 @@ function renderShoppingList() {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ DOM je spreman!');
 
+    // === LOGIN DUGME (click + touch) ===
     const loginBtn = document.getElementById('loginBtn');
     if (loginBtn) {
-        loginBtn.addEventListener('click', function() {
+        function handleLogin() {
             const phone = document.getElementById('phoneInput').value.trim();
             if (phone.length >= 9) {
                 showScreen('languageScreen');
@@ -641,58 +642,71 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 alert('Unesite validan broj telefona (9+ cifara)!');
             }
-        });
+        }
+        loginBtn.addEventListener('click', handleLogin);
+        loginBtn.addEventListener('touchstart', handleLogin);
     }
 
+    // === ENTER na polju za telefon ===
     document.getElementById('phoneInput')?.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') loginBtn?.click();
+        if (e.key === 'Enter') {
+            const phone = this.value.trim();
+            if (phone.length >= 9) {
+                showScreen('languageScreen');
+                renderLanguages();
+            } else {
+                alert('Unesite validan broj telefona (9+ cifara)!');
+            }
+        }
     });
 
-    document.getElementById('exitLoginBtn')?.addEventListener('click', exitApp);
-    document.getElementById('exitLangBtn')?.addEventListener('click', exitApp);
-    document.getElementById('exitMainBtn')?.addEventListener('click', exitApp);
+    // === EXIT DUGMAD (click + touch) ===
+    function handleExit() {
+        if (confirm('Da li želite da zatvorite aplikaciju?')) {
+            document.getElementById('mainScreen').style.display = 'none';
+            document.getElementById('languageScreen').style.display = 'none';
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('phoneInput').value = '';
+        }
+    }
+    document.getElementById('exitLoginBtn')?.addEventListener('click', handleExit);
+    document.getElementById('exitLoginBtn')?.addEventListener('touchstart', handleExit);
+    document.getElementById('exitLangBtn')?.addEventListener('click', handleExit);
+    document.getElementById('exitLangBtn')?.addEventListener('touchstart', handleExit);
+    document.getElementById('exitMainBtn')?.addEventListener('click', handleExit);
+    document.getElementById('exitMainBtn')?.addEventListener('touchstart', handleExit);
 
+    // === BACK DUGME ===
     document.getElementById('backBtn')?.addEventListener('click', function() {
-
-    if (window.historyStack.length <= 1) {
-        window.historyStack = [];
-        showScreen('languageScreen');
-        renderLanguages();
-        return;
-    }
-
-    // ukloni trenutni ekran
-    window.historyStack.pop();
-
-    // uzmi prethodni
-    const previous = window.historyStack.pop();
-
-    if (!previous) {
-        showScreen('languageScreen');
-        renderLanguages();
-        return;
-    }
-
-    switch(previous.type) {
-
-        case 'categories':
-            renderCategories(false);
-            break;
-
-        case 'subcategories':
-            renderSubcategories(previous.category, false);
-            break;
-
-        case 'productParts':
-            renderProductParts(previous.subcategory, false);
-            break;
-
-        case 'dataEntry':
-            renderDataEntry('', false);
-            break;
-
-        default:
+        if (window.historyStack.length === 0) {
             showScreen('languageScreen');
             renderLanguages();
-    }
+            return;
+        }
+        const last = window.historyStack.pop();
+        if (last.type === 'categories') {
+            renderCategories();
+        } else if (last.type === 'subcategories') {
+            renderSubcategories(last.category);
+        } else if (last.type === 'productParts') {
+            renderProductParts(last.subcategory);
+        } else if (last.type === 'dataEntry') {
+            renderProductParts(last.subcategory);
+        } else {
+            showScreen('languageScreen');
+            renderLanguages();
+        }
+    });
+
+    // === ZALIHE DUGME ===
+    document.getElementById('inventoryBtn')?.addEventListener('click', function() {
+        renderInventory();
+    });
+
+    // === SPISAK DUGME ===
+    document.getElementById('shoppingBtn')?.addEventListener('click', function() {
+        renderShoppingList();
+    });
+
+    console.log('✅ Svi događaji povezani!');
 });
