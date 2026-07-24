@@ -569,6 +569,63 @@ function addProductToTable(product) {
     `;
     container.appendChild(row);
 }
+
+// ===== 9. ZALIHE I SPISAK =====
+function renderInventory() {
+    const content = document.getElementById('mainContent');
+    if (!content) return;
+    const zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
+    let html = `<div class="title">${t('stanje')}</div>`;
+    html += `<div class="table-container"><div class="table-title">📦 ${t('stanje')}</div>`;
+    html += `<div id="inventoryTable"><div class="table-row header-row">
+        <div class="cell">${t('naziv_proizvoda')}</div>
+        <div class="cell">${t('opis')}</div>
+        <div class="cell">${t('komad')}</div>
+        <div class="cell">${t('kolicina')}</div>
+        <div class="cell">${t('jedinica_mere')}</div>
+        <div class="cell">${t('rok_trajanja')}</div>
+        <div class="cell">${t('mesto_skladistenja')}</div>
+    </div>`;
+    if (zalihe.length === 0) {
+        html += `<div class="table-row"><div class="cell" style="grid-column:span 7;padding:30px;color:#999;">${t('nema_proizvoda')}</div></div>`;
+    } else {
+        zalihe.forEach(p => {
+            const expiry = new Date(p.entry_date);
+            expiry.setMonth(expiry.getMonth() + p.shelf_life_months);
+            const expiryDisplay = expiry.toLocaleDateString('sr-RS', { month: '2-digit', year: '2-digit' });
+            html += `<div class="table-row"><div class="cell">${p.product_name}</div><div class="cell">${p.description}</div><div class="cell">${p.piece}</div><div class="cell">${p.quantity}</div><div class="cell">${p.unit}</div><div class="cell">${expiryDisplay}</div><div class="cell">${p.storage_location}</div></div>`;
+        });
+    }
+    html += `</div></div>`;
+    content.innerHTML = html;
+}
+
+function renderShoppingList() {
+    const content = document.getElementById('mainContent');
+    if (!content) return;
+    const zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
+    const kritični = zalihe.filter(p => {
+        const qty = p.quantity;
+        const unit = p.unit;
+        if (qty === 0) return true;
+        if (unit === 'g' && qty < 400) return true;
+        if (unit === 'kg' && qty < 0.4) return true;
+        if ((unit === 'kom' || unit === 'pcs') && qty <= 2) return true;
+        return false;
+    });
+    let html = `<div class="title">${t('spisak_potreba')}</div>`;
+    html += `<div class="table-container"><div class="table-title">🛒 ${t('spisak_potreba')}</div>`;
+    html += `<div id="shoppingTable"><div class="table-row header-row"><div class="cell">${t('naziv_proizvoda')}</div><div class="cell">${t('opis')}</div><div class="cell">${t('kolicina')}</div><div class="cell">${t('jedinica_mere')}</div></div>`;
+    if (kritični.length === 0) {
+        html += `<div class="table-row"><div class="cell" style="grid-column:span 4;padding:30px;color:#999;">${t('nema_proizvoda')}</div></div>`;
+    } else {
+        kritični.forEach(p => {
+            html += `<div class="table-row"><div class="cell">${p.product_name}</div><div class="cell">${p.description}</div><div class="cell">${p.quantity}</div><div class="cell">${p.unit}</div></div>`;
+        });
+    }
+    html += `</div></div>`;
+    content.innerHTML = html;
+}
 // ===== ZALIHE =====
 function renderInventory() {
     const content = document.getElementById('mainContent');
@@ -656,7 +713,13 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('phoneInput')?.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') loginBtn?.click();
     });
-    
+    document.getElementById('inventoryBtn')?.addEventListener('click', function() {
+    renderInventory();
+    });
+
+    document.getElementById('shoppingBtn')?.addEventListener('click', function() {
+        renderShoppingList();
+    });
     document.getElementById('exitLoginBtn')?.addEventListener('click', exitApp);
     document.getElementById('exitLangBtn')?.addEventListener('click', exitApp);
     document.getElementById('exitMainBtn')?.addEventListener('click', exitApp);
