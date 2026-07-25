@@ -500,14 +500,14 @@ function renderDataEntry(productName, addHistory = true) {
             <div id="entriesContainer"></div>
         </div>
     `;
-  document.getElementById('dateInput')?.addEventListener('change', updateExpiryDate);
+    document.getElementById('dateInput')?.addEventListener('change', updateExpiryDate);
     document.getElementById('dateInput')?.addEventListener('input', updateExpiryDate);
     document.getElementById('shelfLifeInput')?.addEventListener('change', updateExpiryDate);
     document.getElementById('shelfLifeInput')?.addEventListener('input', updateExpiryDate);
     document.getElementById('productInput')?.focus();
     updateExpiryDate();
     
-    // ⭐⭐⭐ OVO DODAJ ⭐⭐⭐
+    // ⭐⭐⭐ PRIKAŽI SVE UNETE PROIZVODE ⭐⭐⭐
     prikaziSveUnose();
     
     if (addHistory) window.historyStack.push({ type: 'dataEntry', subcategory: currentSubcategory });
