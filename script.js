@@ -497,7 +497,7 @@ function renderDataEntry(productName, addHistory = true) {
         </div>
         <div class="table-container">
             <div class="table-title">📊 ${t('pregled_unosa')}</div>
-            <div id="entriesContainer"><div class="table-row header-row"><div class="cell">${t('komad')}</div><div class="cell">${t('kolicina')}</div><div class="cell">${t('jedinica_mere')}</div><div class="cell">${t('rok_trajanja')}</div><div class="cell">${t('mesto_skladistenja')}</div></div></div>
+            <div id="entriesContainer"></div>
         </div>
     `;
     document.getElementById('dateInput')?.addEventListener('change', updateExpiryDate);
@@ -506,89 +506,57 @@ function renderDataEntry(productName, addHistory = true) {
     document.getElementById('shelfLifeInput')?.addEventListener('input', updateExpiryDate);
     document.getElementById('productInput')?.focus();
     updateExpiryDate();
+    
+    // ⭐⭐⭐ PRIKAŽI SVE UNETE PROIZVODE ⭐⭐⭐
+    prikaziSveUnose();
+    
     if (addHistory) window.historyStack.push({ type: 'dataEntry', subcategory: currentSubcategory });
 }
-
-function updateExpiryDate() {
-    const dateInput = document.getElementById('dateInput');
-    const shelfLifeInput = document.getElementById('shelfLifeInput');
-    const expiryDisplay = document.getElementById('expiryDisplay');
-    if (!dateInput || !shelfLifeInput || !expiryDisplay) return;
-    const date = dateInput.value;
-    const months = parseInt(shelfLifeInput.value) || 0;
-    if (date && months > 0) {
-        const expiry = new Date(date);
-        expiry.setMonth(expiry.getMonth() + months);
-        expiryDisplay.textContent = expiry.toLocaleDateString('sr-RS', { day: '2-digit', month: '2-digit', year: 'numeric' });
-    } else {
-        expiryDisplay.textContent = '-';
-    }
-}
-
-function saveProduct() {
-    const product = document.getElementById('productInput')?.value.trim();
-    const quantity = document.getElementById('quantityInput')?.value.trim();
-    if (!product) { alert('Unesite naziv proizvoda!'); return; }
-    if (!quantity || isNaN(parseFloat(quantity))) { alert('Unesite količinu!'); return; }
+// ===== PRIKAZ SVIH UNETIH PROIZVODA NA EKRANU ZA UNOS =====
+function prikaziSveUnose() {
+    const container = document.getElementById('entriesContainer');
+    if (!container) return;
     
-    const productData = {
-        product_name: product,
-        description: document.getElementById('descriptionInput')?.value.trim() || '',
-        piece: document.getElementById('pieceInput')?.value.trim() || '-',
-        quantity: parseFloat(quantity),
-        unit: document.getElementById('unitSelect')?.value || 'kg',
-        entry_date: document.getElementById('dateInput')?.value || new Date().toISOString().split('T')[0],
-        shelf_life_months: parseInt(document.getElementById('shelfLifeInput')?.value) || 12,
-        storage_location: document.getElementById('storageSelect')?.value || 'Ostalo'
-    };
+    const zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
     
-    // ⭐ Ako je količina 0, dodaj u shopping i NE dodaj u zalihe
-    if (productData.quantity === 0) {
-        // Dodaj u shopping listu
-        let shopping = JSON.parse(localStorage.getItem('shoppingList') || '[]');
-        shopping.push({
-            product_name: productData.product_name,
-            description: productData.description,
-            quantity: productData.quantity,
-            unit: productData.unit
-        });
-        localStorage.setItem('shoppingList', JSON.stringify(shopping));
-        
-        // ⭐ OBRISI iz zaliha ako već postoji (da ne bi ostao sa 0)
-        let zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
-        // Pronađi proizvod sa istim imenom
-        const existingIndex = zalihe.findIndex(p => p.product_name === productData.product_name);
-        if (existingIndex !== -1) {
-            zalihe.splice(existingIndex, 1); // ⭐ OBRISI ga
-            localStorage.setItem('zalihe', JSON.stringify(zalihe));
-        }
-        
-        alert('🛒 Proizvod dodat u spisak potreba (količina 0)!');
-        document.getElementById('pieceInput').value = '';
-        document.getElementById('quantityInput').value = '1';
-        document.getElementById('quantityInput').focus();
-        renderInventory(); // ⭐ OSVEŽI prikaz
+    // Očisti tabelu ali zadrži header
+    container.innerHTML = `
+        <div class="table-row header-row">
+            <div class="cell">${t('komad')}</div>
+            <div class="cell">${t('kolicina')}</div>
+            <div class="cell">${t('jedinica_mere')}</div>
+            <div class="cell">${t('rok_trajanja')}</div>
+            <div class="cell">${t('mesto_skladistenja')}</div>
+        </div>
+    `;
+    
+    // Prikaži sve proizvode (samo one sa količinom > 0)
+    const aktivni = zalihe.filter(p => p.quantity > 0);
+    
+    if (aktivni.length === 0) {
+        const row = document.createElement('div');
+        row.className = 'table-row';
+        row.innerHTML = `<div class="cell" style="grid-column:span 5;padding:20px;color:#999;text-align:center;">${t('nema_proizvoda')}</div>`;
+        container.appendChild(row);
         return;
     }
     
-    // ⭐ Ako je količina > 0, dodaj u zalihe
-    let zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
-    // Proveri da li već postoji isti proizvod
-    const existingIndex = zalihe.findIndex(p => p.product_name === productData.product_name);
-    if (existingIndex !== -1) {
-        // Ako postoji, ažuriraj ga
-        zalihe[existingIndex] = productData;
-    } else {
-        // Ako ne postoji, dodaj novi
-        zalihe.push(productData);
-    }
-    localStorage.setItem('zalihe', JSON.stringify(zalihe));
-    addProductToTable(productData);
-    document.getElementById('pieceInput').value = '';
-    document.getElementById('quantityInput').value = '1';
-    document.getElementById('quantityInput').focus();
-    alert('✅ Proizvod sačuvan!');
-    renderInventory(); // ⭐ OSVEŽI prikaz
+    aktivni.forEach(p => {
+        const expiry = new Date(p.entry_date);
+        expiry.setMonth(expiry.getMonth() + p.shelf_life_months);
+        const expiryDisplay = expiry.toLocaleDateString('sr-RS', { month: '2-digit', year: '2-digit' });
+        
+        const row = document.createElement('div');
+        row.className = 'table-row';
+        row.innerHTML = `
+            <div class="cell">${p.piece || '-'}</div>
+            <div class="cell">${p.quantity}</div>
+            <div class="cell">${p.unit}</div>
+            <div class="cell">${expiryDisplay}</div>
+            <div class="cell">${p.storage_location}</div>
+        `;
+        container.appendChild(row);
+    });
 }
 // ===== ZALIHE SA DUGMADIMA I CHECKBOX-OVIMA =====
 function renderInventory() {
