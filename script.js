@@ -43,7 +43,6 @@ const translations = {
         delovi_proizvoda: "Delovi proizvoda", unos_podataka: "Unos podataka",
         pregled_unosa: "Pregled unosa", nema_proizvoda: "Nema proizvoda",
         spisak_potreba: "Spisak potreba", azuriraj: "Ažuriraj", obrisi: "Obriši",
-         izaberi_sve: "Izaberi sve", kopiraj: "Kopiraj", brisi: "Briši",
         zamrzivac_1: "Zamrzivač 1", zamrzivac_2: "Zamrzivač 2", zamrzivac_3: "Zamrzivač 3",
         frizider: "Frižider", ostava: "Ostava", Ostalo: "Ostalo",
         kg: "kg", g: "g", kom: "kom", l: "l", ml: "ml", pak: "pak", kutija: "kutija"
@@ -59,7 +58,6 @@ const translations = {
         delovi_proizvoda: "Product Parts", unos_podataka: "Data Entry",
         pregled_unosa: "Entry Review", nema_proizvoda: "No products",
         spisak_potreba: "Shopping List",  azuriraj: "Update", obrisi: "Delete",
-        izaberi_sve: "Select all", kopiraj: "Copy", brisi: "Delete",
         zamrzivac_1: "Freezer 1", zamrzivac_2: "Freezer 2", zamrzivac_3: "Freezer 3",
         frizider: "Refrigerator", ostava: "Pantry", Ostalo: "Other",
         kg: "kg", g: "g", kom: "pcs", l: "l", ml: "ml", pak: "pck", kutija: "box"
@@ -75,7 +73,6 @@ const translations = {
         delovi_proizvoda: "Produktteile", unos_podataka: "Dateneingabe",
         pregled_unosa: "Eingabeübersicht", nema_proizvoda: "Keine Produkte",
         spisak_potreba: "Einkaufsliste", azuriraj: "Aktualisieren", obrisi: "Löschen",
-        izaberi_sve: "Alle auswählen", kopiraj: "Kopieren", brisi: "Löschen",
         zamrzivac_1: "Gefrierschrank 1", zamrzivac_2: "Gefrierschrank 2", zamrzivac_3: "Gefrierschrank 3",
         frizider: "Kühlschrank", ostava: "Vorratskammer", Ostalo: "Andere",
         kg: "kg", g: "g", kom: "Stk", l: "l", ml: "ml", pak: "Pck", kutija: "Karton"
@@ -91,7 +88,6 @@ const translations = {
         delovi_proizvoda: "Termék részei", unos_podataka: "Adatbevitel",
         pregled_unosa: "Bevitel áttekintése", nema_proizvoda: "Nincsenek termékek",
         spisak_potreba: "Bevásárlólista", azuriraj: "Frissítés", obrisi: "Törlés",
-        izaberi_sve: "Mindet kijelöl", kopiraj: "Másolás", brisi: "Törlés",
         zamrzivac_1: "Mélyhűtő 1", zamrzivac_2: "Mélyhűtő 2", zamrzivac_3: "Mélyhűtő 3",
         frizider: "Hűtőszekrény", ostava: "Spájz", Ostalo: "Egyéb",
         kg: "kg", g: "g", kom: "db", l: "l", ml: "ml", pak: "csom", kutija: "doboz"
@@ -107,7 +103,6 @@ const translations = {
         delovi_proizvoda: "Частини продукту", unos_podataka: "Введення даних",
         pregled_unosa: "Огляд введення", nema_proizvoda: "Немає продуктів",
         spisak_potreba: "Список потреб", azuriraj: "Оновити", obrisi: "Видалити",
-        izaberi_sve: "Вибрати все", kopiraj: "Копіювати", brisi: "Видалити",
         zamrzivac_1: "Морозилка 1", zamrzivac_2: "Морозилка 2", zamrzivac_3: "Морозилка 3",
         frizider: "Холодильник", ostava: "Комора", Ostalo: "Інше",
         kg: "кг", g: "г", kom: "шт", l: "л", ml: "мл", pak: "уп", kutija: "кор"
@@ -123,7 +118,6 @@ const translations = {
         delovi_proizvoda: "Части продукта", unos_podataka: "Ввод данных",
         pregled_unosa: "Обзор ввода", nema_proizvoda: "Нет продуктов",
         spisak_potreba: "Список потребностей", azuriraj: "Обновить", obrisi: "Удалить",
-        izaberi_sve: "Выбрать все", kopiraj: "Копировать", brisi: "Удалить",
         zamrzivac_1: "Морозилка 1", zamrzivac_2: "Морозилка 2", zamrzivac_3: "Морозилка 3",
         frizider: "Холодильник", ostava: "Кладовая", Ostalo: "Другое",
         kg: "кг", g: "г", kom: "шт", l: "л", ml: "мл", pak: "уп", kutija: "кор"
@@ -139,7 +133,6 @@ const translations = {
         delovi_proizvoda: "产品部件", unos_podataka: "数据输入",
         pregled_unosa: "输入记录查看", nema_proizvoda: "没有产品",
         spisak_potreba: "购物清单", azuriraj: "更新", obrisi: "删除",
-         izaberi_sve: "全选", kopiraj: "复制", brisi: "删除",
         zamrzivac_1: "冷冻柜 1", zamrzivac_2: "冷冻柜 2", zamrzivac_3: "冷冻柜 3",
         frizider: "冰箱", ostava: "储藏室", Ostalo: "其他",
         kg: "公斤", g: "克", kom: "件", l: "升", ml: "毫升", pak: "包", kutija: "盒"
@@ -155,7 +148,6 @@ const translations = {
         delovi_proizvoda: "Partes del Producto", unos_podataka: "Entrada de Datos",
         pregled_unosa: "Revisión de entrada", nema_proizvoda: "No hay productos",
         spisak_potreba: "Lista de Compras", azuriraj: "Actualizar", obrisi: "Eliminar",
-        izaberi_sve: "Seleccionar todo", kopiraj: "Copiar", brisi: "Eliminar",
         zamrzivac_1: "Congelador 1", zamrzivac_2: "Congelador 2", zamrzivac_3: "Congelador 3",
         frizider: "Refrigerador", ostava: "Despensa", Ostalo: "Otro",
         kg: "kg", g: "g", kom: "pz", l: "l", ml: "ml", pak: "pq", kutija: "caja"
@@ -171,7 +163,6 @@ const translations = {
         delovi_proizvoda: "Partes do Produto", unos_podataka: "Entrada de Dados",
         pregled_unosa: "Revisão de entrada", nema_proizvoda: "Nenhum produto",
         spisak_potreba: "Lista de Compras", azuriraj: "Atualizar", obrisi: "Excluir",
-        izaberi_sve: "Selecionar tudo", kopiraj: "Copiar", brisi: "Excluir",
         zamrzivac_1: "Congelador 1", zamrzivac_2: "Congelador 2", zamrzivac_3: "Congelador 3",
         frizider: "Geladeira", ostava: "Despensa", Ostalo: "Outro",
         kg: "kg", g: "g", kom: "pç", l: "l", ml: "ml", pak: "pc", kutija: "cx"
@@ -187,7 +178,6 @@ const translations = {
         delovi_proizvoda: "Pièces du Produit", unos_podataka: "Saisie de Données",
         pregled_unosa: "Aperçu des saisies", nema_proizvoda: "Aucun produit",
         spisak_potreba: "Liste de Courses", azuriraj: "Mettre à jour", obrisi: "Supprimer",
-        izaberi_sve: "Tout sélectionner", kopiraj: "Copier", brisi: "Supprimer",
         zamrzivac_1: "Congélateur 1", zamrzivac_2: "Congélateur 2", zamrzivac_3: "Congélateur 3",
         frizider: "Réfrigérateur", ostava: "Garde-manger", Ostalo: "Autre",
         kg: "kg", g: "g", kom: "pc", l: "l", ml: "ml", pak: "paq", kutija: "boîte"
@@ -783,79 +773,39 @@ function sacuvajAzuriranje(index) {
 }
 
 // ===== SPISAK POTREBA =====
-// ===== SELEKTOVANJE SVIH U SHOPPING LISTI =====
-function toggleAllShopping() {
-    const selectAll = document.getElementById('selectAllShopping');
-    const checkboxes = document.querySelectorAll('.shopping-checkbox');
-    checkboxes.forEach(cb => cb.checked = selectAll.checked);
-}
-
-// ===== KOPIRANJE SHOPPING LISTE NA CLIPBOARD =====
-function kopirajShopping() {
-    const shopping = JSON.parse(localStorage.getItem('shoppingList') || '[]');
+function renderShoppingList() {
+    const content = document.getElementById('mainContent');
+    if (!content) return;
     
-    if (shopping.length === 0) {
-        alert(t('nema_proizvoda'));
-        return;
-    }
-    
-    // Formiraj tekst za kopiranje
-    let tekst = `${t('spisak_potreba')}\n`;
-    tekst += `${'='.repeat(30)}\n\n`;
-    
-    shopping.forEach((p, index) => {
-        tekst += `${index + 1}. ${p.product_name}`;
-        if (p.description) tekst += ` - ${p.description}`;
-        tekst += ` (${p.quantity} ${p.unit})\n`;
+    const zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
+    const kritični = zalihe.filter(p => {
+        const qty = p.quantity;
+        const unit = p.unit;
+        if (qty === 0) return true;
+        if (unit === 'g' && qty < 400) return true;
+        if (unit === 'kg' && qty < 0.4) return true;
+        if ((unit === 'kom' || unit === 'pcs') && qty <= 2) return true;
+        return false;
     });
     
-    // Kopiraj na clipboard
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(tekst).then(() => {
-            alert('✅ Lista je kopirana na clipboard!');
-        }).catch(() => {
-            kopirajFallback(tekst);
-        });
+    let html = `<div class="title">${t('spisak_potreba')}</div>`;
+    html += `<div class="table-container"><div class="table-title">🛒 ${t('spisak_potreba')}</div>`;
+    html += `<div id="shoppingTable"><div class="table-row header-row">
+        <div class="cell">${t('naziv_proizvoda')}</div>
+        <div class="cell">${t('opis')}</div>
+        <div class="cell">${t('kolicina')}</div>
+        <div class="cell">${t('jedinica_mere')}</div>
+    </div>`;
+    
+    if (kritični.length === 0) {
+        html += `<div class="table-row"><div class="cell" style="grid-column:span 4;padding:30px;color:#999;">${t('nema_proizvoda')}</div></div>`;
     } else {
-        kopirajFallback(tekst);
+        kritični.forEach(p => {
+            html += `<div class="table-row"><div class="cell">${p.product_name}</div><div class="cell">${p.description}</div><div class="cell">${p.quantity}</div><div class="cell">${p.unit}</div></div>`;
+        });
     }
-}
-
-// ===== FALLBACK ZA KOPIRANJE (ako clipboard ne radi) =====
-function kopirajFallback(tekst) {
-    const textarea = document.createElement('textarea');
-    textarea.value = tekst;
-    textarea.style.position = 'fixed';
-    textarea.style.opacity = '0';
-    document.body.appendChild(textarea);
-    textarea.select();
-    try {
-        document.execCommand('copy');
-        alert('✅ Lista je kopirana na clipboard!');
-    } catch (err) {
-        alert('❌ Greška pri kopiranju. Molimo kopirajte ručno.');
-    }
-    document.body.removeChild(textarea);
-}
-
-// ===== BRISANJE IZABRANIH STAVKI IZ SHOPPING LISTE =====
-function obrisiIzabranoShopping() {
-    const selected = document.querySelectorAll('.shopping-checkbox:checked');
-    if (selected.length === 0) {
-        alert('Niste označili nijednu stavku za brisanje!');
-        return;
-    }
-    
-    if (!confirm(`Da li ste sigurni da želite da obrišete ${selected.length} stavku/ke?`)) return;
-    
-    let shopping = JSON.parse(localStorage.getItem('shoppingList') || '[]');
-    const indices = Array.from(selected).map(cb => parseInt(cb.dataset.index));
-    indices.sort((a, b) => b - a);
-    indices.forEach(i => shopping.splice(i, 1));
-    localStorage.setItem('shoppingList', JSON.stringify(shopping));
-    
-    renderShoppingList();
-}
+    html += `</div></div>`;
+    content.innerHTML = html;
 }
 // ===== AŽURIRANJE DATUMA ISTEKA =====
 function updateExpiryDate() {
@@ -990,17 +940,13 @@ function prikaziSveUnose() {
     });
 }
 // ===== 10. GLAVNI DOGAĐAJI =====
-// ===== LOGIN =====
 document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ DOM je spreman!');
 
     const loginBtn = document.getElementById('loginBtn');
-    const phoneInput = document.getElementById('phoneInput');
-
-    // Klik na dugme
     if (loginBtn) {
         loginBtn.addEventListener('click', function() {
-            const phone = phoneInput.value.trim();
+            const phone = document.getElementById('phoneInput').value.trim();
             if (phone.length >= 9) {
                 showScreen('languageScreen');
                 renderLanguages();
@@ -1010,56 +956,54 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Enter na input polju
-    if (phoneInput) {
-        phoneInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                loginBtn?.click();
-            }
-        });
-    }
-
-    // Exit dugmad
+    document.getElementById('phoneInput')?.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') loginBtn?.click();
+    });
+    
     document.getElementById('exitLoginBtn')?.addEventListener('click', exitApp);
     document.getElementById('exitLangBtn')?.addEventListener('click', exitApp);
     document.getElementById('exitMainBtn')?.addEventListener('click', exitApp);
 
-    // Back dugme
     document.getElementById('backBtn')?.addEventListener('click', function() {
-        if (window.historyStack.length <= 1) {
-            window.historyStack = [];
-            showScreen('languageScreen');
-            renderLanguages();
-            return;
-        }
-        window.historyStack.pop();
-        const previous = window.historyStack.pop();
-        if (!previous) {
-            showScreen('languageScreen');
-            renderLanguages();
-            return;
-        }
-        switch(previous.type) {
-            case 'categories':
-                renderCategories(false);
-                break;
-            case 'subcategories':
-                renderSubcategories(previous.category, false);
-                break;
-            case 'productParts':
-                renderProductParts(previous.subcategory, false);
-                break;
-            case 'dataEntry':
-                renderDataEntry('', false);
-                break;
-            default:
-                showScreen('languageScreen');
-                renderLanguages();
-        }
-    });
 
-    // Inventory i Shopping dugmad
+    if (window.historyStack.length <= 1) {
+        window.historyStack = [];
+        showScreen('languageScreen');
+        renderLanguages();
+        return;
+    }
+
+    window.historyStack.pop();
+    const previous = window.historyStack.pop();
+
+    if (!previous) {
+        showScreen('languageScreen');
+        renderLanguages();
+        return;
+    }
+
+    switch(previous.type) {
+        case 'categories':
+            renderCategories(false);
+            break;
+
+        case 'subcategories':
+            renderSubcategories(previous.category, false);
+            break;
+
+        case 'productParts':
+            renderProductParts(previous.subcategory, false);
+            break;
+
+        case 'dataEntry':
+            renderDataEntry('', false);
+            break;
+
+        default:
+            showScreen('languageScreen');
+            renderLanguages();
+    }
+});
     document.getElementById('inventoryBtn')?.addEventListener('click', function() {
         renderInventory();
     });
