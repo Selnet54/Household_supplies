@@ -132,7 +132,7 @@ const translations = {
         glavne_kategorije: "主要类别", podkategorije: "子类别",
         delovi_proizvoda: "产品部件", unos_podataka: "数据输入",
         pregled_unosa: "输入记录查看", nema_proizvoda: "没有产品",
-        spisak_potreba: "购物清单", zuriraj: "更新", obrisi: "删除",
+        spisak_potreba: "购物清单", azuriraj: "更新", obrisi: "删除",
         zamrzivac_1: "冷冻柜 1", zamrzivac_2: "冷冻柜 2", zamrzivac_3: "冷冻柜 3",
         frizider: "冰箱", ostava: "储藏室", Ostalo: "其他",
         kg: "公斤", g: "克", kom: "件", l: "升", ml: "毫升", pak: "包", kutija: "盒"
