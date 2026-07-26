@@ -990,13 +990,17 @@ function prikaziSveUnose() {
     });
 }
 // ===== 10. GLAVNI DOGAĐAJI =====
+// ===== LOGIN =====
 document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ DOM je spreman!');
 
     const loginBtn = document.getElementById('loginBtn');
+    const phoneInput = document.getElementById('phoneInput');
+
+    // Klik na dugme
     if (loginBtn) {
         loginBtn.addEventListener('click', function() {
-            const phone = document.getElementById('phoneInput').value.trim();
+            const phone = phoneInput.value.trim();
             if (phone.length >= 9) {
                 showScreen('languageScreen');
                 renderLanguages();
@@ -1006,54 +1010,56 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    document.getElementById('phoneInput')?.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') loginBtn?.click();
-    });
-    
+    // Enter na input polju
+    if (phoneInput) {
+        phoneInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                loginBtn?.click();
+            }
+        });
+    }
+
+    // Exit dugmad
     document.getElementById('exitLoginBtn')?.addEventListener('click', exitApp);
     document.getElementById('exitLangBtn')?.addEventListener('click', exitApp);
     document.getElementById('exitMainBtn')?.addEventListener('click', exitApp);
 
+    // Back dugme
     document.getElementById('backBtn')?.addEventListener('click', function() {
-
-    if (window.historyStack.length <= 1) {
-        window.historyStack = [];
-        showScreen('languageScreen');
-        renderLanguages();
-        return;
-    }
-
-    window.historyStack.pop();
-    const previous = window.historyStack.pop();
-
-    if (!previous) {
-        showScreen('languageScreen');
-        renderLanguages();
-        return;
-    }
-
-    switch(previous.type) {
-        case 'categories':
-            renderCategories(false);
-            break;
-
-        case 'subcategories':
-            renderSubcategories(previous.category, false);
-            break;
-
-        case 'productParts':
-            renderProductParts(previous.subcategory, false);
-            break;
-
-        case 'dataEntry':
-            renderDataEntry('', false);
-            break;
-
-        default:
+        if (window.historyStack.length <= 1) {
+            window.historyStack = [];
             showScreen('languageScreen');
             renderLanguages();
-    }
-});
+            return;
+        }
+        window.historyStack.pop();
+        const previous = window.historyStack.pop();
+        if (!previous) {
+            showScreen('languageScreen');
+            renderLanguages();
+            return;
+        }
+        switch(previous.type) {
+            case 'categories':
+                renderCategories(false);
+                break;
+            case 'subcategories':
+                renderSubcategories(previous.category, false);
+                break;
+            case 'productParts':
+                renderProductParts(previous.subcategory, false);
+                break;
+            case 'dataEntry':
+                renderDataEntry('', false);
+                break;
+            default:
+                showScreen('languageScreen');
+                renderLanguages();
+        }
+    });
+
+    // Inventory i Shopping dugmad
     document.getElementById('inventoryBtn')?.addEventListener('click', function() {
         renderInventory();
     });
