@@ -783,40 +783,6 @@ function sacuvajAzuriranje(index) {
 }
 
 // ===== SPISAK POTREBA =====
-function renderShoppingList() {
-    const content = document.getElementById('mainContent');
-    if (!content) return;
-    
-    const zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
-    const kritični = zalihe.filter(p => {
-        const qty = p.quantity;
-        const unit = p.unit;
-        if (qty === 0) return true;
-        if (unit === 'g' && qty < 400) return true;
-        if (unit === 'kg' && qty < 0.4) return true;
-        if ((unit === 'kom' || unit === 'pcs') && qty <= 2) return true;
-        return false;
-    });
-    
-    let html = `<div class="title">${t('spisak_potreba')}</div>`;
-    html += `<div class="table-container"><div class="table-title">🛒 ${t('spisak_potreba')}</div>`;
-    html += `<div id="shoppingTable"><div class="table-row header-row">
-        <div class="cell">${t('naziv_proizvoda')}</div>
-        <div class="cell">${t('opis')}</div>
-        <div class="cell">${t('kolicina')}</div>
-        <div class="cell">${t('jedinica_mere')}</div>
-    </div>`;
-    
-    if (kritični.length === 0) {
-        html += `<div class="table-row"><div class="cell" style="grid-column:span 4;padding:30px;color:#999;">${t('nema_proizvoda')}</div></div>`;
-    } else {
-        kritični.forEach(p => {
-            html += `<div class="table-row"><div class="cell">${p.product_name}</div><div class="cell">${p.description}</div><div class="cell">${p.quantity}</div><div class="cell">${p.unit}</div></div>`;
-        });
-    }
-    html += `</div></div>`;
-    content.innerHTML = html;
-}
 // ===== SELEKTOVANJE SVIH U SHOPPING LISTI =====
 function toggleAllShopping() {
     const selectAll = document.getElementById('selectAllShopping');
@@ -848,11 +814,9 @@ function kopirajShopping() {
         navigator.clipboard.writeText(tekst).then(() => {
             alert('✅ Lista je kopirana na clipboard!');
         }).catch(() => {
-            // Fallback metoda
             kopirajFallback(tekst);
         });
     } else {
-        // Fallback metoda
         kopirajFallback(tekst);
     }
 }
@@ -891,6 +855,7 @@ function obrisiIzabranoShopping() {
     localStorage.setItem('shoppingList', JSON.stringify(shopping));
     
     renderShoppingList();
+}
 }
 // ===== AŽURIRANJE DATUMA ISTEKA =====
 function updateExpiryDate() {
