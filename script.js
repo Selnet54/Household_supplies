@@ -42,7 +42,7 @@ const translations = {
         glavne_kategorije: "Glavne kategorije", podkategorije: "Podkategorije",
         delovi_proizvoda: "Delovi proizvoda", unos_podataka: "Unos podataka",
         pregled_unosa: "Pregled unosa", nema_proizvoda: "Nema proizvoda",
-        spisak_potreba: "Spisak potreba",
+        spisak_potreba: "Spisak potreba", azuriraj: "Ažuriraj", obrisi: "Obriši",
         zamrzivac_1: "Zamrzivač 1", zamrzivac_2: "Zamrzivač 2", zamrzivac_3: "Zamrzivač 3",
         frizider: "Frižider", ostava: "Ostava", Ostalo: "Ostalo",
         kg: "kg", g: "g", kom: "kom", l: "l", ml: "ml", pak: "pak", kutija: "kutija"
@@ -57,7 +57,7 @@ const translations = {
         glavne_kategorije: "Main Categories", podkategorije: "Subcategories",
         delovi_proizvoda: "Product Parts", unos_podataka: "Data Entry",
         pregled_unosa: "Entry Review", nema_proizvoda: "No products",
-        spisak_potreba: "Shopping List",
+        spisak_potreba: "Shopping List",  azuriraj: "Update", obrisi: "Delete",
         zamrzivac_1: "Freezer 1", zamrzivac_2: "Freezer 2", zamrzivac_3: "Freezer 3",
         frizider: "Refrigerator", ostava: "Pantry", Ostalo: "Other",
         kg: "kg", g: "g", kom: "pcs", l: "l", ml: "ml", pak: "pck", kutija: "box"
@@ -72,7 +72,7 @@ const translations = {
         glavne_kategorije: "Hauptkategorien", podkategorije: "Unterkategorien",
         delovi_proizvoda: "Produktteile", unos_podataka: "Dateneingabe",
         pregled_unosa: "Eingabeübersicht", nema_proizvoda: "Keine Produkte",
-        spisak_potreba: "Einkaufsliste",
+        spisak_potreba: "Einkaufsliste", azuriraj: "Aktualisieren", obrisi: "Löschen",
         zamrzivac_1: "Gefrierschrank 1", zamrzivac_2: "Gefrierschrank 2", zamrzivac_3: "Gefrierschrank 3",
         frizider: "Kühlschrank", ostava: "Vorratskammer", Ostalo: "Andere",
         kg: "kg", g: "g", kom: "Stk", l: "l", ml: "ml", pak: "Pck", kutija: "Karton"
@@ -87,7 +87,7 @@ const translations = {
         glavne_kategorije: "Fő kategóriák", podkategorije: "Alkategóriák",
         delovi_proizvoda: "Termék részei", unos_podataka: "Adatbevitel",
         pregled_unosa: "Bevitel áttekintése", nema_proizvoda: "Nincsenek termékek",
-        spisak_potreba: "Bevásárlólista",
+        spisak_potreba: "Bevásárlólista", azuriraj: "Frissítés", obrisi: "Törlés",
         zamrzivac_1: "Mélyhűtő 1", zamrzivac_2: "Mélyhűtő 2", zamrzivac_3: "Mélyhűtő 3",
         frizider: "Hűtőszekrény", ostava: "Spájz", Ostalo: "Egyéb",
         kg: "kg", g: "g", kom: "db", l: "l", ml: "ml", pak: "csom", kutija: "doboz"
@@ -102,7 +102,7 @@ const translations = {
         glavne_kategorije: "Основні категорії", podkategorije: "Підкатегорії",
         delovi_proizvoda: "Частини продукту", unos_podataka: "Введення даних",
         pregled_unosa: "Огляд введення", nema_proizvoda: "Немає продуктів",
-        spisak_potreba: "Список потреб",
+        spisak_potreba: "Список потреб", azuriraj: "Оновити", obrisi: "Видалити",
         zamrzivac_1: "Морозилка 1", zamrzivac_2: "Морозилка 2", zamrzivac_3: "Морозилка 3",
         frizider: "Холодильник", ostava: "Комора", Ostalo: "Інше",
         kg: "кг", g: "г", kom: "шт", l: "л", ml: "мл", pak: "уп", kutija: "кор"
@@ -117,7 +117,7 @@ const translations = {
         glavne_kategorije: "Основные категории", podkategorije: "Подкатегории",
         delovi_proizvoda: "Части продукта", unos_podataka: "Ввод данных",
         pregled_unosa: "Обзор ввода", nema_proizvoda: "Нет продуктов",
-        spisak_potreba: "Список потребностей",
+        spisak_potreba: "Список потребностей", azuriraj: "Обновить", obrisi: "Удалить",
         zamrzivac_1: "Морозилка 1", zamrzivac_2: "Морозилка 2", zamrzivac_3: "Морозилка 3",
         frizider: "Холодильник", ostava: "Кладовая", Ostalo: "Другое",
         kg: "кг", g: "г", kom: "шт", l: "л", ml: "мл", pak: "уп", kutija: "кор"
@@ -132,7 +132,7 @@ const translations = {
         glavne_kategorije: "主要类别", podkategorije: "子类别",
         delovi_proizvoda: "产品部件", unos_podataka: "数据输入",
         pregled_unosa: "输入记录查看", nema_proizvoda: "没有产品",
-        spisak_potreba: "购物清单",
+        spisak_potreba: "购物清单", zuriraj: "更新", obrisi: "删除",
         zamrzivac_1: "冷冻柜 1", zamrzivac_2: "冷冻柜 2", zamrzivac_3: "冷冻柜 3",
         frizider: "冰箱", ostava: "储藏室", Ostalo: "其他",
         kg: "公斤", g: "克", kom: "件", l: "升", ml: "毫升", pak: "包", kutija: "盒"
@@ -147,7 +147,7 @@ const translations = {
         glavne_kategorije: "Categorías Principales", podkategorije: "Subcategorías",
         delovi_proizvoda: "Partes del Producto", unos_podataka: "Entrada de Datos",
         pregled_unosa: "Revisión de entrada", nema_proizvoda: "No hay productos",
-        spisak_potreba: "Lista de Compras",
+        spisak_potreba: "Lista de Compras", azuriraj: "Actualizar", obrisi: "Eliminar",
         zamrzivac_1: "Congelador 1", zamrzivac_2: "Congelador 2", zamrzivac_3: "Congelador 3",
         frizider: "Refrigerador", ostava: "Despensa", Ostalo: "Otro",
         kg: "kg", g: "g", kom: "pz", l: "l", ml: "ml", pak: "pq", kutija: "caja"
@@ -162,7 +162,7 @@ const translations = {
         glavne_kategorije: "Categorias Principais", podkategorije: "Subcategorias",
         delovi_proizvoda: "Partes do Produto", unos_podataka: "Entrada de Dados",
         pregled_unosa: "Revisão de entrada", nema_proizvoda: "Nenhum produto",
-        spisak_potreba: "Lista de Compras",
+        spisak_potreba: "Lista de Compras", azuriraj: "Atualizar", obrisi: "Excluir",
         zamrzivac_1: "Congelador 1", zamrzivac_2: "Congelador 2", zamrzivac_3: "Congelador 3",
         frizider: "Geladeira", ostava: "Despensa", Ostalo: "Outro",
         kg: "kg", g: "g", kom: "pç", l: "l", ml: "ml", pak: "pc", kutija: "cx"
@@ -177,7 +177,7 @@ const translations = {
         glavne_kategorije: "Catégories Principales", podkategorije: "Sous-catégories",
         delovi_proizvoda: "Pièces du Produit", unos_podataka: "Saisie de Données",
         pregled_unosa: "Aperçu des saisies", nema_proizvoda: "Aucun produit",
-        spisak_potreba: "Liste de Courses",
+        spisak_potreba: "Liste de Courses", azuriraj: "Mettre à jour", obrisi: "Supprimer",
         zamrzivac_1: "Congélateur 1", zamrzivac_2: "Congélateur 2", zamrzivac_3: "Congélateur 3",
         frizider: "Réfrigérateur", ostava: "Garde-manger", Ostalo: "Autre",
         kg: "kg", g: "g", kom: "pc", l: "l", ml: "ml", pak: "paq", kutija: "boîte"
@@ -569,11 +569,11 @@ function renderInventory() {
     
     let html = `<div class="title">${t('stanje')}</div>`;
     
-    // Dugmad za akcije
+    // Dugmad za akcije - SADA SA PREVODIMA
     html += `<div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;">`;
-    html += `<button onclick="azurirajZalihe()" style="background:#4CAF50; color:white; border:none; padding:10px 20px; border-radius:8px; font-size:16px; cursor:pointer;">✅ Ažuriraj</button>`;
-    html += `<button onclick="obrisiZalihe()" style="background:#666; color:white; border:none; padding:10px 20px; border-radius:8px; font-size:16px; cursor:pointer;">🗑️ Briši</button>`;
-    html += `<button onclick="renderCategories()" style="background:#f44336; color:white; border:none; padding:10px 20px; border-radius:8px; font-size:16px; cursor:pointer;">✖ Odustani</button>`;
+    html += `<button onclick="azurirajZalihe()" style="background:#4CAF50; color:white; border:none; padding:10px 20px; border-radius:8px; font-size:16px; cursor:pointer;">✅ ${t('azuriraj')}</button>`;
+    html += `<button onclick="obrisiZalihe()" style="background:#666; color:white; border:none; padding:10px 20px; border-radius:8px; font-size:16px; cursor:pointer;">🗑️ ${t('obrisi')}</button>`;
+    html += `<button onclick="renderCategories()" style="background:#f44336; color:white; border:none; padding:10px 20px; border-radius:8px; font-size:16px; cursor:pointer;">✖ ${t('odustani')}</button>`;
     html += `</div>`;
     
     // Tabela sa checkbox-ovima
