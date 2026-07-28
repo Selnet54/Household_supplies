@@ -5,13 +5,11 @@ console.log('✅ Script.js je učitan!');
 
 // ===== 0. EXIT FUNKCIJA =====
 function exitApp() {
-    if (confirm('Da li želite da zatvorite aplikaciju?')) {
-        document.getElementById('mainScreen').style.display = 'none';
-        document.getElementById('languageScreen').style.display = 'none';
-        document.getElementById('loginScreen').style.display = 'flex';
-        document.getElementById('phoneInput').value = '';
-        document.getElementById('phoneInput').focus();
-    }
+    document.getElementById('mainScreen').style.display = 'none';
+    document.getElementById('languageScreen').style.display = 'none';
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('phoneInput').value = '';
+    document.getElementById('phoneInput').focus();
 }
 
 // ===== 6. TRENUTNO STANJE =====
