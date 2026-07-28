@@ -1,10 +1,7 @@
 // ============================================
 // PUNI SCRIPT ZA APLIKACIJU - ISPRAVNA VERZIJA
 // ============================================
-
 console.log('✅ Script.js je učitan!');
-
-// ===== HISTORY STACK ZA NAZAD DUGME =====
 window.historyStack = [];
 
 // ===== 0. EXIT FUNKCIJA =====
@@ -17,6 +14,11 @@ function exitApp() {
         document.getElementById('phoneInput').focus();
     }
 }
+
+// ===== 6. TRENUTNO STANJE =====
+let currentLang = 'sr';
+let currentCategory = '';
+let currentSubcategory = '';
 
 // ===== 1. JEZICI =====
 const languages = {
@@ -1091,12 +1093,15 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ DOM je spreman!');
 
     const loginBtn = document.getElementById('loginBtn');
+    const phoneInput = document.getElementById('phoneInput');
+    
     console.log('🔍 loginBtn:', loginBtn);
+    console.log('🔍 phoneInput:', phoneInput);
 
     // ===== LOGIN - KLIK NA DUGME =====
     if (loginBtn) {
         loginBtn.addEventListener('click', function() {
-            const phone = document.getElementById('phoneInput').value.trim();
+            const phone = phoneInput.value.trim();
             console.log('📱 Telefon:', phone);
             if (phone.length >= 9) {
                 showScreen('languageScreen');
@@ -1107,37 +1112,30 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // ===== LOGIN - ENTER NA KEYPRESS =====
-    document.getElementById('phoneInput')?.addEventListener('keypress', function(e) {
-        console.log('🔑 Pritisnut taster:', e.key);
-        if (e.key === 'Enter') {
-            console.log('✅ Enter detektovan na keypress!');
-            loginBtn?.click();
-        }
-    });
-
-    // ===== LOGIN - ENTER NA KEYDOWN (FALLBACK) =====
-    document.getElementById('phoneInput')?.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            console.log('✅ Enter detektovan na keydown!');
-            loginBtn?.click();
-        }
-    });
+    // ===== LOGIN - ENTER =====
+    if (phoneInput) {
+        phoneInput.addEventListener('keydown', function(e) {
+            console.log('🔑 Pritisnut taster:', e.key);
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                console.log('✅ Enter detektovan!');
+                loginBtn?.click();
+            }
+        });
+    }
     
     // ===== EXIT DUGMAD =====
     document.getElementById('exitLoginBtn')?.addEventListener('click', exitApp);
     document.getElementById('exitLangBtn')?.addEventListener('click', exitApp);
     document.getElementById('exitMainBtn')?.addEventListener('click', exitApp);
 
-    // ===== BACK DUGME - RADI BEZ HISTORY STACK GREŠAK =====
+    // ===== BACK DUGME =====
     document.getElementById('backBtn')?.addEventListener('click', function() {
         const mainContent = document.getElementById('mainContent');
         if (!mainContent) return;
         
         const html = mainContent.innerHTML;
         
-        // Ako smo na kategorijama -> vrati na jezike
         if (html.includes('glavne_kategorije')) {
             window.historyStack = [];
             showScreen('languageScreen');
@@ -1145,99 +1143,37 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        // Ako smo na podkategorijama -> vrati na kategorije
         if (html.includes('podkategorije')) {
             renderCategories(false);
             return;
         }
         
-        // Ako smo na delovima proizvoda -> vrati na podkategorije
         if (html.includes('delovi_proizvoda')) {
             renderSubcategories(currentCategory, false);
             return;
         }
         
-        // Ako smo na unosu podataka -> vrati na delove proizvoda
         if (html.includes('unos_podataka')) {
             renderProductParts(currentSubcategory, false);
             return;
         }
         
-        // Ako smo na zalihama -> vrati na kategorije
-        if (html.includes('Zalihe') || html.includes('Inventory') || html.includes('Bestand') || html.includes('Készlet') || html.includes('Запаси') || html.includes('Запасы') || html.includes('库存') || html.includes('Inventario') || html.includes('Estoque') || html.includes('Stock')) {
+        if (html.includes('Zalihe') || html.includes('Inventory') || html.includes('Bestand')) {
             renderCategories(false);
             return;
         }
         
-        // Ako smo na spisku potreba -> vrati na kategorije
-        if (html.includes('spisak_potreba') || html.includes('Shopping List') || html.includes('Einkaufsliste') || html.includes('Bevásárlólista') || html.includes('Список потреб') || html.includes('Список потребностей') || html.includes('购物清单') || html.includes('Lista de Compras') || html.includes('Lista de Compras') || html.includes('Liste de Courses')) {
+        if (html.includes('spisak_potreba') || html.includes('Shopping List') || html.includes('Einkaufsliste')) {
             renderCategories(false);
             return;
         }
         
-        // Default - vrati na jezike
         window.historyStack = [];
         showScreen('languageScreen');
         renderLanguages();
     });
 
-    // ===== INVENTORY DUGME =====
-    document.getElementById('inventoryBtn')?.addEventListener('click', function() {
-        renderInventory();
-    });
-
-    // ===== SHOPPING DUGME =====
-    document.getElementById('shoppingBtn')?.addEventListener('click', function() {
-        renderShoppingList();
-    });
-
-    console.log('✅ Svi događaji povezani!');
-});
-        
-        // Ako smo na kategorijama -> vrati na jezike
-        if (html.includes('glavne_kategorije')) {
-            window.historyStack = [];
-            showScreen('languageScreen');
-            renderLanguages();
-            return;
-        }
-        
-        // Ako smo na podkategorijama -> vrati na kategorije
-        if (html.includes('podkategorije')) {
-            renderCategories(false);
-            return;
-        }
-        
-        // Ako smo na delovima proizvoda -> vrati na podkategorije
-        if (html.includes('delovi_proizvoda')) {
-            renderSubcategories(currentCategory, false);
-            return;
-        }
-        
-        // Ako smo na unosu podataka -> vrati na delove proizvoda
-        if (html.includes('unos_podataka')) {
-            renderProductParts(currentSubcategory, false);
-            return;
-        }
-        
-        // Ako smo na zalihama -> vrati na kategorije
-        if (html.includes('Zalihe') || html.includes('Inventory') || html.includes('Bestand') || html.includes('Készlet') || html.includes('Запаси') || html.includes('Запасы') || html.includes('库存') || html.includes('Inventario') || html.includes('Estoque') || html.includes('Stock')) {
-            renderCategories(false);
-            return;
-        }
-        
-        // Ako smo na spisku potreba -> vrati na kategorije
-        if (html.includes('spisak_potreba') || html.includes('Shopping List') || html.includes('Einkaufsliste') || html.includes('Bevásárlólista') || html.includes('Список потреб') || html.includes('Список потребностей') || html.includes('购物清单') || html.includes('Lista de Compras') || html.includes('Lista de Compras') || html.includes('Liste de Courses')) {
-            renderCategories(false);
-            return;
-        }
-        
-        // Default - vrati na jezike
-        window.historyStack = [];
-        showScreen('languageScreen');
-        renderLanguages();
-    });
-
+    // ===== INVENTORY I SHOPPING =====
     document.getElementById('inventoryBtn')?.addEventListener('click', function() {
         renderInventory();
     });
