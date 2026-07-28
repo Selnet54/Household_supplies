@@ -1092,36 +1092,36 @@ function prikaziSveUnose() {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ DOM je spreman!');
 
-    const loginBtn = document.getElementById('loginBtn');
-    const phoneInput = document.getElementById('phoneInput');
-    
-    console.log('🔍 loginBtn:', loginBtn);
-    console.log('🔍 phoneInput:', phoneInput);
+    // ===== LOGIN - ENTER I KLIK (Delegiranje / Sigurna provjera) =====
+    document.addEventListener('click', function(e) {
+        if (e.target && e.target.id === 'loginBtn') {
+            triggerLogin();
+        }
+    });
 
-    // ===== LOGIN - KLIK NA DUGME =====
-    if (loginBtn) {
-        loginBtn.addEventListener('click', function() {
-            const phone = phoneInput.value.trim();
-            console.log('📱 Telefon:', phone);
-            if (phone.length >= 9) {
-                showScreen('languageScreen');
-                renderLanguages();
-            } else {
-                alert('Unesite validan broj telefona (9+ cifara)!');
-            }
-        });
-    }
-
-    // ===== LOGIN - ENTER =====
-    if (phoneInput) {
-        phoneInput.addEventListener('keydown', function(e) {
-            console.log('🔑 Pritisnut taster:', e.key);
-            if (e.key === 'Enter') {
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            const phoneInput = document.getElementById('phoneInput');
+            // Proveravamo da li je aktivni element input za telefon ili da li je on u fokusu
+            if (phoneInput && document.activeElement === phoneInput) {
                 e.preventDefault();
-                console.log('✅ Enter detektovan!');
-                loginBtn?.click();
+                console.log('✅ Enter detektovan na telefonu!');
+                triggerLogin();
             }
-        });
+        }
+    });
+
+    function triggerLogin() {
+        const phoneInput = document.getElementById('phoneInput');
+        if (!phoneInput) return;
+        const phone = phoneInput.value.trim();
+        console.log('📱 Telefon:', phone);
+        if (phone.length >= 9) {
+            showScreen('languageScreen');
+            renderLanguages();
+        } else {
+            alert('Unesite validan broj telefona (9+ cifara)!');
+        }
     }
     
     // ===== EXIT DUGMAD =====
