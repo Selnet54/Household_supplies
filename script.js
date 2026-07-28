@@ -7,11 +7,6 @@ console.log('✅ Script.js je učitan!');
 // ===== HISTORY STACK ZA NAZAD DUGME =====
 window.historyStack = [];
 
-// ===== TRENUTNO STANJE =====
-let currentLang = 'sr';
-let currentCategory = '';
-let currentSubcategory = '';
-
 // ===== 0. EXIT FUNKCIJA =====
 function exitApp() {
     if (confirm('Da li želite da zatvorite aplikaciju?')) {
@@ -22,6 +17,11 @@ function exitApp() {
         document.getElementById('phoneInput').focus();
     }
 }
+
+// ===== 1. JEZICI =====
+const languages = {
+    // ... tvoj postojeći kod ...
+};
 
 // ===== 1. JEZICI =====
 const languages = {
