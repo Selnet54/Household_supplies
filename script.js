@@ -647,6 +647,8 @@ function renderCategories() {
 
 // ===== ISPRAVLJENE / DODATE FUNKCIJE ZA PODKATEGORIJE =====
 
+// ===== ISPRAVLJENO RENDERETOVANJE PODKATEGORIJA =====
+
 function renderSubcategories(category) {
     currentScreenState = 'subcategories';
     currentCategory = category;
@@ -658,7 +660,6 @@ function renderSubcategories(category) {
     let html = `<div class="title">${t('podkategorije')}</div>`;
     html += `<div class="categories-grid">`;
     
-    // Provera da li su podkategorije običan niz ili objekat sa grupama (kao Pića, Zimnica, itd.)
     if (Array.isArray(subData)) {
         subData.forEach((item, idx) => {
             const color = colors[idx % colors.length];
@@ -669,36 +670,51 @@ function renderSubcategories(category) {
             }
         });
     } else if (subData && typeof subData === 'object') {
-        // Ako su ugnježđene grupe (npr. Voda, Vino, Sok kod Pića)
         const keys = Object.keys(subData);
         keys.forEach((groupName, idx) => {
             const color = colors[idx % colors.length];
-            html += `<button class="category-btn" style="background:${color};" onclick="renderSubcategoryGroup('${category}', '${groupName}')">${groupName} ➜</button>`;
+            // Strelica ostaje samo ako grupa u sebi ima podstavke, a "Ostalo" dobija svoju strelicu
+            if (isOtherButton(groupName)) {
+                html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('')">${groupName} ➜</button>`;
+            } else {
+                html += `<button class="category-btn" style="background:${color};" onclick="renderSubcategoryGroup('${category}', '${groupName}')">${groupName}</button>`;
+            }
         });
     } else {
-        html += `<button class="category-btn" style="background:#ddd;" onclick="renderDataEntry('')">Ostalo</button>`;
+        html += `<button class="category-btn" style="background:#ddd;" onclick="renderDataEntry('')">Ostalo ➜</button>`;
     }
     
     html += `</div>`;
     content.innerHTML = html;
 }
-// Nova pomoćna funkcija koja otvara unutrašnje grupe (npr. Voda -> Mineralna, Gazirana...)
+
 function renderSubcategoryGroup(category, groupName) {
     currentScreenState = 'subcategories';
     const content = document.getElementById('mainContent');
     const sub = subcategories[currentLang] || subcategories.sr;
-    const items = sub[category][groupName];
+    let items = sub[category][groupName];
     const colors = getSubcategoryColors(category);
     
     let html = `<div class="title">${groupName}</div>`;
     html += `<div class="categories-grid">`;
     
     if (Array.isArray(items)) {
-        items.forEach((item, idx) => {
+        // Kreiramo kopiju niza da originalni objekat ostane netaknut
+        let displayItems = [...items];
+        
+        // Proveravamo da li niz već sadrži "Ostalo" (ili lokalizovanu varijantu), ako ne - dodajemo ga na kraj
+        const hasOstalo = displayItems.some(item => isOtherButton(item));
+        if (!hasOstalo) {
+            displayItems.push("Ostalo");
+        }
+
+        displayItems.forEach((item, idx) => {
             const color = colors[idx % colors.length];
             if (isOtherButton(item)) {
+                // Strelica isključivo na "Ostalo"
                 html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('')">${item} ➜</button>`;
             } else {
+                // Obične stavke BEZ strelice
                 html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('${item}')">${item}</button>`;
             }
         });
@@ -712,13 +728,21 @@ function renderProductParts(subcategory) {
     currentScreenState = 'productParts';
     currentSubcategory = subcategory;
     const content = document.getElementById('mainContent');
-    const parts = getProductParts(subcategory);
+    let parts = getProductParts(subcategory);
     const colors = getSubcategoryColors(currentCategory);
+    
     let html = `<div class="title">${subcategory}</div>`;
     html += `<div style="margin-bottom:15px;text-align:center;font-size:20px;color:#666;">${t('delovi_proizvoda')}</div>`;
     html += `<div class="categories-grid">`;
+    
     if (parts && parts.length > 0) {
-        parts.forEach((part, idx) => {
+        let displayParts = [...parts];
+        const hasOstalo = displayParts.some(part => isOtherButton(part));
+        if (!hasOstalo) {
+            displayParts.push("Ostalo");
+        }
+
+        displayParts.forEach((part, idx) => {
             const color = colors[idx % colors.length];
             if (isOtherButton(part)) {
                 html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('')">${part} ➜</button>`;
@@ -727,8 +751,9 @@ function renderProductParts(subcategory) {
             }
         });
     } else {
-        html += `<button class="category-btn" style="background:#ddd;" onclick="renderDataEntry('')">${t('unesi')}</button>`;
+        html += `<button class="category-btn" style="background:#ddd;" onclick="renderDataEntry('')">Ostalo ➜</button>`;
     }
+    
     html += `</div>`;
     content.innerHTML = html;
 }
