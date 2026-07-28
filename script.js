@@ -426,10 +426,13 @@ function renderSubcategories(category, addHistory = true) {
         html += `<button class="category-btn" style="background:${color};" onclick="renderProductParts('${sub}')">${sub}</button>`;
     });
     html += `</div>`;
+    // ⭐ DODAJ DUGME ZA NAZAD NA KATEGORIJE
+    html += `<div style="text-align:center;margin-top:20px;">
+        <button onclick="renderCategories()" style="background:#90caf9;color:#1a237e;border:none;padding:15px 40px;border-radius:12px;font-size:22px;font-weight:bold;cursor:pointer;">◀ ${t('nazad')}</button>
+    </div>`;
     content.innerHTML = html;
     if (addHistory) window.historyStack.push({ type: 'subcategories', category: currentCategory });
 }
-
 function renderProductParts(subcategory, addHistory = true) {
     currentSubcategory = subcategory;
     const content = document.getElementById('mainContent');
@@ -441,12 +444,21 @@ function renderProductParts(subcategory, addHistory = true) {
     if (parts && parts.length > 0) {
         parts.forEach((part, idx) => {
             const color = colors[idx % colors.length];
-            html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('${part}')">${part}</button>`;
+            // ⭐ Ako je "Ostalo", odmah otvori unos
+            if (part === "Ostalo" || part === "Other" || part === "Andere" || part === "Egyéb" || part === "Інше" || part === "Другое" || part === "其他" || part === "Otro" || part === "Outro" || part === "Autre") {
+                html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('')">${part} ➜</button>`;
+            } else {
+                html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('${part}')">${part}</button>`;
+            }
         });
     } else {
         html += `<button class="category-btn" style="background:#ddd;" onclick="renderDataEntry('')">${t('unesi')}</button>`;
     }
     html += `</div>`;
+    // ⭐ DODAJ DUGME ZA NAZAD NA PODKATEGORIJE
+    html += `<div style="text-align:center;margin-top:20px;">
+        <button onclick="renderSubcategories('${currentCategory}')" style="background:#90caf9;color:#1a237e;border:none;padding:15px 40px;border-radius:12px;font-size:22px;font-weight:bold;cursor:pointer;">◀ ${t('nazad')}</button>
+    </div>`;
     content.innerHTML = html;
     if (addHistory) window.historyStack.push({ type: 'productParts', subcategory: currentSubcategory });
 }
