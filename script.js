@@ -1260,9 +1260,12 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ DOM je spreman!');
 
     const loginBtn = document.getElementById('loginBtn');
-    if (loginBtn) {
-        loginBtn.addEventListener('click', function() { triggerLogin(); });
-    }
+if (loginBtn) {
+    loginBtn.addEventListener('click', function(e) {
+        e.preventDefault(); // Sprečava eventualno osvežavanje stranice ako je dugme u formi
+        triggerLogin(); 
+    });
+}
 
     // Globalno slušanje Enter tastera za sve inpute
     document.addEventListener('keydown', function(e) {
@@ -1307,7 +1310,10 @@ document.addEventListener('DOMContentLoaded', function() {
 // ============================================
 function triggerLogin() {
     const phoneInput = document.getElementById('phoneInput');
-    if (!phoneInput) return;
+    if (!phoneInput) {
+        alert('Greška: Polje za telefon nije pronađeno!');
+        return;
+    }
     const phone = phoneInput.value.trim();
     if (phone.length >= 9) {
         showScreen('languageScreen');
