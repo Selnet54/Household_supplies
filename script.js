@@ -1,5 +1,5 @@
 // ============================================
-// PUNI SCRIPT ZA APLIKACIJU - ISPRAVNA VERZIJA
+// PUNI SCRIPT ZA APLIKACIJU - NOVA VERZIJA
 // ============================================
 console.log('✅ Script.js je učitan!');
 window.historyStack = [];
@@ -370,6 +370,12 @@ function getSubcategoryColors(category) {
     return ['#FFEDB5', '#F2D382'];
 }
 
+// Provera da li je dugme "Ostalo" na bilo kom jeziku
+function isOtherButton(text) {
+    const ostaloVariants = ["Ostalo", "Other", "Andere", "Egyéb", "Інше", "Другое", "其他", "Otro", "Outro", "Autre"];
+    return ostaloVariants.includes(text);
+}
+
 // ===== 8. RENDER FUNKCIJE =====
 function renderLanguages() {
     const grid = document.getElementById('languageGrid');
@@ -417,12 +423,18 @@ function renderSubcategories(category, addHistory = true) {
     const content = document.getElementById('mainContent');
     const subList = getSubcategories(category);
     const colors = getSubcategoryColors(category);
-    let html = `<div class="title">${category}</div>`;
-    html += `<div style="margin-bottom:15px;text-align:center;font-size:20px;color:#666;">${t('podkategorije')}</div>`;
+    
+    // Uklonjen naziv kategorije/mesa iz zaglavlja, ostaje samo naslov podkategorije
+    let html = `<div class="title">${t('podkategorije')}</div>`;
     html += `<div class="categories-grid">`;
+    
     subList.forEach((sub, idx) => {
         const color = colors[idx % colors.length];
-        html += `<button class="category-btn" style="background:${color};" onclick="renderProductParts('${sub}')">${sub}</button>`;
+        if (isOtherButton(sub)) {
+            html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('')">${sub} ➜</button>`;
+        } else {
+            html += `<button class="category-btn" style="background:${color};" onclick="renderProductParts('${sub}')">${sub}</button>`;
+        }
     });
     html += `</div>`;
     content.innerHTML = html;
@@ -440,7 +452,7 @@ function renderProductParts(subcategory, addHistory = true) {
     if (parts && parts.length > 0) {
         parts.forEach((part, idx) => {
             const color = colors[idx % colors.length];
-            if (part === "Ostalo" || part === "Other" || part === "Andere" || part === "Egyéb" || part === "Інше" || part === "Другое" || part === "其他" || part === "Otro" || part === "Outro" || part === "Autre") {
+            if (isOtherButton(part)) {
                 html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('')">${part} ➜</button>`;
             } else {
                 html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('${part}')">${part}</button>`;
@@ -1018,13 +1030,14 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('exitLangBtn')?.addEventListener('click', exitApp);
     document.getElementById('exitMainBtn')?.addEventListener('click', exitApp);
 
-    // ===== BACK DUGME =====
+    // ===== BACK DUGME (Prvo vraća na glavne kategorije, pa tek onda na jezike) =====
     document.getElementById('backBtn')?.addEventListener('click', function() {
         const mainContent = document.getElementById('mainContent');
         if (!mainContent) return;
         
         const html = mainContent.innerHTML;
         
+        // Ako smo već na glavnim kategorijama, vrati na jezike
         if (html.includes('glavne_kategorije')) {
             window.historyStack = [];
             showScreen('languageScreen');
@@ -1032,34 +1045,8 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        if (html.includes('podkategorije')) {
-            renderCategories(false);
-            return;
-        }
-        
-        if (html.includes('delovi_proizvoda')) {
-            renderSubcategories(currentCategory, false);
-            return;
-        }
-        
-        if (html.includes('unos_podataka')) {
-            renderProductParts(currentSubcategory, false);
-            return;
-        }
-        
-        if (html.includes('Zalihe') || html.includes('Inventory') || html.includes('Bestand')) {
-            renderCategories(false);
-            return;
-        }
-        
-        if (html.includes('spisak_potreba') || html.includes('Shopping List') || html.includes('Einkaufsliste')) {
-            renderCategories(false);
-            return;
-        }
-        
-        window.historyStack = [];
-        showScreen('languageScreen');
-        renderLanguages();
+        // Sa bilo kog drugog ekrana (podkategorije, delovi, unos, zalihe, spisak) vrati na glavne kategorije
+        renderCategories();
     });
 
     // ===== INVENTORY I SHOPPING =====
