@@ -645,24 +645,65 @@ function renderCategories() {
     content.innerHTML = html;
 }
 
+// ===== ISPRAVLJENE / DODATE FUNKCIJE ZA PODKATEGORIJE =====
+
 function renderSubcategories(category) {
     currentScreenState = 'subcategories';
     currentCategory = category;
     const content = document.getElementById('mainContent');
-    const subList = getSubcategories(category);
+    const sub = subcategories[currentLang] || subcategories.sr;
+    const subData = sub[category];
     const colors = getSubcategoryColors(category);
     
     let html = `<div class="title">${t('podkategorije')}</div>`;
     html += `<div class="categories-grid">`;
     
-    subList.forEach((sub, idx) => {
-        const color = colors[idx % colors.length];
-        if (isOtherButton(sub)) {
-            html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('')">${sub} ➜</button>`;
-        } else {
-            html += `<button class="category-btn" style="background:${color};" onclick="renderProductParts('${sub}')">${sub}</button>`;
-        }
-    });
+    // Provera da li su podkategorije običan niz ili objekat sa grupama (kao Pića, Zimnica, itd.)
+    if (Array.isArray(subData)) {
+        subData.forEach((item, idx) => {
+            const color = colors[idx % colors.length];
+            if (isOtherButton(item)) {
+                html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('')">${item} ➜</button>`;
+            } else {
+                html += `<button class="category-btn" style="background:${color};" onclick="renderProductParts('${item}')">${item}</button>`;
+            }
+        });
+    } else if (subData && typeof subData === 'object') {
+        // Ako su ugnježđene grupe (npr. Voda, Vino, Sok kod Pića)
+        const keys = Object.keys(subData);
+        keys.forEach((groupName, idx) => {
+            const color = colors[idx % colors.length];
+            html += `<button class="category-btn" style="background:${color};" onclick="renderSubcategoryGroup('${category}', '${groupName}')">${groupName} ➜</button>`;
+        });
+    } else {
+        html += `<button class="category-btn" style="background:#ddd;" onclick="renderDataEntry('')">Ostalo</button>`;
+    }
+    
+    html += `</div>`;
+    content.innerHTML = html;
+}
+// Nova pomoćna funkcija koja otvara unutrašnje grupe (npr. Voda -> Mineralna, Gazirana...)
+function renderSubcategoryGroup(category, groupName) {
+    currentScreenState = 'subcategories';
+    const content = document.getElementById('mainContent');
+    const sub = subcategories[currentLang] || subcategories.sr;
+    const items = sub[category][groupName];
+    const colors = getSubcategoryColors(category);
+    
+    let html = `<div class="title">${groupName}</div>`;
+    html += `<div class="categories-grid">`;
+    
+    if (Array.isArray(items)) {
+        items.forEach((item, idx) => {
+            const color = colors[idx % colors.length];
+            if (isOtherButton(item)) {
+                html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('')">${item} ➜</button>`;
+            } else {
+                html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('${item}')">${item}</button>`;
+            }
+        });
+    }
+    
     html += `</div>`;
     content.innerHTML = html;
 }
