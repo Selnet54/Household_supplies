@@ -20,11 +20,6 @@ function exitApp() {
 
 // ===== 1. JEZICI =====
 const languages = {
-    // ... tvoj postojeći kod ...
-};
-
-// ===== 1. JEZICI =====
-const languages = {
     sr: { name: 'Srpski', flag: '/Household_supplies/icons/jezici/srpski.png' },
     en: { name: 'English', flag: '/Household_supplies/icons/jezici/engleski.png' },
     de: { name: 'Deutsch', flag: '/Household_supplies/icons/jezici/nemacki.png' },
