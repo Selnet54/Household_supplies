@@ -766,12 +766,39 @@ function sacuvajAzuriranje(index) {
     if (!product) { alert('Unesite naziv proizvoda!'); return; }
     if (!quantity || isNaN(parseFloat(quantity))) { alert('Unesite količinu!'); return; }
     
-    const zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
+    const novaKolicina = parseFloat(quantity);
+    let zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
+    
+    // ⭐ Ako je količina 0, prebaci u shopping listu
+    if (novaKolicina === 0) {
+        const proizvod = zalihe[index];
+        if (proizvod) {
+            // Dodaj u shopping
+            let shopping = JSON.parse(localStorage.getItem('shoppingList') || '[]');
+            shopping.push({
+                product_name: proizvod.product_name,
+                description: proizvod.description || '',
+                quantity: 0,
+                unit: proizvod.unit || 'kom'
+            });
+            localStorage.setItem('shoppingList', JSON.stringify(shopping));
+            
+            // Obriši iz zaliha
+            zalihe.splice(index, 1);
+            localStorage.setItem('zalihe', JSON.stringify(zalihe));
+            
+            alert('🛒 Proizvod prebačen u spisak potreba (količina 0)!');
+            renderInventory();
+            return;
+        }
+    }
+    
+    // ⭐ Ako je količina > 0, ažuriraj zalihe
     zalihe[index] = {
         product_name: product,
         description: document.getElementById('updateDescriptionInput')?.value.trim() || '',
         piece: document.getElementById('updatePieceInput')?.value.trim() || '-',
-        quantity: parseFloat(quantity),
+        quantity: novaKolicina,
         unit: document.getElementById('updateUnitSelect')?.value || 'kg',
         entry_date: document.getElementById('updateDateInput')?.value || new Date().toISOString().split('T')[0],
         shelf_life_months: parseInt(document.getElementById('updateShelfLifeInput')?.value) || 12,
