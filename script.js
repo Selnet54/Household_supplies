@@ -649,6 +649,8 @@ function renderCategories() {
 
 // ===== ISPRAVLJENO RENDERETOVANJE PODKATEGORIJA =====
 
+// ===== KONAČNA ISPRAVKA ZA PRIKAZ "OSTALO" I STRELICA =====
+
 function renderSubcategories(category) {
     currentScreenState = 'subcategories';
     currentCategory = category;
@@ -661,7 +663,14 @@ function renderSubcategories(category) {
     html += `<div class="categories-grid">`;
     
     if (Array.isArray(subData)) {
-        subData.forEach((item, idx) => {
+        let displayData = [...subData];
+        // Provera da li postoji bilo koja varijanta reči "Ostalo"
+        const hasOstalo = displayData.some(item => isOtherButton(item));
+        if (!hasOstalo) {
+            displayData.push(t('Ostalo') || "Ostalo");
+        }
+
+        displayData.forEach((item, idx) => {
             const color = colors[idx % colors.length];
             if (isOtherButton(item)) {
                 html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('')">${item} ➜</button>`;
@@ -671,9 +680,14 @@ function renderSubcategories(category) {
         });
     } else if (subData && typeof subData === 'object') {
         const keys = Object.keys(subData);
-        keys.forEach((groupName, idx) => {
+        let displayKeys = [...keys];
+        const hasOstalo = displayKeys.some(key => isOtherButton(key));
+        if (!hasOstalo) {
+            displayKeys.push(t('Ostalo') || "Ostalo");
+        }
+
+        displayKeys.forEach((groupName, idx) => {
             const color = colors[idx % colors.length];
-            // Strelica ostaje samo ako grupa u sebi ima podstavke, a "Ostalo" dobija svoju strelicu
             if (isOtherButton(groupName)) {
                 html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('')">${groupName} ➜</button>`;
             } else {
@@ -681,7 +695,7 @@ function renderSubcategories(category) {
             }
         });
     } else {
-        html += `<button class="category-btn" style="background:#ddd;" onclick="renderDataEntry('')">Ostalo ➜</button>`;
+        html += `<button class="category-btn" style="background:#ddd;" onclick="renderDataEntry('')">${t('Ostalo') || "Ostalo"} ➜</button>`;
     }
     
     html += `</div>`;
@@ -699,25 +713,22 @@ function renderSubcategoryGroup(category, groupName) {
     html += `<div class="categories-grid">`;
     
     if (Array.isArray(items)) {
-        // Kreiramo kopiju niza da originalni objekat ostane netaknut
         let displayItems = [...items];
-        
-        // Proveravamo da li niz već sadrži "Ostalo" (ili lokalizovanu varijantu), ako ne - dodajemo ga na kraj
         const hasOstalo = displayItems.some(item => isOtherButton(item));
         if (!hasOstalo) {
-            displayItems.push("Ostalo");
+            displayItems.push(t('Ostalo') || "Ostalo");
         }
 
         displayItems.forEach((item, idx) => {
             const color = colors[idx % colors.length];
             if (isOtherButton(item)) {
-                // Strelica isključivo na "Ostalo"
                 html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('')">${item} ➜</button>`;
             } else {
-                // Obične stavke BEZ strelice
                 html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('${item}')">${item}</button>`;
             }
         });
+    } else {
+        html += `<button class="category-btn" style="background:#ddd;" onclick="renderDataEntry('')">${t('Ostalo') || "Ostalo"} ➜</button>`;
     }
     
     html += `</div>`;
@@ -739,7 +750,7 @@ function renderProductParts(subcategory) {
         let displayParts = [...parts];
         const hasOstalo = displayParts.some(part => isOtherButton(part));
         if (!hasOstalo) {
-            displayParts.push("Ostalo");
+            displayParts.push(t('Ostalo') || "Ostalo");
         }
 
         displayParts.forEach((part, idx) => {
@@ -751,7 +762,7 @@ function renderProductParts(subcategory) {
             }
         });
     } else {
-        html += `<button class="category-btn" style="background:#ddd;" onclick="renderDataEntry('')">Ostalo ➜</button>`;
+        html += `<button class="category-btn" style="background:#ddd;" onclick="renderDataEntry('')">${t('Ostalo') || "Ostalo"} ➜</button>`;
     }
     
     html += `</div>`;
