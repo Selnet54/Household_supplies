@@ -412,7 +412,12 @@ function renderCategories() {
     html += `<div class="categories-grid">`;
     catList.forEach(cat => {
         const color = getCategoryColor(cat);
-        html += `<button class="category-btn" style="background:${color};" onclick="renderSubcategories('${cat}')">${cat}</button>`;
+        // Proveravamo da li je u pitanju "Ostalo" (na bilo kom jeziku)
+        if (isOtherButton(cat)) {
+            html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('')">${cat} ➜</button>`;
+        } else {
+            html += `<button class="category-btn" style="background:${color};" onclick="renderSubcategories('${cat}')">${cat}</button>`;
+        }
     });
     html += `</div>`;
     content.innerHTML = html;
