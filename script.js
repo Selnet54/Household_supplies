@@ -238,77 +238,296 @@ const mainCategories = {
     fr: ["Viande blanche", "Viande rouge", "Petit gibier", "Gros gibier", "Poisson", "Produits laitiers", "Légumes", "Conserves et compotes", "Pâte et Sucreries", "Boissons", "Chimie et hygiène", "Autre"]
 };
 
-// ===== 5. PODKATEGORIJE =====
+// ===== 5. PODKATEGORIJE ZA SVIH 10 JEZIKA =====
 const subcategories = {
-    sr: {
+    srpski: {
         "Belo meso": ["Pileće", "Ćureće", "Guska", "Patka", "Ostalo"],
         "Crveno meso": ["Svinjsko", "Jagnjeće", "Ovčije", "Juneće", "Govedina", "Od bika", "Konjsko", "Zečije", "Ostalo"],
+        "Sitna divljač": ["Prepelica", "Fazan", "Jarebica", "Divlja patka", "Divlja guska", "Divlji zec", "Golub", "Ostalo"],
+        "Krupna divljač": ["Jelen", "Srna", "Divokoza", "Los", "Irvas", "Divlja svinja", "Bizon", "Kamila", "Lama", "Alpaka", "Kengur", "Krokodil/Aligator", "Gušter", "Zmija", "Ostalo"],
         "Riba": ["Morska", "Slatkovodna", "Plodovi mora", "Ostalo"],
+        "Mlečni proizvodi": ["Mleko", "Jogurt i kiselo mleko", "Pavlaka", "Mladi sir", "Tvrdi sir", "Kozji i ovčiji sir", "Kajmak i puter", "Ostalo"],
         "Povrće": ["Sveže", "Termički obrađeno", "Zamrznuto", "Ostalo"],
+        "Zimnica i kompoti": ["Ajvar i pinđur", "Turšija i kiseli program", "Džemovi i pekmezi", "Kompoti", "Sokovi i sirupi", "Ostalo"],
+        "Testo i Slatkiši": ["Hleb i peciva", "Brašno i testenina", "Kolači i torte", "Čokolade i bomboni", "Ostalo"],
+        "Pića": ["Voda", "Vino", "Sok", "Žestoka pića", "Pivo", "Ostalo"],
+        "Hemija i higijena": ["Deterdženti i omekšivači", "Sredstva za čišćenje", "Lična higijena", "Toaletni papir i ubrusi", "Ostalo"],
         "Ostalo": ["Ostalo"]
     },
-    en: {
-        "White meat": ["Chicken", "Turkey", "Goose", "Duck", "Other"],
-        "Red meat": ["Pork", "Lamb", "Sheep", "Veal", "Beef", "Bull", "Horse", "Rabbit", "Other"],
-        "Fish": ["Sea", "Freshwater", "Seafood", "Other"],
-        "Vegetables": ["Fresh", "Heat treated", "Frozen", "Other"],
-        "Other": ["Other"]
-    },
-    de: {
-        "Weißes Fleisch": ["Huhn", "Truthahn", "Gans", "Ente", "Andere"],
-        "Rotes Fleisch": ["Schwein", "Lamm", "Schaf", "Kalb", "Rind", "Bulle", "Pferd", "Kaninchen", "Andere"],
-        "Fisch": ["Meer", "Süßwasser", "Meeresfrüchte", "Andere"],
-        "Gemüse": ["Frisch", "Wärmebehandelt", "Gefroren", "Andere"],
-        "Andere": ["Andere"]
-    },
-    hu: {
+    hungary: {
         "Fehér hús": ["Csirke", "Pulyka", "Libacomb", "Kacsa", "Egyéb"],
         "Vörös hús": ["Sertéshús", "Bárányhús", "Juhhús", "Borjúhús", "Marhahús", "Bikahús", "Lóhús", "Nyúlhús", "Egyéb"],
+        "Apróvad": ["Fürj", "Fácán", "Fogoly", "Vadkacsa", "Vadliba", "Vadnyúl", "Galamb", "Egyéb"],
+        "Nagyvad": ["Szarvas", "Őz", "Vadkecske", "Jávorszarvas", "Rénszarvas", "Vadkan", "Bölény", "Teve", "Láma", "Alpaka", "Kenguru", "Krokodil/Alligátor", "Gyík", "Kígyó", "Egyéb"],
         "Hal": ["Tengeri", "Édesvízi", "Tenger gyümölcsei", "Egyéb"],
+        "Tejtermékek": ["Tej", "Joghurt és aludttej", "Tejföl", "Friss sajt", "Kemény sajt", "Kecske- és juhsajt", "Kajmak és vaj", "Egyéb"],
         "Zöldség": ["Friss", "Hőkezelt", "Fagyasztott", "Egyéb"],
+        "Befőttek és kompótok": ["Ajvár", "Savanyúság", "Lejárók és lekvárok", "Kompótok", "Levek és szirupok", "Egyéb"],
+        "Tészta és Édességek": ["Kenyér és péksütemények", "Liszt és tészta", "Sütemények és torták", "Csokoládék és cukorkák", "Egyéb"],
+        "Italok": ["Víz", "Bor", "Lé", "Tömény italok", "Sör", "Egyéb"],
+        "Kémia és higiénia": ["Mosószerek és öblítők", "Tisztítószerek", "Személyes higiénia", "Toalettpapír és törölközők", "Egyéb"],
         "Egyéb": ["Egyéb"]
     },
-    uk: {
+    ukrajinski: {
         "Біле м'ясо": ["Курятина", "Індичка", "Гуска", "Качка", "Інше"],
         "Червоне м'ясо": ["Свинина", "Ягнятина", "Баранина", "Телятина", "Яловичина", "Бичатина", "Конина", "Кролик", "Інше"],
+        "Дрібна дичина": ["Перепілка", "Фазан", "Куріпка", "Дика качка", "Дика гуска", "Заєць", "Голуб", "Інше"],
+        "Велика дичина": ["Олень", "Косуля", "Козуль", "Лось", "Північний олень", "Дикий кабан", "Бізон", "Верблюд", "Лама", "Альпака", "Кенгуру", "Крокодил/Алігатор", "Ящірка", "Змія", "Інше"],
         "Риба": ["Морська", "Прісноводна", "Морепродукти", "Інше"],
+        "Молочні продукти": ["Молоко", "Йогурт та кисляк", "Сметана", "М'який сир", "Твердий сир", "Козячий та овечий сир", "Каймак та масло", "Інше"],
         "Овочі": ["Свіжі", "Термічно оброблені", "Заморожені", "Інше"],
+        "Консервація та компоти": ["Айвар", "Консервація та соління", "Джеми та варення", "Компоти", "Соки та сиропи", "Інше"],
+        "Тісто та Солодощі": ["Хліб та випічка", "Борошно та макарони", "Торти та тістечка", "Шоколад та цукерки", "Інше"],
+        "Напої": ["Вода", "Вино", "Сік", "Міцні напої", "Пиво", "Інше"],
+        "Хімія та гігієна": ["Пральні порошки та кондиціонери", "Засоби для чищення", "Особиста гігієна", "Туалетний папір та серветки", "Інше"],
         "Інше": ["Інше"]
     },
-    ru: {
+    ruski: {
         "Белое мясо": ["Курица", "Индейка", "Гусь", "Утка", "Другое"],
         "Красное мясо": ["Свинина", "Баранина", "Овца", "Телятина", "Говядина", "Бык", "Конина", "Кролик", "Другое"],
+        "Мелкая дичь": ["Перепел", "Фазан", "Куропатка", "Дикая утка", "Дикий гусь", "Заяц", "Голубь", "Другое"],
+        "Крупная дичь": ["Олень", "Косуля", "Дикая коза", "Лось", "Северный олень", "Кабан", "Бизон", "Верблюд", "Лама", "Альпака", "Кенгуру", "Крокодил/Аллигатор", "Ящерица", "Змея", "Другое"],
         "Рыба": ["Морская", "Пресноводная", "Морепродукты", "Другое"],
+        "Молочные продукты": ["Молоко", "Йогурт и простокваша", "Сметана", "Мягкий сыр", "Твердый сыр", "Козий и овечий сыр", "Каймак и масло", "Другое"],
         "Овощи": ["Свежие", "Термически обработанные", "Замороженные", "Другое"],
+        "Консервация и компоты": ["Айвар", "Соленья", "Джемы и варенье", "Компоты", "Соки и сиропы", "Другое"],
+        "Тесто и Сладости": ["Хлеб и выпечка", "Мука и макароны", "Торты и пирожные", "Шоколад и конфеты", "Другое"],
+        "Напитки": ["Вода", "Вино", "Сок", "Крепкие напитки", "Пиво", "Другое"],
+        "Химия и гигиена": ["Порошки и кондиционеры", "Чистящие средства", "Личная гигиена", "Туалетная бумага и салфетки", "Другое"],
         "Другое": ["Другое"]
     },
-    zh: {
+    english: {
+        "White meat": ["Chicken", "Turkey", "Goose", "Duck", "Other"],
+        "Red meat": ["Pork", "Lamb", "Sheep", "Veal", "Beef", "Bull", "Horse", "Rabbit", "Other"],
+        "Small game": ["Quail", "Pheasant", "Partridge", "Wild duck", "Wild goose", "Hare", "Pigeon", "Other"],
+        "Big game": ["Deer", "Roe deer", "Wild goat", "Moose", "Reindeer", "Wild boar", "Bison", "Camel", "Llama", "Alpaca", "Kangaroo", "Crocodile/Alligator", "Lizard", "Snake", "Other"],
+        "Fish": ["Sea", "Freshwater", "Seafood", "Other"],
+        "Dairy products": ["Milk", "Yogurt and sour milk", "Sour cream", "Soft cheese", "Hard cheese", "Goat and sheep cheese", "Kaymak and butter", "Other"],
+        "Vegetables": ["Fresh", "Heat treated", "Frozen", "Other"],
+        "Preserves and compotes": ["Ajvar and relish", "Pickles", "Jams and preserves", "Compotes", "Juices and syrups", "Other"],
+        "Dough and Sweets": ["Bread and pastry", "Flour and pasta", "Cakes and pastries", "Chocolate and candies", "Other"],
+        "Beverages": ["Water", "Wine", "Juice", "Spirits", "Beer", "Other"],
+        "Chemicals and hygiene": ["Detergents and softeners", "Cleaning agents", "Personal hygiene", "Toilet paper and tissues", "Other"],
+        "Other": ["Other"]
+    },
+    deutsch: {
+        "Weißes Fleisch": ["Huhn", "Truthahn", "Gans", "Ente", "Andere"],
+        "Rotes Fleisch": ["Schwein", "Lamm", "Schaf", "Kalb", "Rind", "Bulle", "Pferd", "Kaninchen", "Andere"],
+        "Kleinwild": ["Wachtel", "Fasan", "Rebhuhn", "Wildente", "Wildgans", "Hase", "Taube", "Andere"],
+        "Großwild": ["Hirsch", "Reh", "Wildziege", "Elch", "Rentier", "Wildschwein", "Bison", "Kamel", "Lama", "Alpaka", "Känguru", "Krokodil/Alligator", "Eidechse", "Schlange", "Andere"],
+        "Fisch": ["Meer", "Süßwasser", "Meeresfrüchte", "Andere"],
+        "Milchprodukte": ["Milch", "Joghurt und Sauermilch", "Saure Sahne", "Frischkäse", "Hartkäse", "Ziegen- und Schafskäse", "Kaymak und Butter", "Andere"],
+        "Gemüse": ["Frisch", "Wärmebehandelt", "Gefroren", "Andere"],
+        "Konserven und Kompotte": ["Ajvar und Relish", "Eingelegtes", "Marmeladen und Konfitüren", "Kompotte", "Säfte und Sirupe", "Andere"],
+        "Teig und Süßigkeiten": ["Brot und Gebäck", "Mehl und Teigwaren", "Kuchen und Torten", "Schokolade und Süßigkeiten", "Andere"],
+        "Getränke": ["Wasser", "Wein", "Saft", "Spirituosen", "Bier", "Andere"],
+        "Chemie und Hygiene": ["Waschmittel und Weichspüler", "Reinigungsmittel", "Körperpflege", "Toilettenpapier und Tücher", "Andere"],
+        "Andere": ["Andere"]
+    },
+    mandarinski: {
         "白肉": ["鸡", "火鸡", "鹅", "鸭", "其他"],
         "红肉": ["猪肉", "羊肉", "羊", "小牛肉", "牛肉", "公牛", "马肉", "兔肉", "其他"],
+        "小型野味": ["鹌鹑", "野鸡", "鹧鸪", "野鸭", "野鹅", "野兔", "鸽子", "其他"],
+        "大型野味": ["鹿", "狍子", "野山羊", "驼鹿", "驯鹿", "野猪", "野牛", "骆驼", "羊驼", "袋鼠", "鳄鱼", "蜥蜴", "蛇", "其他"],
         "鱼": ["海鱼", "淡水鱼", "海鲜", "其他"],
+        "乳制品": ["牛奶", "酸奶", "酸奶油", "软奶酪", "硬奶酪", "山羊和绵羊奶酪", "奶油和黄油", "其他"],
         "蔬菜": ["新鲜", "热处理", "冷冻", "其他"],
+        "蜜饯和蜜饯": ["辣椒酱", "泡菜", "果酱", "果盘", "果汁糖浆", "其他"],
+        "面团和糖果": ["面包糕点", "面粉面条", "蛋糕点心", "巧克力糖果", "其他"],
+        "饮料": ["水", "葡萄酒", "果汁", "烈酒", "啤酒", "其他"],
+        "化学品和卫生": ["洗涤剂柔软剂", "清洁剂", "个人卫生", "卫生纸巾", "其他"],
         "其他": ["其他"]
     },
-    es: {
+    espanol: {
         "Carne blanca": ["Pollo", "Pavo", "Ganso", "Pato", "Otro"],
         "Carne roja": ["Cerdo", "Cordero", "Oveja", "Ternera", "Res", "Toro", "Caballo", "Conejo", "Otro"],
+        "Caza menor": ["Codorniz", "Faisán", "Perdiz", "Pato salvaje", "Ganso salvaje", "Liebre", "Paloma", "Otro"],
+        "Caza mayor": ["Ciervo", "Corzo", "Cabra salvaje", "Alce", "Reno", "Jabalí", "Bisonte", "Camello", "Llama", "Alpaca", "Canguro", "Cocodrilo/Caimán", "Lagarto", "Serpiente", "Otro"],
         "Pescado": ["Mar", "Agua dulce", "Mariscos", "Otro"],
+        "Productos lácteos": ["Leche", "Yogur y leche agria", "Crema agria", "Queso tierno", "Queso curado", "Queso de cabra y oveja", "Mantequilla y nata", "Otro"],
         "Verduras": ["Frescas", "Tratadas térmicamente", "Congeladas", "Otro"],
+        "Conservas y compotas": ["Ajvar", "Encurtidos", "Mermeladas y confituras", "Compotas", "Zumos y jarabes", "Otro"],
+        "Masa y Dulces": ["Pan y bollería", "Harina y pasta", "Pasteles y tortas", "Chocolate y caramelos", "Otro"],
+        "Bebidas": ["Agua", "Vino", "Jugo", "Licores", "Cerveza", "Otro"],
+        "Química e higiene": ["Detergentes y suavizantes", "Productos de limpieza", "Higiene personal", "Papel higiénico y pañuelos", "Otro"],
         "Otro": ["Otro"]
     },
-    pt: {
+    portugalski: {
         "Carne branca": ["Frango", "Peru", "Ganso", "Pato", "Outro"],
         "Carne vermelha": ["Porco", "Cordeiro", "Ovelha", "Vitela", "Boi", "Touro", "Cavalo", "Coelho", "Outro"],
+        "Caça pequena": ["Codorna", "Faisão", "Perdiz", "Pato selvagem", "Ganso selvagem", "Lebre", "Pombo", "Outro"],
+        "Caça grossa": ["Cervo", "Corça", "Cabra selvagem", "Alce", "Rena", "Javali", "Bisão", "Camelo", "Lhama", "Alpaca", "Canguru", "Crocodilo/Jacaré", "Lagarto", "Cobra", "Outro"],
         "Peixe": ["Mar", "Água doce", "Frutos do mar", "Outro"],
+        "Laticínios": ["Leite", "Iogurte e leite coalhado", "Creme de leite", "Queijo fresco", "Queijo cura", "Queijo de cabra e ovelha", "Manteiga e nata", "Outro"],
         "Vegetais": ["Fresco", "Tratado termicamente", "Congelado", "Outro"],
+        "Conservas e compotas": ["Ajvar", "Picles", "Geleias e compotas", "Compotas de frutas", "Sucos e xaropes", "Outro"],
+        "Massa e Doces": ["Pão e pastelaria", "Farinha e massas", "Bolos e tortas", "Chocolate e doces", "Outro"],
+        "Bebidas": ["Água", "Vinho", "Suco", "Bebidas destiladas", "Cerveja", "Outro"],
+        "Química e higiene": ["Detergentes e amaciantes", "Produtos de limpeza", "Higiene pessoal", "Papel higiênico e lenços", "Outro"],
         "Outro": ["Outro"]
     },
-    fr: {
+    francais: {
         "Viande blanche": ["Poulet", "Dinde", "Oie", "Canard", "Autre"],
         "Viande rouge": ["Porc", "Agneau", "Mouton", "Veau", "Bœuf", "Taureau", "Cheval", "Lapin", "Autre"],
+        "Petit gibier": ["Caille", "Faisan", "Perdrix", "Canard sauvage", "Oie sauvage", "Lièvre", "Pigeon", "Autre"],
+        "Gros gibier": ["Cerf", "Chevreuil", "Chèvre sauvage", "Élan", "Renne", "Sanglier", "Bison", "Chameau", "Lama", "Alpaga", "Kangourou", "Crocodile/Alligator", "Lézard", "Serpent", "Autre"],
         "Poisson": ["Mer", "Eau douce", "Fruits de mer", "Autre"],
+        "Produits laitiers": ["Lait", "Yaourt et lait caillé", "Crème fraîche", "Fromage frais", "Fromage à pâte dure", "Fromage de chèvre et brebis", "Beurre et crème", "Autre"],
         "Légumes": ["Frais", "Traité thermiquement", "Congelé", "Autre"],
+        "Conserves et compotes": ["Ajvar", "Cornichons et pickles", "Confitures et gelées", "Compotes", "Jus et sirops", "Autre"],
+        "Pâte et Sucreries": ["Pain et viennoiseries", "Farine et pâtes", "Gâteaux et tartes", "Chocolat et bonbons", "Autre"],
+        "Boissons": ["Eau", "Vin", "Jus", "Spiritueux", "Bière", "Autre"],
+        "Chimie et hygiène": ["Lessives et adoucissants", "Produits de nettoyage", "Hygiène personnelle", "Papier toilette et mouchoirs", "Autre"],
         "Autre": ["Autre"]
+    }
+};
+
+// ===== 6. DELOVI PROIZVODA ZA SVIH 10 JEZIKA =====
+const product_parts_translations = {
+    srpski: {
+        "Prepelica": ["Celo meso", "Grudi (fileti)", "Bataci", "Jetra", "Ostalo"],
+        "Fazan": ["Celo meso", "Grudi (fileti)", "Bataci", "Jetra", "Ostalo"],
+        "Jarebica": ["Celo meso", "Grudi (fileti)", "Bataci", "Jetra", "Ostalo"],
+        "Divlja patka": ["Celo meso", "Grudi (fileti)", "Bataci", "Jetra", "Ostalo"],
+        "Divlja guska": ["Celo meso", "Grudi (fileti)", "Bataci", "Jetra", "Ostalo"],
+        "Divlji zec": ["Zadnji but", "Prednji but", "File (leđa)", "Rebra", "Ostalo"],
+        "Golub": ["Celo meso", "Grudi (fileti)", "Bataci", "Jetra", "Ostalo"],
+        "Jelen": ["But", "File (leđa)", "Biftek", "Rebra", "Grudi", "Plećka", "Kolenica", "Usitnjeno", "Ostalo"],
+        "Srna": ["But", "File (leđa)", "Biftek", "Rebra", "Grudi", "Plećka", "Kolenica", "Usitnjeno", "Ostalo"],
+        "Divokoza": ["But", "File (leđa)", "Biftek", "Rebra", "Grudi", "Plećka", "Kolenica", "Usitnjeno", "Ostalo"],
+        "Los": ["But", "File (leđa)", "Biftek", "Rebra", "Grudi", "Plećka", "Kolenica", "Usitnjeno", "Ostalo"],
+        "Irvas": ["But", "File (leđa)", "Biftek", "Rebra", "Grudi", "Plećka", "Kolenica", "Usitnjeno", "Ostalo"],
+        "Divlja svinja": ["But", "Plećka", "Rebra", "Slanina", "Kolenica", "Vrat", "Glava", "Ostalo"],
+        "Mleko": ["Sveže mleko", "Dugotrajno mleko", "Kefir", "Kiselo mleko", "Mlaćenica", "Ostalo"],
+        "Jogurt i kiselo mleko": ["Jogurt običan", "Voćni jogurt", "Grčki jogurt", "Kiselo mleko", "Ostalo"],
+        "Mladi sir": ["Mladi kravlji sir", "Mladi ovčiji sir", "Mladi kozji sir", "Urda", "Krem sir", "Ostalo"],
+        "Ajvar i pinđur": ["Blagi ajvar", "Ljuti ajvar", "Domaći pinđur", "Lutenica", "Ostalo"]
+    },
+    english: {
+        "Quail": ["Whole meat", "Breast (fillets)", "Drumsticks", "Liver", "Other"],
+        "Pheasant": ["Whole meat", "Breast (fillets)", "Drumsticks", "Liver", "Other"],
+        "Partridge": ["Whole meat", "Breast (fillets)", "Drumsticks", "Liver", "Other"],
+        "Wild duck": ["Whole meat", "Breast (fillets)", "Drumsticks", "Liver", "Other"],
+        "Wild goose": ["Whole meat", "Breast (fillets)", "Drumsticks", "Liver", "Other"],
+        "Hare": ["Hind leg", "Foreleg", "Loin (back)", "Ribs", "Other"],
+        "Pigeon": ["Whole meat", "Breast (fillets)", "Drumsticks", "Liver", "Other"],
+        "Deer": ["Leg", "Loin (back)", "Steak", "Ribs", "Breast", "Shoulder", "Shank", "Minced", "Other"],
+        "Roe deer": ["Leg", "Loin (back)", "Steak", "Ribs", "Breast", "Shoulder", "Shank", "Minced", "Other"],
+        "Milk": ["Fresh milk", "UHT milk", "Kefir", "Sour milk", "Buttermilk", "Other"],
+        "Soft cheese": ["Young cow cheese", "Young sheep cheese", "Young goat cheese", "Urda", "Cream cheese", "Other"],
+        "Ajvar and relish": ["Mild ajvar", "Hot ajvar", "Homemade pindur", "Lutenica", "Other"]
+    },
+    hungary: {
+        "Fürj": ["Egész hús", "Mell (filé)", "Comb", "Máj", "Egyéb"],
+        "Fácán": ["Egész hús", "Mell (filé)", "Comb", "Máj", "Egyéb"],
+        "Fogoly": ["Egész hús", "Mell (filé)", "Comb", "Máj", "Egyéb"],
+        "Vadkacsa": ["Egész hús", "Mell (filé)", "Comb", "Máj", "Egyéb"],
+        "Vadliba": ["Egész hús", "Mell (filé)", "Comb", "Máj", "Egyéb"],
+        "Vadnyúl": ["Hátsó comb", "Első comb", "Gerinc", "Borda", "Egyéb"],
+        "Galamb": ["Egész hús", "Mell (filé)", "Comb", "Máj", "Egyéb"],
+        "Szarvas": ["Comb", "Gerinc", "Bifsztek", "Borda", "Mell", "Lapocka", "Lábszár", "Darált", "Egyéb"],
+        "Őz": ["Comb", "Gerinc", "Bifsztek", "Borda", "Mell", "Lapocka", "Lábszár", "Darált", "Egyéb"],
+        "Tej": ["Friss tej", "UHT tej", "Kefir", "Aludttej", "Író", "Egyéb"],
+        "Friss sajt": ["Friss tehénsajt", "Friss juhsajt", "Friss kecskesajt", "Orda", "Krémsajt", "Egyéb"],
+        "Ajvár": ["Enyhe ajvár", "Csípős ajvár", "Házi pindzsúr", "Lutenica", "Egyéb"]
+    },
+    deutsch: {
+        "Wachtel": ["Ganzes Fleisch", "Brust (Filets)", "Keulen", "Leber", "Andere"],
+        "Fasan": ["Ganzes Fleisch", "Brust (Filets)", "Keulen", "Leber", "Andere"],
+        "Rebhuhn": ["Ganzes Fleisch", "Brust (Filets)", "Keulen", "Leber", "Andere"],
+        "Wildente": ["Ganzes Fleisch", "Brust (Filets)", "Keulen", "Leber", "Andere"],
+        "Wildgans": ["Ganzes Fleisch", "Brust (Filets)", "Keulen", "Leber", "Andere"],
+        "Hase": ["Hinterlauf", "Vorderlauf", "Rücken", "Rippen", "Andere"],
+        "Taube": ["Ganzes Fleisch", "Brust (Filets)", "Keulen", "Leber", "Andere"],
+        "Hirsch": ["Keule", "Rücken", "Steak", "Rippen", "Brust", "Schulter", "Haxe", "Minced", "Andere"],
+        "Reh": ["Keule", "Rücken", "Steak", "Rippen", "Brust", "Schulter", "Haxe", "Minced", "Andere"],
+        "Milch": ["Frischmilch", "H-Milch", "Kefir", "Sauermilch", "Buttermilch", "Andere"],
+        "Frischkäse": ["Junger Kuhkäse", "Junger Schafskäse", "Junger Ziegenkäse", "Urda", "Frischkäse", "Andere"],
+        "Ajvar und Relish": ["Milder Ajvar", "Scharfer Ajvar", "Hausgemachter Pindur", "Lutenica", "Andere"]
+    },
+    ruski: {
+        "Перепел": ["Цельное мясо", "Грудка (филе)", "Голени", "Печень", "Другое"],
+        "Фазан": ["Цельное мясо", "Грудка (филе)", "Голени", "Печень", "Другое"],
+        "Куропатка": ["Цельное мясо", "Грудка (филе)", "Голени", "Печень", "Другое"],
+        "Дикая утка": ["Цельное мясо", "Грудка (филе)", "Голени", "Печень", "Другое"],
+        "Дикий гусь": ["Цельное мясо", "Грудка (филе)", "Голени", "Печень", "Другое"],
+        "Заяц": ["Задняя нога", "Передняя нога", "Спинка", "Ребра", "Другое"],
+        "Голубь": ["Цельное мясо", "Грудка (филе)", "Голени", "Печень", "Другое"],
+        "Олень": ["Бедро", "Спинка", "Стейк", "Ребра", "Грудинка", "Лопатка", "Голяшка", "Фарш", "Другое"],
+        "Косуля": ["Бедро", "Спинка", "Стейк", "Ребра", "Грудинка", "Лопатка", "Голяшка", "Фарш", "Другое"],
+        "Молоко": ["Свежее молоко", "Ультрапастеризованное молоко", "Кефир", "Простокваша", "Пахта", "Другое"],
+        "Мягкий сыр": ["Молодой коровчий сыр", "Молодой овечий сыр", "Молодой козий сыр", "Урда", "Сливочный сыр", "Другое"],
+        "Айвар": ["Мягкий айвар", "Острый айвар", "Домашний пинджур", "Лютеница", "Другое"]
+    },
+    ukrajinski: {
+        "Перепілка": ["Ціле м'ясо", "Грудка (філе)", "Гомілки", "Печінка", "Інше"],
+        "Фазан": ["Ціле м'ясо", "Грудка (філе)", "Гомілки", "Печінка", "Інше"],
+        "Куріпка": ["Ціле м'ясо", "Грудка (філе)", "Гомілки", "Печінка", "Інше"],
+        "Дика качка": ["Ціле м'ясо", "Грудка (філе)", "Гомілки", "Печінка", "Інше"],
+        "Дика гуска": ["Ціле м'ясо", "Грудка (філе)", "Гомілки", "Печінка", "Інше"],
+        "Заєць": ["Задня нога", "Передня нога", "Спинка", "Ребра", "Інше"],
+        "Голуб": ["Ціле м'ясо", "Грудка (філе)", "Гомілки", "Печінка", "Інше"],
+        "Олень": ["Стегно", "Спинка", "Стейк", "Ребра", "Грудинка", "Лопатка", "Гомілка", "Фарш", "Інше"],
+        "Косуля": ["Стегно", "Спинка", "Стейк", "Ребра", "Грудинка", "Лопатка", "Гомілка", "Фарш", "Інше"],
+        "Молоко": ["Свіже молоко", "Ультрапастеризоване молоко", "Кефір", "Кисляк", "Пахта", "Інше"],
+        "М'який сир": ["Молодий коров'ячий сир", "Молодий овечий сир", "Молодий козячий сир", "Урда", "Вершковий сир", "Інше"],
+        "Айвар": ["М'який айвар", "Гострий айвар", "Домашній пінчур", "Лютениця", "Інше"]
+    },
+    mandarinski: {
+        "鹌鹑": ["整肉", "胸肉 (鱼片)", "小腿", "肝脏", "其他"],
+        "野鸡": ["整肉", "胸肉 (鱼片)", "小腿", "肝脏", "其他"],
+        "鹧鸪": ["整肉", "胸肉 (鱼片)", "小腿", "肝脏", "其他"],
+        "野鸭": ["整肉", "胸肉 (鱼片)", "小腿", "肝脏", "其他"],
+        "野鹅": ["整肉", "胸肉 (鱼片)", "小腿", "肝脏", "其他"],
+        "野兔": ["后腿", "前腿", "腰部", "排骨", "其他"],
+        "鸽子": ["整肉", "胸肉 (鱼片)", "小腿", "肝脏", "其他"],
+        "鹿": ["腿肉", "腰肉", "牛排", "排骨", "胸肉", "肩膀", "小腿", "肉末", "其他"],
+        "狍子": ["腿肉", "腰肉", "牛排", "排骨", "胸肉", "肩膀", "小腿", "肉末", "其他"],
+        "牛奶": ["鲜奶", "长效奶", "开菲尔", "酸奶", "酪乳", "其他"],
+        "软奶酪": ["嫩牛干酪", "嫩羊干酪", "嫩山羊干酪", "乌尔da", "奶油干酪", "其他"],
+        "辣椒酱": ["温和辣椒酱", "辣味辣椒酱", "自制拼豆酱", "其他"]
+    },
+    espanol: {
+        "Codorniz": ["Carne entera", "Pechuga (filetes)", "Muslos", "Hígado", "Otro"],
+        "Faisán": ["Carne entera", "Pechuga (filetes)", "Muslos", "Hígado", "Otro"],
+        "Perdiz": ["Carne entera", "Pechuga (filetes)", "Muslos", "Hígado", "Otro"],
+        "Pato salvaje": ["Carne entera", "Pechuga (filetes)", "Muslos", "Hígado", "Otro"],
+        "Ganso salvaje": ["Carne entera", "Pechuga (filetes)", "Muslos", "Hígado", "Otro"],
+        "Liebre": ["Pata trasera", "Pata delantera", "Lomo", "Costillas", "Otro"],
+        "Paloma": ["Carne entera", "Pechuga (filetes)", "Muslos", "Hígado", "Otro"],
+        "Ciervo": ["Pierna", "Lomo", "Bistec", "Costillas", "Pecho", "Hombro", "Chamorro", "Picado", "Otro"],
+        "Corzo": ["Pierna", "Lomo", "Bistec", "Costillas", "Pecho", "Hombro", "Chamorro", "Picado", "Otro"],
+        "Leche": ["Leche fresca", "Leche UHT", "Kéfir", "Leche agria", "Suero de leche", "Otro"],
+        "Queso tierno": ["Queso tierno de vaca", "Queso tierno de oveja", "Queso tierno de cabra", "Urda", "Queso crema", "Otro"],
+        "Ajvar": ["Ajvar suave", "Ajvar picante", "Pindur casero", "Lutenica", "Otro"]
+    },
+    portugalski: {
+        "Codorna": ["Carne inteira", "Peito (filés)", "Coxas", "Fígado", "Outro"],
+        "Faisão": ["Carne inteira", "Peito (filés)", "Coxas", "Fígado", "Outro"],
+        "Perdiz": ["Carne inteira", "Peito (filés)", "Coxas", "Fígado", "Outro"],
+        "Pato selvagem": ["Carne inteira", "Peito (filés)", "Coxas", "Fígado", "Outro"],
+        "Ganso selvagem": ["Carne inteira", "Peito (filés)", "Coxas", "Fígado", "Outro"],
+        "Lebre": ["Perna traseira", "Perna dianteira", "Lombo", "Costelas", "Outro"],
+        "Pombo": ["Carne inteira", "Peito (filés)", "Coxas", "Fígado", "Outro"],
+        "Cervo": ["Perna", "Lombo", "Bife", "Costelas", "Peito", "Ombro", "Canela", "Moído", "Outro"],
+        "Corça": ["Perna", "Lombo", "Bife", "Costelas", "Peito", "Ombro", "Canela", "Moído", "Outro"],
+        "Leite": ["Leite fresco", "Leite UHT", "Kefir", "Leite coalhado", "Buttermilk", "Outro"],
+        "Queijo fresco": ["Queijo de vaca fresco", "Queijo de ovelha fresco", "Queijo de cabra fresco", "Urda", "Requeijão", "Outro"],
+        "Ajvar": ["Ajvar suave", "Ajvar picante", "Pindur caseiro", "Lutenica", "Outro"]
+    },
+    francais: {
+        "Caille": ["Viande entière", "Blanc (filets)", "Cuisses", "Foie", "Autre"],
+        "Faisan": ["Viande entière", "Blanc (filets)", "Cuisses", "Foie", "Autre"],
+        "Perdrix": ["Viande entière", "Blanc (filets)", "Cuisses", "Foie", "Autre"],
+        "Canard sauvage": ["Viande entière", "Blanc (filets)", "Cuisses", "Foie", "Autre"],
+        "Oie sauvage": ["Viande entière", "Blanc (filets)", "Cuisses", "Foie", "Autre"],
+        "Lièvre": ["Patte arrière", "Patte avant", "Filet", "Côtes", "Autre"],
+        "Pigeon": ["Viande entière", "Blanc (filets)", "Cuisses", "Foie", "Autre"],
+        "Cerf": ["Cuisse", "Filet", "Steak", "Côtes", "Poitrine", "Épaule", "Jarret", "Haché", "Autre"],
+        "Chevreuil": ["Cuisse", "Filet", "Steak", "Côtes", "Poitrine", "Épaule", "Jarret", "Haché", "Autre"],
+        "Lait": ["Lait frais", "Lait UHT", "Kéfir", "Lait caillé", "Babeurre", "Autre"],
+        "Fromage frais": ["Jeune fromage de vache", "Jeune fromage de brebis", "Jeune fromage de chèvre", "Urda", "Fromage à la crème", "Autre"],
+        "Ajvar": ["Ajvar doux", "Ajvar épicé", "Pindur maison", "Lutenica", "Autre"]
     }
 };
 
