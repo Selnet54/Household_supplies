@@ -3,7 +3,14 @@
 // ============================================
 
 console.log('✅ Script.js je učitan!');
+
+// ===== HISTORY STACK ZA NAZAD DUGME =====
 window.historyStack = [];
+
+// ===== TRENUTNO STANJE =====
+let currentLang = 'sr';
+let currentCategory = '';
+let currentSubcategory = '';
 
 // ===== 0. EXIT FUNKCIJA =====
 function exitApp() {
@@ -426,10 +433,6 @@ function renderSubcategories(category, addHistory = true) {
         html += `<button class="category-btn" style="background:${color};" onclick="renderProductParts('${sub}')">${sub}</button>`;
     });
     html += `</div>`;
-    // ⭐ DODAJ DUGME ZA NAZAD NA KATEGORIJE
-    html += `<div style="text-align:center;margin-top:20px;">
-        <button onclick="renderCategories()" style="background:#90caf9;color:#1a237e;border:none;padding:15px 40px;border-radius:12px;font-size:22px;font-weight:bold;cursor:pointer;">◀ ${t('nazad')}</button>
-    </div>`;
     content.innerHTML = html;
     if (addHistory) window.historyStack.push({ type: 'subcategories', category: currentCategory });
 }
@@ -455,10 +458,6 @@ function renderProductParts(subcategory, addHistory = true) {
         html += `<button class="category-btn" style="background:#ddd;" onclick="renderDataEntry('')">${t('unesi')}</button>`;
     }
     html += `</div>`;
-    // ⭐ DODAJ DUGME ZA NAZAD NA PODKATEGORIJE
-    html += `<div style="text-align:center;margin-top:20px;">
-        <button onclick="renderSubcategories('${currentCategory}')" style="background:#90caf9;color:#1a237e;border:none;padding:15px 40px;border-radius:12px;font-size:22px;font-weight:bold;cursor:pointer;">◀ ${t('nazad')}</button>
-    </div>`;
     content.innerHTML = html;
     if (addHistory) window.historyStack.push({ type: 'productParts', subcategory: currentSubcategory });
 }
@@ -1117,46 +1116,57 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('exitLangBtn')?.addEventListener('click', exitApp);
     document.getElementById('exitMainBtn')?.addEventListener('click', exitApp);
 
+    // ===== BACK DUGME - RADI BEZ HISTORY STACK GREŠAK =====
     document.getElementById('backBtn')?.addEventListener('click', function() {
-
-    if (window.historyStack.length <= 1) {
+        const mainContent = document.getElementById('mainContent');
+        if (!mainContent) return;
+        
+        const html = mainContent.innerHTML;
+        
+        // Ako smo na kategorijama -> vrati na jezike
+        if (html.includes('glavne_kategorije')) {
+            window.historyStack = [];
+            showScreen('languageScreen');
+            renderLanguages();
+            return;
+        }
+        
+        // Ako smo na podkategorijama -> vrati na kategorije
+        if (html.includes('podkategorije')) {
+            renderCategories(false);
+            return;
+        }
+        
+        // Ako smo na delovima proizvoda -> vrati na podkategorije
+        if (html.includes('delovi_proizvoda')) {
+            renderSubcategories(currentCategory, false);
+            return;
+        }
+        
+        // Ako smo na unosu podataka -> vrati na delove proizvoda
+        if (html.includes('unos_podataka')) {
+            renderProductParts(currentSubcategory, false);
+            return;
+        }
+        
+        // Ako smo na zalihama -> vrati na kategorije
+        if (html.includes('Zalihe') || html.includes('Inventory') || html.includes('Bestand') || html.includes('Készlet') || html.includes('Запаси') || html.includes('Запасы') || html.includes('库存') || html.includes('Inventario') || html.includes('Estoque') || html.includes('Stock')) {
+            renderCategories(false);
+            return;
+        }
+        
+        // Ako smo na spisku potreba -> vrati na kategorije
+        if (html.includes('spisak_potreba') || html.includes('Shopping List') || html.includes('Einkaufsliste') || html.includes('Bevásárlólista') || html.includes('Список потреб') || html.includes('Список потребностей') || html.includes('购物清单') || html.includes('Lista de Compras') || html.includes('Lista de Compras') || html.includes('Liste de Courses')) {
+            renderCategories(false);
+            return;
+        }
+        
+        // Default - vrati na jezike
         window.historyStack = [];
         showScreen('languageScreen');
         renderLanguages();
-        return;
-    }
+    });
 
-    window.historyStack.pop();
-    const previous = window.historyStack.pop();
-
-    if (!previous) {
-        showScreen('languageScreen');
-        renderLanguages();
-        return;
-    }
-
-    switch(previous.type) {
-        case 'categories':
-            renderCategories(false);
-            break;
-
-        case 'subcategories':
-            renderSubcategories(previous.category, false);
-            break;
-
-        case 'productParts':
-            renderProductParts(previous.subcategory, false);
-            break;
-
-        case 'dataEntry':
-            renderDataEntry('', false);
-            break;
-
-        default:
-            showScreen('languageScreen');
-            renderLanguages();
-    }
-});
     document.getElementById('inventoryBtn')?.addEventListener('click', function() {
         renderInventory();
     });
