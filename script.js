@@ -1111,19 +1111,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    function triggerLogin() {
-        const phoneInput = document.getElementById('phoneInput');
-        if (!phoneInput) return;
-        const phone = phoneInput.value.trim();
-        console.log('📱 Telefon:', phone);
-        if (phone.length >= 9) {
-            showScreen('languageScreen');
-            renderLanguages();
-        } else {
-            alert('Unesite validan broj telefona (9+ cifara)!');
-        }
-    }
-    
     // ===== EXIT DUGMAD =====
     document.getElementById('exitLoginBtn')?.addEventListener('click', exitApp);
     document.getElementById('exitLangBtn')?.addEventListener('click', exitApp);
@@ -1182,5 +1169,33 @@ document.addEventListener('DOMContentLoaded', function() {
         renderShoppingList();
     });
 
+    // ⭐ 1. OVDE STAVLJATE SLUŠAČ ZA ENTER (Unutar DOMContentLoaded bloka)
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            const phoneInput = document.getElementById('phoneInput');
+            if (phoneInput && document.activeElement === phoneInput) {
+                e.preventDefault();
+                triggerLogin(); // Poziva funkciju ispod
+            }
+        }
+    });
+
     console.log('✅ Svi događaji povezani!');
-});
+}); // <--- Ovde se zatvara DOMContentLoaded
+
+
+// ==========================================
+// ⭐ 2. A SAMU FUNKCIJU DRŽITE NA SAMOM KRAJU FAJLA (Van svega)
+// ==========================================
+function triggerLogin() {
+    const phoneInput = document.getElementById('phoneInput');
+    if (!phoneInput) return;
+    const phone = phoneInput.value.trim();
+    console.log('📱 Telefon:', phone);
+    if (phone.length >= 9) {
+        showScreen('languageScreen');
+        renderLanguages();
+    } else {
+        alert('Unesite validan broj telefona (9+ cifara)!');
+    }
+}
