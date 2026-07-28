@@ -3,35 +3,33 @@
 // ============================================
 console.log('✅ Script.js je učitan!');
 
-// ===== 0. EXIT FUNKCIJA (UNIVERZALNA) =====
+// ===== 0. EXIT FUNKCIJA =====
 function exitApp() {
     console.log("Exit dugme kliknuto!");
     
-    // 1. Sakrij SVE ekrane u aplikaciji
-    const screens = document.querySelectorAll('.screen');
-    screens.forEach(screen => {
+    // Sakrij SVE ekrane
+    document.querySelectorAll('.screen').forEach(screen => {
         screen.style.display = 'none';
     });
     
-    // 2. Obavezno prikaži isključivo login ekran
+    // Prikaži samo login ekran
     const loginScreen = document.getElementById('loginScreen');
     if (loginScreen) {
         loginScreen.style.display = 'flex';
-    } else {
-        console.error("Greška: ID 'loginScreen' nije pronađen u HTML-u!");
     }
     
-    // 3. Očisti i fokusiraj polje za unos telefona
+    // Očisti i fokusiraj polje za telefon
     const phoneInput = document.getElementById('phoneInput');
     if (phoneInput) {
         phoneInput.value = '';
         phoneInput.focus();
     }
     
-    // 4. Resetuj stanje ekrana u aplikaciji
-    currentScreenState = 'login';
+    // Ako imate globalnu promenljivu za stanje ekrana, vratite je na početak:
+    if (typeof currentScreenState !== 'undefined') {
+        currentScreenState = 'login';
+    }
 }
-
 // ===== 6. TRENUTNO STANJE =====
 let currentLang = 'sr';
 let currentCategory = '';
