@@ -248,24 +248,49 @@ const subcategories = {
         "Riba": ["Morska", "Slatkovodna", "Plodovi mora", "Ostalo"],
         "Mlečni proizvodi": ["Mleko", "Jogurt i kiselo mleko", "Pavlaka", "Mladi sir", "Tvrdi sir", "Kozji i ovčiji sir", "Kajmak i puter", "Ostalo"],
         "Povrće": ["Sveže", "Termički obrađeno", "Zamrznuto", "Ostalo"],
-        "Zimnica i kompoti": ["Ajvar i pinđur", "Turšija i kiseli program", "Džemovi i pekmezi", "Kompoti", "Sokovi i sirupi", "Ostalo"],
-        "Testo i Slatkiši": ["Hleb i peciva", "Brašno i testenina", "Kolači i torte", "Čokolade i bomboni", "Ostalo"],
-        "Pića": ["Voda", "Vino", "Sok", "Žestoka pića", "Pivo", "Ostalo"],
-        "Hemija i higijena": ["Deterdženti i omekšivači", "Sredstva za čišćenje", "Lična higijena", "Toaletni papir i ubrusi", "Ostalo"],
+        "Zimnica i kompoti": {
+         "Voće": ["Kajsija", "Kruška", "Višnja", "Pekmez od jagoda", "Šljivov pekmez", "Trešnja", "Pekmez od malina", "Dunja", "Ananas", "Pekmez od manga", "Ostalo"],
+         "Povrće": ["Kiseli krastavci", "Kisela paprika", "Paradajz pire", "Cvekla", "Ajvar", "Turšija", "Kiseli kupus", "Ostalo"]
+        },
+        "Testo i Slatkiši": {
+            "Testo": ["Hleb", "Raženi hleb", "Čabata", "Kukuruzni hleb", "Baguette", "Pšenično brašno", "Integralno brašno", "Heljdino brašno", "Pirinčano brašno", "Začini", "Ostalo"],
+            "Slatkiši": ["Kolači", "Torte", "Peciva", "Sladoled", "Čokolada", "Bombone", "Ostalo"]
+        },
+        "Pića": {
+            "Voda": ["Mineralna", "Negazirana", "Gazirana", "Ostalo"],
+            "Vino": ["Crno", "Belo", "Roze", "Ostalo"],
+            "Sok": ["Voćni", "Povrtni", "Ostalo"],
+            "Žestoka pića": ["Rakija", "Votka", "Viski", "Ostalo"],
+            "Pivo": ["Tamno", "Svetlo", "Ostalo"]
+        },
+        "Hemija i higijena": {
+            "Sanitar": ["Pranje prozora", "Pranje posuđa", "Pranje podova", "Sredstvo za kupatilo", "Ostalo"],
+            "Lična higijena": ["Dezodorans", "Brijač", "Šminka", "Sapun", "Šampon", "Krema", "Ostalo"],
+            "Pribor": ["Kantica", "Kofa", "Krpa za prašinu", "Metla", "Ostalo"]
+        },
         "Ostalo": ["Ostalo"]
     },
     hu: {
-        "Fehér hús": ["Csirke", "Pulyka", "Libacomb", "Kacsa", "Egyéb"],
-        "Vörös hús": ["Sertéshús", "Bárányhús", "Juhhús", "Borjúhús", "Marhahús", "Bikahús", "Lóhús", "Nyúlhús", "Egyéb"],
-        "Apróvad": ["Fürj", "Fácán", "Fogoly", "Vadkacsa", "Vadliba", "Vadnyúl", "Galamb", "Egyéb"],
-        "Nagyvad": ["Szarvas", "Őz", "Vadkecske", "Jávorszarvas", "Rénszarvas", "Vadkan", "Bölény", "Teve", "Láma", "Alpaka", "Kenguru", "Krokodil/Alligátor", "Gyík", "Kígyó", "Egyéb"],
-        "Hal": ["Tengeri", "Édesvízi", "Tenger gyümölcsei", "Egyéb"],
-        "Tejtermékek": ["Tej", "Joghurt és aludttej", "Tejföl", "Friss sajt", "Kemény sajt", "Kecske- és juhsajt", "Kajmak és vaj", "Egyéb"],
-        "Zöldség": ["Friss", "Hőkezelt", "Fagyasztott", "Egyéb"],
-        "Befőttek és kompótok": ["Ajvár", "Savanyúság", "Lejárók és lekvárok", "Kompótok", "Levek és szirupok", "Egyéb"],
-        "Tészta és Édességek": ["Kenyér és péksütemények", "Liszt és tészta", "Sütemények és torták", "Csokoládék és cukorkák", "Egyéb"],
-        "Italok": ["Víz", "Bor", "Lé", "Tömény italok", "Sör", "Egyéb"],
-        "Kémia és higiénia": ["Mosószerek és öblítők", "Tisztítószerek", "Személyes higiénia", "Toalettpapír és törölközők", "Egyéb"],
+        "Befőttek és kompótok": {
+            "Gyümölcs": ["Kajszibarack", "Körte", "Meggy", "Eperlekvár", "Szilvalevar", "Cseresznye", "Málnalevar", "Birs", "Ananász", "Mangólekvár", "Egyéb"],
+            "Zöldség": ["Savanyú uborka", "Savanyú paprika", "Paradicsompüré", "Cékla", "Ajvár", "Savanyúság", "Savanyú káposzta", "Egyéb"]
+        },
+        "Tészta és Édességek": {
+            "Tészta": ["Kenyér", "Rozskenyér", "Ciabatta", "Kukoricakenyér", "Baguette", "Búzaliszt", "Teljes kiőrlésű liszt", "Hajdinaliszt", "Rizsliszt", "Fűszerek", "Egyéb"],
+            "Édességek": ["Sütemények", "Torták", "Péksütemények", "Fagylalt", "Csokoládé", "Cukorkák", "Egyéb"]
+        },
+        "Italok": {
+            "Víz": ["Ásványvíz", "Szénsavmentes", "Szénsavas", "Egyéb"],
+            "Bor": ["Vörös", "Fehér", "Rosé", "Egyéb"],
+            "Lé": ["Gyümölcslé", "Zöldséglé", "Egyéb"],
+            "Tömény italok": ["Pálinka", "Vodka", "Whisky", "Egyéb"],
+            "Sör": ["Barna", "Világos", "Egyéb"]
+        },
+        "Kémia és higiénia": {
+            "Tisztítószerek": ["Ablaktisztítás", "Mosogatás", "Padlótisztítás", "Fürdőszobai tisztítószer", "Egyéb"],
+            "Személyes higiénia": ["Dezodor", "Borotva", "Smink", "Szappan", "Sampon", "Krém", "Egyéb"],
+            "Ezközök": ["Kis vödör", "Vödör", "Portörlő rongy", "Seprű", "Egyéb"]
+        },
         "Egyéb": ["Egyéb"]
     },
     uk: {
@@ -276,10 +301,26 @@ const subcategories = {
         "Риба": ["Морська", "Прісноводна", "Морепродукти", "Інше"],
         "Молочні продукти": ["Молоко", "Йогурт та кисляк", "Сметана", "М'який сир", "Твердий сир", "Козячий та овечий сир", "Каймак та масло", "Інше"],
         "Овочі": ["Свіжі", "Термічно оброблені", "Заморожені", "Інше"],
-        "Консервація та компоти": ["Айвар", "Консервація та соління", "Джеми та варення", "Компоти", "Соки та сиропи", "Інше"],
-        "Тісто та Солодощі": ["Хліб та випічка", "Борошно та макарони", "Торти та тістечка", "Шоколад та цукерки", "Інше"],
-        "Напої": ["Вода", "Вино", "Сік", "Міцні напої", "Пиво", "Інше"],
-        "Хімія та гігієна": ["Пральні порошки та кондиціонери", "Засоби для чищення", "Особиста гігієна", "Туалетний папір та серветки", "Інше"],
+        "Консервація та компоти": {
+            "Фрукти": ["Абрикос", "Груша", "Вишня", "Полуничний джем", "Сливовий джем", "Черешня", "Малиновий джем", "Айва", "Ананас", "Манговий джем", "Інше"],
+            "Овочі": ["Мариновані огірки", "Маринований перець", "Томатне пюре", "Буряк", "Айвар", "Соління", "Квашена капуста", "Інше"]
+        },
+        "Тісто та Солодощі": {
+            "Тісто": ["Хліб", "Житній хліб", "Чабата", "Кукурудзяний хліб", "Багет", "Пшеничне борошно", "Цільнозернове борошно", "Гречане борошно", "Рисове борошно", "Спеції", "Інше"],
+            "Солодощі": ["Тістечка", "Торти", "Випічка", "Морозиво", "Шоколад", "Цукерки", "Інше"]
+        },
+        "Напої": {
+            "Вода": ["Мінеральна", "Негазована", "Газована", "Інше"],
+            "Вино": ["Червоне", "Біле", "Рожеве", "Інше"],
+            "Сік": ["Фруктовий", "Овочевий", "Інше"],
+            "Міцні напої": ["Ракія", "Горілка", "Віскі", "Інше"],
+            "Пиво": ["Темне", "Світле", "Інше"]
+        },
+        "Хімія та гігієна": {
+            "Санітарія": ["Миття вікон", "Миття посуду", "Миття підлоги", "Засіб для ванної", "Інше"],
+            "Особиста гігієна": ["Дезодорант", "Бритва", "Косметика", "Мило", "Шампунь", "Крем", "Інше"],
+            "Інвентар": ["Маленьке відро", "Відро", "Ганчірка для пилу", "Мітла", "Інше"]
+        },
         "Інше": ["Інше"]
     },
     ru: {
@@ -290,10 +331,26 @@ const subcategories = {
         "Рыба": ["Морская", "Пресноводная", "Морепродукты", "Другое"],
         "Молочные продукты": ["Молоко", "Йогурт и простокваша", "Сметана", "Мягкий сыр", "Твердый сыр", "Козий и овечий сыр", "Каймак и масло", "Другое"],
         "Овощи": ["Свежие", "Термически обработанные", "Замороженные", "Другое"],
-        "Консервация и компоты": ["Айвар", "Соленья", "Джемы и варенье", "Компоты", "Соки и сиропы", "Другое"],
-        "Тесто и Сладости": ["Хлеб и выпечка", "Мука и макароны", "Торты и пирожные", "Шоколад и конфеты", "Другое"],
-        "Напитки": ["Вода", "Вино", "Сок", "Крепкие напитки", "Пиво", "Другое"],
-        "Химия и гигиена": ["Порошки и кондиционеры", "Чистящие средства", "Личная гигиена", "Туалетная бумага и салфетки", "Другое"],
+        "Консервация и компоты": {
+            "Фрукты": ["Абрикос", "Груша", "Вишня", "Клубничный джем", "Сливовый джем", "Черешня", "Малиновый джем", "Айва", "Ананас", "Манговый джем", "Другое"],
+            "Овощи": ["Маринованные огурцы", "Маринованный перец", "Томатное пюре", "Свекла", "Айвар", "Соленья", "Квашеная капуста", "Другое"]
+        },
+        "Тесто и Сладости": {
+            "Тесто": ["Хлеб", "Ржаной хлеб", "Чиабатта", "Кукурузный хлеб", "Багет", "Пшеничная мука", "Цельнозерновая мука", "Гречневая мука", "Рисовая мука", "Специи", "Другое"],
+            "Сладости": ["Пирожные", "Торты", "Выпечка", "Мороженое", "Шоколад", "Конфеты", "Другое"]
+        },
+        "Напитки": {
+            "Вода": ["Минеральная", "Негазированная", "Газированная", "Другое"],
+            "Вино": ["Красное", "Белое", "Розовое", "Другое"],
+            "Сок": ["Фруктовый", "Овощной", "Другое"],
+            "Крепкие напитки": ["Ракия", "Водка", "Виски", "Другое"],
+            "Пиво": ["Темное", "Светлое", "Другое"]
+        },
+        "Химия и гигиена": {
+            "Санитария": ["Мытье окон", "Мытье посуды", "Мытье полов", "Средство для ванной", "Другое"],
+            "Личная гигиена": ["Дезодорант", "Бритва", "Косметика", "Мыло", "Шампунь", "Крем", "Другое"],
+            "Инвентарь": ["Маленькое ведро", "Ведро", "Тряпка для пыли", "Метла", "Другое"]
+        },
         "Другое": ["Другое"]
     },
     en: {
@@ -304,10 +361,26 @@ const subcategories = {
         "Fish": ["Sea", "Freshwater", "Seafood", "Other"],
         "Dairy products": ["Milk", "Yogurt and sour milk", "Sour cream", "Soft cheese", "Hard cheese", "Goat and sheep cheese", "Kaymak and butter", "Other"],
         "Vegetables": ["Fresh", "Heat treated", "Frozen", "Other"],
-        "Preserves and compotes": ["Ajvar and relish", "Pickles", "Jams and preserves", "Compotes", "Juices and syrups", "Other"],
-        "Dough and Sweets": ["Bread and pastry", "Flour and pasta", "Cakes and pastries", "Chocolate and candies", "Other"],
-        "Beverages": ["Water", "Wine", "Juice", "Spirits", "Beer", "Other"],
-        "Chemicals and hygiene": ["Detergents and softeners", "Cleaning agents", "Personal hygiene", "Toilet paper and tissues", "Other"],
+        "Preserves and compotes": {
+            "Fruit": ["Apricot", "Pear", "Sour cherry", "Strawberry jam", "Plum jam", "Cherry", "Raspberry jam", "Quince", "Pineapple", "Mango jam", "Other"],
+            "Vegetables": ["Pickled cucumbers", "Pickled peppers", "Tomato puree", "Beetroot", "Ajvar", "Pickles", "Sauerkraut", "Other"]
+        },
+        "Dough and Sweets": {
+            "Dough": ["Bread", "Rye bread", "Ciabatta", "Cornbread", "Baguette", "Wheat flour", "Whole grain flour", "Buckwheat flour", "Rice flour", "Spices", "Other"],
+            "Sweets": ["Cakes", "Pastries", "Baked goods", "Ice cream", "Chocolate", "Candies", "Other"]
+        },
+        "Beverages": {
+            "Water": ["Mineral", "Still", "Sparkling", "Other"],
+            "Wine": ["Red", "White", "Rosé", "Other"],
+            "Juice": ["Fruit juice", "Vegetable juice", "Other"],
+            "Spirits": ["Rakia", "Vodka", "Whiskey", "Other"],
+            "Beer": ["Dark", "Light", "Other"]
+        },
+        "Chemicals and hygiene": {
+            "Sanitary": ["Window cleaning", "Dishwashing", "Floor cleaning", "Bathroom cleaner", "Other"],
+            "Personal hygiene": ["Deodorant", "Razor", "Makeup", "Soap", "Shampoo", "Cream", "Other"],
+            "Supplies": ["Small bucket", "Bucket", "Dust cloth", "Broom", "Other"]
+        },
         "Other": ["Other"]
     },
     de: {
@@ -318,10 +391,26 @@ const subcategories = {
         "Fisch": ["Meer", "Süßwasser", "Meeresfrüchte", "Andere"],
         "Milchprodukte": ["Milch", "Joghurt und Sauermilch", "Saure Sahne", "Frischkäse", "Hartkäse", "Ziegen- und Schafskäse", "Kaymak und Butter", "Andere"],
         "Gemüse": ["Frisch", "Wärmebehandelt", "Gefroren", "Andere"],
-        "Konserven und Kompotte": ["Ajvar und Relish", "Eingelegtes", "Marmeladen und Konfitüren", "Kompotte", "Säfte und Sirupe", "Andere"],
-        "Teig und Süßigkeiten": ["Brot und Gebäck", "Mehl und Teigwaren", "Kuchen und Torten", "Schokolade und Süßigkeiten", "Andere"],
-        "Getränke": ["Wasser", "Wein", "Saft", "Spirituosen", "Bier", "Andere"],
-        "Chemie und Hygiene": ["Waschmittel und Weichspüler", "Reinigungsmittel", "Körperpflege", "Toilettenpapier und Tücher", "Andere"],
+        "Konserven und Kompotte": {
+            "Obst": ["Aprikose", "Birne", "Sauerkirsche", "Erdbeermarmelade", "Pflaumenmus", "Kirsche", "Himbeermarmelade", "Quitte", "Ananas", "Mangomarmelade", "Andere"],
+            "Gemüse": ["Gewürzgurken", "Eingelegter Paprika", "Tomatenmark", "Rote Bete", "Ajvar", "Sauergemüse", "Sauerkraut", "Andere"]
+        },
+        "Teig und Süßigkeiten": {
+            "Teig": ["Brot", "Roggenbrot", "Ciabatta", "Maisbrot", "Baguette", "Weizenmehl", "Vollkornmehl", "Buchweizenmehl", "Reismehl", "Gewürze", "Andere"],
+            "Süßigkeiten": ["Kuchen", "Torten", "Gebäck", "Eiscreme", "Schokolade", "Bonbons", "Andere"]
+        },
+        "Getränke": {
+            "Wasser": ["Mineralwasser", "Still", "Sprudeld", "Andere"],
+            "Wein": ["Rotwein", "Weißwein", "Rosé", "Andere"],
+            "Saft": ["Fruchtsaft", "Gemüsesaft", "Andere"],
+            "Spirituosen": ["Rakija", "Wodka", "Whisky", "Andere"],
+            "Bier": ["Dunkel", "Hell", "Andere"]
+        },
+        "Chemie und Hygiene": {
+            "Sanitär": ["Fensterreinigung", "Geschirrspülen", "Bodenreinigung", "Badreiniger", "Andere"],
+            "Körperpflege": ["Deodorant", "Rasierer", "Make-up", "Seife", "Shampoo", "Creme", "Andere"],
+            "Zubehör": ["Kleiner Eimer", "Eimer", "Staubtuch", "Besen", "Andere"]
+        },
         "Andere": ["Andere"]
     },
     zh: {
@@ -332,10 +421,26 @@ const subcategories = {
         "鱼": ["海鱼", "淡水鱼", "海鲜", "其他"],
         "乳制品": ["牛奶", "酸奶", "酸奶油", "软奶酪", "硬奶酪", "山羊和绵羊奶酪", "奶油和黄油", "其他"],
         "蔬菜": ["新鲜", "热处理", "冷冻", "其他"],
-        "蜜饯和蜜饯": ["辣椒酱", "泡菜", "果酱", "果盘", "果汁糖浆", "Other"],
-        "面团和糖果": ["面包糕点", "面粉面条", "蛋糕点心", "巧克力糖果", "其他"],
-        "饮料": ["水", "葡萄酒", "果汁", "烈酒", "啤酒", "其他"],
-        "化学品和卫生": ["洗涤剂柔软剂", "清洁剂", "个人卫生", "卫生纸巾", "其他"],
+        "蜜饯和蜜饯": {
+            "水果": ["杏", "梨", "酸樱桃", "草莓酱", "李子酱", "樱桃", "树莓酱", "木瓜", "菠萝", "芒果酱", "其他"],
+            "蔬菜": ["酸黄瓜", "腌辣椒", "番茄酱", "甜菜根", "辣椒酱", "泡菜", "酸菜", "其他"]
+        },
+        "面团和糖果": {
+            "面团": ["面包", "黑麦面包", "恰巴塔", "玉米面包", "法包", "小麦粉", "全麦粉", "荞麦粉", "米粉", "调味料", "其他"],
+            "糖果": ["糕点", "蛋糕", "烘焙食品", "冰淇淋", "巧克力", "糖果", "其他"]
+        },
+        "饮料": {
+            "水": ["矿泉水", "纯净水", "气泡水", "其他"],
+            "葡萄酒": ["红葡萄酒", "白葡萄酒", "桃红葡萄酒", "其他"],
+            "果汁": ["果汁", "蔬菜汁", "其他"],
+            "烈酒": ["果酒", "伏特加", "威士忌", "其他"],
+            "啤酒": ["黑啤酒", "白啤酒", "其他"]
+        },
+        "化学品和卫生": {
+            "卫生清洁": ["擦窗", "洗碗", "擦地", "浴室清洁剂", "其他"],
+            "个人卫生": ["止汗剂", "剃须刀", "化妆品", "肥皂", "洗发水", "面霜", "其他"],
+            "用具": ["小水桶", "水桶", "除尘布", "扫帚", "其他"]
+        },
         "其他": ["其他"]
     },
     es: {
@@ -346,12 +451,38 @@ const subcategories = {
         "Pescado": ["Mar", "Agua dulce", "Mariscos", "Otro"],
         "Productos lácteos": ["Leche", "Yogur y leche agria", "Crema agria", "Queso tierno", "Queso curado", "Queso de cabra y oveja", "Mantequilla y nata", "Otro"],
         "Verduras": ["Frescas", "Tratadas térmicamente", "Congeladas", "Otro"],
-        "Conservas y compotas": ["Ajvar", "Encurtidos", "Mermeladas y confituras", "Compotas", "Zumos y jarabes", "Otro"],
-        "Masa y Dulces": ["Pan y bollería", "Harina y pasta", "Pasteles y tortas", "Chocolate y caramelos", "Otro"],
-        "Bebidas": ["Agua", "Vino", "Jugo", "Licores", "Cerveza", "Otro"],
-        "Química e higiene": ["Detergentes y suavizantes", "Productos de limpieza", "Higiene personal", "Papel higiénico y pañuelos", "Otro"],
+        "Conservas y compotas": {
+            "Fruta": ["Albaricoque", "Pera", "Guinda", "Mermelada de fresa", "Mermelada de ciruela", "Cereza", "Mermelada de frambuesa", "Membrillo", "Piña", "Mermelada de mango", "Otro"],
+            "Verduras": ["Pepinillos", "Pimientos en conserva", "Puré de tomate", "Remolacha", "Ajvar", "Encurtidos", "Chucrut", "Otro"]
+        },
+        "Masa y Dulces": {
+            "Masa": ["Pan", "Pan de centeno", "Ciabatta", "Pan de maíz", "Baguette", "Harina de trigo", "Harina integral", "Harina de trigo sarraceno", "Harina de arroz", "Especias", "Otro"],
+            "Dulces": ["Pasteles", "Tartas", "Bollería", "Helado", "Chocolate", "Caramelos", "Otro"]
+        },
+        "Bebidas": {
+            "Agua": ["Mineral", "Sin gas", "Con gas", "Otro"],
+            "Vino": ["Tinto", "Blanco", "Rosado", "Otro"],
+            "Jugo": ["De frutas", "De verduras", "Otro"],
+            "Licores": ["Orujo/Rakia", "Vodka", "Whisky", "Otro"],
+            "Cerveza": ["Negra", "Rubia", "Otro"]
+        },
+        "Química e higiene": {
+            "Sanitario": ["Limpieza de ventanas", "Lavadavajillas", "Limpieza de suelos", "Limpiador de baño", "Otro"],
+            "Higiene personal": ["Desodorante", "Maquinilla de afeitar", "Maquillaje", "Jabón", "Champú", "Crema", "Otro"],
+            "Utensilios": ["Cubo pequeño", "Cubo", "Trapo del polvo", "Escoba", "Otro"]
+        },
         "Otro": ["Otro"]
     },
+        "Bebidas": ["Agua", "Vino", "Jugo", "Licores", "Cerveza", "Otro"],
+        "Química e higiene": [
+            "Detergentes y suavizantes", 
+            "Productos de limpieza", 
+            "Higiene personal", 
+            "Papel higiénico y pañuelos", 
+            "Otro"
+        ],
+        "Otro": ["Otro"]
+    }
     pt: {
         "Carne branca": ["Frango", "Peru", "Ganso", "Pato", "Outro"],
         "Carne vermelha": ["Porco", "Cordeiro", "Ovelha", "Vitela", "Boi", "Touro", "Cavalo", "Coelho", "Outro"],
@@ -360,10 +491,26 @@ const subcategories = {
         "Peixe": ["Mar", "Água doce", "Frutos do mar", "Outro"],
         "Laticínios": ["Leite", "Iogurte e leite coalhado", "Creme de leite", "Queijo fresco", "Queijo cura", "Queijo de cabra e ovelha", "Manteiga e nata", "Outro"],
         "Vegetais": ["Fresco", "Tratado termicamente", "Congelado", "Outro"],
-        "Conservas e compotas": ["Ajvar", "Picles", "Geleias e compotas", "Compotas de frutas", "Sucos e xaropes", "Outro"],
-        "Massa e Doces": ["Pão e pastelaria", "Farinha e massas", "Bolos e tortas", "Chocolate e doces", "Outro"],
-        "Bebidas": ["Água", "Vinho", "Suco", "Bebidas destiladas", "Cerveja", "Outro"],
-        "Química e higiene": ["Detergentes e amaciantes", "Produtos de limpeza", "Higiene pessoal", "Papel higiênico e lenços", "Outro"],
+        "Conservas e compotas": {
+            "Fruta": ["Damasco", "Pêra", "Cereja ácida", "Geleia de morango", "Geleia de ameixa", "Cereja", "Geleia de framboesa", "Marmelo", "Ananás", "Geleia de manga", "Outro"],
+            "Vegetais": ["Pepinos em conserva", "Pimentões em conserva", "Puré de tomate", "Beterraba", "Ajvar", "Picles", "Chucrute", "Outro"]
+        },
+        "Massa e Doces": {
+            "Massa": ["Pão", "Pão de centeio", "Ciabatta", "Pão de milho", "Baguete", "Farinha de trigo", "Farinha integral", "Farinha de trigo sarraceno", "Farinha de arroz", "Especiarias", "Outro"],
+            "Doces": ["Bolos", "Tortas", "Produtos de pastelaria", "Gelado", "Chocolate", "Doces", "Outro"]
+        },
+        "Bebidas": {
+            "Água": ["Mineral", "Sem gás", "Com gás", "Outro"],
+            "Vinho": ["Tinto", "Branco", "Rosé", "Outro"],
+            "Suco": ["De frutas", "De vegetais", "Outro"],
+            "Bebidas destiladas": ["Aguardente", "Vodka", "Uísque", "Outro"],
+            "Cerveja": ["Escura", "Clara", "Outro"]
+        },
+        "Química e higiene": {
+            "Sanitário": ["Limpeza de janelas", "Lava-louças", "Limpeza de pisos", "Limpador de banheiro", "Outro"],
+            "Higiene pessoal": ["Desodorante", "Lâmina de barbear", "Maquiagem", "Sabonete", "Xampu", "Creme", "Outro"],
+            "Utensílios": ["Balde pequeno", "Balde", "Pano de pó", "Vassoura", "Outro"]
+        },
         "Outro": ["Outro"]
     },
     fr: {
@@ -374,10 +521,27 @@ const subcategories = {
         "Poisson": ["Mer", "Eau douce", "Fruits de mer", "Autre"],
         "Produits laitiers": ["Lait", "Yaourt et lait caillé", "Crème fraîche", "Fromage frais", "Fromage à pâte dure", "Fromage de chèvre et brebis", "Beurre et crème", "Autre"],
         "Légumes": ["Frais", "Traité thermiquement", "Congelé", "Autre"],
-        "Conserves et compotes": ["Ajvar", "Cornichons et pickles", "Confitures et gelées", "Compotes", "Jus et sirops", "Autre"],
-        "Pâte et Sucreries": ["Pain et viennoiseries", "Farine et pâtes", "Gâteaux et tartes", "Chocolat et bonbons", "Autre"],
-        "Boissons": ["Eau", "Vin", "Jus", "Spiritueux", "Bière", "Autre"],
-        "Chimie et hygiène": ["Lessives et adoucissants", "Produits de nettoyage", "Hygiène personnelle", "Papier toilette et mouchoirs", "Autre"],
+        {
+        "Conserves et compotes": {
+            "Fruits": ["Abricot", "Poire", "Griotte", "Confiture de fraises", "Confiture de prunes", "Cerise", "Confiture de framboises", "Coing", "Ananas", "Confiture de mangue", "Autre"],
+            "Légumes": ["Cornichons", "Poivrons marinés", "Purée de tomates", "Betterave", "Ajvar", "Pickles", "Choucroute", "Autre"]
+        },
+        "Pâte et Sucreries": {
+            "Pâte": ["Pain", "Pain de seigle", "Ciabatta", "Pain de maïs", "Baguette", "Farine de blé", "Farine complète", "Farine de sarrasin", "Farine de riz", "Épices", "Autre"],
+            "Sucreries": ["Gâteaux", "Tartes", "Viennoiseries", "Glace", "Chocolat", "Bonbons", "Autre"]
+        },
+        "Boissons": {
+            "Eau": ["Minérale", "Plate", "Gazeuse", "Autre"],
+            "Vin": ["Rouge", "Blanc", "Rosé", "Autre"],
+            "Jus": ["De fruits", "De légumes", "Autre"],
+            "Spiritueux": ["Eau-de-vie", "Vodka", "Whisky", "Autre"],
+            "Bière": ["Brune", "Blonde", "Autre"]
+        },
+        "Chimie et hygiène": {
+            "Sanitaire": ["Lavage des vitres", "Lavage de la vaisselle", "Lavage des sols", "Produit pour salle de bain", "Autre"],
+            "Hygiène personnelle": ["Déodorant", "Rasoir", "Maquillage", "Savon", "Shampooing", "Crème", "Autre"],
+            "Matériel": ["Petit seau", "Seau", "Chiffon à poussière", "Balai", "Autre"]
+        },
         "Autre": ["Autre"]
     }
 };
