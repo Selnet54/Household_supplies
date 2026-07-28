@@ -1,5 +1,5 @@
 // ============================================
-// PUNI SCRIPT ZA APLIKACIJU - FINA KOREKCIJA NAZAD
+// PUNI SCRIPT ZA APLIKACIJU - HIJERARHIJSKI NAZAD
 // ============================================
 console.log('✅ Script.js je učitan!');
 
@@ -18,6 +18,7 @@ function exitApp() {
 let currentLang = 'sr';
 let currentCategory = '';
 let currentSubcategory = '';
+let currentProductPart = '';
 let currentScreenState = 'languages'; // 'languages', 'categories', 'subcategories', 'productParts', 'dataEntry', 'inventory', 'shopping'
 
 // ===== 1. JEZICI =====
@@ -466,6 +467,7 @@ function renderProductParts(subcategory) {
 
 function renderDataEntry(productName) {
     currentScreenState = 'dataEntry';
+    currentProductPart = productName;
     const content = document.getElementById('mainContent');
     if (!content) return;
     const today = new Date().toISOString().split('T')[0];
@@ -517,7 +519,7 @@ function renderDataEntry(productName) {
         </div>
         <div class="btn-group">
             <button class="btn-save" onclick="saveProduct()">✅ ${t('unesi')}</button>
-            <button class="btn-cancel" onclick="renderCategories()">✖ ${t('odustani')}</button>
+            <button class="btn-cancel" onclick="handleBackAction()">✖ ${t('odustani')}</button>
         </div>
         <div class="table-container">
             <div class="table-title">📊 ${t('pregled_unosa')}</div>
@@ -926,6 +928,34 @@ function saveProduct() {
     alert('✅ Proizvod sačuvan!');
 }
 
+// ===== GLAVNA FUNKCIJA ZA NAZAD / ODUSTANI =====
+function handleBackAction() {
+    console.log('⬅️ Trenutni ekran stanje:', currentScreenState);
+    
+    if (currentScreenState === 'dataEntry') {
+        // Sa unosa podataka vrati na delove proizvoda (ili podkategorije ako delovi ne postoje)
+        if (currentSubcategory) {
+            renderProductParts(currentSubcategory);
+        } else {
+            renderSubcategories(currentCategory);
+        }
+    } else if (currentScreenState === 'productParts') {
+        // Sa delova proizvoda vrati na podkategorije
+        renderSubcategories(currentCategory);
+    } else if (currentScreenState === 'subcategories') {
+        // Sa podkategorija vrati na glavne kategorije
+        renderCategories();
+    } else if (currentScreenState === 'categories') {
+        // Sa glavnih kategorija vrati na jezike
+        showScreen('languageScreen');
+        renderLanguages();
+    } else {
+        // Za inventar, spisak i ostalo vrati na glavne kategorije
+        showScreen('mainScreen');
+        renderCategories();
+    }
+}
+
 // ===== 10. GLAVNI DOGAĐAJI =====
 document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ DOM je spreman!');
@@ -949,20 +979,8 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('exitLangBtn')?.addEventListener('click', exitApp);
     document.getElementById('exitMainBtn')?.addEventListener('click', exitApp);
 
-    // ===== BACK DUGME (Precizna kontrola stanja) =====
-    document.getElementById('backBtn')?.addEventListener('click', function() {
-        console.log('⬅️ Trenutni ekran stanje:', currentScreenState);
-        
-        if (currentScreenState === 'categories') {
-            // Ako smo na glavnim kategorijama, idi na jezike
-            showScreen('languageScreen');
-            renderLanguages();
-        } else {
-            // Sa bilo kog drugog ekrana vrati na glavne kategorije
-            showScreen('mainScreen');
-            renderCategories();
-        }
-    });
+    // ===== BACK DUGME =====
+    document.getElementById('backBtn')?.addEventListener('click', handleBackAction);
 
     document.getElementById('inventoryBtn')?.addEventListener('click', function() { renderInventory(); });
     document.getElementById('shoppingBtn')?.addEventListener('click', function() { renderShoppingList(); });
