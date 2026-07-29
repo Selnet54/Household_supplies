@@ -7,9 +7,64 @@ console.log('✅ Script.js je učitan!');
 function exitApp() {
     console.log("🚪 Exit dugme kliknuto!");
     
-    // Potpuni reset - vrati na početno stanje
-    location.reload();
+    // 1. Sakrij SVE ekrane
+    const screens = document.querySelectorAll('.screen');
+    console.log(`📱 Pronađeno ekrana: ${screens.length}`);
+    screens.forEach((screen, index) => {
+        console.log(`  Ekran ${index}: ${screen.id || 'nema id'}`);
+        // Eksplicitno sakrij svaki ekran
+        screen.style.display = 'none';
+    });
+    
+    // 2. Prikaži login ekran
+    const loginScreen = document.getElementById('loginScreen');
+    console.log(`🔍 Login ekran pronađen: ${!!loginScreen}`);
+    
+    if (loginScreen) {
+        // Postavi display na 'flex' (jer je to default za .screen)
+        loginScreen.style.display = 'flex';
+        console.log('✅ Login ekran prikazan sa display: flex');
+        
+        // Očisti i fokusiraj polje za telefon
+        const phoneInput = document.getElementById('phoneInput');
+        if (phoneInput) {
+            phoneInput.value = '';
+            // Fokusiraj nakon što se ekran prikaže
+            setTimeout(() => {
+                phoneInput.focus();
+                console.log('📞 Fokus na telefon polje');
+            }, 50);
+        }
+        
+        // Resetuj trenutno stanje
+        currentScreenState = 'languages';
+        console.log(`🔄 Stanje resetovano na: ${currentScreenState}`);
+        
+    } else {
+        console.error("❌ Greška: ID 'loginScreen' nije pronađen!");
+    }
 }
+// ===== 6. TRENUTNO STANJE =====
+let currentLang = 'sr';
+let currentCategory = '';
+let currentSubcategory = '';
+let currentProductPart = '';
+let currentScreenState = 'languages'; // 'languages', 'categories', 'subcategories', 'productParts', 'dataEntry', 'inventory', 'shopping'
+
+// ===== 1. JEZICI =====
+const languages = {
+    sr: { name: 'Srpski', flag: '/Household_supplies/icons/jezici/srpski.png' },
+    en: { name: 'English', flag: '/Household_supplies/icons/jezici/engleski.png' },
+    de: { name: 'Deutsch', flag: '/Household_supplies/icons/jezici/nemacki.png' },
+    hu: { name: 'Magyar', flag: '/Household_supplies/icons/jezici/madjarski.png' },
+    uk: { name: 'Українська', flag: '/Household_supplies/icons/jezici/ukrajinski.png' },
+    ru: { name: 'Русский', flag: '/Household_supplies/icons/jezici/ruski.png' },
+    zh: { name: '中文', flag: '/Household_supplies/icons/jezici/mandarinski.png' },
+    es: { name: 'Español', flag: '/Household_supplies/icons/jezici/spanski.png' },
+    pt: { name: 'Português', flag: '/Household_supplies/icons/jezici/portugalski.png' },
+    fr: { name: 'Français', flag: '/Household_supplies/icons/jezici/francuski.png' }
+};
+
 // ===== 2. PREVODI =====
 const translations = {
     sr: {
