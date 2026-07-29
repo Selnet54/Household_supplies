@@ -8,7 +8,6 @@ function exitApp() {
     console.log("🚪 Exit dugme kliknuto!");
     location.reload();
 }
-
 // ===== 1. JEZICI =====
 const languages = {
     sr: { name: 'Srpski', flag: '/Household_supplies/icons/jezici/srpski.png' },
