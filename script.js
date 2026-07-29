@@ -7,34 +7,25 @@ console.log('✅ Script.js je učitan!');
 function exitApp() {
     console.log("🚪 Exit dugme kliknuto!");
     
-    // Samo prikaži login i sakrij sve ostalo
-    document.getElementById('loginScreen').style.display = 'flex';
-    document.getElementById('languageScreen').style.display = 'none';
-    document.getElementById('mainScreen').style.display = 'none';
+    // Sakrij ceo body
+    document.body.style.display = 'none';
+    
+    // Prikaži samo login
+    const login = document.getElementById('loginScreen');
+    login.style.display = 'flex';
+    login.style.position = 'fixed';
+    login.style.top = '0';
+    login.style.left = '0';
+    login.style.width = '100%';
+    login.style.height = '100%';
+    login.style.zIndex = '9999';
+    login.style.backgroundColor = '#f5f5f5';
     
     document.getElementById('phoneInput').value = '';
-    document.getElementById('phoneInput').focus();
+    setTimeout(() => {
+        document.getElementById('phoneInput').focus();
+    }, 100);
 }
-// ===== 6. TRENUTNO STANJE =====
-let currentLang = 'sr';
-let currentCategory = '';
-let currentSubcategory = '';
-let currentProductPart = '';
-let currentScreenState = 'languages'; // 'languages', 'categories', 'subcategories', 'productParts', 'dataEntry', 'inventory', 'shopping'
-
-// ===== 1. JEZICI =====
-const languages = {
-    sr: { name: 'Srpski', flag: '/Household_supplies/icons/jezici/srpski.png' },
-    en: { name: 'English', flag: '/Household_supplies/icons/jezici/engleski.png' },
-    de: { name: 'Deutsch', flag: '/Household_supplies/icons/jezici/nemacki.png' },
-    hu: { name: 'Magyar', flag: '/Household_supplies/icons/jezici/madjarski.png' },
-    uk: { name: 'Українська', flag: '/Household_supplies/icons/jezici/ukrajinski.png' },
-    ru: { name: 'Русский', flag: '/Household_supplies/icons/jezici/ruski.png' },
-    zh: { name: '中文', flag: '/Household_supplies/icons/jezici/mandarinski.png' },
-    es: { name: 'Español', flag: '/Household_supplies/icons/jezici/spanski.png' },
-    pt: { name: 'Português', flag: '/Household_supplies/icons/jezici/portugalski.png' },
-    fr: { name: 'Français', flag: '/Household_supplies/icons/jezici/francuski.png' }
-};
 
 // ===== 2. PREVODI =====
 const translations = {
