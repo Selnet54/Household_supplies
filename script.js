@@ -7,25 +7,31 @@ console.log('✅ Script.js je učitan!');
 function exitApp() {
     console.log("Exit dugme kliknuto!");
     
-    // 1. Sakrij SVE ekrane koristeći CSS property sa prioritetom
+    // 1. Sakrij SVE ekrane
     const screens = document.querySelectorAll('.screen');
     screens.forEach(screen => {
-        screen.style.setProperty('display', 'none', 'important');
+        screen.style.display = 'none';
     });
     
-    // 2. Prikaži isključivo login ekran sa prioritetom
+    // 2. Prikaži login ekran
     const loginScreen = document.getElementById('loginScreen');
     if (loginScreen) {
-        loginScreen.style.setProperty('display', 'flex', 'important');
+        loginScreen.style.display = 'flex';
+        // Resetuj stanje
+        const phoneInput = document.getElementById('phoneInput');
+        if (phoneInput) {
+            phoneInput.value = '';
+            setTimeout(() => phoneInput.focus(), 100);
+        }
+        // Resetuj trenutno stanje
+        currentScreenState = 'languages';
     } else {
         console.error("Greška: ID 'loginScreen' nije pronađen!");
-    }
-    
-    // 3. Očisti i fokusiraj polje za telefon
-    const phoneInput = document.getElementById('phoneInput');
-    if (phoneInput) {
-        phoneInput.value = '';
-        phoneInput.focus();
+        // Fallback - ako loginScreen ne postoji, pokušaj da prikažeš prvi ekran
+        const firstScreen = document.querySelector('.screen');
+        if (firstScreen) {
+            firstScreen.style.display = 'flex';
+        }
     }
 }
 // ===== 6. TRENUTNO STANJE =====
