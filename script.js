@@ -3,46 +3,17 @@
 // ============================================
 console.log('✅ Script.js je učitan!');
 
-// ===== 0. EXIT FUNKCIJA (POTPUNO RESETOVANJE) =====
+// ===== 0. EXIT FUNKCIJA =====
 function exitApp() {
     console.log("🚪 Exit dugme kliknuto!");
     
-    // 1. Sakrij SVE ekrane
-    const screens = document.querySelectorAll('.screen');
-    screens.forEach(screen => {
-        screen.style.display = 'none';
-        // Dodatno: ukloni sve inline stilove koji mogu smetati
-        screen.style.removeProperty('display');
-    });
+    // Samo prikaži login i sakrij sve ostalo
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('languageScreen').style.display = 'none';
+    document.getElementById('mainScreen').style.display = 'none';
     
-    // 2. Prikaži login ekran
-    const loginScreen = document.getElementById('loginScreen');
-    if (loginScreen) {
-        // Očisti sve prethodne stilove
-        loginScreen.style.removeProperty('display');
-        // Postavi novi display
-        loginScreen.style.display = 'flex';
-        
-        // Očisti input
-        const phoneInput = document.getElementById('phoneInput');
-        if (phoneInput) {
-            phoneInput.value = '';
-            // Fokus sa većim delay-om
-            setTimeout(() => {
-                phoneInput.focus();
-                // Dodatno: selektuj tekst ako postoji
-                phoneInput.select();
-            }, 150);
-        }
-        
-        // Resetuj sva stanja
-        currentScreenState = 'languages';
-        currentCategory = '';
-        currentSubcategory = '';
-        currentProductPart = '';
-        
-        console.log('✅ Potpuno resetovanje završeno');
-    }
+    document.getElementById('phoneInput').value = '';
+    document.getElementById('phoneInput').focus();
 }
 // ===== 6. TRENUTNO STANJE =====
 let currentLang = 'sr';
