@@ -3,30 +3,45 @@
 // ============================================
 console.log('✅ Script.js je učitan!');
 
-// ===== 0. EXIT FUNKCIJA (sa !important) =====
+// ===== 0. EXIT FUNKCIJA =====
 function exitApp() {
     console.log("🚪 Exit dugme kliknuto!");
     
     // 1. Sakrij SVE ekrane
     const screens = document.querySelectorAll('.screen');
-    screens.forEach(screen => {
-        screen.style.setProperty('display', 'none', 'important');
+    console.log(`📱 Pronađeno ekrana: ${screens.length}`);
+    screens.forEach((screen, index) => {
+        console.log(`  Ekran ${index}: ${screen.id || 'nema id'}`);
+        // Eksplicitno sakrij svaki ekran
+        screen.style.display = 'none';
     });
     
-    // 2. Prikaži login ekran sa !important
+    // 2. Prikaži login ekran
     const loginScreen = document.getElementById('loginScreen');
+    console.log(`🔍 Login ekran pronađen: ${!!loginScreen}`);
+    
     if (loginScreen) {
-        loginScreen.style.setProperty('display', 'flex', 'important');
-        console.log('✅ Login ekran prikazan sa !important');
+        // Postavi display na 'flex' (jer je to default za .screen)
+        loginScreen.style.display = 'flex';
+        console.log('✅ Login ekran prikazan sa display: flex');
         
+        // Očisti i fokusiraj polje za telefon
         const phoneInput = document.getElementById('phoneInput');
         if (phoneInput) {
             phoneInput.value = '';
-            setTimeout(() => phoneInput.focus(), 50);
+            // Fokusiraj nakon što se ekran prikaže
+            setTimeout(() => {
+                phoneInput.focus();
+                console.log('📞 Fokus na telefon polje');
+            }, 50);
         }
+        
+        // Resetuj trenutno stanje
         currentScreenState = 'languages';
+        console.log(`🔄 Stanje resetovano na: ${currentScreenState}`);
+        
     } else {
-        console.error("❌ Login ekran nije pronađen!");
+        console.error("❌ Greška: ID 'loginScreen' nije pronađen!");
     }
 }
 // ===== 6. TRENUTNO STANJE =====
