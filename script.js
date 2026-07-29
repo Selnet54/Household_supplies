@@ -1248,39 +1248,25 @@ function handleBackAction() {
 // ===== 10. GLAVNI DOGAĐAJI =====
 document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ DOM je spreman!');
-
-    const loginBtn = document.getElementById('loginBtn');
-if (loginBtn) {
-    loginBtn.addEventListener('click', function(e) {
-        e.preventDefault(); // Sprečava eventualno osvežavanje stranice ako je dugme u formi
-        triggerLogin(); 
-    });
-}
-
-    // Globalno slušanje Enter tastera za sve inpute
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') {
-            const phoneField = document.getElementById('phoneInput');
-            if (phoneField && document.activeElement === phoneField) {
-                e.preventDefault();
-                triggerLogin();
-                return;
-            }
-
-            // Podrška za Enter unutar forme za unos proizvoda (dataEntry)
-            if (currentScreenState === 'dataEntry') {
-                const active = document.activeElement;
-                if (active && (active.tagName === 'INPUT' || active.tagName === 'SELECT')) {
-                    e.preventDefault();
-                    // Ako je u polju za čuvanje ili poslednjem elementu, sačuvaj proizvod
-                    const saveBtn = document.querySelector('.btn-save');
-                    if (saveBtn) {
-                        saveProduct();
-                    }
-                }
-            }
-        }
-    });
+    
+    // ... tvoj postojeći kod ...
+    
+    // ===== EXIT DUGME - SAMO JEDNOM =====
+    const exitBtn = document.getElementById('exitLoginBtn');
+    if (exitBtn) {
+        // Ukloni sve postojeće event listenere (ako ih ima)
+        const newExitBtn = exitBtn.cloneNode(true);
+        exitBtn.parentNode.replaceChild(newExitBtn, exitBtn);
+        
+        // Dodaj NOVI event listener
+        newExitBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            exitApp();
+        });
+        console.log('✅ EXIT dugme povezano (samo jednom)');
+    }
+});
     
     document.getElementById('exitLoginBtn')?.addEventListener('click', exitApp);
     document.getElementById('exitLangBtn')?.addEventListener('click', exitApp);
