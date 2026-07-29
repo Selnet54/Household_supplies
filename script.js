@@ -7,26 +7,9 @@ console.log('✅ Script.js je učitan!');
 function exitApp() {
     console.log("🚪 Exit dugme kliknuto!");
     
-    // Sakrij ceo body
-    document.body.style.display = 'none';
-    
-    // Prikaži samo login
-    const login = document.getElementById('loginScreen');
-    login.style.display = 'flex';
-    login.style.position = 'fixed';
-    login.style.top = '0';
-    login.style.left = '0';
-    login.style.width = '100%';
-    login.style.height = '100%';
-    login.style.zIndex = '9999';
-    login.style.backgroundColor = '#f5f5f5';
-    
-    document.getElementById('phoneInput').value = '';
-    setTimeout(() => {
-        document.getElementById('phoneInput').focus();
-    }, 100);
+    // Potpuni reset - vrati na početno stanje
+    location.reload();
 }
-
 // ===== 2. PREVODI =====
 const translations = {
     sr: {
