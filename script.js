@@ -5,22 +5,45 @@ console.log('✅ Script.js je učitan!');
 
 // ===== 0. EXIT FUNKCIJA =====
 function exitApp() {
-    if (confirm('Da li želite da zatvorite aplikaciju?')) {
-        document.getElementById('mainScreen').style.display = 'none';
-        document.getElementById('languageScreen').style.display = 'none';
-        document.getElementById('loginScreen').style.display = 'flex';
-        document.getElementById('phoneInput').value = '';
-        document.getElementById('phoneInput').focus();
+    console.log("🚪 Exit dugme kliknuto!");
+    
+    // 1. Sakrij SVE ekrane
+    const screens = document.querySelectorAll('.screen');
+    console.log(`📱 Pronađeno ekrana: ${screens.length}`);
+    screens.forEach((screen, index) => {
+        console.log(`  Ekran ${index}: ${screen.id || 'nema id'}`);
+        // Eksplicitno sakrij svaki ekran
+        screen.style.display = 'none';
+    });
+    
+    // 2. Prikaži login ekran
+    const loginScreen = document.getElementById('loginScreen');
+    console.log(`🔍 Login ekran pronađen: ${!!loginScreen}`);
+    
+    if (loginScreen) {
+        // Postavi display na 'flex' (jer je to default za .screen)
+        loginScreen.style.display = 'flex';
+        console.log('✅ Login ekran prikazan sa display: flex');
+        
+        // Očisti i fokusiraj polje za telefon
+        const phoneInput = document.getElementById('phoneInput');
+        if (phoneInput) {
+            phoneInput.value = '';
+            // Fokusiraj nakon što se ekran prikaže
+            setTimeout(() => {
+                phoneInput.focus();
+                console.log('📞 Fokus na telefon polje');
+            }, 50);
+        }
+        
+        // Resetuj trenutno stanje
+        currentScreenState = 'languages';
+        console.log(`🔄 Stanje resetovano na: ${currentScreenState}`);
+        
+    } else {
+        console.error("❌ Greška: ID 'loginScreen' nije pronađen!");
     }
 }
-
-// ===== 6. TRENUTNO STANJE =====
-let currentLang = 'sr';
-let currentCategory = '';
-let currentSubcategory = '';
-let currentProductPart = '';
-let currentScreenState = 'languages'; // 'languages', 'categories', 'subcategories', 'productParts', 'dataEntry', 'inventory', 'shopping'
-
 // ===== 6. TRENUTNO STANJE =====
 let currentLang = 'sr';
 let currentCategory = '';
