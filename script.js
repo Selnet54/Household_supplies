@@ -6,7 +6,23 @@ console.log('✅ Script.js je učitan!');
 // ===== 0. EXIT FUNKCIJA =====
 function exitApp() {
     console.log("🚪 Exit dugme kliknuto!");
-    location.reload();
+    
+    // Pokušaj prvo bez reload-a
+    try {
+        document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+        const login = document.getElementById('loginScreen');
+        if (login) {
+            login.style.display = 'flex';
+            document.getElementById('phoneInput').value = '';
+            document.getElementById('phoneInput').focus();
+            currentScreenState = 'languages';
+            console.log('✅ Vraćen na login');
+        }
+    } catch(e) {
+        // Ako ne uspe, RELOAD
+        console.log('🔄 Reload kao fallback');
+        location.reload();
+    }
 }
 // ===== 1. JEZICI =====
 const languages = {
