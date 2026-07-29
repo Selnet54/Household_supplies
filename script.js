@@ -6,44 +6,8 @@ console.log('✅ Script.js je učitan!');
 // ===== 0. EXIT FUNKCIJA =====
 function exitApp() {
     console.log("🚪 Exit dugme kliknuto!");
-    
-    // 1. Sakrij SVE ekrane sa !important
-    document.querySelectorAll('.screen').forEach(s => {
-        s.style.setProperty('display', 'none', 'important');
-    });
-    
-    // 2. Prikaži login ekran sa !important
-    const loginScreen = document.getElementById('loginScreen');
-    if (loginScreen) {
-        loginScreen.style.setProperty('display', 'flex', 'important');
-        loginScreen.style.setProperty('visibility', 'visible', 'important');
-        loginScreen.style.setProperty('opacity', '1', 'important');
-        
-        // 3. FORSIRAJ REFRESH - ovo je ključno!
-        loginScreen.offsetHeight; // Forsira browser da preračuna
-        loginScreen.style.display = 'flex';
-        
-        console.log('✅ Login ekran prikazan sa !important');
-    }
-    
-    // 4. Očisti i fokusiraj
-    const phoneInput = document.getElementById('phoneInput');
-    if (phoneInput) {
-        phoneInput.value = '';
-        setTimeout(() => phoneInput.focus(), 100);
-    }
-    
-    // 5. Resetuj stanje
-    currentScreenState = 'languages';
-    currentLang = 'sr';
-    console.log('🔄 Stanje resetovano');
+    location.reload();
 }
-// ===== 6. TRENUTNO STANJE =====
-let currentLang = 'sr';
-let currentCategory = '';
-let currentSubcategory = '';
-let currentProductPart = '';
-let currentScreenState = 'languages'; // 'languages', 'categories', 'subcategories', 'productParts', 'dataEntry', 'inventory', 'shopping'
 
 // ===== 1. JEZICI =====
 const languages = {
