@@ -7,42 +7,36 @@ console.log('✅ Script.js je učitan!');
 function exitApp() {
     console.log("🚪 Exit dugme kliknuto!");
     
-    // 1. Sakrij SVE ekrane
-    const screens = document.querySelectorAll('.screen');
-    console.log(`📱 Pronađeno ekrana: ${screens.length}`);
-    screens.forEach((screen, index) => {
-        console.log(`  Ekran ${index}: ${screen.id || 'nema id'}`);
-        // Eksplicitno sakrij svaki ekran
-        screen.style.display = 'none';
+    // 1. Sakrij SVE ekrane sa !important
+    document.querySelectorAll('.screen').forEach(s => {
+        s.style.setProperty('display', 'none', 'important');
     });
     
-    // 2. Prikaži login ekran
+    // 2. Prikaži login ekran sa !important
     const loginScreen = document.getElementById('loginScreen');
-    console.log(`🔍 Login ekran pronađen: ${!!loginScreen}`);
-    
     if (loginScreen) {
-        // Postavi display na 'flex' (jer je to default za .screen)
+        loginScreen.style.setProperty('display', 'flex', 'important');
+        loginScreen.style.setProperty('visibility', 'visible', 'important');
+        loginScreen.style.setProperty('opacity', '1', 'important');
+        
+        // 3. FORSIRAJ REFRESH - ovo je ključno!
+        loginScreen.offsetHeight; // Forsira browser da preračuna
         loginScreen.style.display = 'flex';
-        console.log('✅ Login ekran prikazan sa display: flex');
         
-        // Očisti i fokusiraj polje za telefon
-        const phoneInput = document.getElementById('phoneInput');
-        if (phoneInput) {
-            phoneInput.value = '';
-            // Fokusiraj nakon što se ekran prikaže
-            setTimeout(() => {
-                phoneInput.focus();
-                console.log('📞 Fokus na telefon polje');
-            }, 50);
-        }
-        
-        // Resetuj trenutno stanje
-        currentScreenState = 'languages';
-        console.log(`🔄 Stanje resetovano na: ${currentScreenState}`);
-        
-    } else {
-        console.error("❌ Greška: ID 'loginScreen' nije pronađen!");
+        console.log('✅ Login ekran prikazan sa !important');
     }
+    
+    // 4. Očisti i fokusiraj
+    const phoneInput = document.getElementById('phoneInput');
+    if (phoneInput) {
+        phoneInput.value = '';
+        setTimeout(() => phoneInput.focus(), 100);
+    }
+    
+    // 5. Resetuj stanje
+    currentScreenState = 'languages';
+    currentLang = 'sr';
+    console.log('🔄 Stanje resetovano');
 }
 // ===== 6. TRENUTNO STANJE =====
 let currentLang = 'sr';
