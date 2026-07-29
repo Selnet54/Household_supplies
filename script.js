@@ -5,36 +5,11 @@ console.log('✅ Script.js je učitan!');
 
 // ===== 0. EXIT FUNKCIJA =====
 function exitApp() {
-    if (confirm('Da li želite da zatvorite aplikaciju?')) {
-        document.getElementById('mainScreen').style.display = 'none';
-        document.getElementById('languageScreen').style.display = 'none';
-        document.getElementById('loginScreen').style.display = 'flex';
-        document.getElementById('phoneInput').value = '';
-        document.getElementById('phoneInput').focus();
-    }
+    console.log("🚪 Exit dugme kliknuto!");
+    
+    // Potpuni reset - vrati na početno stanje
+    location.reload();
 }
-
-// ===== 6. TRENUTNO STANJE =====
-let currentLang = 'sr';
-let currentCategory = '';
-let currentSubcategory = '';
-let currentProductPart = '';
-let currentScreenState = 'languages'; // 'languages', 'categories', 'subcategories', 'productParts', 'dataEntry', 'inventory', 'shopping'
-
-// ===== 1. JEZICI =====
-const languages = {
-    sr: { name: 'Srpski', flag: '/Household_supplies/icons/jezici/srpski.png' },
-    en: { name: 'English', flag: '/Household_supplies/icons/jezici/engleski.png' },
-    de: { name: 'Deutsch', flag: '/Household_supplies/icons/jezici/nemacki.png' },
-    hu: { name: 'Magyar', flag: '/Household_supplies/icons/jezici/madjarski.png' },
-    uk: { name: 'Українська', flag: '/Household_supplies/icons/jezici/ukrajinski.png' },
-    ru: { name: 'Русский', flag: '/Household_supplies/icons/jezici/ruski.png' },
-    zh: { name: '中文', flag: '/Household_supplies/icons/jezici/mandarinski.png' },
-    es: { name: 'Español', flag: '/Household_supplies/icons/jezici/spanski.png' },
-    pt: { name: 'Português', flag: '/Household_supplies/icons/jezici/portugalski.png' },
-    fr: { name: 'Français', flag: '/Household_supplies/icons/jezici/francuski.png' }
-};
-
 // ===== 2. PREVODI =====
 const translations = {
     sr: {
@@ -645,24 +620,92 @@ function renderCategories() {
     content.innerHTML = html;
 }
 
+// ===== ISPRAVLJENE / DODATE FUNKCIJE ZA PODKATEGORIJE =====
+
+// ===== ISPRAVLJENO RENDERETOVANJE PODKATEGORIJA =====
+
+// ===== KONAČNA ISPRAVKA ZA PRIKAZ "OSTALO" I STRELICA =====
+
 function renderSubcategories(category) {
     currentScreenState = 'subcategories';
     currentCategory = category;
     const content = document.getElementById('mainContent');
-    const subList = getSubcategories(category);
+    const sub = subcategories[currentLang] || subcategories.sr;
+    const subData = sub[category];
     const colors = getSubcategoryColors(category);
     
     let html = `<div class="title">${t('podkategorije')}</div>`;
     html += `<div class="categories-grid">`;
     
-    subList.forEach((sub, idx) => {
-        const color = colors[idx % colors.length];
-        if (isOtherButton(sub)) {
-            html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('')">${sub} ➜</button>`;
-        } else {
-            html += `<button class="category-btn" style="background:${color};" onclick="renderProductParts('${sub}')">${sub}</button>`;
+    if (Array.isArray(subData)) {
+        let displayData = [...subData];
+        // Provera da li postoji bilo koja varijanta reči "Ostalo"
+        const hasOstalo = displayData.some(item => isOtherButton(item));
+        if (!hasOstalo) {
+            displayData.push(t('Ostalo') || "Ostalo");
         }
-    });
+
+        displayData.forEach((item, idx) => {
+            const color = colors[idx % colors.length];
+            if (isOtherButton(item)) {
+                html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('')">${item} ➜</button>`;
+            } else {
+                html += `<button class="category-btn" style="background:${color};" onclick="renderProductParts('${item}')">${item}</button>`;
+            }
+        });
+    } else if (subData && typeof subData === 'object') {
+        const keys = Object.keys(subData);
+        let displayKeys = [...keys];
+        const hasOstalo = displayKeys.some(key => isOtherButton(key));
+        if (!hasOstalo) {
+            displayKeys.push(t('Ostalo') || "Ostalo");
+        }
+
+        displayKeys.forEach((groupName, idx) => {
+            const color = colors[idx % colors.length];
+            if (isOtherButton(groupName)) {
+                html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('')">${groupName} ➜</button>`;
+            } else {
+                html += `<button class="category-btn" style="background:${color};" onclick="renderSubcategoryGroup('${category}', '${groupName}')">${groupName}</button>`;
+            }
+        });
+    } else {
+        html += `<button class="category-btn" style="background:#ddd;" onclick="renderDataEntry('')">${t('Ostalo') || "Ostalo"} ➜</button>`;
+    }
+    
+    html += `</div>`;
+    content.innerHTML = html;
+}
+
+function renderSubcategoryGroup(category, groupName) {
+    currentScreenState = 'subcategories';
+    const content = document.getElementById('mainContent');
+    const sub = subcategories[currentLang] || subcategories.sr;
+    let items = sub[category][groupName];
+    const colors = getSubcategoryColors(category);
+    
+    let html = `<div class="title">${groupName}</div>`;
+    html += `<div class="categories-grid">`;
+    
+    if (Array.isArray(items)) {
+        let displayItems = [...items];
+        const hasOstalo = displayItems.some(item => isOtherButton(item));
+        if (!hasOstalo) {
+            displayItems.push(t('Ostalo') || "Ostalo");
+        }
+
+        displayItems.forEach((item, idx) => {
+            const color = colors[idx % colors.length];
+            if (isOtherButton(item)) {
+                html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('')">${item} ➜</button>`;
+            } else {
+                html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('${item}')">${item}</button>`;
+            }
+        });
+    } else {
+        html += `<button class="category-btn" style="background:#ddd;" onclick="renderDataEntry('')">${t('Ostalo') || "Ostalo"} ➜</button>`;
+    }
+    
     html += `</div>`;
     content.innerHTML = html;
 }
@@ -671,13 +714,21 @@ function renderProductParts(subcategory) {
     currentScreenState = 'productParts';
     currentSubcategory = subcategory;
     const content = document.getElementById('mainContent');
-    const parts = getProductParts(subcategory);
+    let parts = getProductParts(subcategory);
     const colors = getSubcategoryColors(currentCategory);
+    
     let html = `<div class="title">${subcategory}</div>`;
     html += `<div style="margin-bottom:15px;text-align:center;font-size:20px;color:#666;">${t('delovi_proizvoda')}</div>`;
     html += `<div class="categories-grid">`;
+    
     if (parts && parts.length > 0) {
-        parts.forEach((part, idx) => {
+        let displayParts = [...parts];
+        const hasOstalo = displayParts.some(part => isOtherButton(part));
+        if (!hasOstalo) {
+            displayParts.push(t('Ostalo') || "Ostalo");
+        }
+
+        displayParts.forEach((part, idx) => {
             const color = colors[idx % colors.length];
             if (isOtherButton(part)) {
                 html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('')">${part} ➜</button>`;
@@ -686,8 +737,9 @@ function renderProductParts(subcategory) {
             }
         });
     } else {
-        html += `<button class="category-btn" style="background:#ddd;" onclick="renderDataEntry('')">${t('unesi')}</button>`;
+        html += `<button class="category-btn" style="background:#ddd;" onclick="renderDataEntry('')">${t('Ostalo') || "Ostalo"} ➜</button>`;
     }
+    
     html += `</div>`;
     content.innerHTML = html;
 }
@@ -1183,9 +1235,12 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ DOM je spreman!');
 
     const loginBtn = document.getElementById('loginBtn');
-    if (loginBtn) {
-        loginBtn.addEventListener('click', function() { triggerLogin(); });
-    }
+if (loginBtn) {
+    loginBtn.addEventListener('click', function(e) {
+        e.preventDefault(); // Sprečava eventualno osvežavanje stranice ako je dugme u formi
+        triggerLogin(); 
+    });
+}
 
     // Globalno slušanje Enter tastera za sve inpute
     document.addEventListener('keydown', function(e) {
@@ -1230,7 +1285,10 @@ document.addEventListener('DOMContentLoaded', function() {
 // ============================================
 function triggerLogin() {
     const phoneInput = document.getElementById('phoneInput');
-    if (!phoneInput) return;
+    if (!phoneInput) {
+        alert('Greška: Polje za telefon nije pronađeno!');
+        return;
+    }
     const phone = phoneInput.value.trim();
     if (phone.length >= 9) {
         showScreen('languageScreen');
