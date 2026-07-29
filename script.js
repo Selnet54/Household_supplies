@@ -3,45 +3,45 @@
 // ============================================
 console.log('✅ Script.js je učitan!');
 
-// ===== 0. EXIT FUNKCIJA =====
+// ===== 0. EXIT FUNKCIJA (POTPUNO RESETOVANJE) =====
 function exitApp() {
     console.log("🚪 Exit dugme kliknuto!");
     
     // 1. Sakrij SVE ekrane
     const screens = document.querySelectorAll('.screen');
-    console.log(`📱 Pronađeno ekrana: ${screens.length}`);
-    screens.forEach((screen, index) => {
-        console.log(`  Ekran ${index}: ${screen.id || 'nema id'}`);
-        // Eksplicitno sakrij svaki ekran
+    screens.forEach(screen => {
         screen.style.display = 'none';
+        // Dodatno: ukloni sve inline stilove koji mogu smetati
+        screen.style.removeProperty('display');
     });
     
     // 2. Prikaži login ekran
     const loginScreen = document.getElementById('loginScreen');
-    console.log(`🔍 Login ekran pronađen: ${!!loginScreen}`);
-    
     if (loginScreen) {
-        // Postavi display na 'flex' (jer je to default za .screen)
+        // Očisti sve prethodne stilove
+        loginScreen.style.removeProperty('display');
+        // Postavi novi display
         loginScreen.style.display = 'flex';
-        console.log('✅ Login ekran prikazan sa display: flex');
         
-        // Očisti i fokusiraj polje za telefon
+        // Očisti input
         const phoneInput = document.getElementById('phoneInput');
         if (phoneInput) {
             phoneInput.value = '';
-            // Fokusiraj nakon što se ekran prikaže
+            // Fokus sa većim delay-om
             setTimeout(() => {
                 phoneInput.focus();
-                console.log('📞 Fokus na telefon polje');
-            }, 50);
+                // Dodatno: selektuj tekst ako postoji
+                phoneInput.select();
+            }, 150);
         }
         
-        // Resetuj trenutno stanje
+        // Resetuj sva stanja
         currentScreenState = 'languages';
-        console.log(`🔄 Stanje resetovano na: ${currentScreenState}`);
+        currentCategory = '';
+        currentSubcategory = '';
+        currentProductPart = '';
         
-    } else {
-        console.error("❌ Greška: ID 'loginScreen' nije pronađen!");
+        console.log('✅ Potpuno resetovanje završeno');
     }
 }
 // ===== 6. TRENUTNO STANJE =====
