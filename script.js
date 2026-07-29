@@ -4,19 +4,11 @@
 console.log('✅ Script.js je učitan!');
 
 function exitApp() {
-    // Direktno prikazujemo login ekran pomoću vaše funkcije za ekrane
-    showScreen('loginScreen');
-    
-    // Očistimo polje za unos telefona i vratimo fokus na njega
-    const phoneInput = document.getElementById('phoneInput');
-    if (phoneInput) {
-        phoneInput.value = '';
-        phoneInput.focus();
-    }
-    
-    // Resetujemo stanje ako pratite trenutni ekran
-    if (typeof currentScreenState !== 'undefined') {
-        currentScreenState = 'login';
+    if (confirm('Do you want to exit?')) {
+
+        document.getElementById('phoneInput').value = '';
+
+        showScreen('welcomeScreen');
     }
 }
 // ===== 1. JEZICI =====
