@@ -473,16 +473,6 @@ const subcategories = {
         },
         "Otro": ["Otro"]
     },
-        "Bebidas": ["Agua", "Vino", "Jugo", "Licores", "Cerveza", "Otro"],
-        "Química e higiene": [
-            "Detergentes y suavizantes", 
-            "Productos de limpieza", 
-            "Higiene personal", 
-            "Papel higiénico y pañuelos", 
-            "Otro"
-        ],
-        "Otro": ["Otro"]
-    }
     pt: {
         "Carne branca": ["Frango", "Peru", "Ganso", "Pato", "Outro"],
         "Carne vermelha": ["Porco", "Cordeiro", "Ovelha", "Vitela", "Boi", "Touro", "Cavalo", "Coelho", "Outro"],
@@ -521,7 +511,6 @@ const subcategories = {
         "Poisson": ["Mer", "Eau douce", "Fruits de mer", "Autre"],
         "Produits laitiers": ["Lait", "Yaourt et lait caillé", "Crème fraîche", "Fromage frais", "Fromage à pâte dure", "Fromage de chèvre et brebis", "Beurre et crème", "Autre"],
         "Légumes": ["Frais", "Traité thermiquement", "Congelé", "Autre"],
-        {
         "Conserves et compotes": {
             "Fruits": ["Abricot", "Poire", "Griotte", "Confiture de fraises", "Confiture de prunes", "Cerise", "Confiture de framboises", "Coing", "Ananas", "Confiture de mangue", "Autre"],
             "Légumes": ["Cornichons", "Poivrons marinés", "Purée de tomates", "Betterave", "Ajvar", "Pickles", "Choucroute", "Autre"]
@@ -646,7 +635,6 @@ function renderCategories() {
     html += `<div class="categories-grid">`;
     catList.forEach(cat => {
         const color = getCategoryColor(cat);
-        // Proveravamo da li je u pitanju "Ostalo" (na bilo kom jeziku)
         if (isOtherButton(cat)) {
             html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('')">${cat} ➜</button>`;
         } else {
@@ -1172,24 +1160,19 @@ function handleBackAction() {
     console.log('⬅️ Trenutni ekran stanje:', currentScreenState);
     
     if (currentScreenState === 'dataEntry') {
-        // Sa unosa podataka vrati na delove proizvoda (ili podkategorije ako delovi ne postoje)
         if (currentSubcategory) {
             renderProductParts(currentSubcategory);
         } else {
             renderSubcategories(currentCategory);
         }
     } else if (currentScreenState === 'productParts') {
-        // Sa delova proizvoda vrati na podkategorije
         renderSubcategories(currentCategory);
     } else if (currentScreenState === 'subcategories') {
-        // Sa podkategorija vrati na glavne kategorije
         renderCategories();
     } else if (currentScreenState === 'categories') {
-        // Sa glavnih kategorija vrati na jezike
         showScreen('languageScreen');
         renderLanguages();
     } else {
-        // Za inventar, spisak i ostalo vrati na glavne kategorije
         showScreen('mainScreen');
         renderCategories();
     }
@@ -1204,12 +1187,27 @@ document.addEventListener('DOMContentLoaded', function() {
         loginBtn.addEventListener('click', function() { triggerLogin(); });
     }
 
+    // Globalno slušanje Enter tastera za sve inpute
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Enter') {
             const phoneField = document.getElementById('phoneInput');
             if (phoneField && document.activeElement === phoneField) {
                 e.preventDefault();
                 triggerLogin();
+                return;
+            }
+
+            // Podrška za Enter unutar forme za unos proizvoda (dataEntry)
+            if (currentScreenState === 'dataEntry') {
+                const active = document.activeElement;
+                if (active && (active.tagName === 'INPUT' || active.tagName === 'SELECT')) {
+                    e.preventDefault();
+                    // Ako je u polju za čuvanje ili poslednjem elementu, sačuvaj proizvod
+                    const saveBtn = document.querySelector('.btn-save');
+                    if (saveBtn) {
+                        saveProduct();
+                    }
+                }
             }
         }
     });
