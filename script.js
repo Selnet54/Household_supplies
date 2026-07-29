@@ -3,25 +3,20 @@
 // ============================================
 console.log('✅ Script.js je učitan!');
 
-// ===== 0. EXIT FUNKCIJA =====
 function exitApp() {
-    console.log("🚪 Exit dugme kliknuto!");
+    // Direktno prikazujemo login ekran pomoću vaše funkcije za ekrane
+    showScreen('loginScreen');
     
-    // Pokušaj prvo bez reload-a
-    try {
-        document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
-        const login = document.getElementById('loginScreen');
-        if (login) {
-            login.style.display = 'flex';
-            document.getElementById('phoneInput').value = '';
-            document.getElementById('phoneInput').focus();
-            currentScreenState = 'languages';
-            console.log('✅ Vraćen na login');
-        }
-    } catch(e) {
-        // Ako ne uspe, RELOAD
-        console.log('🔄 Reload kao fallback');
-        location.reload();
+    // Očistimo polje za unos telefona i vratimo fokus na njega
+    const phoneInput = document.getElementById('phoneInput');
+    if (phoneInput) {
+        phoneInput.value = '';
+        phoneInput.focus();
+    }
+    
+    // Resetujemo stanje ako pratite trenutni ekran
+    if (typeof currentScreenState !== 'undefined') {
+        currentScreenState = 'login';
     }
 }
 // ===== 1. JEZICI =====
