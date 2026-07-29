@@ -5,32 +5,53 @@ console.log('✅ Script.js je učitan!');
 
 // ===== 0. EXIT FUNKCIJA =====
 function exitApp() {
-    console.log("Exit dugme kliknuto!");
+    console.log("🚪 Exit dugme kliknuto!");
     
     // 1. Sakrij SVE ekrane
     const screens = document.querySelectorAll('.screen');
-    screens.forEach(screen => {
+    console.log(`📱 Pronađeno ekrana: ${screens.length}`);
+    screens.forEach((screen, index) => {
+        console.log(`  Ekran ${index}: ${screen.id}`);
         screen.style.display = 'none';
     });
     
     // 2. Prikaži login ekran
     const loginScreen = document.getElementById('loginScreen');
+    console.log(`🔍 Login ekran pronađen: ${!!loginScreen}`);
+    
     if (loginScreen) {
         loginScreen.style.display = 'flex';
-        // Resetuj stanje
+        console.log('✅ Login ekran prikazan');
+        
+        // Očisti i fokusiraj polje za telefon
         const phoneInput = document.getElementById('phoneInput');
         if (phoneInput) {
             phoneInput.value = '';
-            setTimeout(() => phoneInput.focus(), 100);
+            setTimeout(() => {
+                phoneInput.focus();
+                console.log('📞 Fokus na telefon polje');
+            }, 100);
         }
+        
         // Resetuj trenutno stanje
         currentScreenState = 'languages';
+        console.log(`🔄 Stanje resetovano na: ${currentScreenState}`);
+        
     } else {
-        console.error("Greška: ID 'loginScreen' nije pronađen!");
-        // Fallback - ako loginScreen ne postoji, pokušaj da prikažeš prvi ekran
-        const firstScreen = document.querySelector('.screen');
+        console.error("❌ Greška: ID 'loginScreen' nije pronađen!");
+        
+        // Fallback - prikaži prvi ekran koji nije sakriven
+        const firstScreen = document.querySelector('.screen:not([style*="display: none"])');
         if (firstScreen) {
+            console.log(`🔍 Fallback: prikazujem ekran: ${firstScreen.id}`);
             firstScreen.style.display = 'flex';
+        } else {
+            // Ako su svi sakriveni, prikaži prvi
+            const anyScreen = document.querySelector('.screen');
+            if (anyScreen) {
+                console.log(`🔍 Fallback: prikazujem prvi ekran: ${anyScreen.id}`);
+                anyScreen.style.display = 'flex';
+            }
         }
     }
 }
