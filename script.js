@@ -6,12 +6,29 @@ console.log('✅ Script.js je učitan!');
 // ===== 0. EXIT FUNKCIJA =====
 function exitApp() {
     console.log("🚪 Exit dugme kliknuto!");
-    document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
-    document.getElementById('loginScreen').style.display = 'flex';
-    document.getElementById('phoneInput').value = '';
-    document.getElementById('phoneInput').focus();
-    currentScreenState = 'languages';
-    alert('✅ Vraćen na login!'); // Ovo će ti pokazati da je pozvano
+    
+    // 1. Ako je aplikacija u hibridnom okruženju (Cordova / PhoneGap)
+    if (typeof navigator !== 'undefined' && navigator.app && navigator.app.exitApp) {
+        navigator.app.exitApp();
+        return;
+    }
+    
+    // 2. Ako je u Capacitor okruženju
+    if (typeof window !== 'undefined' && window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
+        window.Capacitor.Plugins.App.exitExit();
+        return;
+    }
+
+    // 3. Pokušaj zatvaranja prozora u standardnom browseru
+    try {
+        window.close();
+    } catch (e) {
+        console.log("window.close() nije dozvoljen od strane browsera.");
+    }
+
+    // 4. Rezervna opcija (fallback) ukoliko browser blokira zatvaranje:
+    // Prazni ekran i uklanja sav sadržaj bez ikakvih obaveštenja i alert-a.
+    document.body.innerHTML = '<div style="display:flex;justify-content:center;align-items:center;height:100vh;background:#000;color:#fff;font-family:sans-serif;font-size:24px;">Aplikacija je zatvorena.</div>';
 }
 // ===== 1. JEZICI =====
 const languages = {
