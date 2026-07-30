@@ -1278,19 +1278,27 @@ if (loginBtn) {
         }
     });
     
-    document.getElementById('exitLoginBtn')?.addEventListener('click', exitApp);
-    document.getElementById('exitLangBtn')?.addEventListener('click', exitApp);
-    document.getElementById('exitMainBtn')?.addEventListener('click', exitApp);
+    ddocument.getElementById('exitLoginBtn')?.addEventListener('click', exitApp);
+document.getElementById('exitLangBtn')?.addEventListener('click', exitApp);
+document.getElementById('exitMainBtn')?.addEventListener('click', exitApp);
 
-    // ===== BACK DUGME =====
-    document.getElementById('backBtn')?.addEventListener('click', handleBackAction);
+// ===== BACK DUGME =====
+document.getElementById('backBtn')?.addEventListener('click', handleBackAction);
 
-    document.getElementById('inventoryBtn')?.addEventListener('click', function() { renderInventory(); });
-    document.getElementById('shoppingBtn')?.addEventListener('click', function() { renderShoppingList(); });
-
-    console.log('✅ Svi događaji povezani!');
+document.getElementById('inventoryBtn')?.addEventListener('click', function() {
+    renderInventory();
 });
 
+document.getElementById('shoppingBtn')?.addEventListener('click', function() {
+    renderShoppingList();
+});
+
+// Klik na logo ekran -> Login
+document.getElementById('welcomeScreen')?.addEventListener('click', function () {
+    showScreen('loginScreen');
+});
+
+console.log('✅ Svi događaji povezani!');
 // ============================================
 // GLOBALNA FUNKCIJA ZA LOGIN
 // ============================================
