@@ -15,15 +15,25 @@ function exitApp() {
     
     // 2. Ako je u Capacitor okruženju
     if (typeof window !== 'undefined' && window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
-        window.Capacitor.Plugins.App.exitExit();
+        window.Capacitor.Plugins.App.exitApp();
         return;
     }
 
-    // 3. Pokušaj zatvaranja prozora u standardnom browseru
+    // 3. Pokušaj zatvaranja prozora u standardnom browseru / mobilnom uređaju
     try {
         window.close();
     } catch (e) {
-        console.log("window.close() nije dozvoljen od strane browsera.");
+        // Ignorišemo grešku
+    }
+
+    // Ako browser/Android blokira zatvaranje (što je slučaj u 99% mobilnih pretraživača),
+    // vraćamo aplikaciju na login ekran i čistimo polje za telefon da bude spremna za ponovnu upotrebu.
+    const phoneInput = document.getElementById('phoneInput');
+    if (phoneInput) phoneInput.value = '';
+    
+    if (typeof showScreen === 'function') {
+        showScreen('loginScreen');
+        currentScreenState = 'login';
     }
 }
 // ===== 1. JEZICI =====
