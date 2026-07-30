@@ -126,7 +126,7 @@
                 <span>🔒 3: Maximum attempts</span>
             </div>
             <!-- EXIT DUGME -->
-            <button id="exitLoginBtn" class="btn btn-red" onclick="exitApp()">✖ EXIT</button>
+            <button id="exitLoginBtn" class="btn btn-red" onclick="event.stopPropagation(); exitApp();" style="position: relative; z-index: 9999; cursor: pointer;">✖ EXIT</button>
         </div>
     </div>
 </div>
