@@ -126,14 +126,8 @@
                 <span>🔒 3: Maximum attempts</span>
             </div>
             <!-- OVO JE POPRAVLJEN EXIT DUGME -->
-            <button id="exitLoginBtn" class="btn btn-red" onclick="window.close()">✖ EXIT</button>
-                document.querySelectorAll('.screen').forEach(s => s.style.display='none');
-                document.getElementById('loginScreen').style.display='flex';
-                document.getElementById('phoneInput').value='';
-                document.getElementById('phoneInput').focus();
-                currentScreenState='languages';
-                console.log('✅ EXIT DIREKTNO RADI');
-            ">✖ EXIT</button>
+            <!-- ISPRAVLJENO -->
+            <button id="exitLoginBtn" class="btn btn-red" onclick="exitApp()">✖ EXIT</button>
         </div>
     </div>
 </div>
