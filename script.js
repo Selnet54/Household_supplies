@@ -5,7 +5,7 @@ console.log('✅ Script.js je učitan!');
 
 function exitApp() {
     document.getElementById('phoneInput').value = '';
-    showScreen('welcomeScreen');
+    showScreen("loginScreen" );
 }
 // ===== 1. JEZICI =====
 const languages = {
