@@ -4,12 +4,8 @@
 console.log('✅ Script.js je učitan!');
 
 function exitApp() {
-    if (confirm('Do you want to exit?')) {
-
-        document.getElementById('phoneInput').value = '';
-
-        showScreen('welcomeScreen');
-    }
+    document.getElementById('phoneInput').value = '';
+    showScreen('welcomeScreen');
 }
 // ===== 1. JEZICI =====
 const languages = {
