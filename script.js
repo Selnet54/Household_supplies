@@ -3,13 +3,37 @@
 // ============================================
 console.log('✅ Script.js je učitan!');
 
+// ===== TRENUTNO STANJE =====
+let currentLang = 'sr';
+let currentCategory = '';
+let currentSubcategory = '';
+let currentProductPart = '';
+let currentScreenState = 'languages';
+
+// ===== 0. EXIT FUNKCIJA =====
 function exitApp() {
-    if (confirm('Do you want to exit?')) {
-
-        document.getElementById('phoneInput').value = '';
-
-        showScreen('welcomeScreen');
+    console.log("🚪 Exit dugme kliknuto!");
+    
+    // Sakrij sve ekrane
+    document.querySelectorAll('.screen').forEach(s => {
+        s.style.display = 'none';
+    });
+    
+    // Prikaži login ekran
+    const loginScreen = document.getElementById('loginScreen');
+    if (loginScreen) {
+        loginScreen.style.display = 'flex';
     }
+    
+    // Očisti i fokusiraj
+    const phoneInput = document.getElementById('phoneInput');
+    if (phoneInput) {
+        phoneInput.value = '';
+        setTimeout(() => phoneInput.focus(), 100);
+    }
+    
+    // Resetuj stanje
+    currentScreenState = 'languages';
 }
 // ===== 1. JEZICI =====
 const languages = {
@@ -1248,42 +1272,58 @@ function handleBackAction() {
 // ===== 10. GLAVNI DOGAĐAJI =====
 document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ DOM je spreman!');
-    
-    // ... tvoj postojeći kod ...
-    
-    // ===== EXIT DUGME - SAMO JEDNOM =====
-    const exitBtn = document.getElementById('exitLoginBtn');
-    if (exitBtn) {
-        // Ukloni sve postojeće event listenere (ako ih ima)
-        const newExitBtn = exitBtn.cloneNode(true);
-        exitBtn.parentNode.replaceChild(newExitBtn, exitBtn);
-        
-        // Dodaj NOVI event listener
-        newExitBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            exitApp();
-        });
-        console.log('✅ EXIT dugme povezano (samo jednom)');
-    }
-});
-    
-    document.getElementById('exitLoginBtn')?.addEventListener('click', exitApp);
-    document.getElementById('exitLangBtn')?.addEventListener('click', exitApp);
-    document.getElementById('exitMainBtn')?.addEventListener('click', exitApp);
 
-    // ===== BACK DUGME =====
+    // LOGIN dugme
+    const loginBtn = document.getElementById('loginBtn');
+    if (loginBtn) {
+        loginBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            triggerLogin();
+        });
+    }
+
+    // ENTER na tastaturi
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            const phoneField = document.getElementById('phoneInput');
+            if (phoneField && document.activeElement === phoneField) {
+                e.preventDefault();
+                triggerLogin();
+            }
+        }
+    });
+    
+    // EXIT dugmad
+    document.getElementById('exitLoginBtn')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        exitApp();
+    });
+    document.getElementById('exitLangBtn')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        exitApp();
+    });
+    document.getElementById('exitMainBtn')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        exitApp();
+    });
+
+    // BACK dugme
     document.getElementById('backBtn')?.addEventListener('click', handleBackAction);
 
-    document.getElementById('inventoryBtn')?.addEventListener('click', function() { renderInventory(); });
-    document.getElementById('shoppingBtn')?.addEventListener('click', function() { renderShoppingList(); });
+    // INVENTORY dugme
+    document.getElementById('inventoryBtn')?.addEventListener('click', function() { 
+        renderInventory(); 
+    });
+    
+    // SHOPPING dugme
+    document.getElementById('shoppingBtn')?.addEventListener('click', function() { 
+        renderShoppingList(); 
+    });
 
     console.log('✅ Svi događaji povezani!');
 });
 
-// ============================================
-// GLOBALNA FUNKCIJA ZA LOGIN
-// ============================================
+// ===== LOGIN FUNKCIJA =====
 function triggerLogin() {
     const phoneInput = document.getElementById('phoneInput');
     if (!phoneInput) {
