@@ -25,10 +25,6 @@ function exitApp() {
     } catch (e) {
         console.log("window.close() nije dozvoljen od strane browsera.");
     }
-
-    // 4. Rezervna opcija (fallback) ukoliko browser blokira zatvaranje:
-    // Prazni ekran i uklanja sav sadržaj bez ikakvih obaveštenja i alert-a.
-    document.body.innerHTML = '<div style="display:flex;justify-content:center;align-items:center;height:100vh;background:#000;color:#fff;font-family:sans-serif;font-size:24px;">Aplikacija je zatvorena.</div>';
 }
 // ===== 1. JEZICI =====
 const languages = {
