@@ -3,11 +3,16 @@
 // ============================================
 console.log('✅ Script.js je učitan!');
 
+// ===== PREPRAVLJEN EXIT =====
 function exitApp() {
+    console.log("🚪 Exit dugme kliknuto!");
     document.getElementById('phoneInput').value = '';
-    showScreen("loginScreen");
+    
+    // Direktno prikaži login
+    document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('phoneInput').focus();
 }
-
 // ===== 1. JEZICI =====
 const languages = {
     sr: { name: 'Srpski', flag: '/Household_supplies/icons/jezici/srpski.png' },
