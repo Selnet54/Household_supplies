@@ -109,45 +109,27 @@
     </style>
 </head>
 <body>
+
 <!-- EKRAN 1: LOGIN -->
-<div id="loginScreen" class="screen" style="display:none;">
+<div id="loginScreen" class="screen">
     <div class="login-container">
         <div class="login-box">
-            <img src="icons/logo.png" alt="SUPPLIES" class="logo-img"
-                 id="logoImg" onerror="this.style.display='none'">
-
+            <img src="icons/logo.png" alt="Zalihe" class="logo-img" id="logoImg" onerror="this.style.display='none'">
             <div class="logo-text">SUPPLIES</div>
-
-            <div style="font-size:18px;color:#aaa;margin-bottom:15px;">
-                Home inventory management
-            </div>
-
+            <div style="font-size:18px;color:#aaa;margin-bottom:15px;">Home inventory management</div>
             <h2>Login</h2>
-
-            <input type="tel"
-                   id="phoneInput"
-                   placeholder="Enter phone number"
-                   maxlength="15">
-
+            <input type="tel" id="phoneInput" placeholder="Enter phone number" maxlength="15">
             <button id="loginBtn" class="btn btn-green">ENTER</button>
-
-            <button id="forgotBtn" class="btn btn-orange">
-                Forgot your phone number?
-            </button>
-
+            <button id="forgotBtn" class="btn btn-orange">Forgot your phone number?</button>
             <div class="login-limits">
                 <span>📱 4: Maximum number of phone numbers.</span>
                 <span>🔒 3: Maximum attempts</span>
             </div>
-
-            <button id="exitLoginBtn"
-                    class="btn btn-red"
-                    onclick="exitApp(); return false;">
-                ✖ EXIT
-            </button>
+            <button id="exitLoginBtn" class="btn btn-red" onclick="exitApp(); return false;">✖ EXIT</button>
         </div>
     </div>
 </div>
+
 <!-- ========================================== -->
 <!-- EKRAN 2: JEZICI -->
 <!-- ========================================== -->
