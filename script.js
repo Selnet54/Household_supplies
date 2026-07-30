@@ -3,36 +3,13 @@
 // ============================================
 console.log('✅ Script.js je učitan!');
 
-// ===== TRENUTNO STANJE =====
-let currentLang = 'sr';
-let currentCategory = '';
-let currentSubcategory = '';
-let currentProductPart = '';
-let currentScreenState = 'languages';
-
-// ===== 0. EXIT FUNKCIJA =====
 function exitApp() {
-    console.log("🚪 Exit dugme kliknuto!");
-    
-    // DIREKTNO - sakrij sve ekrane
-    document.getElementById('languageScreen').style.display = 'none';
-    document.getElementById('mainScreen').style.display = 'none';
-    
-    // Prikaži login
-    const login = document.getElementById('loginScreen');
-    login.style.display = 'flex';
-    login.style.visibility = 'visible';
-    login.style.opacity = '1';
-    login.style.position = 'relative';
-    login.style.zIndex = '9999';
-    
-    // Očisti
-    document.getElementById('phoneInput').value = '';
-    document.getElementById('phoneInput').focus();
-    
-    // Resetuj
-    currentScreenState = 'languages';
-    currentLang = 'sr';
+    if (confirm('Do you want to exit?')) {
+
+        document.getElementById('phoneInput').value = '';
+
+        showScreen('welcomeScreen');
+    }
 }
 // ===== 1. JEZICI =====
 const languages = {
@@ -1271,36 +1248,56 @@ function handleBackAction() {
 // ===== 10. GLAVNI DOGAĐAJI =====
 document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ DOM je spreman!');
+
+    const loginBtn = document.getElementById('loginBtn');
+if (loginBtn) {
+    loginBtn.addEventListener('click', function(e) {
+        e.preventDefault(); // Sprečava eventualno osvežavanje stranice ako je dugme u formi
+        triggerLogin(); 
+    });
+}
+
+    // Globalno slušanje Enter tastera za sve inpute
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            const phoneField = document.getElementById('phoneInput');
+            if (phoneField && document.activeElement === phoneField) {
+                e.preventDefault();
+                triggerLogin();
+                return;
+            }
+
+            // Podrška za Enter unutar forme za unos proizvoda (dataEntry)
+            if (currentScreenState === 'dataEntry') {
+                const active = document.activeElement;
+                if (active && (active.tagName === 'INPUT' || active.tagName === 'SELECT')) {
+                    e.preventDefault();
+                    // Ako je u polju za čuvanje ili poslednjem elementu, sačuvaj proizvod
+                    const saveBtn = document.querySelector('.btn-save');
+                    if (saveBtn) {
+                        saveProduct();
+                    }
+                }
+            }
+        }
+    });
     
-    // ... tvoj postojeći kod ...
-    
-    // ===== DIREKTNO POVEZIVANJE LOGIN EXIT =====
-    const exitLoginBtn = document.getElementById('exitLoginBtn');
-    if (exitLoginBtn) {
-        // Ukloni sve postojeće event listenere
-        const newBtn = exitLoginBtn.cloneNode(true);
-        exitLoginBtn.parentNode.replaceChild(newBtn, exitLoginBtn);
-        
-        // Dodaj NOVE event listenere
-        newBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log('🖱️ EXIT klik (login)');
-            exitApp();
-        });
-        
-        // Dodaj i touch event za mobilne
-        newBtn.addEventListener('touchstart', function(e) {
-            e.preventDefault();
-            console.log('📱 EXIT touch (login)');
-            exitApp();
-        });
-        
-        console.log('✅ Login EXIT dugme povezano DIREKTNO');
-    }
+    document.getElementById('exitLoginBtn')?.addEventListener('click', exitApp);
+    document.getElementById('exitLangBtn')?.addEventListener('click', exitApp);
+    document.getElementById('exitMainBtn')?.addEventListener('click', exitApp);
+
+    // ===== BACK DUGME =====
+    document.getElementById('backBtn')?.addEventListener('click', handleBackAction);
+
+    document.getElementById('inventoryBtn')?.addEventListener('click', function() { renderInventory(); });
+    document.getElementById('shoppingBtn')?.addEventListener('click', function() { renderShoppingList(); });
+
+    console.log('✅ Svi događaji povezani!');
 });
 
-// ===== LOGIN FUNKCIJA =====
+// ============================================
+// GLOBALNA FUNKCIJA ZA LOGIN
+// ============================================
 function triggerLogin() {
     const phoneInput = document.getElementById('phoneInput');
     if (!phoneInput) {
