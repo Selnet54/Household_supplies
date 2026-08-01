@@ -7,23 +7,32 @@ console.log('✅ Script.js je učitan!');
 function exitApp() {
     console.log("🚪 Exit dugme kliknuto!");
     
-    // 1. Ako je aplikacija u hibridnom okruženju (Cordova / PhoneGap)
-    if (typeof navigator !== 'undefined' && navigator.app && navigator.app.exitApp) {
-        navigator.app.exitApp();
+    // 1. Ako je u PWA (standalone) modu - vrati na početni ekran
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+        // U PWA modu, preusmeri na about:blank ili početnu stranicu
+        window.location.href = 'about:blank';
         return;
     }
     
-    // 2. Ako je u Capacitor okruženju
-    if (typeof window !== 'undefined' && window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
-        window.Capacitor.Plugins.App.exitExit();
-        return;
-    }
-
-    // 3. Pokušaj zatvaranja prozora u standardnom browseru
+    // 2. Ako je u browseru - prikaži prazan ekran
+    document.body.innerHTML = '';
+    document.body.style.background = '#1a237e';
+    document.body.style.margin = '0';
+    document.body.style.padding = '0';
+    document.body.style.width = '100%';
+    document.body.style.height = '100vh';
+    document.body.style.display = 'flex';
+    document.body.style.justifyContent = 'center';
+    document.body.style.alignItems = 'center';
+    document.body.style.fontSize = '24px';
+    document.body.style.color = '#FFD700';
+    document.body.textContent = '👋 Hvala na korišćenju!';
+    
+    // 3. Pokušaj window.close (ako je moguće)
     try {
         window.close();
-    } catch (e) {
-        console.log("window.close() nije dozvoljen od strane browsera.");
+    } catch(e) {
+        console.log('window.close nije dozvoljen');
     }
 }
 // ===== 1. JEZICI =====
