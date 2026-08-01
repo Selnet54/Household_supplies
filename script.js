@@ -7,50 +7,25 @@ console.log('✅ Script.js je učitan!');
 function exitApp() {
     console.log("🚪 Exit dugme kliknuto!");
     
-    // 1. Sakrij SVE ekrane
-    const screens = document.querySelectorAll('.screen');
-    console.log(`📱 Pronađeno ekrana: ${screens.length}`);
-    screens.forEach((screen, index) => {
-        console.log(`  Ekran ${index}: ${screen.id || 'nema id'}`);
-        // Eksplicitno sakrij svaki ekran
-        screen.style.display = 'none';
-    });
+    // 1. Ako je aplikacija u hibridnom okruženju (Cordova / PhoneGap)
+    if (typeof navigator !== 'undefined' && navigator.app && navigator.app.exitApp) {
+        navigator.app.exitApp();
+        return;
+    }
     
-    // 2. Prikaži login ekran
-    const loginScreen = document.getElementById('loginScreen');
-    console.log(`🔍 Login ekran pronađen: ${!!loginScreen}`);
-    
-    if (loginScreen) {
-        // Postavi display na 'flex' (jer je to default za .screen)
-        loginScreen.style.display = 'flex';
-        console.log('✅ Login ekran prikazan sa display: flex');
-        
-        // Očisti i fokusiraj polje za telefon
-        const phoneInput = document.getElementById('phoneInput');
-        if (phoneInput) {
-            phoneInput.value = '';
-            // Fokusiraj nakon što se ekran prikaže
-            setTimeout(() => {
-                phoneInput.focus();
-                console.log('📞 Fokus na telefon polje');
-            }, 50);
-        }
-        
-        // Resetuj trenutno stanje
-        currentScreenState = 'languages';
-        console.log(`🔄 Stanje resetovano na: ${currentScreenState}`);
-        
-    } else {
-        console.error("❌ Greška: ID 'loginScreen' nije pronađen!");
+    // 2. Ako je u Capacitor okruženju
+    if (typeof window !== 'undefined' && window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
+        window.Capacitor.Plugins.App.exitExit();
+        return;
+    }
+
+    // 3. Pokušaj zatvaranja prozora u standardnom browseru
+    try {
+        window.close();
+    } catch (e) {
+        console.log("window.close() nije dozvoljen od strane browsera.");
     }
 }
-// ===== 6. TRENUTNO STANJE =====
-let currentLang = 'sr';
-let currentCategory = '';
-let currentSubcategory = '';
-let currentProductPart = '';
-let currentScreenState = 'languages'; // 'languages', 'categories', 'subcategories', 'productParts', 'dataEntry', 'inventory', 'shopping'
-
 // ===== 1. JEZICI =====
 const languages = {
     sr: { name: 'Srpski', flag: '/Household_supplies/icons/jezici/srpski.png' },
