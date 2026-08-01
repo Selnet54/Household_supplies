@@ -7,27 +7,34 @@ console.log('✅ Script.js je učitan!');
 function exitApp() {
     console.log("🚪 Exit dugme kliknuto!");
     
-    // IZBRIŠI sve
+    // 1. Ako je u PWA (standalone) modu - vrati na početni ekran
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+        // U PWA modu, preusmeri na about:blank ili početnu stranicu
+        window.location.href = 'about:blank';
+        return;
+    }
+    
+    // 2. Ako je u browseru - prikaži prazan ekran
     document.body.innerHTML = '';
     document.body.style.background = '#1a237e';
     document.body.style.margin = '0';
     document.body.style.padding = '0';
     document.body.style.width = '100%';
     document.body.style.height = '100vh';
+    document.body.style.display = 'flex';
+    document.body.style.justifyContent = 'center';
+    document.body.style.alignItems = 'center';
+    document.body.style.fontSize = '24px';
+    document.body.style.color = '#FFD700';
+    document.body.textContent = '👋 Thanks for using this app!';
+    
+    // 3. Pokušaj window.close (ako je moguće)
+    try {
+        window.close();
+    } catch(e) {
+        console.log('window.close nije dozvoljen');
+    }
 }
-// ===== 1. JEZICI =====
-const languages = {
-    sr: { name: 'Srpski', flag: '/Household_supplies/icons/jezici/srpski.png' },
-    en: { name: 'English', flag: '/Household_supplies/icons/jezici/engleski.png' },
-    de: { name: 'Deutsch', flag: '/Household_supplies/icons/jezici/nemacki.png' },
-    hu: { name: 'Magyar', flag: '/Household_supplies/icons/jezici/madjarski.png' },
-    uk: { name: 'Українська', flag: '/Household_supplies/icons/jezici/ukrajinski.png' },
-    ru: { name: 'Русский', flag: '/Household_supplies/icons/jezici/ruski.png' },
-    zh: { name: '中文', flag: '/Household_supplies/icons/jezici/mandarinski.png' },
-    es: { name: 'Español', flag: '/Household_supplies/icons/jezici/spanski.png' },
-    pt: { name: 'Português', flag: '/Household_supplies/icons/jezici/portugalski.png' },
-    fr: { name: 'Français', flag: '/Household_supplies/icons/jezici/francuski.png' }
-};
 
 // ===== 2. PREVODI =====
 const translations = {
