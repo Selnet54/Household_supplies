@@ -7,10 +7,10 @@ console.log('✅ Script.js je učitan!');
 function exitApp() {
     console.log("🚪 Exit dugme kliknuto!");
     
-    // Koristi currentLang ili 'en' ako nije definisan
-    const lang = currentLang || 'en';
-    const poruka = translations[lang]?.exit_poruka || "Thanks for using this app! 👋";
+    // Uzmi poruku na trenutnom jeziku
+    const poruka = t('exit_poruka') || "Thanks for using this app! 👋";
     
+    // Prikaži plavi ekran sa porukom
     document.body.innerHTML = '';
     document.body.style.background = '#1a237e';
     document.body.style.margin = '0';
