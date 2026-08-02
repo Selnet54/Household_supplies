@@ -3,14 +3,9 @@
 // ============================================
 console.log('✅ Script.js je učitan!');
 
-// ===== 0. EXIT FUNKCIJA =====
+// ===== 0. EXIT FUNKCIJA - PRVA FUNKCIJA =====
 function exitApp() {
     console.log("🚪 Exit dugme kliknuto!");
-    
-    // Uzmi poruku na trenutnom jeziku
-    const poruka = t('exit_poruka') || "Thanks for using this app! 👋";
-    
-    // Prikaži plavi ekran sa porukom
     document.body.innerHTML = '';
     document.body.style.background = '#1a237e';
     document.body.style.margin = '0';
@@ -22,19 +17,16 @@ function exitApp() {
     document.body.style.alignItems = 'center';
     document.body.style.flexDirection = 'column';
     document.body.style.fontFamily = 'Arial, sans-serif';
-    
     document.body.innerHTML = `
         <div style="text-align: center; color: #FFD700;">
             <div style="font-size: 80px; margin-bottom: 20px;">👋</div>
-            <div style="font-size: 32px; font-weight: bold;">${poruka}</div>
+            <div style="font-size: 32px; font-weight: bold;">Thanks for using this app!</div>
             <div style="font-size: 16px; color: #888; margin-top: 30px;">© Supplies App</div>
         </div>
     `;
-    
-    try {
-        window.close();
-    } catch(e) {}
+    try { window.close(); } catch(e) {}
 }
+
 // ===== 1. JEZICI =====
 const languages = {
     sr: { name: 'Srpski', flag: '/Household_supplies/icons/jezici/srpski.png' },
