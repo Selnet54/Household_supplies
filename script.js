@@ -7,29 +7,16 @@ console.log('✅ Script.js je učitan!');
 function exitApp() {
     console.log("🚪 Exit dugme kliknuto!");
     
-    // Proveri da li je login ekran vidljiv
-    const loginScreen = document.getElementById('loginScreen');
-    const isLoginVisible = loginScreen && loginScreen.style.display !== 'none';
-    
-    if (isLoginVisible) {
-        // Na login ekranu - IZAĐI IZ APLIKACIJE
-        console.log("🔴 Izlaz iz aplikacije");
-        try {
-            window.close();
-        } catch(e) {
-            // Ako window.close ne radi, prikaži prazan ekran
-            document.body.innerHTML = '';
-            document.body.style.background = '#1a237e';
-            document.body.style.margin = '0';
-            document.body.style.padding = '0';
-            document.body.style.width = '100%';
-            document.body.style.height = '100vh';
-        }
-    } else {
-        // Na drugom ekranu - VRATI SE NA LOGIN
-        console.log("🔄 Vraćanje na login");
-        document.getElementById('phoneInput').value = '';
-        showScreen('loginScreen');
+    // ZATVORI aplikaciju
+    try {
+        window.close();
+    } catch(e) {
+        document.body.innerHTML = '';
+        document.body.style.background = '#1a237e';
+        document.body.style.margin = '0';
+        document.body.style.padding = '0';
+        document.body.style.width = '100%';
+        document.body.style.height = '100vh';
     }
 }
 // ===== 1. JEZICI =====
