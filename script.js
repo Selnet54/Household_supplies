@@ -7,31 +7,44 @@ console.log('✅ Script.js je učitan!');
 function exitApp() {
     console.log("🚪 Exit dugme kliknuto!");
     
-    // Proveri da li je login ekran vidljiv
-    const loginScreen = document.getElementById('loginScreen');
-    const isLoginVisible = loginScreen && window.getComputedStyle(loginScreen).display === 'flex';
+    const messages = {
+        sr: 'Hvala na korišćenju!',
+        en: 'Thanks for using this app!',
+        de: 'Danke für die Nutzung!',
+        hu: 'Köszönjük a használatot!',
+        uk: 'Дякуємо за використання!',
+        ru: 'Спасибо за использование!',
+        zh: '感谢使用！',
+        es: '¡Gracias por usar!',
+        pt: 'Obrigado por usar!',
+        fr: 'Merci d\'utiliser!'
+    };
     
-    if (isLoginVisible) {
-        // Na login ekranu - ZATVORI
-        document.body.innerHTML = '';
-        document.body.style.background = '#1a237e';
-        document.body.style.margin = '0';
-        document.body.style.padding = '0';
-        document.body.style.width = '100%';
-        document.body.style.height = '100vh';
-    } else {
-        // Na drugom ekranu - VRATI NA LOGIN
-        document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
-        if (loginScreen) {
-            loginScreen.style.display = 'flex';
-        }
-        const phoneInput = document.getElementById('phoneInput');
-        if (phoneInput) {
-            phoneInput.value = '';
-            phoneInput.focus();
-        }
-        currentScreenState = 'languages';
-    }
+    const msg = messages[currentLang] || messages.en;
+    
+    document.body.innerHTML = '';
+    document.body.style.background = '#1a237e';
+    document.body.style.margin = '0';
+    document.body.style.padding = '0';
+    document.body.style.width = '100%';
+    document.body.style.height = '100vh';
+    document.body.style.display = 'flex';
+    document.body.style.justifyContent = 'center';
+    document.body.style.alignItems = 'center';
+    document.body.style.flexDirection = 'column';
+    document.body.style.fontFamily = 'Arial, sans-serif';
+    
+    document.body.innerHTML = `
+        <div style="text-align: center; color: #FFD700;">
+            <div style="font-size: 80px; margin-bottom: 20px;">👋</div>
+            <div style="font-size: 32px; font-weight: bold; margin-bottom: 10px;">${msg}</div>
+            <div style="font-size: 16px; color: #888; margin-top: 20px;">© Supplies App</div>
+        </div>
+    `;
+    
+    try {
+        window.close();
+    } catch(e) {}
 }
 // ===== 1. JEZICI =====
 const languages = {
