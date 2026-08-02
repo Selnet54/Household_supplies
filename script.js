@@ -6,18 +6,8 @@ console.log('✅ Script.js je učitan!');
 // ===== 0. EXIT FUNKCIJA =====
 function exitApp() {
     console.log("🚪 Exit dugme kliknuto!");
-    
-    // ZATVORI aplikaciju
-    try {
-        window.close();
-    } catch(e) {
-        document.body.innerHTML = '';
-        document.body.style.background = '#1a237e';
-        document.body.style.margin = '0';
-        document.body.style.padding = '0';
-        document.body.style.width = '100%';
-        document.body.style.height = '100vh';
-    }
+    document.getElementById('phoneInput').value = '';
+    showScreen('loginScreen');
 }
 // ===== 1. JEZICI =====
 const languages = {
