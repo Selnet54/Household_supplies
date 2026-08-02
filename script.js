@@ -7,10 +7,17 @@ console.log('✅ Script.js je učitan!');
 function exitApp() {
     console.log("🚪 Exit dugme kliknuto!");
     
-    // Uzmi poruku na trenutnom jeziku
-    const poruka = t('exit_poruka') || "Thanks for using this app! 👋";
+    // Proveri da li je login ekran vidljiv
+    const loginScreen = document.getElementById('loginScreen');
+    const isLoginVisible = loginScreen && window.getComputedStyle(loginScreen).display === 'flex';
     
-    // Prikaži plavi ekran sa porukom
+    let poruka;
+    if (isLoginVisible) {
+        poruka = "Thanks for using this app! 👋"; // Uvek engleski na login
+    } else {
+        poruka = t('exit_poruka') || "Thanks for using this app! 👋";
+    }
+    
     document.body.innerHTML = '';
     document.body.style.background = '#1a237e';
     document.body.style.margin = '0';
