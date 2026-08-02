@@ -7,16 +7,9 @@ console.log('✅ Script.js je učitan!');
 function exitApp() {
     console.log("🚪 Exit dugme kliknuto!");
     
-    // Proveri da li je login ekran vidljiv
-    const loginScreen = document.getElementById('loginScreen');
-    const isLoginVisible = loginScreen && window.getComputedStyle(loginScreen).display === 'flex';
-    
-    let poruka;
-    if (isLoginVisible) {
-        poruka = "Thanks for using this app! 👋"; // Uvek engleski na login
-    } else {
-        poruka = t('exit_poruka') || "Thanks for using this app! 👋";
-    }
+    // Koristi currentLang ili 'en' ako nije definisan
+    const lang = currentLang || 'en';
+    const poruka = translations[lang]?.exit_poruka || "Thanks for using this app! 👋";
     
     document.body.innerHTML = '';
     document.body.style.background = '#1a237e';
