@@ -7,32 +7,29 @@ console.log('✅ Script.js je učitan!');
 function exitApp() {
     console.log("🚪 Exit dugme kliknuto!");
     
-    // 1. Ako je u PWA (standalone) modu - vrati na početni ekran
-    if (window.matchMedia('(display-mode: standalone)').matches) {
-        // U PWA modu, preusmeri na about:blank ili početnu stranicu
-        window.location.href = 'about:blank';
-        return;
-    }
+    // Proveri da li je login ekran vidljiv
+    const loginScreen = document.getElementById('loginScreen');
+    const isLoginVisible = loginScreen && loginScreen.style.display !== 'none';
     
-    // 2. Ako je u browseru - prikaži prazan ekran
-    document.body.innerHTML = '';
-    document.body.style.background = '#1a237e';
-    document.body.style.margin = '0';
-    document.body.style.padding = '0';
-    document.body.style.width = '100%';
-    document.body.style.height = '100vh';
-    document.body.style.display = 'flex';
-    document.body.style.justifyContent = 'center';
-    document.body.style.alignItems = 'center';
-    document.body.style.fontSize = '24px';
-    document.body.style.color = '#FFD700';
-    document.body.textContent = '👋 Thanks for using this app!';
-    
-    // 3. Pokušaj window.close (ako je moguće)
-    try {
-        window.close();
-    } catch(e) {
-        console.log('window.close nije dozvoljen');
+    if (isLoginVisible) {
+        // Na login ekranu - IZAĐI IZ APLIKACIJE
+        console.log("🔴 Izlaz iz aplikacije");
+        try {
+            window.close();
+        } catch(e) {
+            // Ako window.close ne radi, prikaži prazan ekran
+            document.body.innerHTML = '';
+            document.body.style.background = '#1a237e';
+            document.body.style.margin = '0';
+            document.body.style.padding = '0';
+            document.body.style.width = '100%';
+            document.body.style.height = '100vh';
+        }
+    } else {
+        // Na drugom ekranu - VRATI SE NA LOGIN
+        console.log("🔄 Vraćanje na login");
+        document.getElementById('phoneInput').value = '';
+        showScreen('loginScreen');
     }
 }
 // ===== 1. JEZICI =====
