@@ -4,7 +4,7 @@
 console.log('✅ Script.js je učitan!');
 
 // ===== TRENUTNO STANJE =====
-let currentLang = 'sr';
+let currentLang = 'en';  // ← Promenjeno sa 'sr' na 'en'
 let currentCategory = '';
 let currentSubcategory = '';
 let currentProductPart = '';
@@ -23,12 +23,12 @@ function exitApp() {
     
     let poruka;
     
-    // Ako je login ili language ekran - UVEK ENGLESKI
+    // Ako je login ili language ekran - UVEK ENGLESKI (ne koristi t())
     if (isLoginVisible || isLanguageVisible) {
         poruka = "Thanks for using this app! 👋";
     } else {
         // Inače koristi trenutni jezik
-        poruka = t('exit_poruka') || "Thanks for using this app! 👋";
+        poruka = translations[currentLang]?.exit_poruka || "Thanks for using this app! 👋";
     }
     
     // PRIKAŽI PLAVI EKRAN
@@ -742,6 +742,11 @@ function isOtherButton(text) {
 
 // ===== 7. RENDER FUNKCIJE =====
 function renderLanguages() {
+    // Ako currentLang nije postavljen, postavi na 'en'
+    if (!currentLang || currentLang === '') {
+        currentLang = 'en';
+    }
+    
     currentScreenState = 'languages';
     const grid = document.getElementById('languageGrid');
     if (!grid) return;
@@ -1456,12 +1461,13 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ Svi događaji povezani!');
 });
 // ============================================
+// ============================================
 // GLOBALNA FUNKCIJA ZA LOGIN
 // ============================================
 function triggerLogin() {
     const phoneInput = document.getElementById('phoneInput');
     if (!phoneInput) {
-        alert('Greška: Polje za telefon nije pronađeno!');
+        alert('Error: Phone input not found!');
         return;
     }
     const phone = phoneInput.value.trim();
@@ -1469,6 +1475,6 @@ function triggerLogin() {
         showScreen('languageScreen');
         renderLanguages();
     } else {
-        alert('Unesite validan broj telefona (9+ cifara)!');
+        alert('Please enter a valid phone number (9+ digits)!');
     }
 }
