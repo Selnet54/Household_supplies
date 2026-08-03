@@ -53,23 +53,8 @@ function exitApp() {
 
 // ===== MODERNI ALERT (Ispravljeno sa automatskim kreiranjem HTML-a ako nedostaje) =====
 function showModernAlert(title, message, icon = '📢') {
-    let alertDiv = document.getElementById('modernAlert');
-    
-    // Ako alert div ne postoji u HTML-u, kreiramo ga dinamički da aplikacija ne pukne
-    if (!alertDiv) {
-        alertDiv = document.createElement('div');
-        alertDiv.id = 'modernAlert';
-        alertDiv.style.cssText = 'position:fixed; top:20px; right:20px; background:#333; color:#fff; padding:15px; border-radius:8px; z-index:9999; display:none; align-items:center; box-shadow:0 4px 6px rgba(0,0,0,0.3);';
-        alertDiv.innerHTML = `
-            <span id="alertIcon" style="font-size:24px; margin-right:10px;">${icon}</span>
-            <div>
-                <div id="alertTitle" style="font-weight:bold; font-size:16px;">${title}</div>
-                <div id="alertMessage" style="font-size:14px;">${message}</div>
-            </div>
-            <button onclick="closeModernAlert()" style="margin-left:15px; background:none; border:none; color:#fff; font-size:16px; cursor:pointer;">✖</button>
-        `;
-        document.body.appendChild(alertDiv);
-    }
+    const alertDiv = document.getElementById('modernAlert');
+    if (!alertDiv) return; // Ako iz nekog razloga ne postoji, izadji
 
     const iconEl = document.getElementById('alertIcon');
     const titleEl = document.getElementById('alertTitle');
