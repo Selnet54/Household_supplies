@@ -851,11 +851,13 @@ function handleBackAction() {
     }
 }
 
-// ===== 8. GLAVNI DOGAĐAJI =====
+// ===== GLAVNI DOGAĐAJI =====
 document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ DOM je spreman!');
 
     const loginBtn = document.getElementById('loginBtn');
+    const phoneInput = document.getElementById('phoneInput');
+
     if (loginBtn) {
         loginBtn.addEventListener('click', function(e) {
             e.preventDefault();
@@ -863,16 +865,59 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') {
-            const phoneField = document.getElementById('phoneInput');
-            if (phoneField && document.activeElement === phoneField) {
+    // Direktan listener za Enter taster na polju za telefon
+    if (phoneInput) {
+        phoneInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
                 e.preventDefault();
                 triggerLogin();
-                return;
             }
-        }
+        });
+    }
+    
+    document.getElementById('exitLoginBtn')?.addEventListener('click', exitApp);
+    document.getElementById('exitLangBtn')?.addEventListener('click', exitApp);
+    document.getElementById('exitMainBtn')?.addEventListener('click', exitApp);
+
+    document.getElementById('backBtn')?.addEventListener('click', handleBackAction);
+    document.getElementById('inventoryBtn')?.addEventListener('click', function() { renderInventory(); });
+    
+    const shoppingBtn = document.getElementById('shoppingBtn');
+    if (shoppingBtn) {
+        shoppingBtn.addEventListener('click', function() { 
+            showModernAlert('Info', 'Shopping list view', '🛒');
+        });
+    }
+
+    // ===== SUPPORT DOGAĐAJI =====
+    document.getElementById('supportBtn')?.addEventListener('click', openSupportDialog);
+    document.getElementById('closeSupportBtn')?.addEventListener('click', closeSupportDialog);
+    document.getElementById('closeSupportBtn2')?.addEventListener('click', closeSupportDialog);
+    
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeSupportDialog();
     });
+
+    console.log('✅ Svi događaji povezani!');
+});
+
+// ============================================
+// GLOBALNA FUNKCIJA ZA LOGIN
+// ============================================
+function triggerLogin() {
+    const phoneInput = document.getElementById('phoneInput');
+    if (!phoneInput) {
+        showModernAlert('Error', 'Phone input not found!', '❌');
+        return;
+    }
+    const phone = phoneInput.value.trim();
+    if (phone.length >= 3) {
+        showScreen('languageScreen');
+        renderLanguages();
+    } else {
+        showModernAlert('Invalid Input', 'Please enter a valid phone number!', '📱');
+    }
+}
     
     document.getElementById('exitLoginBtn')?.addEventListener('click', exitApp);
     document.getElementById('exitLangBtn')?.addEventListener('click', exitApp);
