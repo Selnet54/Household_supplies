@@ -14,11 +14,14 @@ let currentScreenState = 'languages';
 function exitApp() {
     console.log("🚪 Exit dugme kliknuto!");
     
-    // Proveri da li je login ili language ekran vidljiv
+    // Proveri koji je ekran vidljiv
     const loginScreen = document.getElementById('loginScreen');
     const languageScreen = document.getElementById('languageScreen');
+    const mainScreen = document.getElementById('mainScreen');
+    
     const isLoginVisible = loginScreen && window.getComputedStyle(loginScreen).display === 'flex';
     const isLanguageVisible = languageScreen && window.getComputedStyle(languageScreen).display === 'flex';
+    const isMainVisible = mainScreen && window.getComputedStyle(mainScreen).display === 'flex';
     
     let poruka;
     
@@ -30,7 +33,7 @@ function exitApp() {
         poruka = t('exit_poruka') || "Thanks for using this app! 👋";
     }
     
-    // Prikaži plavi ekran sa porukom
+    // PRIKAŽI PLAVI EKRAN SA PORUKOM
     document.body.innerHTML = '';
     document.body.style.background = '#1a237e';
     document.body.style.margin = '0';
@@ -51,10 +54,12 @@ function exitApp() {
         </div>
     `;
     
+    // Pokušaj zatvoriti prozor (samo ako je otvoren preko JS)
     try {
         window.close();
     } catch(e) {
-        // Browser ne dozvoljava zatvaranje
+        // Browser ne dozvoljava - samo prikaži poruku
+        console.log('Browser does not allow window.close()');
     }
 }
 // ===== SUPPORT FUNKCIJE =====
