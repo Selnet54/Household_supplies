@@ -189,7 +189,10 @@
             <h2>Login</h2>
             <input type="tel" id="phoneInput" placeholder="Enter phone number" maxlength="15">
             <button id="loginBtn" class="btn btn-green">ENTER</button>
+            
+            <!-- DODAJ OVO -->
             <button id="supportBtn" class="btn btn-orange" onclick="openSupportDialog()">📧 Support</button>
+            
             <div class="login-limits">
                 <span>📱 4: Maximum number of phone numbers.</span>
                 <span>🔒 3: Maximum attempts</span>
@@ -199,13 +202,10 @@
     </div>
 </div>
 
-<!-- ===== SAMO JEDAN SUPPORT DIJALOG ===== -->
+<!-- ===== SUPPORT DIJALOG ===== -->
 <div id="supportDialog" class="support-overlay" style="display:none;">
     <div class="support-box">
-        <button class="support-close" onclick="
-            document.getElementById('supportDialog').style.display='none';
-            document.getElementById('supportDialog').classList.remove('active');
-        ">✖</button>
+        <button class="support-close" onclick="closeSupportDialog()">✖</button>
         
         <h2>📧 Support</h2>
         
@@ -240,10 +240,7 @@
             </div>
         </div>
         
-        <button class="btn btn-green" style="margin-top:20px;" onclick="
-            document.getElementById('supportDialog').style.display='none';
-            document.getElementById('supportDialog').classList.remove('active');
-        ">✅ Got it</button>
+        <button class="btn btn-green" style="margin-top:20px;" onclick="closeSupportDialog()">✅ Got it</button>
     </div>
 </div>
 <!-- ========================================== -->
