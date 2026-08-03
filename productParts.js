@@ -534,3 +534,136 @@ const productParts = {
         "Autre": ["Note : Saisir le nom du produit"]
     }
 };
+/* ===== RESPONSIVE ZA SUPPORT ===== */
+@media (max-width: 600px) {
+    .support-box {
+        padding: 25px 20px;
+        max-width: 95%;
+    }
+    
+    .support-box h2 {
+        font-size: 24px;
+    }
+    
+    .support-box p {
+        font-size: 14px;
+    }
+    
+    .support-email {
+        font-size: 16px;
+    }
+}
+
+/* ===== MODERNI ALERT ===== */
+.modern-alert-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 999999;
+    animation: fadeIn 0.3s ease;
+}
+
+.modern-alert-overlay.active {
+    display: flex;
+}
+
+.modern-alert-box {
+    background: #c62828;
+    border-radius: 24px;
+    padding: 40px 45px;
+    max-width: 450px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+    border: 3px solid #FFD700;
+    animation: slideIn 0.4s ease;
+}
+
+.modern-alert-icon {
+    font-size: 60px;
+    margin-bottom: 15px;
+}
+
+.modern-alert-title {
+    color: #FFD700;
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 12px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.modern-alert-message {
+    color: #ffffff;
+    font-size: 18px;
+    line-height: 1.6;
+    margin-bottom: 25px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+.modern-alert-btn {
+    background: #ffffff;
+    color: #c62828;
+    border: none;
+    padding: 14px 50px;
+    border-radius: 50px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    letter-spacing: 1px;
+}
+
+.modern-alert-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 25px rgba(0,0,0,0.3);
+    background: #FFD700;
+    color: #c62828;
+}
+
+.modern-alert-btn:active {
+    transform: scale(0.95);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from { 
+        transform: translateY(-50px) scale(0.9);
+        opacity: 0;
+    }
+    to { 
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+
+@media (max-width: 600px) {
+    .modern-alert-box {
+        padding: 30px 25px;
+        max-width: 95%;
+    }
+    .modern-alert-title {
+        font-size: 24px;
+    }
+    .modern-alert-message {
+        font-size: 16px;
+    }
+    .modern-alert-btn {
+        padding: 12px 35px;
+        font-size: 16px;
+    }
+    .modern-alert-icon {
+        font-size: 50px;
+    }
+}
+
