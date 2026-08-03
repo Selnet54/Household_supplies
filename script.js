@@ -4,11 +4,11 @@
 console.log('✅ Script.js je učitan!');
 
 // ===== TRENUTNO STANJE =====
-let currentLang = 'en';
+let currentLang = 'sr';
 let currentCategory = '';
 let currentSubcategory = '';
-let currentProductPart = '';
-let currentScreenState = 'languages';
+let db = null;
+let products = [];
 
 // ===== 0. EXIT FUNKCIJA =====
 function exitApp() {
@@ -365,7 +365,7 @@ if (typeof subcategories === 'undefined') {
                 "Pribor": ["Kantica", "Kofa", "Krpa za prašinu", "Metla", "Ostalo"]
             },
             "Ostalo": ["Ostalo"]
-        }
+        },
     hu: {
         "Fehér hús": ["Csirke", "Pulyka", "Libacomb", "Kacsa", "Egyéb"],
         "Vörös hús": ["Sertés", "Bárány", "Birka", "Borjú", "Marha", "Bika", "Ló", "Nyúl", "Egyéb"],
@@ -718,7 +718,6 @@ if (typeof subcategories === 'undefined') {
         "Autre": ["Autre"]
     }
 };
-}
 
 // ===== 6. POMOĆNE FUNKCIJE =====
 function t(key) {
@@ -1224,14 +1223,14 @@ document.addEventListener('DOMContentLoaded', function() {
 function triggerLogin() {
     const phoneInput = document.getElementById('phoneInput');
     if (!phoneInput) {
-        showModernAlert('Error', 'Phone input not found!', '❌');
+        alert('Greška: Polje za telefon nije pronađeno!');
         return;
     }
     const phone = phoneInput.value.trim();
-    if (phone.length >= 3) {
+    if (phone.length >= 9) {
         showScreen('languageScreen');
         renderLanguages();
     } else {
-        showModernAlert('Invalid Input', 'Please enter a valid phone number!', '📱');
+        alert('Unesite validan broj telefona (9+ cifara)!');
     }
 }
