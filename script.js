@@ -785,26 +785,21 @@ function isOtherButton(text) {
 }
 
 // ===== 7. RENDER FUNKCIJE =====
+// ===== 13. RENDER FUNKCIJE =====
 function renderLanguages() {
-    if (!currentLang || currentLang === '') {
-        currentLang = 'en';
-    }
-    currentScreenState = 'languages';
     const grid = document.getElementById('languageGrid');
     if (!grid) return;
     grid.innerHTML = '';
-    Object.keys(languages).forEach(code => {
-        const lang = languages[code];
+    languages.forEach(lang => {
         const btn = document.createElement('button');
         btn.className = 'lang-btn-main';
         btn.innerHTML = `
             <img src="${lang.flag}?v=3" alt="${lang.name}" onerror="this.style.display='none'">
             <span class="lang-name">${lang.name}</span>
         `;
-        btn.onclick = () => selectLanguage(code);
+        btn.onclick = () => selectLanguage(lang.code);
         grid.appendChild(btn);
     });
-    console.log('✅ Jezici prikazani');
 }
 
 function selectLanguage(langCode) {
@@ -814,8 +809,8 @@ function selectLanguage(langCode) {
     renderCategories();
 }
 
+// ===== 14. GLAVNE KATEGORIJE =====
 function renderCategories() {
-    currentScreenState = 'categories';
     const content = document.getElementById('mainContent');
     if (!content) return;
     const catList = getMainCategories();
@@ -823,152 +818,92 @@ function renderCategories() {
     html += `<div class="categories-grid">`;
     catList.forEach(cat => {
         const color = getCategoryColor(cat);
-        if (isOtherButton(cat)) {
-            html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('')">${cat} ➜</button>`;
-        } else {
-            html += `<button class="category-btn" style="background:${color};" onclick="renderSubcategories('${cat.replace(/'/g, "\\'")}')">${cat}</button>`;
-        }
+        html += `<button class="category-btn" style="background:${color};" onclick="renderSubcategories('${cat.replace(/'/g, "\\'")}')">${cat}</button>`;
     });
     html += `</div>`;
     content.innerHTML = html;
 }
 
+// ===== 15. PODKATEGORIJE =====
 function renderSubcategories(category) {
-    currentScreenState = 'subcategories';
     currentCategory = category;
     const content = document.getElementById('mainContent');
-    if (!content) return;
-
-    const langSubs = subcategories[currentLang] || subcategories.sr || {};
-    const subData = langSubs[category] || [];
+    const subList = getSubcategories(category);
     const colors = getSubcategoryColors(category);
-    
-    let html = `<div class="title">${t('podkategorije')}</div>`;
+    let html = `<div class="title">${category}</div>`;
+    html += `<div style="margin-bottom:15px;text-align:center;font-size:20px;color:#666;">${t('podkategorije')}</div>`;
     html += `<div class="categories-grid">`;
-    
-    if (Array.isArray(subData) && subData.length > 0) {
-        let displayData = [...subData];
-        const hasOstalo = displayData.some(item => isOtherButton(item));
-        if (!hasOstalo) {
-            displayData.push(t('Ostalo') || "Ostalo");
+    subList.forEach((sub, idx) => {
+        const color = colors[idx % colors.length];
+        const safeSub = sub.replace(/'/g, "\\'");
+        // Proveri da li postoje delovi proizvoda za ovu podkategoriju
+        const hasParts = productParts[currentLang] && productParts[currentLang][sub] && productParts[currentLang][sub].length > 0;
+        if (hasParts) {
+            html += `<button class="category-btn" style="background:${color};" onclick="renderProductParts('${safeSub}')">${sub}</button>`;
+        } else {
+            html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('${safeSub}')">${sub} ➜</button>`;
         }
-        
-        displayData.forEach((item, idx) => {
-            const color = colors[idx % colors.length];
-            const safeItem = item.toString().replace(/'/g, "\\'");
-            const hasParts = typeof productParts !== 'undefined' && ((productParts[currentLang] && productParts[currentLang][item]) || (productParts.sr && productParts.sr[item]));
-            
-            if (isOtherButton(item)) {
-                html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('')">${item} ➜</button>`;
-            } else if (hasParts) {
-                html += `<button class="category-btn" style="background:${color};" onclick="renderProductParts('${safeItem}')">${item}</button>`;
-            } else {
-                html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('${safeItem}')">${item}</button>`;
-            }
-        });
-    } else if (subData && typeof subData === 'object') {
-        const keys = Object.keys(subData);
-        let displayKeys = [...keys];
-        const hasOstalo = displayKeys.some(key => isOtherButton(key));
-        if (!hasOstalo) {
-            displayKeys.push(t('Ostalo') || "Ostalo");
-        }
-        displayKeys.forEach((groupName, idx) => {
-            const color = colors[idx % colors.length];
-            const safeGroup = groupName.toString().replace(/'/g, "\\'");
-            if (isOtherButton(groupName)) {
-                html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('')">${groupName} ➜</button>`;
-            } else {
-                html += `<button class="category-btn" style="background:${color};" onclick="renderSubcategoryGroup('${category.replace(/'/g, "\\'")}', '${safeGroup}')">${groupName}</button>`;
-            }
-        });
-    } else {
-        html += `<button class="category-btn" style="background:#ddd;" onclick="renderDataEntry('')">${t('Ostalo') || "Ostalo"} ➜</button>`;
-    }
-    
+    });
     html += `</div>`;
+    // DODAJ BACK DUGME
+    html += `<div style="margin-top:20px;text-align:center;">
+        <button onclick="renderCategories()" style="background:#90caf9;color:#1a237e;border:none;padding:15px 40px;border-radius:10px;font-size:20px;font-weight:bold;cursor:pointer;">◀ ${t('nazad')}</button>
+    </div>`;
     content.innerHTML = html;
 }
 
-function renderSubcategoryGroup(category, groupName) {
-    currentScreenState = 'subcategories';
-    const content = document.getElementById('mainContent');
-    const sub = subcategories[currentLang] || subcategories.sr || {};
-    let items = sub[category] ? sub[category][groupName] : [];
-    const colors = getSubcategoryColors(category);
-    
-    let html = `<div class="title">${groupName}</div>`;
-    html += `<div class="categories-grid">`;
-    if (Array.isArray(items)) {
-        let displayItems = [...items];
-        const hasOstalo = displayItems.some(item => isOtherButton(item));
-        if (!hasOstalo) {
-            displayItems.push(t('Ostalo') || "Ostalo");
-        }
-        displayItems.forEach((item, idx) => {
-            const color = colors[idx % colors.length];
-            const safeItem = item.toString().replace(/'/g, "\\'");
-            if (isOtherButton(item)) {
-                html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('')">${item} ➜</button>`;
-            } else {
-                html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('${safeItem}')">${item}</button>`;
-            }
-        });
-    } else {
-        html += `<button class="category-btn" style="background:#ddd;" onclick="renderDataEntry('')">${t('Ostalo') || "Ostalo"} ➜</button>`;
-    }
-    html += `</div>`;
-    content.innerHTML = html;
-}
-
+// ===== 16. DELOVI PROIZVODA =====
 function renderProductParts(subcategory) {
-    currentScreenState = 'productParts';
     currentSubcategory = subcategory;
     const content = document.getElementById('mainContent');
-    let parts = getProductParts(subcategory);
-    const colors = getSubcategoryColors(currentCategory);
-    
+    const parts = getProductParts(subcategory);
+    const colors = getProductPartsColors(currentCategory);
     let html = `<div class="title">${subcategory}</div>`;
     html += `<div style="margin-bottom:15px;text-align:center;font-size:20px;color:#666;">${t('delovi_proizvoda')}</div>`;
     html += `<div class="categories-grid">`;
     if (parts && parts.length > 0) {
-        let displayParts = [...parts];
-        const hasOstalo = displayParts.some(part => isOtherButton(part));
-        if (!hasOstalo) {
-            displayParts.push(t('Ostalo') || "Ostalo");
-        }
-        displayParts.forEach((part, idx) => {
+        parts.forEach((part, idx) => {
             const color = colors[idx % colors.length];
-            const safePart = part.toString().replace(/'/g, "\\'");
-            if (isOtherButton(part)) {
-                html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('')">${part} ➜</button>`;
-            } else {
-                html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('${safePart}')">${part}</button>`;
-            }
+            const safePart = part.replace(/'/g, "\\'");
+            html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('${safePart}')">${part}</button>`;
         });
     } else {
-        html += `<button class="category-btn" style="background:#ddd;" onclick="renderDataEntry('')">${t('Ostalo') || "Ostalo"} ➜</button>`;
+        html += `<button class="category-btn" style="background:#ddd;" onclick="renderDataEntry('')">${t('Ostalo') || 'Unesite naziv'}</button>`;
     }
     html += `</div>`;
+    // DODAJ BACK DUGME
+    html += `<div style="margin-top:20px;text-align:center;">
+        <button onclick="renderSubcategories('${currentCategory.replace(/'/g, "\\'")}')" style="background:#90caf9;color:#1a237e;border:none;padding:15px 40px;border-radius:10px;font-size:20px;font-weight:bold;cursor:pointer;">◀ ${t('nazad')}</button>
+    </div>`;
     content.innerHTML = html;
 }
 
+// ===== 17. UNOS PODATAKA =====
 function renderDataEntry(productName) {
-    currentScreenState = 'dataEntry';
-    currentProductPart = productName;
     const content = document.getElementById('mainContent');
     if (!content) return;
+    
     const today = new Date().toISOString().split('T')[0];
+    
     content.innerHTML = `
         <div class="title">${t('unos_podataka')}</div>
-        <div class="row"><label>${t('naziv_proizvoda')}</label><input type="text" id="productInput" value="${productName || ''}"></div>
-        <div class="row"><label>${t('opis')}</label><input type="text" id="descriptionInput"></div>
+        
+        <div class="row">
+            <label>${t('naziv_proizvoda')}</label>
+            <input type="text" id="productInput" value="${productName || ''}" placeholder="">
+        </div>
+        
+        <div class="row">
+            <label>${t('opis')}</label>
+            <input type="text" id="descriptionInput" placeholder="">
+        </div>
+        
         <div class="row">
             <label>${t('komad')}</label>
             <div class="inline-group">
-                <input type="text" id="pieceInput">
+                <input type="text" id="pieceInput" placeholder="">
                 <label>${t('kolicina')}</label>
-                <input type="number" id="quantityInput" value="1" step="0.1">
+                <input type="number" id="quantityInput" placeholder="0" step="0.1">
                 <label>${t('jedinica_mere')}</label>
                 <select id="unitSelect">
                     <option value="kg">${t('kg')}</option>
@@ -981,6 +916,7 @@ function renderDataEntry(productName) {
                 </select>
             </div>
         </div>
+        
         <div class="row">
             <label>${t('datum_unosa')}</label>
             <div class="inline-group">
@@ -990,10 +926,14 @@ function renderDataEntry(productName) {
                 <span style="font-size:18px;">mes</span>
             </div>
         </div>
+        
         <div class="row">
             <label>${t('automatski_rok')}</label>
-            <div class="inline-group"><span id="expiryDisplay">-</span></div>
+            <div class="inline-group">
+                <span id="expiryDisplay">-</span>
+            </div>
         </div>
+        
         <div class="row">
             <label>${t('mesto_skladistenja')}</label>
             <select id="storageSelect">
@@ -1005,168 +945,72 @@ function renderDataEntry(productName) {
                 <option value="${t('Ostalo')}">📦 ${t('Ostalo')}</option>
             </select>
         </div>
+        
         <div class="btn-group">
             <button class="btn-save" onclick="saveProduct()">✅ ${t('unesi')}</button>
-            <button class="btn-cancel" onclick="handleBackAction()">✖ ${t('odustani')}</button>
+            <button class="btn-cancel" onclick="renderCategories()">✖ ${t('odustani')}</button>
         </div>
+        
         <div class="table-container">
             <div class="table-title">📊 ${t('pregled_unosa')}</div>
-            <div id="entriesContainer"></div>
+            <div id="entriesContainer">
+                <div class="table-row header-row">
+                    <div class="cell">${t('komad')}</div>
+                    <div class="cell">${t('kolicina')}</div>
+                    <div class="cell">${t('jedinica_mere')}</div>
+                    <div class="cell">${t('rok_trajanja')}</div>
+                    <div class="cell">${t('mesto_skladistenja')}</div>
+                </div>
+            </div>
         </div>
     `;
+    
     document.getElementById('dateInput')?.addEventListener('change', updateExpiryDate);
     document.getElementById('dateInput')?.addEventListener('input', updateExpiryDate);
     document.getElementById('shelfLifeInput')?.addEventListener('change', updateExpiryDate);
     document.getElementById('shelfLifeInput')?.addEventListener('input', updateExpiryDate);
+    
     document.getElementById('productInput')?.focus();
     updateExpiryDate();
-    prikaziSveUnose();
 }
 
-function prikaziSveUnose() {
-    const container = document.getElementById('entriesContainer');
-    if (!container) return;
-    const zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
-    container.innerHTML = `
-        <div class="table-row header-row">
-            <div class="cell">${t('komad')}</div>
-            <div class="cell">${t('kolicina')}</div>
-            <div class="cell">${t('jedinica_mere')}</div>
-            <div class="cell">${t('rok_trajanja')}</div>
-            <div class="cell">${t('mesto_skladistenja')}</div>
-        </div>
-    `;
-    const aktivni = zalihe.filter(p => p.quantity > 0);
-    if (aktivni.length === 0) {
-        const row = document.createElement('div');
-        row.className = 'table-row';
-        row.innerHTML = `<div class="cell" style="grid-column:span 5;padding:20px;color:#999;text-align:center;">${t('nema_proizvoda')}</div>`;
-        container.appendChild(row);
-        return;
-    }
-    aktivni.forEach(p => {
-        const expiry = new Date(p.entry_date);
-        expiry.setMonth(expiry.getMonth() + p.shelf_life_months);
-        const expiryDisplay = expiry.toLocaleDateString('sr-RS', { month: '2-digit', year: '2-digit' });
-        const row = document.createElement('div');
-        row.className = 'table-row';
-        row.innerHTML = `
-            <div class="cell">${p.piece || '-'}</div>
-            <div class="cell">${p.quantity}</div>
-            <div class="cell">${p.unit}</div>
-            <div class="cell">${expiryDisplay}</div>
-            <div class="cell">${p.storage_location}</div>
-        `;
-        container.appendChild(row);
-    });
-}
-
-function renderInventory() {
-    currentScreenState = 'inventory';
-    const content = document.getElementById('mainContent');
-    if (!content) return;
-    const zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
-    const aktivneZalihe = zalihe.filter(p => p.quantity > 0);
+function updateExpiryDate() {
+    const dateInput = document.getElementById('dateInput');
+    const shelfLifeInput = document.getElementById('shelfLifeInput');
+    const expiryDisplay = document.getElementById('expiryDisplay');
+    if (!dateInput || !shelfLifeInput || !expiryDisplay) return;
     
-    let html = `<div class="title">${t('stanje')}</div>`;
-    html += `<div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;">`;
-    html += `<button onclick="azurirajZalihe()" style="background:#4CAF50; color:white; border:none; padding:10px 20px; border-radius:8px; font-size:16px; cursor:pointer;">✅ ${t('azuriraj')}</button>`;
-    html += `<button onclick="obrisiZalihe()" style="background:#666; color:white; border:none; padding:10px 20px; border-radius:8px; font-size:16px; cursor:pointer;">🗑️ ${t('obrisi')}</button>`;
-    html += `<button onclick="renderCategories()" style="background:#f44336; color:white; border:none; padding:10px 20px; border-radius:8px; font-size:16px; cursor:pointer;">✖ ${t('odustani')}</button>`;
-    html += `</div>`;
+    const date = dateInput.value;
+    const months = parseInt(shelfLifeInput.value) || 0;
     
-    html += `<div class="table-container" style="max-height:400px; overflow-y:auto;">`;
-    html += `<div class="table-title">📦 ${t('stanje')}</div>`;
-    html += `<div id="inventoryTable">`;
-    html += `<div class="table-row header-row" style="display:grid; grid-template-columns:40px 1.2fr 1.2fr 0.8fr 0.8fr 0.8fr 0.8fr 1fr; gap:2px; background:#f0f0f0; font-weight:bold; border-bottom:2px solid #ccc; padding:5px 0;">`;
-    html += `<div class="cell" style="text-align:center;"><input type="checkbox" id="selectAll" onchange="toggleAllCheckboxes()"></div>`;
-    html += `<div class="cell">${t('naziv_proizvoda')}</div>`;
-    html += `<div class="cell">${t('opis')}</div>`;
-    html += `<div class="cell">${t('komad')}</div>`;
-    html += `<div class="cell">${t('kolicina')}</div>`;
-    html += `<div class="cell">${t('jedinica_mere')}</div>`;
-    html += `<div class="cell">${t('rok_trajanja')}</div>`;
-    html += `<div class="cell">${t('mesto_skladistenja')}</div>`;
-    html += `</div>`;
-    
-    if (aktivneZalihe.length === 0) {
-        html += `<div class="table-row"><div class="cell" style="grid-column:span 8;padding:30px;color:#999;text-align:center;">${t('nema_proizvoda')}</div></div>`;
-    } else {
-        aktivneZalihe.forEach((p) => {
-            const originalIndex = zalihe.indexOf(p);
-            const expiry = new Date(p.entry_date);
-            expiry.setMonth(expiry.getMonth() + p.shelf_life_months);
-            const expiryDisplay = expiry.toLocaleDateString('sr-RS', { month: '2-digit', year: '2-digit' });
-            const isLow = (p.unit === 'g' && p.quantity < 400) || (p.unit === 'kg' && p.quantity < 0.4) || ((p.unit === 'kom' || p.unit === 'pcs') && p.quantity <= 2);
-            const bgColor = isLow ? '#F9AA65' : '';
-            
-            html += `<div class="table-row" style="display:grid; grid-template-columns:40px 1.2fr 1.2fr 0.8fr 0.8fr 0.8fr 0.8fr 1fr; gap:2px; border-bottom:1px solid #eee; padding:5px 0; background:${bgColor};">`;
-            html += `<div class="cell" style="text-align:center;"><input type="checkbox" class="row-checkbox" data-index="${originalIndex}"></div>`;
-            html += `<div class="cell">${p.product_name}</div>`;
-            html += `<div class="cell">${p.description || ''}</div>`;
-            html += `<div class="cell">${p.piece || '-'}</div>`;
-            html += `<div class="cell">${p.quantity}</div>`;
-            html += `<div class="cell">${p.unit}</div>`;
-            html += `<div class="cell">${expiryDisplay}</div>`;
-            html += `<div class="cell">${p.storage_location}</div>`;
-            html += `</div>`;
+    if (date && months > 0) {
+        const expiry = new Date(date);
+        expiry.setMonth(expiry.getMonth() + months);
+        expiryDisplay.textContent = expiry.toLocaleDateString('sr-RS', { 
+            day: '2-digit', month: '2-digit', year: 'numeric' 
         });
+    } else {
+        expiryDisplay.textContent = '-';
     }
-    html += `</div></div>`;
-    content.innerHTML = html;
 }
 
-function toggleAllCheckboxes() {
-    const selectAll = document.getElementById('selectAll');
-    const checkboxes = document.querySelectorAll('.row-checkbox');
-    checkboxes.forEach(cb => cb.checked = selectAll.checked);
-}
-
-function obrisiZalihe() {
-    const selected = document.querySelectorAll('.row-checkbox:checked');
-    if (selected.length === 0) {
-        showModernAlert('No Selection', 'You have not selected any items to delete!', '⚠️');
-        return;
-    }
-    if (!confirm(`Da li ste sigurni da želite da obrišete ${selected.length} stavku/ke?`)) return;
-    const zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
-    const indices = Array.from(selected).map(cb => parseInt(cb.dataset.index));
-    indices.sort((a, b) => b - a);
-    indices.forEach(i => zalihe.splice(i, 1));
-    localStorage.setItem('zalihe', JSON.stringify(zalihe));
-    renderInventory();
-}
-
-function azurirajZalihe() {
-    const selected = document.querySelectorAll('.row-checkbox:checked');
-    if (selected.length === 0) {
-        showModernAlert('No Selection', 'You have not selected any items to update!', '⚠️');
-        return;
-    }
-    if (selected.length > 1) {
-        showModernAlert('Error', 'You can only update one item at a time!', '❌');
-        return;
-    }
-    const index = parseInt(selected[0].dataset.index);
-    const zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
-    renderUpdateEntry(zalihe[index], index);
-}
-
-function renderUpdateEntry(proizvod, index) {
-    showModernAlert('Update', 'Update feature selected for index ' + index, 'ℹ️');
-}
-
+// ===== SAVE PRODUCT =====
 function saveProduct() {
     const product = document.getElementById('productInput')?.value.trim();
     const quantity = document.getElementById('quantityInput')?.value.trim();
+    
     if (!product) {
-        showModernAlert('Missing Info', 'Please enter a product name!', '📝');
+        alert('Unesite naziv proizvoda!');
+        document.getElementById('productInput')?.focus();
         return;
     }
+    
     if (!quantity || isNaN(parseFloat(quantity))) {
-        showModernAlert('Missing Info', 'Please enter a valid quantity!', '📝');
+        alert('Unesite količinu!');
+        document.getElementById('quantityInput')?.focus();
         return;
     }
+    
     const productData = {
         product_name: product,
         description: document.getElementById('descriptionInput')?.value.trim() || '',
@@ -1178,100 +1022,199 @@ function saveProduct() {
         storage_location: document.getElementById('storageSelect')?.value || 'Ostalo'
     };
     
-    let zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
-    const existingIndex = zalihe.findIndex(p => p.product_name === productData.product_name);
-    if (existingIndex !== -1) { zalihe[existingIndex] = productData; } else { zalihe.push(productData); }
-    localStorage.setItem('zalihe', JSON.stringify(zalihe));
-    if (typeof prikaziSveUnose === 'function') prikaziSveUnose();
-    document.getElementById('pieceInput').value = '';
-    document.getElementById('quantityInput').value = '1';
-    document.getElementById('quantityInput').focus();
-    showModernAlert('Success', 'Product saved successfully!', '✅');
+    // Sačuvaj u bazu
+    saveProductToDB(productData).then(id => {
+        addProductToTable(productData);
+        document.getElementById('pieceInput').value = '';
+        document.getElementById('quantityInput').value = '';
+        document.getElementById('quantityInput').focus();
+        alert('✅ Proizvod sačuvan!');
+    }).catch(err => {
+        alert('Greška pri čuvanju: ' + err.message);
+    });
 }
 
-function updateExpiryDate() {
-    const dateInput = document.getElementById('dateInput');
-    const shelfLifeInput = document.getElementById('shelfLifeInput');
-    const expiryDisplay = document.getElementById('expiryDisplay');
-    if (!dateInput || !shelfLifeInput || !expiryDisplay) return;
-    const date = dateInput.value;
-    const months = parseInt(shelfLifeInput.value) || 0;
-    if (date && months > 0) {
-        const expiry = new Date(date);
-        expiry.setMonth(expiry.getMonth() + months);
-        expiryDisplay.textContent = expiry.toLocaleDateString('sr-RS', { day: '2-digit', month: '2-digit', year: 'numeric' });
-    } else {
-        expiryDisplay.textContent = '-';
-    }
+function addProductToTable(product) {
+    const container = document.getElementById('entriesContainer');
+    if (!container) return;
+    
+    const expiry = new Date(product.entry_date);
+    expiry.setMonth(expiry.getMonth() + product.shelf_life_months);
+    const expiryDisplay = expiry.toLocaleDateString('sr-RS', { month: '2-digit', year: '2-digit' });
+    
+    const row = document.createElement('div');
+    row.className = 'table-row';
+    row.innerHTML = `
+        <div class="cell">${product.piece}</div>
+        <div class="cell">${product.quantity}</div>
+        <div class="cell">${product.unit}</div>
+        <div class="cell">${expiryDisplay}</div>
+        <div class="cell">${product.storage_location}</div>
+    `;
+    container.appendChild(row);
 }
 
-// ===== GLAVNA FUNKCIJA ZA NAZAD / ODUSTANI =====
-function handleBackAction() {
-    console.log('⬅️ Trenutni ekran stanje:', currentScreenState);
-    if (currentScreenState === 'dataEntry') {
-        if (currentSubcategory) {
-            renderProductParts(currentSubcategory);
+// ===== 18. ZALIHE =====
+function renderInventory() {
+    const content = document.getElementById('mainContent');
+    if (!content) return;
+    
+    getAllProducts().then(products => {
+        let html = `<div class="title">${t('stanje')}</div>`;
+        html += `<div class="table-container" style="max-height:400px;">`;
+        html += `<div class="table-title">📦 ${t('stanje')}</div>`;
+        html += `<div id="inventoryTable">`;
+        html += `<div class="table-row header-row">
+            <div class="cell">${t('naziv_proizvoda')}</div>
+            <div class="cell">${t('opis')}</div>
+            <div class="cell">${t('komad')}</div>
+            <div class="cell">${t('kolicina')}</div>
+            <div class="cell">${t('jedinica_mere')}</div>
+            <div class="cell">${t('rok_trajanja')}</div>
+            <div class="cell">${t('mesto_skladistenja')}</div>
+            <div class="cell">Akcija</div>
+        </div>`;
+        
+        if (products.length === 0) {
+            html += `<div class="table-row"><div class="cell" style="grid-column:span 8;padding:30px;color:#999;">${t('nema_proizvoda')}</div></div>`;
         } else {
-            renderSubcategories(currentCategory);
+            products.forEach(p => {
+                const expiry = new Date(p.entry_date);
+                expiry.setMonth(expiry.getMonth() + p.shelf_life_months);
+                const expiryDisplay = expiry.toLocaleDateString('sr-RS', { month: '2-digit', year: '2-digit' });
+                html += `<div class="table-row" data-product-id="${p.id}">
+                    <div class="cell">${p.product_name}</div>
+                    <div class="cell">${p.description}</div>
+                    <div class="cell">${p.piece}</div>
+                    <div class="cell">${p.quantity}</div>
+                    <div class="cell">${p.unit}</div>
+                    <div class="cell">${expiryDisplay}</div>
+                    <div class="cell">${p.storage_location}</div>
+                    <div class="cell"><button onclick="deleteProduct(${p.id})" style="background:#f44336;color:white;border:none;padding:5px 15px;border-radius:5px;cursor:pointer;">✖</button></div>
+                </div>`;
+            });
         }
-    } else if (currentScreenState === 'productParts') {
-        renderSubcategories(currentCategory);
-    } else if (currentScreenState === 'subcategories') {
-        renderCategories();
-    } else if (currentScreenState === 'categories') {
+        html += `</div></div>`;
+        // BACK DUGME
+        html += `<div style="margin-top:20px;text-align:center;">
+            <button onclick="renderCategories()" style="background:#90caf9;color:#1a237e;border:none;padding:15px 40px;border-radius:10px;font-size:20px;font-weight:bold;cursor:pointer;">◀ ${t('nazad')}</button>
+        </div>`;
+        content.innerHTML = html;
+    }).catch(err => {
+        content.innerHTML = `<div class="title">${t('stanje')}</div><div style="text-align:center;padding:30px;color:red;">Greška: ${err.message}</div>`;
+    });
+}
+
+function deleteProduct(id) {
+    if (!confirm('Obrišite proizvod?')) return;
+    deleteProductFromDB(id).then(() => {
+        renderInventory();
+    }).catch(err => {
+        alert('Greška: ' + err.message);
+    });
+}
+
+// ===== 19. SPISAK POTREBA =====
+function renderShoppingList() {
+    const content = document.getElementById('mainContent');
+    if (!content) return;
+    
+    getShoppingList().then(items => {
+        let html = `<div class="title">${t('spisak_potreba') || 'Spisak potreba'}</div>`;
+        html += `<div class="table-container" style="max-height:400px;">`;
+        html += `<div class="table-title">🛒 ${t('spisak_potreba') || 'Spisak potreba'}</div>`;
+        html += `<div id="shoppingTable">`;
+        html += `<div class="table-row header-row">
+            <div class="cell">${t('naziv_proizvoda')}</div>
+            <div class="cell">${t('opis')}</div>
+            <div class="cell">Akcija</div>
+        </div>`;
+        
+        if (items.length === 0) {
+            html += `<div class="table-row"><div class="cell" style="grid-column:span 3;padding:30px;color:#999;">Spisak je prazan</div></div>`;
+        } else {
+            items.forEach(item => {
+                html += `<div class="table-row" data-item-id="${item.id}">
+                    <div class="cell">${item.product_name}</div>
+                    <div class="cell">${item.description || ''}</div>
+                    <div class="cell"><button onclick="removeFromShopping(${item.id})" style="background:#f44336;color:white;border:none;padding:5px 15px;border-radius:5px;cursor:pointer;">✖</button></div>
+                </div>`;
+            });
+        }
+        html += `</div></div>`;
+        // BACK DUGME
+        html += `<div style="margin-top:20px;text-align:center;">
+            <button onclick="renderCategories()" style="background:#90caf9;color:#1a237e;border:none;padding:15px 40px;border-radius:10px;font-size:20px;font-weight:bold;cursor:pointer;">◀ ${t('nazad')}</button>
+        </div>`;
+        content.innerHTML = html;
+    }).catch(err => {
+        content.innerHTML = `<div class="title">${t('spisak')}</div><div style="text-align:center;padding:30px;color:red;">Greška: ${err.message}</div>`;
+    });
+}
+
+function removeFromShopping(id) {
+    if (!confirm('Obrišite stavku sa spiska?')) return;
+    deleteFromShoppingList(id).then(() => {
+        renderShoppingList();
+    }).catch(err => {
+        alert('Greška: ' + err.message);
+    });
+}
+
+// ===== 20. DOGAĐAJI =====
+document.addEventListener('DOMContentLoaded', function() {
+    // 1. Otvori bazu
+    openDB().then(database => {
+        db = database;
+        console.log('Baza otvorena');
+    }).catch(err => {
+        console.error('Greška pri otvaranju baze:', err);
+    });
+    
+    // 2. Service Worker
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./service-worker.js')
+            .catch(err => console.log('SW greška: ', err));
+    }
+    
+    // 3. Login
+    showScreen('loginScreen');
+    
+    document.getElementById('loginBtn').addEventListener('click', function() {
+        const phone = document.getElementById('phoneInput').value.trim();
+        if (phone.length >= 9) {
+            showScreen('languageScreen');
+            renderLanguages();
+        } else {
+            alert('Unesite validan broj telefona!');
+        }
+    });
+    
+    document.getElementById('phoneInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') document.getElementById('loginBtn').click();
+    });
+    
+    // 4. Exit dugmad
+    document.getElementById('exitLoginBtn').addEventListener('click', exitApp);
+    document.getElementById('exitLangBtn').addEventListener('click', exitApp);
+    document.getElementById('exitMainBtn').addEventListener('click', exitApp);
+    
+    // 5. Back dugme - vraća na jezike
+    document.getElementById('backBtn').addEventListener('click', function() {
         showScreen('languageScreen');
         renderLanguages();
-    } else {
-        showScreen('mainScreen');
-        renderCategories();
-    }
-}
-
-// ===== GLAVNI DOGAĐAJI =====
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('✅ DOM je spreman!');
-
-    const loginBtn = document.getElementById('loginBtn');
-    const phoneInput = document.getElementById('phoneInput');
-
-    if (loginBtn) {
-        loginBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            triggerLogin(); 
-        });
-    }
-
-    if (phoneInput) {
-        phoneInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                triggerLogin();
-            }
-        });
-    }
-    
-    document.getElementById('exitLoginBtn')?.addEventListener('click', exitApp);
-    document.getElementById('exitLangBtn')?.addEventListener('click', exitApp);
-    document.getElementById('exitMainBtn')?.addEventListener('click', exitApp);
-
-    document.getElementById('backBtn')?.addEventListener('click', handleBackAction);
-    document.getElementById('inventoryBtn')?.addEventListener('click', function() { renderInventory(); });
-    
-    const shoppingBtn = document.getElementById('shoppingBtn');
-    if (shoppingBtn) {
-        shoppingBtn.addEventListener('click', function() { 
-            showModernAlert('Info', 'Shopping list view', '🛒');
-        });
-    }
-
-    document.getElementById('supportBtn')?.addEventListener('click', openSupportDialog);
-    document.getElementById('closeSupportBtn')?.addEventListener('click', closeSupportDialog);
-    document.getElementById('closeSupportBtn2')?.addEventListener('click', closeSupportDialog);
-    
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') closeSupportDialog();
     });
-
+    
+    // 6. Zalihe dugme
+    document.getElementById('inventoryBtn').addEventListener('click', function() {
+        renderInventory();
+    });
+    
+    // 7. Spisak dugme
+    document.getElementById('shoppingBtn').addEventListener('click', function() {
+        renderShoppingList();
+    });
+    
     console.log('✅ Svi događaji povezani!');
 });
 
