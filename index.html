@@ -189,15 +189,12 @@
             <h2>Login</h2>
             <input type="tel" id="phoneInput" placeholder="Enter phone number" maxlength="15">
             <button id="loginBtn" class="btn btn-green">ENTER</button>
-            
-            <!-- DODAJ OVO -->
             <button id="supportBtn" class="btn btn-orange" onclick="openSupportDialog()">📧 Support</button>
-            
             <div class="login-limits">
                 <span>📱 4: Maximum number of phone numbers.</span>
                 <span>🔒 3: Maximum attempts</span>
             </div>
-            <button id="exitLoginBtn" class="btn btn-red" onclick="event.stopPropagation(); exitApp();" style="position: relative; z-index: 9999; cursor: pointer;">✖ EXIT</button>
+            <button id="exitLoginBtn" class="btn btn-red" onclick="exitApp();">✖ EXIT</button>
         </div>
     </div>
 </div>
@@ -243,6 +240,7 @@
         <button class="btn btn-green" style="margin-top:20px;" onclick="closeSupportDialog()">✅ Got it</button>
     </div>
 </div>
+
 <!-- ========================================== -->
 <!-- EKRAN 2: JEZICI -->
 <!-- ========================================== -->
@@ -253,7 +251,7 @@
                 Izaberite jezik / Choose Language / Sprache auswählen / Válasszon nyelvet / Виберіть мову / Выберите язык / 选择语言 / Elija idioma / Escolha o idioma / Choisir la langue
             </div>
             <div class="languages-grid" id="languageGrid"></div>
-            <button id="exitLangBtn" class="btn btn-red" style="margin-top:20px;">EXIT</button>
+            <button id="exitLangBtn" class="btn btn-red" style="margin-top:20px;" onclick="exitApp();">EXIT</button>
         </div>
     </div>
 </div>
@@ -266,10 +264,9 @@
         <button id="backBtn" class="btn-header btn-back">◀ <span id="backText">Nazad</span></button>
         <button id="inventoryBtn" class="btn-header btn-inventory">📦 <span id="invText">Zalihe</span></button>
         <button id="shoppingBtn" class="btn-header btn-shopping">🛒 <span id="shopText">Spisak</span></button>
-        <button id="exitMainBtn" class="btn-header btn-exit">✕ EXIT</button>
+        <button id="exitMainBtn" class="btn-header btn-exit" onclick="exitApp();">✕ EXIT</button>
     </div>
     <div class="container" id="mainContent"></div>
 </div>
-
 </body>
 </html>
