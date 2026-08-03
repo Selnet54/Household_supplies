@@ -127,7 +127,7 @@ const translations = {
         pregled_unosa: "Entry Review", nema_proizvoda: "No products",
         spisak_potreba: "Shopping List", azuriraj: "Update", obrisi: "Delete",
         oznaci_sve: "Select all", kopiraj: "Copy", obrisi_oznaceno: "Delete selected",
-        exit_poruka: "Thanks for using this app! 👋",
+        exit_poruka: "Thanks for using this app!",
         zamrzivac_1: "Freezer 1", zamrzivac_2: "Freezer 2", zamrzivac_3: "Freezer 3",
         frizider: "Refrigerator", ostava: "Pantry", Ostalo: "Other",
         kg: "kg", g: "g", kom: "pcs", l: "l", ml: "ml", pak: "pck", kutija: "box"
@@ -144,7 +144,7 @@ const translations = {
         pregled_unosa: "Eingabeübersicht", nema_proizvoda: "Keine Produkte",
         spisak_potreba: "Einkaufsliste", azuriraj: "Aktualisieren", obrisi: "Löschen",
         oznaci_sve: "Alle auswählen", kopiraj: "Kopieren", obrisi_oznaceno: "Ausgewählte löschen",
-        exit_poruka: "Danke für die Nutzung! 👋",
+        exit_poruka: "Danke für die Nutzung!",
         zamrzivac_1: "Gefrierschrank 1", zamrzivac_2: "Gefrierschrank 2", zamrzivac_3: "Gefrierschrank 3",
         frizider: "Kühlschrank", ostava: "Vorratskammer", Ostalo: "Andere",
         kg: "kg", g: "g", kom: "Stk", l: "l", ml: "ml", pak: "Pck", kutija: "Karton"
@@ -160,7 +160,7 @@ const translations = {
         delovi_proizvoda: "Termék részei", unos_podataka: "Adatbevitel",
         pregled_unosa: "Bevitel áttekintése", nema_proizvoda: "Nincsenek termékek",
         spisak_potreba: "Bevásárlólista", azuriraj: "Frissítés", obrisi: "Törlés",
-        exit_poruka: "Köszönjük a használatot! 👋",
+        exit_poruka: "Köszönjük a használatot!",
         oznaci_sve: "Mindet kijelöl", kopiraj: "Másolás", obrisi_oznaceno: "Kijelöltek törlése",
         zamrzivac_1: "Mélyhűtő 1", zamrzivac_2: "Mélyhűtő 2", zamrzivac_3: "Mélyhűtő 3",
         frizider: "Hűtőszekrény", ostava: "Spájz", Ostalo: "Egyéb",
@@ -178,7 +178,7 @@ const translations = {
         pregled_unosa: "Огляд введення", nema_proizvoda: "Немає продуктів",
         spisak_potreba: "Список потреб", azuriraj: "Оновити", obrisi: "Видалити",
         oznaci_sve: "Вибрати все", kopiraj: "Копіювати", obrisi_oznaceno: "Видалити вибране",
-        exit_poruka: "Дякуємо за використання! 👋",
+        exit_poruka: "Дякуємо за використання!",
         zamrzivac_1: "Морозилка 1", zamrzivac_2: "Морозилка 2", zamrzivac_3: "Морозилка 3",
         frizider: "Холодильник", ostava: "Комора", Ostalo: "Інше",
         kg: "кг", g: "г", kom: "шт", l: "л", ml: "мл", pak: "уп", kutija: "кор"
@@ -195,7 +195,7 @@ const translations = {
         pregled_unosa: "Обзор ввода", nema_proizvoda: "Нет продуктов",
         spisak_potreba: "Список потребностей", azuriraj: "Обновить", obrisi: "Удалить",
         oznaci_sve: "Выбрать все", kopiraj: "Копировать", obrisi_oznaceno: "Удалить выбранное",
-        exit_poruka: "Спасибо за использование! 👋",
+        exit_poruka: "Спасибо за использование!",
         zamrzivac_1: "Морозилка 1", zamrzivac_2: "Морозилка 2", zamrzivac_3: "Морозилка 3",
         frizider: "Холодильник", ostava: "Кладовая", Ostalo: "Другое",
         kg: "кг", g: "г", kom: "шт", l: "л", ml: "мл", pak: "уп", kutija: "кор"
@@ -212,7 +212,7 @@ const translations = {
         pregled_unosa: "输入记录查看", nema_proizvoda: "没有产品",
         spisak_potreba: "购物清单", azuriraj: "更新", obrisi: "删除",
         oznaci_sve: "全选", kopiraj: "复制", obrisi_oznaceno: "删除选中",
-        exit_poruka: "感谢使用！👋",
+        exit_poruka: "感谢使用！",
         zamrzivac_1: "冷冻柜 1", zamrzivac_2: "冷冻柜 2", zamrzivac_3: "冷冻柜 3",
         frizider: "冰箱", ostava: "储藏室", Ostalo: "其他",
         kg: "公斤", g: "克", kom: "件", l: "升", ml: "毫升", pak: "包", kutija: "盒"
@@ -228,7 +228,7 @@ const translations = {
         delovi_proizvoda: "Partes del Producto", unos_podataka: "Entrada de Datos",
         pregled_unosa: "Revisión de entrada", nema_proizvoda: "No hay productos",
         spisak_potreba: "Lista de Compras", azuriraj: "Actualizar", obrisi: "Eliminar",
-        exit_poruka: "¡Gracias por usar! 👋",
+        exit_poruka: "¡Gracias por usar!",
         oznaci_sve: "Seleccionar todo", kopiraj: "Copiar", obrisi_oznaceno: "Eliminar seleccionados",
         zamrzivac_1: "Congelador 1", zamrzivac_2: "Congelador 2", zamrzivac_3: "Congelador 3",
         frizider: "Refrigerador", ostava: "Despensa", Ostalo: "Otro",
@@ -246,7 +246,7 @@ const translations = {
         pregled_unosa: "Revisão de entrada", nema_proizvoda: "Nenhum produto",
         spisak_potreba: "Lista de Compras", azuriraj: "Atualizar", obrisi: "Excluir",
         oznaci_sve: "Selecionar tudo", kopiraj: "Copiar", obrisi_oznaceno: "Excluir selecionados",
-        exit_poruka: "Obrigado por usar! 👋",
+        exit_poruka: "Obrigado por usar!",
         zamrzivac_1: "Congelador 1", zamrzivac_2: "Congelador 2", zamrzivac_3: "Congelador 3",
         frizider: "Geladeira", ostava: "Despensa", Ostalo: "Outro",
         kg: "kg", g: "g", kom: "pç", l: "l", ml: "ml", pak: "pc", kutija: "cx"
@@ -263,7 +263,7 @@ const translations = {
         pregled_unosa: "Aperçu des saisies", nema_proizvoda: "Aucun produit",
         spisak_potreba: "Liste de Courses", azuriraj: "Mettre à jour", obrisi: "Supprimer",
         oznaci_sve: "Tout sélectionner", kopiraj: "Copier", obrisi_oznaceno: "Supprimer sélectionnés",
-        exit_poruka: "Merci d'utiliser! 👋",
+        exit_poruka: "Merci d'utiliser!",
         zamrzivac_1: "Congélateur 1", zamrzivac_2: "Congélateur 2", zamrzivac_3: "Congélateur 3",
         frizider: "Réfrigérateur", ostava: "Garde-manger", Ostalo: "Autre",
         kg: "kg", g: "g", kom: "pc", l: "l", ml: "ml", pak: "paq", kutija: "boîte"
