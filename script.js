@@ -451,39 +451,45 @@ function renderSubcategories(category) {
     currentScreenState = 'subcategories';
     currentCategory = category;
     const content = document.getElementById('mainContent');
-    const sub = subcategories[currentLang] || subcategories.sr || {};
-    const subData = sub[category];
+    if (!content) return;
+
+    // Bezbedno izvlačenje podkategorija za izabrani jezik i kategoriju
+    const langSubs = subcategories[currentLang] || subcategories.sr || {};
+    const subData = langSubs[category] || [];
     const colors = getSubcategoryColors(category);
-    
-    const hasSubSubcategories = {
-        'Mlečni proizvodi': ['Mleko'],
-        'Zimnica i kompoti': ['Voće', 'Povrće'],
-        'Testo i Slatkiši': ['Testo', 'Slatkiši'],
-        'Pića': ['Voda', 'Vino', 'Sok', 'Žestoka pića', 'Pivo'],
-        'Hemija i higijena': ['Sanitar', 'Lična higijena', 'Pribor']
-    };
     
     let html = `<div class="title">${t('podkategorije')}</div>`;
     html += `<div class="categories-grid">`;
     
-    if (Array.isArray(subData)) {
+    if (Array.isArray(subData) && subData.length > 0) {
         let displayData = [...subData];
         const hasOstalo = displayData.some(item => isOtherButton(item));
         if (!hasOstalo) {
             displayData.push(t('Ostalo') || "Ostalo");
         }
+        
         displayData.forEach((item, idx) => {
             const color = colors[idx % colors.length];
-            const hasChildren = hasSubSubcategories[category] && hasSubSubcategories[category].includes(item);
             const safeItem = item.toString().replace(/'/g, "\\'");
+            
+            // Provera da li ova podkategorija ima svoje delove (productParts)
+            const hasParts = productParts[currentLang]?.[item] || productParts.sr?.[item];
+            
             if (isOtherButton(item)) {
                 html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('')">${item} ➜</button>`;
-            } else if (hasChildren) {
-                html += `<button class="category-btn" style="background:${color};" onclick="renderSubcategoryGroup('${category.replace(/'/g, "\\'")}', '${safeItem}')">${item}</button>`;
+            } else if (hasParts) {
+                html += `<button class="category-btn" style="background:${color};" onclick="renderProductParts('${safeItem}')">${item}</button>`;
             } else {
                 html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('${safeItem}')">${item}</button>`;
             }
         });
+    } else {
+        html += `<button class="category-btn" style="background:#ddd;" onclick="renderDataEntry('')">${t('Ostalo') || "Ostalo"} ➜</button>`;
+    }
+    
+    html += `</div>`;
+    content.innerHTML = html;
+}
     } else if (subData && typeof subData === 'object') {
         const keys = Object.keys(subData);
         let displayKeys = [...keys];
