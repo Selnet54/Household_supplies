@@ -14,18 +14,24 @@ let currentScreenState = 'languages';
 function exitApp() {
     console.log("🚪 Exit dugme kliknuto!");
     
+    // Proveri koji je ekran vidljiv
     const loginScreen = document.getElementById('loginScreen');
     const languageScreen = document.getElementById('languageScreen');
+    
     const isLoginVisible = loginScreen && window.getComputedStyle(loginScreen).display === 'flex';
     const isLanguageVisible = languageScreen && window.getComputedStyle(languageScreen).display === 'flex';
     
     let poruka;
+    
+    // Ako je login ili language ekran - UVEK ENGLESKI
     if (isLoginVisible || isLanguageVisible) {
         poruka = "Thanks for using this app! 👋";
     } else {
+        // Inače koristi trenutni jezik
         poruka = t('exit_poruka') || "Thanks for using this app! 👋";
     }
     
+    // PRIKAŽI PLAVI EKRAN
     document.body.innerHTML = '';
     document.body.style.background = '#1a237e';
     document.body.style.margin = '0';
@@ -43,16 +49,11 @@ function exitApp() {
             <div style="font-size: 80px; margin-bottom: 20px;">👋</div>
             <div style="font-size: 32px; font-weight: bold;">${poruka}</div>
             <div style="font-size: 16px; color: #888; margin-top: 30px;">© Supplies App</div>
+            <button onclick="location.reload()" style="margin-top:30px; padding:12px 30px; background:#FFD700; color:#1a237e; border:none; border-radius:8px; font-size:18px; cursor:pointer; font-weight:bold;">
+                🔄 Restart App
+            </button>
         </div>
     `;
-}
-function closeSupportDialog() {
-    const dialog = document.getElementById('supportDialog');
-    if (dialog) {
-        dialog.style.display = 'none';
-        dialog.classList.remove('active');
-        console.log('✅ Support zatvoren');
-    }
 }
 // ===== 1. JEZICI =====
 const languages = {
