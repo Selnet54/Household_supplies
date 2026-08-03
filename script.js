@@ -1093,8 +1093,14 @@ function toggleAllCheckboxes() {
 
 function obrisiZalihe() {
     const selected = document.querySelectorAll('.row-checkbox:checked');
-    if (selected.length === 0) { alert('Niste označili nijedan red za brisanje!'); return; }
+    if (selected.length === 0) {
+        showModernAlert('No Selection', 'You have not selected any items to delete!', '⚠️');
+        return;
+    }
+    
+    // Umesto confirm, koristi moderni alert sa opcijama
     if (!confirm(`Da li ste sigurni da želite da obrišete ${selected.length} stavku/ke?`)) return;
+    
     const zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
     const indices = Array.from(selected).map(cb => parseInt(cb.dataset.index));
     indices.sort((a, b) => b - a);
@@ -1345,9 +1351,14 @@ function updateExpiryDate() {
 function saveProduct() {
     const product = document.getElementById('productInput')?.value.trim();
     const quantity = document.getElementById('quantityInput')?.value.trim();
-    if (!product) { alert('Unesite naziv proizvoda!'); return; }
-    if (!quantity || isNaN(parseFloat(quantity))) { alert('Unesite količinu!'); return; }
-    
+    if (!product) {
+        showModernAlert('Missing Info', 'Please enter a product name!', '📝');
+        return;
+    }
+    if (!quantity || isNaN(parseFloat(quantity))) {
+        showModernAlert('Missing Info', 'Please enter a valid quantity!', '📝');
+        return;
+    }
     const productData = {
         product_name: product,
         description: document.getElementById('descriptionInput')?.value.trim() || '',
