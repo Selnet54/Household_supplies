@@ -30,16 +30,26 @@ function exitApp() {
         </div>
     `;
 }
-
 // ===== SUPPORT FUNKCIJE =====
 function openSupportDialog() {
-    document.getElementById('supportDialog').classList.add('active');
+    const dialog = document.getElementById('supportDialog');
+    if (dialog) {
+        dialog.style.display = 'flex';
+        dialog.classList.add('active');
+        console.log('✅ Support otvoren');
+    } else {
+        console.error('❌ Support dialog nije pronađen');
+    }
 }
 
 function closeSupportDialog() {
-    document.getElementById('supportDialog').classList.remove('active');
+    const dialog = document.getElementById('supportDialog');
+    if (dialog) {
+        dialog.style.display = 'none';
+        dialog.classList.remove('active');
+        console.log('✅ Support zatvoren');
+    }
 }
-
 // ===== 1. JEZICI =====
 const languages = {
     sr: { name: 'Srpski', flag: '/Household_supplies/icons/jezici/srpski.png' },
@@ -1199,7 +1209,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Globalno slušanje Enter tastera
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Enter') {
             const phoneField = document.getElementById('phoneInput');
@@ -1221,15 +1230,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // EXIT dugmad
     document.getElementById('exitLoginBtn')?.addEventListener('click', exitApp);
     document.getElementById('exitLangBtn')?.addEventListener('click', exitApp);
     document.getElementById('exitMainBtn')?.addEventListener('click', exitApp);
 
-    // BACK dugme
     document.getElementById('backBtn')?.addEventListener('click', handleBackAction);
-
-    // INVENTORY i SHOPPING dugmad
     document.getElementById('inventoryBtn')?.addEventListener('click', function() { renderInventory(); });
     document.getElementById('shoppingBtn')?.addEventListener('click', function() { renderShoppingList(); });
 
@@ -1238,14 +1243,12 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('closeSupportBtn')?.addEventListener('click', closeSupportDialog);
     document.getElementById('closeSupportBtn2')?.addEventListener('click', closeSupportDialog);
     
-    // Zatvori Support na ESC
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') closeSupportDialog();
     });
 
     console.log('✅ Svi događaji povezani!');
 });
-
 // ============================================
 // GLOBALNA FUNKCIJA ZA LOGIN
 // ============================================
