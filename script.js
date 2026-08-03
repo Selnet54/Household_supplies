@@ -636,6 +636,15 @@ function renderSubcategories(category) {
     const subData = sub[category];
     const colors = getSubcategoryColors(category);
     
+    // Lista podkategorija koje treba da imaju DALJE podkategorije (a ne direktan unos)
+    const hasSubSubcategories = {
+        'Mlečni proizvodi': ['Mleko'],
+        'Zimnica i kompoti': ['Voće', 'Povrće'],
+        'Testo i Slatkiši': ['Testo', 'Slatkiši'],
+        'Pića': ['Voda', 'Vino', 'Sok', 'Žestoka pića', 'Pivo'],
+        'Hemija i higijena': ['Sanitar', 'Lična higijena', 'Pribor']
+    };
+    
     let html = `<div class="title">${t('podkategorije')}</div>`;
     html += `<div class="categories-grid">`;
     
@@ -645,12 +654,22 @@ function renderSubcategories(category) {
         if (!hasOstalo) {
             displayData.push(t('Ostalo') || "Ostalo");
         }
+
         displayData.forEach((item, idx) => {
             const color = colors[idx % colors.length];
+            
+            // Proveri da li ova podkategorija ima DALJE podkategorije
+            const hasChildren = hasSubSubcategories[category] && hasSubSubcategories[category].includes(item);
+            
             if (isOtherButton(item)) {
+                // Ostalo uvek ide na unos
                 html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('')">${item} ➜</button>`;
+            } else if (hasChildren) {
+                // Ima dalje podkategorije
+                html += `<button class="category-btn" style="background:${color};" onclick="renderSubcategoryGroup('${category}', '${item}')">${item}</button>`;
             } else {
-                html += `<button class="category-btn" style="background:${color};" onclick="renderProductParts('${item}')">${item}</button>`;
+                // Nema dalje podkategorije - ide direktno na unos
+                html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('${item}')">${item}</button>`;
             }
         });
     } else if (subData && typeof subData === 'object') {
@@ -660,6 +679,7 @@ function renderSubcategories(category) {
         if (!hasOstalo) {
             displayKeys.push(t('Ostalo') || "Ostalo");
         }
+
         displayKeys.forEach((groupName, idx) => {
             const color = colors[idx % colors.length];
             if (isOtherButton(groupName)) {
@@ -671,6 +691,7 @@ function renderSubcategories(category) {
     } else {
         html += `<button class="category-btn" style="background:#ddd;" onclick="renderDataEntry('')">${t('Ostalo') || "Ostalo"} ➜</button>`;
     }
+    
     html += `</div>`;
     content.innerHTML = html;
 }
