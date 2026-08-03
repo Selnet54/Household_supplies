@@ -13,6 +13,24 @@ let currentScreenState = 'languages';
 // ===== 0. EXIT FUNKCIJA =====
 function exitApp() {
     console.log("🚪 Exit dugme kliknuto!");
+    
+    // Proveri da li je login ili language ekran vidljiv
+    const loginScreen = document.getElementById('loginScreen');
+    const languageScreen = document.getElementById('languageScreen');
+    const isLoginVisible = loginScreen && window.getComputedStyle(loginScreen).display === 'flex';
+    const isLanguageVisible = languageScreen && window.getComputedStyle(languageScreen).display === 'flex';
+    
+    let poruka;
+    
+    // Ako je login ili language ekran - uvek engleski
+    if (isLoginVisible || isLanguageVisible) {
+        poruka = "Thanks for using this app! 👋";
+    } else {
+        // Inače koristi trenutni jezik
+        poruka = t('exit_poruka') || "Thanks for using this app! 👋";
+    }
+    
+    // Prikaži plavi ekran sa porukom
     document.body.innerHTML = '';
     document.body.style.background = '#1a237e';
     document.body.style.margin = '0';
@@ -23,12 +41,21 @@ function exitApp() {
     document.body.style.justifyContent = 'center';
     document.body.style.alignItems = 'center';
     document.body.style.flexDirection = 'column';
+    document.body.style.fontFamily = 'Arial, sans-serif';
+    
     document.body.innerHTML = `
-        <div style="text-align:center;color:#FFD700;font-size:40px;">
-            <div>👋</div>
-            <div style="font-size:28px;margin-top:20px;">Thanks for using this app!</div>
+        <div style="text-align: center; color: #FFD700;">
+            <div style="font-size: 80px; margin-bottom: 20px;">👋</div>
+            <div style="font-size: 32px; font-weight: bold;">${poruka}</div>
+            <div style="font-size: 16px; color: #888; margin-top: 30px;">© Supplies App</div>
         </div>
     `;
+    
+    try {
+        window.close();
+    } catch(e) {
+        // Browser ne dozvoljava zatvaranje
+    }
 }
 // ===== SUPPORT FUNKCIJE =====
 function openSupportDialog() {
