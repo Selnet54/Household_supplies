@@ -3,7 +3,14 @@
 // ============================================
 console.log('✅ Script.js je učitan!');
 
-// ===== 0. EXIT FUNKCIJA - PRVA FUNKCIJA =====
+// ===== TRENUTNO STANJE =====
+let currentLang = 'sr';
+let currentCategory = '';
+let currentSubcategory = '';
+let currentProductPart = '';
+let currentScreenState = 'languages';
+
+// ===== 0. EXIT FUNKCIJA =====
 function exitApp() {
     console.log("🚪 Exit dugme kliknuto!");
     document.body.innerHTML = '';
@@ -23,6 +30,16 @@ function exitApp() {
         </div>
     `;
 }
+
+// ===== SUPPORT FUNKCIJE =====
+function openSupportDialog() {
+    document.getElementById('supportDialog').classList.add('active');
+}
+
+function closeSupportDialog() {
+    document.getElementById('supportDialog').classList.remove('active');
+}
+
 // ===== 1. JEZICI =====
 const languages = {
     sr: { name: 'Srpski', flag: '/Household_supplies/icons/jezici/srpski.png' },
@@ -36,6 +53,7 @@ const languages = {
     pt: { name: 'Português', flag: '/Household_supplies/icons/jezici/portugalski.png' },
     fr: { name: 'Français', flag: '/Household_supplies/icons/jezici/francuski.png' }
 };
+
 // ===== 2. PREVODI =====
 const translations = {
     sr: {
@@ -65,7 +83,7 @@ const translations = {
         glavne_kategorije: "Main Categories", podkategorije: "Subcategories",
         delovi_proizvoda: "Product Parts", unos_podataka: "Data Entry",
         pregled_unosa: "Entry Review", nema_proizvoda: "No products",
-        spisak_potreba: "Shopping List",  azuriraj: "Update", obrisi: "Delete",
+        spisak_potreba: "Shopping List", azuriraj: "Update", obrisi: "Delete",
         oznaci_sve: "Select all", kopiraj: "Copy", obrisi_oznaceno: "Delete selected",
         exit_poruka: "Thanks for using this app! 👋",
         zamrzivac_1: "Freezer 1", zamrzivac_2: "Freezer 2", zamrzivac_3: "Freezer 3",
@@ -100,7 +118,7 @@ const translations = {
         delovi_proizvoda: "Termék részei", unos_podataka: "Adatbevitel",
         pregled_unosa: "Bevitel áttekintése", nema_proizvoda: "Nincsenek termékek",
         spisak_potreba: "Bevásárlólista", azuriraj: "Frissítés", obrisi: "Törlés",
-        exit_poruka: "Köszönjük a használatot! 👋",    
+        exit_poruka: "Köszönjük a használatot! 👋",
         oznaci_sve: "Mindet kijelöl", kopiraj: "Másolás", obrisi_oznaceno: "Kijelöltek törlése",
         zamrzivac_1: "Mélyhűtő 1", zamrzivac_2: "Mélyhűtő 2", zamrzivac_3: "Mélyhűtő 3",
         frizider: "Hűtőszekrény", ostava: "Spájz", Ostalo: "Egyéb",
@@ -249,7 +267,7 @@ const mainCategories = {
     fr: ["Viande blanche", "Viande rouge", "Petit gibier", "Gros gibier", "Poisson", "Produits laitiers", "Légumes", "Conserves et compotes", "Pâte et Sucreries", "Boissons", "Chimie et hygiène", "Autre"]
 };
 
-// ===== 5. PODKATEGORIJE ZA SVIH 10 JEZIKA =====
+// ===== 5. PODKATEGORIJE =====
 const subcategories = {
     sr: {
         "Belo meso": ["Pileće", "Ćureće", "Guska", "Patka", "Ostalo"],
@@ -260,8 +278,8 @@ const subcategories = {
         "Mlečni proizvodi": ["Mleko", "Jogurt i kiselo mleko", "Pavlaka", "Mladi sir", "Tvrdi sir", "Kozji i ovčiji sir", "Kajmak i puter", "Ostalo"],
         "Povrće": ["Sveže", "Termički obrađeno", "Zamrznuto", "Ostalo"],
         "Zimnica i kompoti": {
-         "Voće": ["Kajsija", "Kruška", "Višnja", "Pekmez od jagoda", "Šljivov pekmez", "Trešnja", "Pekmez od malina", "Dunja", "Ananas", "Pekmez od manga", "Ostalo"],
-         "Povrće": ["Kiseli krastavci", "Kisela paprika", "Paradajz pire", "Cvekla", "Ajvar", "Turšija", "Kiseli kupus", "Ostalo"]
+            "Voće": ["Kajsija", "Kruška", "Višnja", "Pekmez od jagoda", "Šljivov pekmez", "Trešnja", "Pekmez od malina", "Dunja", "Ananas", "Pekmez od manga", "Ostalo"],
+            "Povrće": ["Kiseli krastavci", "Kisela paprika", "Paradajz pire", "Cvekla", "Ajvar", "Turšija", "Kiseli kupus", "Ostalo"]
         },
         "Testo i Slatkiši": {
             "Testo": ["Hleb", "Raženi hleb", "Čabata", "Kukuruzni hleb", "Baguette", "Pšenično brašno", "Integralno brašno", "Heljdino brašno", "Pirinčano brašno", "Začini", "Ostalo"],
@@ -280,89 +298,6 @@ const subcategories = {
             "Pribor": ["Kantica", "Kofa", "Krpa za prašinu", "Metla", "Ostalo"]
         },
         "Ostalo": ["Ostalo"]
-    },
-    hu: {
-        "Befőttek és kompótok": {
-            "Gyümölcs": ["Kajszibarack", "Körte", "Meggy", "Eperlekvár", "Szilvalevar", "Cseresznye", "Málnalevar", "Birs", "Ananász", "Mangólekvár", "Egyéb"],
-            "Zöldség": ["Savanyú uborka", "Savanyú paprika", "Paradicsompüré", "Cékla", "Ajvár", "Savanyúság", "Savanyú káposzta", "Egyéb"]
-        },
-        "Tészta és Édességek": {
-            "Tészta": ["Kenyér", "Rozskenyér", "Ciabatta", "Kukoricakenyér", "Baguette", "Búzaliszt", "Teljes kiőrlésű liszt", "Hajdinaliszt", "Rizsliszt", "Fűszerek", "Egyéb"],
-            "Édességek": ["Sütemények", "Torták", "Péksütemények", "Fagylalt", "Csokoládé", "Cukorkák", "Egyéb"]
-        },
-        "Italok": {
-            "Víz": ["Ásványvíz", "Szénsavmentes", "Szénsavas", "Egyéb"],
-            "Bor": ["Vörös", "Fehér", "Rosé", "Egyéb"],
-            "Lé": ["Gyümölcslé", "Zöldséglé", "Egyéb"],
-            "Tömény italok": ["Pálinka", "Vodka", "Whisky", "Egyéb"],
-            "Sör": ["Barna", "Világos", "Egyéb"]
-        },
-        "Kémia és higiénia": {
-            "Tisztítószerek": ["Ablaktisztítás", "Mosogatás", "Padlótisztítás", "Fürdőszobai tisztítószer", "Egyéb"],
-            "Személyes higiénia": ["Dezodor", "Borotva", "Smink", "Szappan", "Sampon", "Krém", "Egyéb"],
-            "Ezközök": ["Kis vödör", "Vödör", "Portörlő rongy", "Seprű", "Egyéb"]
-        },
-        "Egyéb": ["Egyéb"]
-    },
-    uk: {
-        "Біле м'ясо": ["Курятина", "Індичка", "Гуска", "Качка", "Інше"],
-        "Червоне м'ясо": ["Свинина", "Ягнятина", "Баранина", "Телятина", "Яловичина", "Бичатина", "Конина", "Кролик", "Інше"],
-        "Дрібна дичина": ["Перепілка", "Фазан", "Куріпка", "Дика качка", "Дика гуска", "Заєць", "Голуб", "Інше"],
-        "Велика дичина": ["Олень", "Косуля", "Козуль", "Лось", "Північний олень", "Дикий кабан", "Бізон", "Верблюд", "Лама", "Альпака", "Кенгуру", "Крокодил/Алігатор", "Ящірка", "Змія", "Інше"],
-        "Риба": ["Морська", "Прісноводна", "Морепродукти", "Інше"],
-        "Молочні продукти": ["Молоко", "Йогурт та кисляк", "Сметана", "М'який сир", "Твердий сир", "Козячий та овечий сир", "Каймак та масло", "Інше"],
-        "Овочі": ["Свіжі", "Термічно оброблені", "Заморожені", "Інше"],
-        "Консервація та компоти": {
-            "Фрукти": ["Абрикос", "Груша", "Вишня", "Полуничний джем", "Сливовий джем", "Черешня", "Малиновий джем", "Айва", "Ананас", "Манговий джем", "Інше"],
-            "Овочі": ["Мариновані огірки", "Маринований перець", "Томатне пюре", "Буряк", "Айвар", "Соління", "Квашена капуста", "Інше"]
-        },
-        "Тісто та Солодощі": {
-            "Тісто": ["Хліб", "Житній хліб", "Чабата", "Кукурудзяний хліб", "Багет", "Пшеничне борошно", "Цільнозернове борошно", "Гречане борошно", "Рисове борошно", "Спеції", "Інше"],
-            "Солодощі": ["Тістечка", "Торти", "Випічка", "Морозиво", "Шоколад", "Цукерки", "Інше"]
-        },
-        "Напої": {
-            "Вода": ["Мінеральна", "Негазована", "Газована", "Інше"],
-            "Вино": ["Червоне", "Біле", "Рожеве", "Інше"],
-            "Сік": ["Фруктовий", "Овочевий", "Інше"],
-            "Міцні напої": ["Ракія", "Горілка", "Віскі", "Інше"],
-            "Пиво": ["Темне", "Світле", "Інше"]
-        },
-        "Хімія та гігієна": {
-            "Санітарія": ["Миття вікон", "Миття посуду", "Миття підлоги", "Засіб для ванної", "Інше"],
-            "Особиста гігієна": ["Дезодорант", "Бритва", "Косметика", "Мило", "Шампунь", "Крем", "Інше"],
-            "Інвентар": ["Маленьке відро", "Відро", "Ганчірка для пилу", "Мітла", "Інше"]
-        },
-        "Інше": ["Інше"]
-    },
-    ru: {
-        "Белое мясо": ["Курица", "Индейка", "Гусь", "Утка", "Другое"],
-        "Красное мясо": ["Свинина", "Баранина", "Овца", "Телятина", "Говядина", "Бык", "Конина", "Кролик", "Другое"],
-        "Мелкая дичь": ["Перепел", "Фазан", "Куропатка", "Дикая утка", "Дикий гусь", "Заяц", "Голубь", "Другое"],
-        "Крупная дичь": ["Олень", "Косуля", "Дикая коза", "Лось", "Северный олень", "Кабан", "Бизон", "Верблюд", "Лама", "Альпака", "Кенгуру", "Крокодил/Аллигатор", "Ящерица", "Змея", "Другое"],
-        "Рыба": ["Морская", "Пресноводная", "Морепродукты", "Другое"],
-        "Молочные продукты": ["Молоко", "Йогурт и простокваша", "Сметана", "Мягкий сыр", "Твердый сыр", "Козий и овечий сыр", "Каймак и масло", "Другое"],
-        "Овощи": ["Свежие", "Термически обработанные", "Замороженные", "Другое"],
-        "Консервация и компоты": {
-            "Фрукты": ["Абрикос", "Груша", "Вишня", "Клубничный джем", "Сливовый джем", "Черешня", "Малиновый джем", "Айва", "Ананас", "Манговый джем", "Другое"],
-            "Овощи": ["Маринованные огурцы", "Маринованный перец", "Томатное пюре", "Свекла", "Айвар", "Соленья", "Квашеная капуста", "Другое"]
-        },
-        "Тесто и Сладости": {
-            "Тесто": ["Хлеб", "Ржаной хлеб", "Чиабатта", "Кукурузный хлеб", "Багет", "Пшеничная мука", "Цельнозерновая мука", "Гречневая мука", "Рисовая мука", "Специи", "Другое"],
-            "Сладости": ["Пирожные", "Торты", "Выпечка", "Мороженое", "Шоколад", "Конфеты", "Другое"]
-        },
-        "Напитки": {
-            "Вода": ["Минеральная", "Негазированная", "Газированная", "Другое"],
-            "Вино": ["Красное", "Белое", "Розовое", "Другое"],
-            "Сок": ["Фруктовый", "Овощной", "Другое"],
-            "Крепкие напитки": ["Ракия", "Водка", "Виски", "Другое"],
-            "Пиво": ["Темное", "Светлое", "Другое"]
-        },
-        "Химия и гигиена": {
-            "Санитария": ["Мытье окон", "Мытье посуды", "Мытье полов", "Средство для ванной", "Другое"],
-            "Личная гигиена": ["Дезодорант", "Бритва", "Косметика", "Мыло", "Шампунь", "Крем", "Другое"],
-            "Инвентарь": ["Маленькое ведро", "Ведро", "Тряпка для пыли", "Метла", "Другое"]
-        },
-        "Другое": ["Другое"]
     },
     en: {
         "White meat": ["Chicken", "Turkey", "Goose", "Duck", "Other"],
@@ -546,7 +481,7 @@ const subcategories = {
     }
 };
 
-// ===== 7. POMOĆNE FUNKCIJE =====
+// ===== 6. POMOĆNE FUNKCIJE =====
 function t(key) {
     return translations[currentLang]?.[key] || key;
 }
@@ -610,7 +545,7 @@ function isOtherButton(text) {
     return ostaloVariants.includes(text);
 }
 
-// ===== 8. RENDER FUNKCIJE =====
+// ===== 7. RENDER FUNKCIJE =====
 function renderLanguages() {
     currentScreenState = 'languages';
     const grid = document.getElementById('languageGrid');
@@ -656,12 +591,6 @@ function renderCategories() {
     content.innerHTML = html;
 }
 
-// ===== ISPRAVLJENE / DODATE FUNKCIJE ZA PODKATEGORIJE =====
-
-// ===== ISPRAVLJENO RENDERETOVANJE PODKATEGORIJA =====
-
-// ===== KONAČNA ISPRAVKA ZA PRIKAZ "OSTALO" I STRELICA =====
-
 function renderSubcategories(category) {
     currentScreenState = 'subcategories';
     currentCategory = category;
@@ -675,12 +604,10 @@ function renderSubcategories(category) {
     
     if (Array.isArray(subData)) {
         let displayData = [...subData];
-        // Provera da li postoji bilo koja varijanta reči "Ostalo"
         const hasOstalo = displayData.some(item => isOtherButton(item));
         if (!hasOstalo) {
             displayData.push(t('Ostalo') || "Ostalo");
         }
-
         displayData.forEach((item, idx) => {
             const color = colors[idx % colors.length];
             if (isOtherButton(item)) {
@@ -696,7 +623,6 @@ function renderSubcategories(category) {
         if (!hasOstalo) {
             displayKeys.push(t('Ostalo') || "Ostalo");
         }
-
         displayKeys.forEach((groupName, idx) => {
             const color = colors[idx % colors.length];
             if (isOtherButton(groupName)) {
@@ -708,7 +634,6 @@ function renderSubcategories(category) {
     } else {
         html += `<button class="category-btn" style="background:#ddd;" onclick="renderDataEntry('')">${t('Ostalo') || "Ostalo"} ➜</button>`;
     }
-    
     html += `</div>`;
     content.innerHTML = html;
 }
@@ -729,7 +654,6 @@ function renderSubcategoryGroup(category, groupName) {
         if (!hasOstalo) {
             displayItems.push(t('Ostalo') || "Ostalo");
         }
-
         displayItems.forEach((item, idx) => {
             const color = colors[idx % colors.length];
             if (isOtherButton(item)) {
@@ -741,7 +665,6 @@ function renderSubcategoryGroup(category, groupName) {
     } else {
         html += `<button class="category-btn" style="background:#ddd;" onclick="renderDataEntry('')">${t('Ostalo') || "Ostalo"} ➜</button>`;
     }
-    
     html += `</div>`;
     content.innerHTML = html;
 }
@@ -763,7 +686,6 @@ function renderProductParts(subcategory) {
         if (!hasOstalo) {
             displayParts.push(t('Ostalo') || "Ostalo");
         }
-
         displayParts.forEach((part, idx) => {
             const color = colors[idx % colors.length];
             if (isOtherButton(part)) {
@@ -775,7 +697,6 @@ function renderProductParts(subcategory) {
     } else {
         html += `<button class="category-btn" style="background:#ddd;" onclick="renderDataEntry('')">${t('Ostalo') || "Ostalo"} ➜</button>`;
     }
-    
     html += `</div>`;
     content.innerHTML = html;
 }
@@ -1266,19 +1187,19 @@ function handleBackAction() {
     }
 }
 
-// ===== 10. GLAVNI DOGAĐAJI =====
+// ===== 8. GLAVNI DOGAĐAJI =====
 document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ DOM je spreman!');
 
     const loginBtn = document.getElementById('loginBtn');
-if (loginBtn) {
-    loginBtn.addEventListener('click', function(e) {
-        e.preventDefault(); // Sprečava eventualno osvežavanje stranice ako je dugme u formi
-        triggerLogin(); 
-    });
-}
+    if (loginBtn) {
+        loginBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            triggerLogin(); 
+        });
+    }
 
-    // Globalno slušanje Enter tastera za sve inpute
+    // Globalno slušanje Enter tastera
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Enter') {
             const phoneField = document.getElementById('phoneInput');
@@ -1287,13 +1208,10 @@ if (loginBtn) {
                 triggerLogin();
                 return;
             }
-
-            // Podrška za Enter unutar forme za unos proizvoda (dataEntry)
             if (currentScreenState === 'dataEntry') {
                 const active = document.activeElement;
                 if (active && (active.tagName === 'INPUT' || active.tagName === 'SELECT')) {
                     e.preventDefault();
-                    // Ako je u polju za čuvanje ili poslednjem elementu, sačuvaj proizvod
                     const saveBtn = document.querySelector('.btn-save');
                     if (saveBtn) {
                         saveProduct();
@@ -1303,15 +1221,27 @@ if (loginBtn) {
         }
     });
     
+    // EXIT dugmad
     document.getElementById('exitLoginBtn')?.addEventListener('click', exitApp);
     document.getElementById('exitLangBtn')?.addEventListener('click', exitApp);
     document.getElementById('exitMainBtn')?.addEventListener('click', exitApp);
 
-    // ===== BACK DUGME =====
+    // BACK dugme
     document.getElementById('backBtn')?.addEventListener('click', handleBackAction);
 
+    // INVENTORY i SHOPPING dugmad
     document.getElementById('inventoryBtn')?.addEventListener('click', function() { renderInventory(); });
     document.getElementById('shoppingBtn')?.addEventListener('click', function() { renderShoppingList(); });
+
+    // ===== SUPPORT DOGAĐAJI =====
+    document.getElementById('supportBtn')?.addEventListener('click', openSupportDialog);
+    document.getElementById('closeSupportBtn')?.addEventListener('click', closeSupportDialog);
+    document.getElementById('closeSupportBtn2')?.addEventListener('click', closeSupportDialog);
+    
+    // Zatvori Support na ESC
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeSupportDialog();
+    });
 
     console.log('✅ Svi događaji povezani!');
 });
