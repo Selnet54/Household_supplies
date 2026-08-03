@@ -312,7 +312,16 @@ const subcategories = {
         "Sitna divljač": ["Prepelica", "Fazan", "Jarebica", "Divlja patka", "Divlja guska", "Divlji zec", "Golub", "Ostalo"],
         "Krupna divljač": ["Jelen", "Srna", "Divokoza", "Los", "Irvas", "Divlja svinja", "Bizon", "Kamila", "Lama", "Alpaka", "Kengur", "Krokodil/Aligator", "Gušter", "Zmija", "Ostalo"],
         "Riba": ["Morska", "Slatkovodna", "Plodovi mora", "Ostalo"],
-        "Mlečni proizvodi": ["Mleko", "Jogurt i kiselo mleko", "Pavlaka", "Mladi sir", "Tvrdi sir", "Kozji i ovčiji sir", "Kajmak i puter", "Ostalo"],
+        "Mlečni proizvodi": {
+            "Mleko": ["Kravlje", "Kozje", "Ovčije", "Bademovo", "Sojino", "Ostalo"],
+            "Jogurt i kiselo mleko": ["Jogurt", "Kiselo mleko", "Ostalo"],
+            "Pavlaka": ["Pavlaka", "Kisela pavlaka", "Ostalo"],
+            "Mladi sir": ["Mladi sir", "Ostalo"],
+            "Tvrdi sir": ["Tvrdi sir", "Ostalo"],
+            "Kozji i ovčiji sir": ["Kozji sir", "Ovčiji sir", "Ostalo"],
+            "Kajmak i puter": ["Kajmak", "Puter", "Ostalo"],
+            "Ostalo": ["Ostalo"]
+        },
         "Povrće": ["Sveže", "Termički obrađeno", "Zamrznuto", "Ostalo"],
         "Zimnica i kompoti": {
             "Voće": ["Kajsija", "Kruška", "Višnja", "Pekmez od jagoda", "Šljivov pekmez", "Trešnja", "Pekmez od malina", "Dunja", "Ananas", "Pekmez od manga", "Ostalo"],
@@ -336,13 +345,139 @@ const subcategories = {
         },
         "Ostalo": ["Ostalo"]
     },
+    hu: {
+        "Fehér hús": ["Csirke", "Pulyka", "Libacomb", "Kacsa", "Egyéb"],
+        "Vörös hús": ["Sertés", "Bárány", "Birka", "Borjú", "Marha", "Bika", "Ló", "Nyúl", "Egyéb"],
+        "Apróvad": ["Fürj", "Fácán", "Fogoly", "Vadkacsa", "Vadliba", "Mezei nyúl", "Galamb", "Egyéb"],
+        "Nagyvad": ["Szarvas", "Őz", "Vadkecske", "Jávorszarvas", "Rénszarvas", "Vaddisznó", "Bölény", "Teve", "Láma", "Alpaka", "Kenguru", "Krokodil/Alligátor", "Gyík", "Kígyó", "Egyéb"],
+        "Hal": ["Tengeri", "Édesvízi", "Tenger gyümölcsei", "Egyéb"],
+        "Tejtermékek": {
+            "Tej": ["Tehéntej", "Kecsketej", "Juhtej", "Mandulatej", "Szójatej", "Egyéb"],
+            "Joghurt és aludttej": ["Joghurt", "Aludttej", "Egyéb"],
+            "Tejföl": ["Tejföl", "Egyéb"],
+            "Friss sajt": ["Friss sajt", "Egyéb"],
+            "Kemény sajt": ["Kemény sajt", "Egyéb"],
+            "Kecske- és juhtúró": ["Kecskesajt", "Juhsajt", "Egyéb"],
+            "Tejföl és vaj": ["Tejföl", "Vaj", "Egyéb"],
+            "Egyéb": ["Egyéb"]
+        },
+        "Zöldség": ["Friss", "Hőkezelt", "Fagyasztott", "Egyéb"],
+        "Befőttek és kompótok": {
+            "Gyümölcs": ["Kajszibarack", "Körte", "Meggy", "Eperlekvár", "Szilvalevar", "Cseresznye", "Málnalevar", "Birs", "Ananász", "Mangólekvár", "Egyéb"],
+            "Zöldség": ["Savanyú uborka", "Savanyú paprika", "Paradicsompüré", "Cékla", "Ajvár", "Savanyúság", "Savanyú káposzta", "Egyéb"]
+        },
+        "Tészta és Édességek": {
+            "Tészta": ["Kenyér", "Rozskenyér", "Ciabatta", "Kukoricakenyér", "Baguette", "Búzaliszt", "Teljes kiőrlésű liszt", "Hajdinaliszt", "Rizsliszt", "Fűszerek", "Egyéb"],
+            "Édességek": ["Sütemények", "Torták", "Péksütemények", "Fagylalt", "Csokoládé", "Cukorkák", "Egyéb"]
+        },
+        "Italok": {
+            "Víz": ["Ásványvíz", "Szénsavmentes", "Szénsavas", "Egyéb"],
+            "Bor": ["Vörös", "Fehér", "Rosé", "Egyéb"],
+            "Lé": ["Gyümölcslé", "Zöldséglé", "Egyéb"],
+            "Tömény italok": ["Pálinka", "Vodka", "Whisky", "Egyéb"],
+            "Sör": ["Barna", "Világos", "Egyéb"]
+        },
+        "Kémia és higiénia": {
+            "Tisztítószerek": ["Ablaktisztítás", "Mosogatás", "Padlótisztítás", "Fürdőszobai tisztítószer", "Egyéb"],
+            "Személyes higiénia": ["Dezodor", "Borotva", "Smink", "Szappan", "Sampon", "Krém", "Egyéb"],
+            "Eszközök": ["Kis vödör", "Vödör", "Portörlő rongy", "Seprű", "Egyéb"]
+        },
+        "Egyéb": ["Egyéb"]
+    },
+    uk: {
+        "Біле м'ясо": ["Курятина", "Індичка", "Гуска", "Качка", "Інше"],
+        "Червоне м'ясо": ["Свинина", "Ягнятина", "Баранина", "Телятина", "Яловичина", "Бичатина", "Конина", "Кролик", "Інше"],
+        "Дрібна дичина": ["Перепілка", "Фазан", "Куріпка", "Дика качка", "Дика гуска", "Заєць", "Голуб", "Інше"],
+        "Велика дичина": ["Олень", "Косуля", "Козуль", "Лось", "Північний олень", "Дикий кабан", "Бізон", "Верблюд", "Лама", "Альпака", "Кенгуру", "Крокодил/Алігатор", "Ящірка", "Змія", "Інше"],
+        "Риба": ["Морська", "Прісноводна", "Морепродукти", "Інше"],
+        "Молочні продукти": {
+            "Молоко": ["Коров'яче", "Козяче", "Овече", "Мигдалеве", "Соєве", "Інше"],
+            "Йогурт та кисляк": ["Йогурт", "Кисляк", "Інше"],
+            "Сметана": ["Сметана", "Інше"],
+            "М'який сир": ["М'який сир", "Інше"],
+            "Твердий сир": ["Твердий сир", "Інше"],
+            "Козячий та овечий сир": ["Козячий сир", "Овечий сир", "Інше"],
+            "Каймак та масло": ["Каймак", "Масло", "Інше"],
+            "Інше": ["Інше"]
+        },
+        "Овочі": ["Свіжі", "Термічно оброблені", "Заморожені", "Інше"],
+        "Консервація та компоти": {
+            "Фрукти": ["Абрикос", "Груша", "Вишня", "Полуничний джем", "Сливовий джем", "Черешня", "Малиновий джем", "Айва", "Ананас", "Манговий джем", "Інше"],
+            "Овочі": ["Мариновані огірки", "Маринований перець", "Томатне пюре", "Буряк", "Айвар", "Соління", "Квашена капуста", "Інше"]
+        },
+        "Тісто та Солодощі": {
+            "Тісто": ["Хліб", "Житній хліб", "Чабата", "Кукурудзяний хліб", "Багет", "Пшеничне борошно", "Цільнозернове борошно", "Гречане борошно", "Рисове борошно", "Спеції", "Інше"],
+            "Солодощі": ["Тістечка", "Торти", "Випічка", "Морозиво", "Шоколад", "Цукерки", "Інше"]
+        },
+        "Напої": {
+            "Вода": ["Мінеральна", "Негазована", "Газована", "Інше"],
+            "Вино": ["Червоне", "Біле", "Рожеве", "Інше"],
+            "Сік": ["Фруктовий", "Овочевий", "Інше"],
+            "Міцні напої": ["Ракія", "Горілка", "Віскі", "Інше"],
+            "Пиво": ["Темне", "Світле", "Інше"]
+        },
+        "Хімія та гігієна": {
+            "Санітарія": ["Миття вікон", "Миття посуду", "Миття підлоги", "Засіб для ванної", "Інше"],
+            "Особиста гігієна": ["Дезодорант", "Бритва", "Косметика", "Мило", "Шампунь", "Крем", "Інше"],
+            "Інвентар": ["Маленьке відро", "Відро", "Ганчірка для пилу", "Мітла", "Інше"]
+        },
+        "Інше": ["Інше"]
+    },
+    ru: {
+        "Белое мясо": ["Курица", "Индейка", "Гусь", "Утка", "Другое"],
+        "Красное мясо": ["Свинина", "Баранина", "Овца", "Телятина", "Говядина", "Бык", "Конина", "Кролик", "Другое"],
+        "Мелкая дичь": ["Перепел", "Фазан", "Куропатка", "Дикая утка", "Дикий гусь", "Заяц", "Голубь", "Другое"],
+        "Крупная дичь": ["Олень", "Косуля", "Дикая коза", "Лось", "Северный олень", "Кабан", "Бизон", "Верблюд", "Лама", "Альпака", "Кенгуру", "Крокодил/Аллигатор", "Ящерица", "Змея", "Другое"],
+        "Рыба": ["Морская", "Пресноводная", "Морепродукты", "Другое"],
+        "Молочные продукты": {
+            "Молоко": ["Коровье", "Козье", "Овечье", "Миндальное", "Соевое", "Другое"],
+            "Йогурт и простокваша": ["Йогурт", "Простокваша", "Другое"],
+            "Сметана": ["Сметана", "Другое"],
+            "Мягкий сыр": ["Мягкий сыр", "Другое"],
+            "Твердый сыр": ["Твердый сыр", "Другое"],
+            "Козий и овечий сыр": ["Козий сыр", "Овечий сыр", "Другое"],
+            "Каймак и масло": ["Каймак", "Масло", "Другое"],
+            "Другое": ["Другое"]
+        },
+        "Овощи": ["Свежие", "Термически обработанные", "Замороженные", "Другое"],
+        "Консервация и компоты": {
+            "Фрукты": ["Абрикос", "Груша", "Вишня", "Клубничный джем", "Сливовый джем", "Черешня", "Малиновый джем", "Айва", "Ананас", "Манговый джем", "Другое"],
+            "Овощи": ["Маринованные огурцы", "Маринованный перец", "Томатное пюре", "Свекла", "Айвар", "Соленья", "Квашеная капуста", "Другое"]
+        },
+        "Тесто и Сладости": {
+            "Тесто": ["Хлеб", "Ржаной хлеб", "Чиабатта", "Кукурузный хлеб", "Багет", "Пшеничная мука", "Цельнозерновая мука", "Гречневая мука", "Рисовая мука", "Специи", "Другое"],
+            "Сладости": ["Пирожные", "Торты", "Выпечка", "Мороженое", "Шоколад", "Конфеты", "Другое"]
+        },
+        "Напитки": {
+            "Вода": ["Минеральная", "Негазированная", "Газированная", "Другое"],
+            "Вино": ["Красное", "Белое", "Розовое", "Другое"],
+            "Сок": ["Фруктовый", "Овощной", "Другое"],
+            "Крепкие напитки": ["Ракия", "Водка", "Виски", "Другое"],
+            "Пиво": ["Темное", "Светлое", "Другое"]
+        },
+        "Химия и гигиена": {
+            "Санитария": ["Мытье окон", "Мытье посуды", "Мытье полов", "Средство для ванной", "Другое"],
+            "Личная гигиена": ["Дезодорант", "Бритва", "Косметика", "Мыло", "Шампунь", "Крем", "Другое"],
+            "Инвентарь": ["Маленькое ведро", "Ведро", "Тряпка для пыли", "Метла", "Другое"]
+        },
+        "Другое": ["Другое"]
+    },
     en: {
         "White meat": ["Chicken", "Turkey", "Goose", "Duck", "Other"],
         "Red meat": ["Pork", "Lamb", "Sheep", "Veal", "Beef", "Bull", "Horse", "Rabbit", "Other"],
         "Small game": ["Quail", "Pheasant", "Partridge", "Wild duck", "Wild goose", "Hare", "Pigeon", "Other"],
         "Big game": ["Deer", "Roe deer", "Wild goat", "Moose", "Reindeer", "Wild boar", "Bison", "Camel", "Llama", "Alpaca", "Kangaroo", "Crocodile/Alligator", "Lizard", "Snake", "Other"],
         "Fish": ["Sea", "Freshwater", "Seafood", "Other"],
-        "Dairy products": ["Milk", "Yogurt and sour milk", "Sour cream", "Soft cheese", "Hard cheese", "Goat and sheep cheese", "Kaymak and butter", "Other"],
+        "Dairy products": {
+            "Milk": ["Cow", "Goat", "Sheep", "Almond", "Soy", "Other"],
+            "Yogurt and sour milk": ["Yogurt", "Sour milk", "Other"],
+            "Sour cream": ["Sour cream", "Other"],
+            "Soft cheese": ["Soft cheese", "Other"],
+            "Hard cheese": ["Hard cheese", "Other"],
+            "Goat and sheep cheese": ["Goat cheese", "Sheep cheese", "Other"],
+            "Kaymak and butter": ["Kaymak", "Butter", "Other"],
+            "Other": ["Other"]
+        },
         "Vegetables": ["Fresh", "Heat treated", "Frozen", "Other"],
         "Preserves and compotes": {
             "Fruit": ["Apricot", "Pear", "Sour cherry", "Strawberry jam", "Plum jam", "Cherry", "Raspberry jam", "Quince", "Pineapple", "Mango jam", "Other"],
@@ -372,7 +507,16 @@ const subcategories = {
         "Kleinwild": ["Wachtel", "Fasan", "Rebhuhn", "Wildente", "Wildgans", "Hase", "Taube", "Andere"],
         "Großwild": ["Hirsch", "Reh", "Wildziege", "Elch", "Rentier", "Wildschwein", "Bison", "Kamel", "Lama", "Alpaka", "Känguru", "Krokodil/Alligator", "Eidechse", "Schlange", "Andere"],
         "Fisch": ["Meer", "Süßwasser", "Meeresfrüchte", "Andere"],
-        "Milchprodukte": ["Milch", "Joghurt und Sauermilch", "Saure Sahne", "Frischkäse", "Hartkäse", "Ziegen- und Schafskäse", "Kaymak und Butter", "Andere"],
+        "Milchprodukte": {
+            "Milch": ["Kuhmilch", "Ziegenmilch", "Schafmilch", "Mandelmilch", "Sojamilch", "Andere"],
+            "Joghurt und Sauermilch": ["Joghurt", "Sauermilch", "Andere"],
+            "Saure Sahne": ["Saure Sahne", "Andere"],
+            "Frischkäse": ["Frischkäse", "Andere"],
+            "Hartkäse": ["Hartkäse", "Andere"],
+            "Ziegen- und Schafskäse": ["Ziegenkäse", "Schafskäse", "Andere"],
+            "Kaymak und Butter": ["Kaymak", "Butter", "Andere"],
+            "Andere": ["Andere"]
+        },
         "Gemüse": ["Frisch", "Wärmebehandelt", "Gefroren", "Andere"],
         "Konserven und Kompotte": {
             "Obst": ["Aprikose", "Birne", "Sauerkirsche", "Erdbeermarmelade", "Pflaumenmus", "Kirsche", "Himbeermarmelade", "Quitte", "Ananas", "Mangomarmelade", "Andere"],
@@ -402,7 +546,16 @@ const subcategories = {
         "小型野味": ["鹌鹑", "野鸡", "鹧鸪", "野鸭", "野鹅", "野兔", "鸽子", "其他"],
         "大型野味": ["鹿", "狍子", "野山羊", "驼鹿", "驯鹿", "野猪", "野牛", "骆驼", "羊驼", "袋鼠", "鳄鱼", "蜥蜴", "蛇", "其他"],
         "鱼": ["海鱼", "淡水鱼", "海鲜", "其他"],
-        "乳制品": ["牛奶", "酸奶", "酸奶油", "软奶酪", "硬奶酪", "山羊和绵羊奶酪", "奶油和黄油", "其他"],
+        "乳制品": {
+            "牛奶": ["牛奶", "羊奶", "杏仁奶", "豆奶", "其他"],
+            "酸奶": ["酸奶", "其他"],
+            "酸奶油": ["酸奶油", "其他"],
+            "软奶酪": ["软奶酪", "其他"],
+            "硬奶酪": ["硬奶酪", "其他"],
+            "山羊和绵羊奶酪": ["山羊奶酪", "绵羊奶酪", "其他"],
+            "奶油和黄油": ["奶油", "黄油", "其他"],
+            "其他": ["其他"]
+        },
         "蔬菜": ["新鲜", "热处理", "冷冻", "其他"],
         "蜜饯和蜜饯": {
             "水果": ["杏", "梨", "酸樱桃", "草莓酱", "李子酱", "樱桃", "树莓酱", "木瓜", "菠萝", "芒果酱", "其他"],
@@ -432,7 +585,16 @@ const subcategories = {
         "Caza menor": ["Codorniz", "Faisán", "Perdiz", "Pato salvaje", "Ganso salvaje", "Liebre", "Paloma", "Otro"],
         "Caza mayor": ["Ciervo", "Corzo", "Cabra salvaje", "Alce", "Reno", "Jabalí", "Bisonte", "Camello", "Llama", "Alpaca", "Canguro", "Cocodrilo/Caimán", "Lagarto", "Serpiente", "Otro"],
         "Pescado": ["Mar", "Agua dulce", "Mariscos", "Otro"],
-        "Productos lácteos": ["Leche", "Yogur y leche agria", "Crema agria", "Queso tierno", "Queso curado", "Queso de cabra y oveja", "Mantequilla y nata", "Otro"],
+        "Productos lácteos": {
+            "Leche": ["Leche de vaca", "Leche de cabra", "Leche de oveja", "Leche de almendra", "Leche de soja", "Otro"],
+            "Yogur y leche agria": ["Yogur", "Leche agria", "Otro"],
+            "Crema agria": ["Crema agria", "Otro"],
+            "Queso tierno": ["Queso tierno", "Otro"],
+            "Queso curado": ["Queso curado", "Otro"],
+            "Queso de cabra y oveja": ["Queso de cabra", "Queso de oveja", "Otro"],
+            "Mantequilla y nata": ["Mantequilla", "Nata", "Otro"],
+            "Otro": ["Otro"]
+        },
         "Verduras": ["Frescas", "Tratadas térmicamente", "Congeladas", "Otro"],
         "Conservas y compotas": {
             "Fruta": ["Albaricoque", "Pera", "Guinda", "Mermelada de fresa", "Mermelada de ciruela", "Cereza", "Mermelada de frambuesa", "Membrillo", "Piña", "Mermelada de mango", "Otro"],
@@ -462,7 +624,16 @@ const subcategories = {
         "Caça pequena": ["Codorna", "Faisão", "Perdiz", "Pato selvagem", "Ganso selvagem", "Lebre", "Pombo", "Outro"],
         "Caça grossa": ["Cervo", "Corça", "Cabra selvagem", "Alce", "Rena", "Javali", "Bisão", "Camelo", "Lhama", "Alpaca", "Canguru", "Crocodilo/Jacaré", "Lagarto", "Cobra", "Outro"],
         "Peixe": ["Mar", "Água doce", "Frutos do mar", "Outro"],
-        "Laticínios": ["Leite", "Iogurte e leite coalhado", "Creme de leite", "Queijo fresco", "Queijo cura", "Queijo de cabra e ovelha", "Manteiga e nata", "Outro"],
+        "Laticínios": {
+            "Leite": ["Leite de vaca", "Leite de cabra", "Leite de ovelha", "Leite de amêndoa", "Leite de soja", "Outro"],
+            "Iogurte e leite coalhado": ["Iogurte", "Leite coalhado", "Outro"],
+            "Creme de leite": ["Creme de leite", "Outro"],
+            "Queijo fresco": ["Queijo fresco", "Outro"],
+            "Queijo cura": ["Queijo cura", "Outro"],
+            "Queijo de cabra e ovelha": ["Queijo de cabra", "Queijo de ovelha", "Outro"],
+            "Manteiga e nata": ["Manteiga", "Nata", "Outro"],
+            "Outro": ["Outro"]
+        },
         "Vegetais": ["Fresco", "Tratado termicamente", "Congelado", "Outro"],
         "Conservas e compotas": {
             "Fruta": ["Damasco", "Pêra", "Cereja ácida", "Geleia de morango", "Geleia de ameixa", "Cereja", "Geleia de framboesa", "Marmelo", "Ananás", "Geleia de manga", "Outro"],
@@ -492,7 +663,16 @@ const subcategories = {
         "Petit gibier": ["Caille", "Faisan", "Perdrix", "Canard sauvage", "Oie sauvage", "Lièvre", "Pigeon", "Autre"],
         "Gros gibier": ["Cerf", "Chevreuil", "Chèvre sauvage", "Élan", "Renne", "Sanglier", "Bison", "Chameau", "Lama", "Alpaga", "Kangourou", "Crocodile/Alligator", "Lézard", "Serpent", "Autre"],
         "Poisson": ["Mer", "Eau douce", "Fruits de mer", "Autre"],
-        "Produits laitiers": ["Lait", "Yaourt et lait caillé", "Crème fraîche", "Fromage frais", "Fromage à pâte dure", "Fromage de chèvre et brebis", "Beurre et crème", "Autre"],
+        "Produits laitiers": {
+            "Lait": ["Lait de vache", "Lait de chèvre", "Lait de brebis", "Lait d'amande", "Lait de soja", "Autre"],
+            "Yaourt et lait caillé": ["Yaourt", "Lait caillé", "Autre"],
+            "Crème fraîche": ["Crème fraîche", "Autre"],
+            "Fromage frais": ["Fromage frais", "Autre"],
+            "Fromage à pâte dure": ["Fromage à pâte dure", "Autre"],
+            "Fromage de chèvre et brebis": ["Fromage de chèvre", "Fromage de brebis", "Autre"],
+            "Beurre et crème": ["Beurre", "Crème", "Autre"],
+            "Autre": ["Autre"]
+        },
         "Légumes": ["Frais", "Traité thermiquement", "Congelé", "Autre"],
         "Conserves et compotes": {
             "Fruits": ["Abricot", "Poire", "Griotte", "Confiture de fraises", "Confiture de prunes", "Cerise", "Confiture de framboises", "Coing", "Ananas", "Confiture de mangue", "Autre"],
