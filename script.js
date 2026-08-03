@@ -14,26 +14,18 @@ let currentScreenState = 'languages';
 function exitApp() {
     console.log("🚪 Exit dugme kliknuto!");
     
-    // Proveri koji je ekran vidljiv
     const loginScreen = document.getElementById('loginScreen');
     const languageScreen = document.getElementById('languageScreen');
-    const mainScreen = document.getElementById('mainScreen');
-    
     const isLoginVisible = loginScreen && window.getComputedStyle(loginScreen).display === 'flex';
     const isLanguageVisible = languageScreen && window.getComputedStyle(languageScreen).display === 'flex';
-    const isMainVisible = mainScreen && window.getComputedStyle(mainScreen).display === 'flex';
     
     let poruka;
-    
-    // Ako je login ili language ekran - uvek engleski
     if (isLoginVisible || isLanguageVisible) {
         poruka = "Thanks for using this app! 👋";
     } else {
-        // Inače koristi trenutni jezik
         poruka = t('exit_poruka') || "Thanks for using this app! 👋";
     }
     
-    // PRIKAŽI PLAVI EKRAN SA PORUKOM
     document.body.innerHTML = '';
     document.body.style.background = '#1a237e';
     document.body.style.margin = '0';
@@ -53,27 +45,7 @@ function exitApp() {
             <div style="font-size: 16px; color: #888; margin-top: 30px;">© Supplies App</div>
         </div>
     `;
-    
-    // Pokušaj zatvoriti prozor (samo ako je otvoren preko JS)
-    try {
-        window.close();
-    } catch(e) {
-        // Browser ne dozvoljava - samo prikaži poruku
-        console.log('Browser does not allow window.close()');
-    }
 }
-// ===== SUPPORT FUNKCIJE =====
-function openSupportDialog() {
-    const dialog = document.getElementById('supportDialog');
-    if (dialog) {
-        dialog.style.display = 'flex';
-        dialog.classList.add('active');
-        console.log('✅ Support otvoren');
-    } else {
-        console.error('❌ Support dialog nije pronađen');
-    }
-}
-
 function closeSupportDialog() {
     const dialog = document.getElementById('supportDialog');
     if (dialog) {
