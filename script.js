@@ -58,7 +58,7 @@ function exitApp() {
 function triggerLogin() {
     const phoneInput = document.getElementById('phoneInput');
     if (!phoneInput) {
-        alert('Greška: Polje za telefon nije pronađeno!');
+        showModernAlert('Error', 'Phone input field not found!', '❌');
         return;
     }
     const phone = phoneInput.value.trim();
@@ -66,7 +66,7 @@ function triggerLogin() {
         showScreen('languageScreen');
         renderLanguages();
     } else {
-        alert('Unesite validan broj telefona (9+ cifara)!');
+        showModernAlert('Error', 'Please enter a valid phone number (9+ digits)!', '⚠️');
     }
 }
 
@@ -888,14 +888,6 @@ function renderSubcategories(category) {
             html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('${safeSub}')">${sub} ➜</button>`;
         }
     });
-    html += `</div>`;
-    // DODAJ BACK DUGME
-    html += `<div style="margin-top:20px;text-align:center;">
-        <button onclick="renderCategories()" style="background:#90caf9;color:#1a237e;border:none;padding:15px 40px;border-radius:10px;font-size:20px;font-weight:bold;cursor:pointer;">◀ ${t('nazad')}</button>
-    </div>`;
-    content.innerHTML = html;
-}
-
 // ===== 16. DELOVI PROIZVODA =====
 function renderProductParts(subcategory) {
     currentSubcategory = subcategory;
