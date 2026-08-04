@@ -1249,22 +1249,10 @@ function sacuvajAzuriranje(index) {
         storage_location: document.getElementById('updateStorageSelect')?.value || 'Ostalo'
     };
     
+    localStorage.setItem('zalihe', JSON.stringify(zalihe));
+    showModernAlert(t('success'), t('product_updated'), '✅');
+    renderInventory();
 }
- 
-    zalihe[index] = {
-        product_name: product,
-        description: document.getElementById('updateDescriptionInput')?.value.trim() || '',
-        piece: document.getElementById('updatePieceInput')?.value.trim() || '-',
-        quantity: novaKolicina,
-        unit: document.getElementById('updateUnitSelect')?.value || 'kg',
-        entry_date: document.getElementById('updateDateInput')?.value || new Date().toISOString().split('T')[0],
-        shelf_life_months: parseInt(document.getElementById('updateShelfLifeInput')?.value) || 12,
-        storage_location: document.getElementById('updateStorageSelect')?.value || 'Ostalo'
-    };
-        localStorage.setItem('zalihe', JSON.stringify(zalihe));
-        showModernAlert(t('success'), t('product_updated'), '✅');
-        renderInventory();
-} 
 
 function renderShoppingList() {
     currentScreenState = 'shopping';
