@@ -191,7 +191,7 @@ const translations = {
         zamrzivac_1: "Gefrierschrank 1", zamrzivac_2: "Gefrierschrank 2", zamrzivac_3: "Gefrierschrank 3",
         frizider: "Kühlschrank", ostava: "Vorratskammer", Ostalo: "Andere",
         kg: "kg", g: "g", kom: "Stk", l: "l", ml: "ml", pak: "Pck", kutija: "Karton"
-       error: "Fehler",
+        error: "Fehler",
         invalid_input: "Ungültige Eingabe",
         please_enter_phone: "Bitte geben Sie eine gültige Telefonnummer ein (9+ Ziffern)!",
         success: "Erfolg",
