@@ -910,12 +910,23 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('backBtn')?.addEventListener('click', handleBackAction);
     document.getElementById('inventoryBtn')?.addEventListener('click', function() { renderInventory(); });
     
-    const shoppingBtn = document.getElementById('shoppingBtn');
-    if (shoppingBtn) {
-        shoppingBtn.addEventListener('click', function() { 
-            showModernAlert('Info', 'Shopping list view', '🛒');
-        });
-    }
+    function renderShoppingList() {
+    currentScreenState = 'shopping';
+    const content = document.getElementById('mainContent');
+    if (!content) return;
+    
+    let html = `<div class="title">${t('spisak')}</div>`;
+    html += `<div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;">`;
+    html += `<button onclick="renderCategories()" style="background:#f44336; color:white; border:none; padding:10px 20px; border-radius:8px; font-size:16px; cursor:pointer;">✖ ${t('odustani')}</button>`;
+    html += `</div>`;
+    
+    html += `<div class="table-container" style="max-height:400px; overflow-y:auto;">`;
+    html += `<div class="table-title">🛒 ${t('spisak_potreba')}</div>`;
+    html += `<div style="padding: 30px; text-align: center; color: #666; font-size: 18px;">${t('nema_proizvoda')}</div>`;
+    html += `</div>`;
+    
+    content.innerHTML = html;
+}
 
     document.getElementById('supportBtn')?.addEventListener('click', openSupportDialog);
     document.getElementById('closeSupportBtn')?.addEventListener('click', closeSupportDialog);
