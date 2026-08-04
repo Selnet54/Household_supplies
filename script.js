@@ -828,28 +828,21 @@ function isOtherButton(text) {
 }
 
 // ===== 7. RENDER FUNKCIJE =====
-// ===== 13. RENDER FUNKCIJE =====
 function renderLanguages() {
     const grid = document.getElementById('languageGrid');
     if (!grid) return;
     grid.innerHTML = '';
-    languages.forEach(lang => {
+    
+    Object.entries(languages).forEach(([code, lang]) => {
         const btn = document.createElement('button');
         btn.className = 'lang-btn-main';
         btn.innerHTML = `
             <img src="${lang.flag}?v=3" alt="${lang.name}" onerror="this.style.display='none'">
             <span class="lang-name">${lang.name}</span>
         `;
-        btn.onclick = () => selectLanguage(lang.code);
+        btn.onclick = () => selectLanguage(code);
         grid.appendChild(btn);
     });
-}
-
-function selectLanguage(langCode) {
-    currentLang = langCode;
-    showScreen('mainScreen');
-    updateHeaderTexts();
-    renderCategories();
 }
 
 // ===== 14. GLAVNE KATEGORIJE =====
