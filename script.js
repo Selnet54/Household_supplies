@@ -55,7 +55,7 @@ function exitApp() {
 function showModernAlert(title, message, icon = '📢') {
     const alertDiv = document.getElementById('modernAlert');
     if (!alertDiv) {
-        alert(message);
+        alert(message); // <-- OVDE JE KLJUČNI PROBLEM!
         return;
     }
     document.getElementById('alertIcon').textContent = icon;
@@ -241,7 +241,7 @@ const translations = {
         copy_error: "Hiba a másolás során!",
         delete_from_shopping: "Törli az elemet a bevásárlólistából?",
         delete_confirm: "Biztosan törölni szeretné {count} elemet?",
-        list_empty: "A bevásárlólista üres
+        list_empty: "A bevásárlólista üres"
     },
     uk: {
         nazad: "Назад", stanje: "Запаси", spisak: "Список",
@@ -360,7 +360,7 @@ const translations = {
         exit_poruka: "¡Gracias por usar! 👋",
         zamrzivac_1: "Congelador 1", zamrzivac_2: "Congelador 2", zamrzivac_3: "Congelador 3",
         frizider: "Refrigerador", ostava: "Despensa", Ostalo: "Otro",
-        kg: "kg", g: "g", kom: "pz", l: "l", ml: "ml", pak: "pq", kutija: "caja"
+        kg: "kg", g: "g", kom: "pz", l: "l", ml: "ml", pak: "pq", kutija: "caja",
         error: "Error",
         invalid_input: "Entrada inválida",
         please_enter_phone: "¡Por favor, introduzca un número de teléfono válido (9+ dígitos)!",
