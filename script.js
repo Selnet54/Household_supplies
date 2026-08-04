@@ -1264,10 +1264,13 @@ function sacuvajAzuriranje(index) {
         shelf_life_months: parseInt(document.getElementById('updateShelfLifeInput')?.value) || 12,
         storage_location: document.getElementById('updateStorageSelect')?.value || 'Ostalo'
     };
-    localStorage.setItem('zalihe', JSON.stringify(zalihe));
+  localStorage.setItem('zalihe', JSON.stringify(zalihe));
     alert('✅ Proizvod ažuriran!');
     renderInventory();
-}
+} // <-- OBAVEZNO zatvorena zagrada prethodne funkcije!
+
+// Nova funkcija počinje ovde čisto i bez greške:
+function renderShoppingList() {
 
 function renderShoppingList() {
     currentScreenState = 'shopping';
