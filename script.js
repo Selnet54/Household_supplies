@@ -1041,19 +1041,42 @@ function sacuvajAzuriranje(index) {
         return;
     }
     
-    const productData = {
+    const novaKolicina = parseFloat(quantity);
+    let zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
+    let shopping = JSON.parse(localStorage.getItem('shoppingList') || '[]');
+    
+    // Ako je količina 0, prebaci u spisak potreba
+    if (novaKolicina === 0) {
+        const proizvod = zalihe[index];
+        if (proizvod) {
+            // Dodaj u spisak potreba
+            shopping.push({
+                product_name: proizvod.product_name,
+                description: proizvod.description || '',
+                quantity: 0,
+                unit: proizvod.unit || 'kom'
+            });
+            localStorage.setItem('shoppingList', JSON.stringify(shopping));
+            // Obriši iz zaliha
+            zalihe.splice(index, 1);
+            localStorage.setItem('zalihe', JSON.stringify(zalihe));
+            alert('🛒 Proizvod prebačen u spisak potreba (količina 0)!');
+            renderInventory();
+            return;
+        }
+    }
+    
+    // Inače ažuriraj
+    zalihe[index] = {
         product_name: product,
         description: document.getElementById('updateDescriptionInput')?.value.trim() || '',
         piece: document.getElementById('updatePieceInput')?.value.trim() || '-',
-        quantity: parseFloat(quantity),
+        quantity: novaKolicina,
         unit: document.getElementById('updateUnitSelect')?.value || 'kg',
         entry_date: document.getElementById('updateDateInput')?.value || new Date().toISOString().split('T')[0],
         shelf_life_months: parseInt(document.getElementById('updateShelfLifeInput')?.value) || 12,
         storage_location: document.getElementById('updateStorageSelect')?.value || 'Ostalo'
     };
-    
-    let zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
-    zalihe[index] = productData;
     localStorage.setItem('zalihe', JSON.stringify(zalihe));
     alert('✅ Proizvod ažuriran!');
     renderInventory();
@@ -1067,16 +1090,19 @@ function renderShoppingList() {
     
     let html = `<div class="title">${t('spisak_potreba')}</div>`;
     html += `<div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;">`;
-    html += `<button onclick="renderCategories()" style="background:#f44336; color:white; border:none; padding:10px 20px; border-radius:8px; font-size:16px; cursor:pointer;">✖ ${t('odustani')}</button>`;
+    html += `<button onclick="oznaciSveShopping()" style="background:#2196F3; color:white; border:none; padding:10px 20px; border-radius:8px; font-size:16px; cursor:pointer;">☑️ ${t('oznaci_sve')}</button>`;
+    html += `<button onclick="kopirajShopping()" style="background:#4CAF50; color:white; border:none; padding:10px 20px; border-radius:8px; font-size:16px; cursor:pointer;">📋 ${t('kopiraj')}</button>`;
+    html += `<button onclick="obrisiOznacenoShopping()" style="background:#f44336; color:white; border:none; padding:10px 20px; border-radius:8px; font-size:16px; cursor:pointer;">🗑️ ${t('obrisi_oznaceno')}</button>`;
+    html += `<button onclick="renderCategories()" style="background:#666; color:white; border:none; padding:10px 20px; border-radius:8px; font-size:16px; cursor:pointer;">✖ ${t('odustani')}</button>`;
     html += `</div>`;
     
     html += `<div class="table-container" style="max-height:400px; overflow-y:auto;">`;
     html += `<div class="table-title">🛒 ${t('spisak_potreba')}</div>`;
     html += `<div id="shoppingTable">`;
-    html += `<div class="table-row header-row" style="display:grid; grid-template-columns:1fr 1fr 0.5fr 0.5fr; gap:2px; background:#f0f0f0; font-weight:bold; border-bottom:2px solid #ccc; padding:5px 0;">`;
+    html += `<div class="table-row header-row" style="display:grid; grid-template-columns:40px 1fr 1fr 0.5fr; gap:2px; background:#f0f0f0; font-weight:bold; border-bottom:2px solid #ccc; padding:5px 0;">`;
+    html += `<div class="cell" style="text-align:center;"><input type="checkbox" id="selectAllShopping" onchange="toggleAllShopping()"></div>`;
     html += `<div class="cell">${t('naziv_proizvoda')}</div>`;
     html += `<div class="cell">${t('opis')}</div>`;
-    html += `<div class="cell">${t('kolicina')}</div>`;
     html += `<div class="cell">Akcija</div>`;
     html += `</div>`;
     
@@ -1084,10 +1110,10 @@ function renderShoppingList() {
         html += `<div class="table-row"><div class="cell" style="grid-column:span 4;padding:30px;color:#999;text-align:center;">${t('nema_proizvoda')}</div></div>`;
     } else {
         shopping.forEach((p, index) => {
-            html += `<div class="table-row" style="display:grid; grid-template-columns:1fr 1fr 0.5fr 0.5fr; gap:2px; border-bottom:1px solid #eee; padding:5px 0;">`;
+            html += `<div class="table-row" style="display:grid; grid-template-columns:40px 1fr 1fr 0.5fr; gap:2px; border-bottom:1px solid #eee; padding:5px 0;">`;
+            html += `<div class="cell" style="text-align:center;"><input type="checkbox" class="shopping-checkbox" data-index="${index}"></div>`;
             html += `<div class="cell">${p.product_name}</div>`;
             html += `<div class="cell">${p.description || ''}</div>`;
-            html += `<div class="cell">${p.quantity}</div>`;
             html += `<div class="cell"><button onclick="obrisiSaSpiska(${index})" style="background:#f44336;color:white;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;">✖</button></div>`;
             html += `</div>`;
         });
@@ -1103,7 +1129,74 @@ function obrisiSaSpiska(index) {
     localStorage.setItem('shoppingList', JSON.stringify(shopping));
     renderShoppingList();
 }
+function oznaciSveShopping() {
+    const checkboxes = document.querySelectorAll('.shopping-checkbox');
+    const selectAll = document.getElementById('selectAllShopping');
+    if (checkboxes.length === 0) return;
+    const sviOznaceni = Array.from(checkboxes).every(cb => cb.checked);
+    checkboxes.forEach(cb => cb.checked = !sviOznaceni);
+    if (selectAll) selectAll.checked = !sviOznaceni;
+}
 
+function toggleAllShopping() {
+    const selectAll = document.getElementById('selectAllShopping');
+    const checkboxes = document.querySelectorAll('.shopping-checkbox');
+    checkboxes.forEach(cb => cb.checked = selectAll.checked);
+}
+
+function kopirajShopping() {
+    const shopping = JSON.parse(localStorage.getItem('shoppingList') || '[]');
+    if (shopping.length === 0) {
+        alert(t('nema_proizvoda'));
+        return;
+    }
+    let tekst = `${t('spisak_potreba')}\n${'='.repeat(30)}\n\n`;
+    shopping.forEach((p, index) => {
+        tekst += `${index + 1}. ${p.product_name}`;
+        if (p.description) tekst += ` - ${p.description}`;
+        tekst += `\n`;
+    });
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(tekst).then(() => alert('✅ Lista je kopirana!')).catch(() => kopirajFallback(tekst));
+    } else {
+        kopirajFallback(tekst);
+    }
+}
+
+function kopirajFallback(tekst) {
+    const textarea = document.createElement('textarea');
+    textarea.value = tekst;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+    try { document.execCommand('copy'); alert('✅ Lista je kopirana!'); } 
+    catch (err) { alert('❌ Greška pri kopiranju.'); }
+    document.body.removeChild(textarea);
+}
+
+function obrisiOznacenoShopping() {
+    const selected = document.querySelectorAll('.shopping-checkbox:checked');
+    if (selected.length === 0) {
+        alert('Niste označili nijednu stavku za brisanje!');
+        return;
+    }
+    if (!confirm(`Da li ste sigurni da želite da obrišete ${selected.length} stavku/ke?`)) return;
+    let shopping = JSON.parse(localStorage.getItem('shoppingList') || '[]');
+    const indices = Array.from(selected).map(cb => parseInt(cb.dataset.index));
+    indices.sort((a, b) => b - a);
+    indices.forEach(i => shopping.splice(i, 1));
+    localStorage.setItem('shoppingList', JSON.stringify(shopping));
+    renderShoppingList();
+}
+
+function obrisiSaSpiska(index) {
+    if (!confirm('Obrišite stavku sa spiska?')) return;
+    let shopping = JSON.parse(localStorage.getItem('shoppingList') || '[]');
+    shopping.splice(index, 1);
+    localStorage.setItem('shoppingList', JSON.stringify(shopping));
+    renderShoppingList();
+}
 // ===== GLAVNA FUNKCIJA ZA NAZAD / ODUSTANI =====
 function handleBackAction() {
     console.log('⬅️ Trenutni ekran stanje:', currentScreenState);
