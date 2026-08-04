@@ -143,18 +143,17 @@ function closeSupportDialog() {
 
 // ===== 1. JEZICI =====
 const languages = {
-    sr: { name: 'Srpski', flag: '/Household_supplies/icons/jezici/srpski.png' },
-    en: { name: 'English', flag: '/Household_supplies/icons/jezici/engleski.png' },
-    de: { name: 'Deutsch', flag: '/Household_supplies/icons/jezici/nemacki.png' },
-    hu: { name: 'Magyar', flag: '/Household_supplies/icons/jezici/madjarski.png' },
-    uk: { name: 'Українська', flag: '/Household_supplies/icons/jezici/ukrajinski.png' },
-    ru: { name: 'Русский', flag: '/Household_supplies/icons/jezici/ruski.png' },
-    zh: { name: '中文', flag: '/Household_supplies/icons/jezici/mandarinski.png' },
-    es: { name: 'Español', flag: '/Household_supplies/icons/jezici/spanski.png' },
-    pt: { name: 'Português', flag: '/Household_supplies/icons/jezici/portugalski.png' },
-    fr: { name: 'Français', flag: '/Household_supplies/icons/jezici/francuski.png' }
+    sr: { name: 'Srpski', flag: 'icons/jezici/srpski.png' },
+    en: { name: 'English', flag: 'icons/jezici/engleski.png' },
+    de: { name: 'Deutsch', flag: 'icons/jezici/nemacki.png' },
+    hu: { name: 'Magyar', flag: 'icons/jezici/madjarski.png' },
+    uk: { name: 'Українська', flag: 'icons/jezici/ukrajinski.png' },
+    ru: { name: 'Русский', flag: 'icons/jezici/ruski.png' },
+    zh: { name: '中文', flag: 'icons/jezici/mandarinski.png' },
+    es: { name: 'Español', flag: 'icons/jezici/spanski.png' },
+    pt: { name: 'Português', flag: 'icons/jezici/portugalski.png' },
+    fr: { name: 'Français', flag: 'icons/jezici/francuski.png' }
 };
-
 // ===== 2. PREVODI =====
 const translations = {
     sr: {
