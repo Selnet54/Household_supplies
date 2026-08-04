@@ -51,6 +51,50 @@ function exitApp() {
     `;
 }
 
+// ============================================
+// GLOBALNA FUNKCIJA ZA LOGIN
+// ============================================
+function triggerLogin() {
+    const phoneInput = document.getElementById('phoneInput');
+    if (!phoneInput) {
+        alert('Greška: Polje za telefon nije pronađeno!');
+        return;
+    }
+    const phone = phoneInput.value.trim();
+    if (phone.length >= 9) {
+        showScreen('languageScreen');
+        renderLanguages();
+    } else {
+        alert('Unesite validan broj telefona (9+ cifara)!');
+    }
+}
+
+function openDB() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open('HouseholdSuppliesDB', 1);
+        
+        request.onerror = event => {
+            console.error("IndexedDB error:", event.target.error);
+            reject(event.target.error);
+        };
+        
+        request.onsuccess = event => {
+            const db = event.target.result;
+            resolve(db);
+        };
+        
+        request.onupgradeneeded = event => {
+            const db = event.target.result;
+            if (!db.objectStoreNames.contains('inventory')) {
+                db.createObjectStore('inventory', { keyPath: 'id', autoIncrement: true });
+            }
+            if (!db.objectStoreNames.contains('shoppingList')) {
+                db.createObjectStore('shoppingList', { keyPath: 'id', autoIncrement: true });
+            }
+        };
+    });
+}
+
 // ===== MODERNI ALERT =====
 function showModernAlert(title, message, icon = '📢') {
     const alertDiv = document.getElementById('modernAlert');
@@ -1161,9 +1205,11 @@ function removeFromShopping(id) {
     });
 }
 
-// ===== 20. DOGAĐAJI =====
+// ============================================
+// 20. DOGAĐAJI (Pokreće se kada se stranica učita)
+// ============================================
 document.addEventListener('DOMContentLoaded', function() {
-    // 1. Otvori bazu
+    // Ovde pozivaš openDB() jer ona već postoji iznad
     openDB().then(database => {
         db = database;
         console.log('Baza otvorena');
@@ -1181,13 +1227,7 @@ document.addEventListener('DOMContentLoaded', function() {
     showScreen('loginScreen');
     
     document.getElementById('loginBtn').addEventListener('click', function() {
-        const phone = document.getElementById('phoneInput').value.trim();
-        if (phone.length >= 9) {
-            showScreen('languageScreen');
-            renderLanguages();
-        } else {
-            alert('Unesite validan broj telefona!');
-        }
+        triggerLogin(); // ili tvoja logika za login
     });
     
     document.getElementById('phoneInput').addEventListener('keypress', function(e) {
@@ -1217,21 +1257,3 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log('✅ Svi događaji povezani!');
 });
-
-// ============================================
-// GLOBALNA FUNKCIJA ZA LOGIN
-// ============================================
-function triggerLogin() {
-    const phoneInput = document.getElementById('phoneInput');
-    if (!phoneInput) {
-        alert('Greška: Polje za telefon nije pronađeno!');
-        return;
-    }
-    const phone = phoneInput.value.trim();
-    if (phone.length >= 9) {
-        showScreen('languageScreen');
-        renderLanguages();
-    } else {
-        alert('Unesite validan broj telefona (9+ cifara)!');
-    }
-}
