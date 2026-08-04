@@ -51,25 +51,10 @@ function exitApp() {
     `;
 }
 
-// ===== MODERNI ALERT (Ispravljeno sa automatskim kreiranjem HTML-a ako nedostaje) =====
+// ===== MODERNI ALERT =====
 function showModernAlert(title, message, icon = '📢') {
-    let alertDiv = document.getElementById('modernAlert');
-    
-    // Ako alert div ne postoji u HTML-u, kreiramo ga dinamički da aplikacija ne pukne
-    if (!alertDiv) {
-        alertDiv = document.createElement('div');
-        alertDiv.id = 'modernAlert';
-        alertDiv.style.cssText = 'position:fixed; top:20px; right:20px; background:#333; color:#fff; padding:15px; border-radius:8px; z-index:9999; display:none; align-items:center; box-shadow:0 4px 6px rgba(0,0,0,0.3);';
-        alertDiv.innerHTML = `
-            <span id="alertIcon" style="font-size:24px; margin-right:10px;">${icon}</span>
-            <div>
-                <div id="alertTitle" style="font-weight:bold; font-size:16px;">${title}</div>
-                <div id="alertMessage" style="font-size:14px;">${message}</div>
-            </div>
-            <button onclick="closeModernAlert()" style="margin-left:15px; background:none; border:none; color:#fff; font-size:16px; cursor:pointer;">✖</button>
-        `;
-        document.body.appendChild(alertDiv);
-    }
+    const alertDiv = document.getElementById('modernAlert');
+    if (!alertDiv) return;
 
     const iconEl = document.getElementById('alertIcon');
     const titleEl = document.getElementById('alertTitle');
@@ -82,7 +67,6 @@ function showModernAlert(title, message, icon = '📢') {
     alertDiv.style.display = 'flex';
     alertDiv.classList.add('active');
 
-    // Automatsko zatvaranje nakon 4 sekunde
     setTimeout(() => {
         closeModernAlert();
     }, 4000);
@@ -340,11 +324,48 @@ const mainCategories = {
     fr: ["Viande blanche", "Viande rouge", "Petit gibier", "Gros gibier", "Poisson", "Produits laitiers", "Légumes", "Conserves et compotes", "Pâte et Sucreries", "Boissons", "Chimie et hygiène", "Autre"]
 };
 
-// ===== 5. PODKATEGORIJE (Fallback definicija da ne pukne ako fali spoljni fajl) =====
+// ===== 5. PODKATEGORIJE =====
 if (typeof subcategories === 'undefined') {
     var subcategories = {
-        sr: { "Belo meso": ["Pileći file", "Batak", "Krila"], "Crveno meso": ["Juneći biftek", "Svinjski kare"] },
-        en: { "White meat": ["Chicken fillet", "Drumstick", "Wings"], "Red meat": ["Beef steak", "Pork loin"] }
+        sr: {
+            "Belo meso": ["Pileće", "Ćureće", "Guska", "Patka", "Ostalo"],
+            "Crveno meso": ["Svinjsko", "Jagnjeće", "Ovčije", "Juneće", "Govedina", "Od bika", "Konjsko", "Zečije", "Ostalo"],
+            "Sitna divljač": ["Prepelica", "Fazan", "Jarebica", "Divlja patka", "Divlja guska", "Divlji zec", "Golub", "Ostalo"],
+            "Krupna divljač": ["Jelen", "Srna", "Divokoza", "Los", "Irvas", "Divlja svinja", "Bizon", "Kamila", "Lama", "Alpaka", "Kengur", "Krokodil/Aligator", "Gušter", "Zmija", "Ostalo"],
+            "Riba": ["Morska", "Slatkovodna", "Plodovi mora", "Ostalo"],
+            "Mlečni proizvodi": {
+                "Mleko": ["Kravlje", "Kozje", "Ovčije", "Bademovo", "Sojino", "Ostalo"],
+                "Jogurt i kiselo mleko": ["Jogurt", "Kiselo mleko", "Ostalo"],
+                "Pavlaka": ["Pavlaka", "Kisela pavlaka", "Ostalo"],
+                "Mladi sir": ["Mladi sir", "Ostalo"],
+                "Tvrdi sir": ["Tvrdi sir", "Ostalo"],
+                "Kozji i ovčiji sir": ["Kozji sir", "Ovčiji sir", "Ostalo"],
+                "Kajmak i puter": ["Kajmak", "Puter", "Ostalo"],
+                "Ostalo": ["Ostalo"]
+            },
+            "Povrće": ["Sveže", "Termički obrađeno", "Zamrznuto", "Ostalo"],
+            "Zimnica i kompoti": {
+                "Voće": ["Kajsija", "Kruška", "Višnja", "Pekmez od jagoda", "Šljivov pekmez", "Trešnja", "Pekmez od malina", "Dunja", "Ananas", "Pekmez od manga", "Ostalo"],
+                "Povrće": ["Kiseli krastavci", "Kisela paprika", "Paradajz pire", "Cvekla", "Ajvar", "Turšija", "Kiseli kupus", "Ostalo"]
+            },
+            "Testo i Slatkiši": {
+                "Testo": ["Hleb", "Raženi hleb", "Čabata", "Kukuruzni hleb", "Baguette", "Pšenično brašno", "Integralno brašno", "Heljdino brašno", "Pirinčano brašno", "Začini", "Ostalo"],
+                "Slatkiši": ["Kolači", "Torte", "Peciva", "Sladoled", "Čokolada", "Bombone", "Ostalo"]
+            },
+            "Pića": {
+                "Voda": ["Mineralna", "Negazirana", "Gazirana", "Ostalo"],
+                "Vino": ["Crno", "Belo", "Roze", "Ostalo"],
+                "Sok": ["Voćni", "Povrtni", "Ostalo"],
+                "Žestoka pića": ["Rakija", "Votka", "Viski", "Ostalo"],
+                "Pivo": ["Tamno", "Svetlo", "Ostalo"]
+            },
+            "Hemija i higijena": {
+                "Sanitar": ["Pranje prozora", "Pranje posuđa", "Pranje podova", "Sredstvo za kupatilo", "Ostalo"],
+                "Lična higijena": ["Dezodorans", "Brijač", "Šminka", "Sapun", "Šampon", "Krema", "Ostalo"],
+                "Pribor": ["Kantica", "Kofa", "Krpa za prašinu", "Metla", "Ostalo"]
+            },
+            "Ostalo": ["Ostalo"]
+        }
     };
 }
 
@@ -451,7 +472,6 @@ function renderCategories() {
     html += `<div class="categories-grid">`;
     catList.forEach(cat => {
         const color = getCategoryColor(cat);
-        // Siguran poziv funkcija preko stringova za dugmad
         if (isOtherButton(cat)) {
             html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('')">${cat} ➜</button>`;
         } else {
@@ -466,35 +486,31 @@ function renderSubcategories(category) {
     currentScreenState = 'subcategories';
     currentCategory = category;
     const content = document.getElementById('mainContent');
-    const sub = subcategories[currentLang] || subcategories.sr || {};
-    const subData = sub[category];
+    if (!content) return;
+
+    const langSubs = subcategories[currentLang] || subcategories.sr || {};
+    const subData = langSubs[category] || [];
     const colors = getSubcategoryColors(category);
-    
-    const hasSubSubcategories = {
-        'Mlečni proizvodi': ['Mleko'],
-        'Zimnica i kompoti': ['Voće', 'Povrće'],
-        'Testo i Slatkiši': ['Testo', 'Slatkiši'],
-        'Pića': ['Voda', 'Vino', 'Sok', 'Žestoka pića', 'Pivo'],
-        'Hemija i higijena': ['Sanitar', 'Lična higijena', 'Pribor']
-    };
     
     let html = `<div class="title">${t('podkategorije')}</div>`;
     html += `<div class="categories-grid">`;
     
-    if (Array.isArray(subData)) {
+    if (Array.isArray(subData) && subData.length > 0) {
         let displayData = [...subData];
         const hasOstalo = displayData.some(item => isOtherButton(item));
         if (!hasOstalo) {
             displayData.push(t('Ostalo') || "Ostalo");
         }
+        
         displayData.forEach((item, idx) => {
             const color = colors[idx % colors.length];
-            const hasChildren = hasSubSubcategories[category] && hasSubSubcategories[category].includes(item);
             const safeItem = item.toString().replace(/'/g, "\\'");
+            const hasParts = typeof productParts !== 'undefined' && ((productParts[currentLang] && productParts[currentLang][item]) || (productParts.sr && productParts.sr[item]));
+            
             if (isOtherButton(item)) {
                 html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('')">${item} ➜</button>`;
-            } else if (hasChildren) {
-                html += `<button class="category-btn" style="background:${color};" onclick="renderSubcategoryGroup('${category.replace(/'/g, "\\'")}', '${safeItem}')">${item}</button>`;
+            } else if (hasParts) {
+                html += `<button class="category-btn" style="background:${color};" onclick="renderProductParts('${safeItem}')">${item}</button>`;
             } else {
                 html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('${safeItem}')">${item}</button>`;
             }
@@ -518,6 +534,7 @@ function renderSubcategories(category) {
     } else {
         html += `<button class="category-btn" style="background:#ddd;" onclick="renderDataEntry('')">${t('Ostalo') || "Ostalo"} ➜</button>`;
     }
+    
     html += `</div>`;
     content.innerHTML = html;
 }
@@ -785,7 +802,6 @@ function azurirajZalihe() {
 }
 
 function renderUpdateEntry(proizvod, index) {
-    // Ako nema specifičnog ekrana, koristi standardni update unos ili alert
     showModernAlert('Update', 'Update feature selected for index ' + index, 'ℹ️');
 }
 
@@ -860,11 +876,13 @@ function handleBackAction() {
     }
 }
 
-// ===== 8. GLAVNI DOGAĐAJI =====
+// ===== GLAVNI DOGAĐAJI =====
 document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ DOM je spreman!');
 
     const loginBtn = document.getElementById('loginBtn');
+    const phoneInput = document.getElementById('phoneInput');
+
     if (loginBtn) {
         loginBtn.addEventListener('click', function(e) {
             e.preventDefault();
@@ -872,16 +890,14 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') {
-            const phoneField = document.getElementById('phoneInput');
-            if (phoneField && document.activeElement === phoneField) {
+    if (phoneInput) {
+        phoneInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
                 e.preventDefault();
                 triggerLogin();
-                return;
             }
-        }
-    });
+        });
+    }
     
     document.getElementById('exitLoginBtn')?.addEventListener('click', exitApp);
     document.getElementById('exitLangBtn')?.addEventListener('click', exitApp);
@@ -897,7 +913,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // ===== SUPPORT DOGAĐAJI =====
     document.getElementById('supportBtn')?.addEventListener('click', openSupportDialog);
     document.getElementById('closeSupportBtn')?.addEventListener('click', closeSupportDialog);
     document.getElementById('closeSupportBtn2')?.addEventListener('click', closeSupportDialog);
@@ -919,7 +934,7 @@ function triggerLogin() {
         return;
     }
     const phone = phoneInput.value.trim();
-    if (phone.length >= 3) { // Prilagođeno na 3+ radi lakšeg testiranja
+    if (phone.length >= 3) {
         showScreen('languageScreen');
         renderLanguages();
     } else {
