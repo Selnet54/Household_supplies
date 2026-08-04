@@ -709,6 +709,22 @@ function prikaziSveUnose() {
         container.appendChild(row);
     });
 }
+    aktivni.forEach(p => {
+        const expiry = new Date(p.entry_date);
+        expiry.setMonth(expiry.getMonth() + p.shelf_life_months);
+        const expiryDisplay = expiry.toLocaleDateString('sr-RS', { month: '2-digit', year: '2-digit' });
+        const row = document.createElement('div');
+        row.className = 'table-row';
+        row.innerHTML = `
+            <div class="cell">${p.piece || '-'}</div>
+            <div class="cell">${p.quantity}</div>
+            <div class="cell">${p.unit}</div>
+            <div class="cell">${expiryDisplay}</div>
+            <div class="cell">${p.storage_location}</div>
+        `;
+        container.appendChild(row);
+    });
+}
 
 function renderInventory() {
     currentScreenState = 'inventory';
@@ -817,6 +833,7 @@ function saveProduct() {
         return;
     }
     const productData = {
+        id: Date.now(), // ← DODAJ OVO! Svaki proizvod ima jedinstven ID
         product_name: product,
         description: document.getElementById('descriptionInput')?.value.trim() || '',
         piece: document.getElementById('pieceInput')?.value.trim() || '-',
@@ -828,9 +845,10 @@ function saveProduct() {
     };
     
     let zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
-    const existingIndex = zalihe.findIndex(p => p.product_name === productData.product_name);
-    if (existingIndex !== -1) { zalihe[existingIndex] = productData; } else { zalihe.push(productData); }
+    // UVEK DODAJ NOVI PROIZVOD, NE PREBRISUJ POSTOJEĆI
+    zalihe.push(productData);
     localStorage.setItem('zalihe', JSON.stringify(zalihe));
+    
     if (typeof prikaziSveUnose === 'function') prikaziSveUnose();
     document.getElementById('pieceInput').value = '';
     document.getElementById('quantityInput').value = '1';
@@ -930,14 +948,14 @@ document.addEventListener('DOMContentLoaded', function() {
 function triggerLogin() {
     const phoneInput = document.getElementById('phoneInput');
     if (!phoneInput) {
-        showModernAlert('Error', 'Phone input not found!', '❌');
+        alert('Greška: Polje za telefon nije pronađeno!');
         return;
     }
     const phone = phoneInput.value.trim();
-    if (phone.length >= 3) {
+    if (phone.length >= 9) {
         showScreen('languageScreen');
         renderLanguages();
     } else {
-        showModernAlert('Invalid Input', 'Please enter a valid phone number!', '📱');
+        alert('Unesite validan broj telefona (9+ cifara)!');
     }
 }
