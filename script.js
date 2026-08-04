@@ -278,7 +278,10 @@ const translations = {
         kg: "kg", g: "g", kom: "pc", l: "l", ml: "ml", pak: "paq", kutija: "boîte"
     }
 };
-
+// ===== POMOĆNA FUNKCIJA ZA PREVODE =====
+function t(key) {
+    return translations[currentLang]?.[key] || key;
+}
 // ===== 3. BOJE =====
 const categoryColors = {
     "Belo meso": "#FFE295", "Crveno meso": "#F1624B",
@@ -826,16 +829,13 @@ function saveProduct() {
     const product = document.getElementById('productInput')?.value.trim();
     const quantity = document.getElementById('quantityInput')?.value.trim();
     if (!product) {
-        alert('Unesite naziv proizvoda!');
-        document.getElementById('productInput')?.focus();
+        showModernAlert(t('missing_info'), t('enter_product_name'), '📝');
         return;
     }
     if (!quantity || isNaN(parseFloat(quantity))) {
-        alert('Unesite količinu!');
-        document.getElementById('quantityInput')?.focus();
+        showModernAlert(t('missing_info'), t('enter_quantity'), '📝');
         return;
     }
-    
     const productData = {
         id: Date.now(),
         product_name: product,
@@ -855,7 +855,7 @@ function saveProduct() {
     document.getElementById('pieceInput').value = '';
     document.getElementById('quantityInput').value = '1';
     document.getElementById('quantityInput').focus();
-    alert('✅ Proizvod sačuvan!');
+    showModernAlert(t('success'), t('product_saved'), '✅');
 }
 
 function renderInventory() {
@@ -1033,11 +1033,11 @@ function sacuvajAzuriranje(index) {
     const product = document.getElementById('updateProductInput')?.value.trim();
     const quantity = document.getElementById('updateQuantityInput')?.value.trim();
     if (!product) {
-        alert('Unesite naziv proizvoda!');
+        showModernAlert(t('missing_info'), t('enter_product_name'), '📝');
         return;
     }
     if (!quantity || isNaN(parseFloat(quantity))) {
-        alert('Unesite količinu!');
+        showModernAlert(t('missing_info'), t('enter_quantity'), '📝');
         return;
     }
     
@@ -1060,11 +1060,27 @@ function sacuvajAzuriranje(index) {
             // Obriši iz zaliha
             zalihe.splice(index, 1);
             localStorage.setItem('zalihe', JSON.stringify(zalihe));
-            alert('🛒 Proizvod prebačen u spisak potreba (količina 0)!');
+            showModernAlert(t('success'), t('shopping_moved'), '🛒');
             renderInventory();
             return;
         }
     }
+    
+    // Inače ažuriraj
+    zalihe[index] = {
+        product_name: product,
+        description: document.getElementById('updateDescriptionInput')?.value.trim() || '',
+        piece: document.getElementById('updatePieceInput')?.value.trim() || '-',
+        quantity: novaKolicina,
+        unit: document.getElementById('updateUnitSelect')?.value || 'kg',
+        entry_date: document.getElementById('updateDateInput')?.value || new Date().toISOString().split('T')[0],
+        shelf_life_months: parseInt(document.getElementById('updateShelfLifeInput')?.value) || 12,
+        storage_location: document.getElementById('updateStorageSelect')?.value || 'Ostalo'
+    };
+    localStorage.setItem('zalihe', JSON.stringify(zalihe));
+    showModernAlert(t('success'), t('product_updated'), '✅');
+    renderInventory();
+}
     
     // Inače ažuriraj
     zalihe[index] = {
