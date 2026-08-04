@@ -778,11 +778,11 @@ function toggleAllCheckboxes() {
 function azurirajZalihe() {
     const selected = document.querySelectorAll('.row-checkbox:checked');
     if (selected.length === 0) {
-        alert('Niste označili nijedan red za ažuriranje!');
+        showModernAlert('No Selection', 'You have not selected any items to update!', '⚠️');
         return;
     }
     if (selected.length > 1) {
-        alert('Možete ažurirati samo jedan red odjednom!');
+        showModernAlert('Error', 'You can only update one item at a time!', '❌');
         return;
     }
     const index = parseInt(selected[0].dataset.index);
@@ -794,20 +794,19 @@ function renderUpdateEntry(proizvod, index) {
     currentScreenState = 'dataEntry';
     const content = document.getElementById('mainContent');
     if (!content) return;
-    const today = proizvod.entry_date || new Date().toISOString().split('T')[0];
     
     content.innerHTML = `
-        <div class="title">✏️ Ažuriraj - ${proizvod.product_name}</div>
-        <div class="row"><label>${t('naziv_proizvoda')}</label><input type="text" id="updateProductInput" value="${proizvod.product_name || ''}"></div>
-        <div class="row"><label>${t('opis')}</label><input type="text" id="updateDescriptionInput" value="${proizvod.description || ''}"></div>
+        <div class="title">Ažuriranje proizvoda</div>
+        <div class="row"><label>${t('naziv_proizvoda')}</label><input type="text" id="productInput" value="${proizvod.product_name || ''}"></div>
+        <div class="row"><label>${t('opis')}</label><input type="text" id="descriptionInput" value="${proizvod.description || ''}"></div>
         <div class="row">
             <label>${t('komad')}</label>
             <div class="inline-group">
-                <input type="text" id="updatePieceInput" value="${proizvod.piece || ''}">
+                <input type="text" id="pieceInput" value="${proizvod.piece || ''}">
                 <label>${t('kolicina')}</label>
-                <input type="number" id="updateQuantityInput" value="${proizvod.quantity || 1}" step="0.1">
+                <input type="number" id="quantityInput" value="${proizvod.quantity || 1}" step="0.1">
                 <label>${t('jedinica_mere')}</label>
-                <select id="updateUnitSelect">
+                <select id="unitSelect">
                     <option value="kg" ${proizvod.unit === 'kg' ? 'selected' : ''}>${t('kg')}</option>
                     <option value="g" ${proizvod.unit === 'g' ? 'selected' : ''}>${t('g')}</option>
                     <option value="kom" ${proizvod.unit === 'kom' ? 'selected' : ''}>${t('kom')}</option>
@@ -821,19 +820,19 @@ function renderUpdateEntry(proizvod, index) {
         <div class="row">
             <label>${t('datum_unosa')}</label>
             <div class="inline-group">
-                <input type="date" id="updateDateInput" value="${today}">
+                <input type="date" id="dateInput" value="${proizvod.entry_date || new Date().toISOString().split('T')[0]}">
                 <label>${t('rok_trajanja')}</label>
-                <input type="number" id="updateShelfLifeInput" value="${proizvod.shelf_life_months || 12}">
+                <input type="number" id="shelfLifeInput" value="${proizvod.shelf_life_months || 12}">
                 <span style="font-size:18px;">mes</span>
             </div>
         </div>
         <div class="row">
             <label>${t('automatski_rok')}</label>
-            <div class="inline-group"><span id="updateExpiryDisplay">-</span></div>
+            <div class="inline-group"><span id="expiryDisplay">-</span></div>
         </div>
         <div class="row">
             <label>${t('mesto_skladistenja')}</label>
-            <select id="updateStorageSelect">
+            <select id="storageSelect">
                 <option value="${t('zamrzivac_1')}" ${proizvod.storage_location === t('zamrzivac_1') ? 'selected' : ''}>❄️ ${t('zamrzivac_1')}</option>
                 <option value="${t('zamrzivac_2')}" ${proizvod.storage_location === t('zamrzivac_2') ? 'selected' : ''}>❄️ ${t('zamrzivac_2')}</option>
                 <option value="${t('zamrzivac_3')}" ${proizvod.storage_location === t('zamrzivac_3') ? 'selected' : ''}>❄️ ${t('zamrzivac_3')}</option>
@@ -843,21 +842,46 @@ function renderUpdateEntry(proizvod, index) {
             </select>
         </div>
         <div class="btn-group">
-            <button class="btn-save" onclick="sacuvajAzuriranje(${index})">✅ Sačuvaj</button>
-            <button class="btn-cancel" onclick="renderInventory()">✖ Odustani</button>
+            <button class="btn-save" onclick="saveUpdatedProduct(${index})">✅ Sačuvaj izmene</button>
+            <button class="btn-cancel" onclick="renderInventory()">✖ ${t('odustani')}</button>
         </div>
     `;
-    document.getElementById('updateDateInput')?.addEventListener('change', updateUpdateExpiryDate);
-    document.getElementById('updateDateInput')?.addEventListener('input', updateUpdateExpiryDate);
-    document.getElementById('updateShelfLifeInput')?.addEventListener('change', updateUpdateExpiryDate);
-    document.getElementById('updateShelfLifeInput')?.addEventListener('input', updateUpdateExpiryDate);
-    updateUpdateExpiryDate();
+    
+    document.getElementById('dateInput')?.addEventListener('change', updateExpiryDate);
+    document.getElementById('shelfLifeInput')?.addEventListener('change', updateExpiryDate);
+    updateExpiryDate();
 }
 
-function updateUpdateExpiryDate() {
-    const dateInput = document.getElementById('updateDateInput');
-    const shelfLifeInput = document.getElementById('updateShelfLifeInput');
-    const expiryDisplay = document.getElementById('updateExpiryDisplay');
+function saveUpdatedProduct(index) {
+    const product = document.getElementById('productInput')?.value.trim();
+    const quantity = document.getElementById('quantityInput')?.value.trim();
+    if (!product || !quantity) {
+        showModernAlert('Missing Info', 'Please fill in required fields!', '📝');
+        return;
+    }
+    
+    const productData = {
+        product_name: product,
+        description: document.getElementById('descriptionInput')?.value.trim() || '',
+        piece: document.getElementById('pieceInput')?.value.trim() || '-',
+        quantity: parseFloat(quantity),
+        unit: document.getElementById('unitSelect')?.value || 'kg',
+        entry_date: document.getElementById('dateInput')?.value || new Date().toISOString().split('T')[0],
+        shelf_life_months: parseInt(document.getElementById('shelfLifeInput')?.value) || 12,
+        storage_location: document.getElementById('storageSelect')?.value || 'Ostalo'
+    };
+    
+    let zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
+    zalihe[index] = productData;
+    localStorage.setItem('zalihe', JSON.stringify(zalihe));
+    
+    showModernAlert('Success', 'Product updated successfully!', '✅');
+    renderInventory();
+}
+function updateExpiryDate() {
+    const dateInput = document.getElementById('dateInput');
+    const shelfLifeInput = document.getElementById('shelfLifeInput');
+    const expiryDisplay = document.getElementById('expiryDisplay');
     if (!dateInput || !shelfLifeInput || !expiryDisplay) return;
     const date = dateInput.value;
     const months = parseInt(shelfLifeInput.value) || 0;
@@ -870,28 +894,26 @@ function updateUpdateExpiryDate() {
     }
 }
 
-function sacuvajAzuriranje(index) {
-    const product = document.getElementById('updateProductInput')?.value.trim();
-    const quantity = document.getElementById('updateQuantityInput')?.value.trim();
-    if (!product) { alert('Unesite naziv proizvoda!'); return; }
-    if (!quantity || isNaN(parseFloat(quantity))) { alert('Unesite količinu!'); return; }
-    
-    const novaKolicina = parseFloat(quantity);
-    let zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
-    
-    zalihe[index] = {
-        product_name: product,
-        description: document.getElementById('updateDescriptionInput')?.value.trim() || '',
-        piece: document.getElementById('updatePieceInput')?.value.trim() || '-',
-        quantity: novaKolicina,
-        unit: document.getElementById('updateUnitSelect')?.value || 'kg',
-        entry_date: document.getElementById('updateDateInput')?.value || new Date().toISOString().split('T')[0],
-        shelf_life_months: parseInt(document.getElementById('updateShelfLifeInput')?.value) || 12,
-        storage_location: document.getElementById('updateStorageSelect')?.value || 'Ostalo'
-    };
-    localStorage.setItem('zalihe', JSON.stringify(zalihe));
-    alert('✅ Proizvod ažuriran!');
-    renderInventory();
+// ===== GLAVNA FUNKCIJA ZA NAZAD / ODUSTANI =====
+function handleBackAction() {
+    console.log('⬅️ Trenutni ekran stanje:', currentScreenState);
+    if (currentScreenState === 'dataEntry') {
+        if (currentSubcategory) {
+            renderProductParts(currentSubcategory);
+        } else {
+            renderSubcategories(currentCategory);
+        }
+    } else if (currentScreenState === 'productParts') {
+        renderSubcategories(currentCategory);
+    } else if (currentScreenState === 'subcategories') {
+        renderCategories();
+    } else if (currentScreenState === 'categories') {
+        showScreen('languageScreen');
+        renderLanguages();
+    } else {
+        showScreen('mainScreen');
+        renderCategories();
+    }
 }
 
 // ===== GLAVNI DOGAĐAJI =====
@@ -924,55 +946,49 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('backBtn')?.addEventListener('click', handleBackAction);
     document.getElementById('inventoryBtn')?.addEventListener('click', function() { renderInventory(); });
     
- function renderShoppingList() {
+    function renderShoppingList() {
     currentScreenState = 'shopping';
     const content = document.getElementById('mainContent');
     if (!content) return;
     
-    const shopping = JSON.parse(localStorage.getItem('shoppingList') || '[]');
-    
-    let html = `<div class="title">${t('spisak_potreba')}</div>`;
+    let html = `<div class="title">${t('spisak')}</div>`;
     html += `<div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;">`;
     html += `<button onclick="renderCategories()" style="background:#f44336; color:white; border:none; padding:10px 20px; border-radius:8px; font-size:16px; cursor:pointer;">✖ ${t('odustani')}</button>`;
     html += `</div>`;
     
     html += `<div class="table-container" style="max-height:400px; overflow-y:auto;">`;
     html += `<div class="table-title">🛒 ${t('spisak_potreba')}</div>`;
-    html += `<div id="shoppingTable">`;
-    html += `<div class="table-row header-row" style="display:grid; grid-template-columns:1fr 1fr 0.5fr; gap:2px; background:#f0f0f0; font-weight:bold; border-bottom:2px solid #ccc; padding:5px 0;">`;
-    html += `<div class="cell">${t('naziv_proizvoda')}</div>`;
-    html += `<div class="cell">${t('opis')}</div>`;
-    html += `<div class="cell">${t('kolicina')}</div>`;
+    html += `<div style="padding: 30px; text-align: center; color: #666; font-size: 18px;">${t('nema_proizvoda')}</div>`;
     html += `</div>`;
     
-    if (shopping.length === 0) {
-        html += `<div class="table-row"><div class="cell" style="grid-column:span 3;padding:30px;color:#999;text-align:center;">${t('nema_proizvoda')}</div></div>`;
-    } else {
-        shopping.forEach((p, index) => {
-            html += `<div class="table-row" style="display:grid; grid-template-columns:1fr 1fr 0.5fr; gap:2px; border-bottom:1px solid #eee; padding:5px 0;">`;
-            html += `<div class="cell">${p.product_name}</div>`;
-            html += `<div class="cell">${p.description || ''}</div>`;
-            html += `<div class="cell">${p.quantity}</div>`;
-            html += `</div>`;
-        });
-    }
-    html += `</div></div>`;
     content.innerHTML = html;
 }
+
+    document.getElementById('supportBtn')?.addEventListener('click', openSupportDialog);
+    document.getElementById('closeSupportBtn')?.addEventListener('click', closeSupportDialog);
+    document.getElementById('closeSupportBtn2')?.addEventListener('click', closeSupportDialog);
+    
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeSupportDialog();
+    });
+
+    console.log('✅ Svi događaji povezani!');
+});
+
 // ============================================
 // GLOBALNA FUNKCIJA ZA LOGIN
 // ============================================
 function triggerLogin() {
     const phoneInput = document.getElementById('phoneInput');
     if (!phoneInput) {
-        alert('Greška: Polje za telefon nije pronađeno!');
+        showModernAlert('Error', 'Phone input not found!', '❌');
         return;
     }
     const phone = phoneInput.value.trim();
-    if (phone.length >= 9) {
+    if (phone.length >= 3) {
         showScreen('languageScreen');
         renderLanguages();
     } else {
-        alert('Unesite validan broj telefona (9+ cifara)!');
+        showModernAlert('Invalid Input', 'Please enter a valid phone number!', '📱');
     }
 }
