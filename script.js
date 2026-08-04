@@ -52,10 +52,9 @@ function exitApp() {
 }
 
 // ===== MODERNI ALERT =====
-function showModernAlert(title, message, icon = '📢') {
+function showModernAlert(title, message, icon) {
     alert(message);
 }
-
 function closeModernAlert() {}
 
 // ===== SUPPORT FUNKCIJE =====
@@ -66,7 +65,6 @@ function openSupportDialog() {
         dialog.classList.add('active');
     }
 }
-
 function closeSupportDialog() {
     const dialog = document.getElementById('supportDialog');
     if (dialog) {
@@ -75,13 +73,170 @@ function closeSupportDialog() {
     }
 }
 
-// ===== 1-4. JEZICI, PREVODI, BOJE, GLAVNE KATEGORIJE =====
-// ... (tvoj postojeći kod, nisam menjao)
+// ===== 1. JEZICI =====
+const languages = {
+    sr: { name: 'Srpski', flag: '/Household_supplies/icons/jezici/srpski.png' },
+    en: { name: 'English', flag: '/Household_supplies/icons/jezici/engleski.png' },
+    de: { name: 'Deutsch', flag: '/Household_supplies/icons/jezici/nemacki.png' },
+    hu: { name: 'Magyar', flag: '/Household_supplies/icons/jezici/madjarski.png' },
+    uk: { name: 'Українська', flag: '/Household_supplies/icons/jezici/ukrajinski.png' },
+    ru: { name: 'Русский', flag: '/Household_supplies/icons/jezici/ruski.png' },
+    zh: { name: '中文', flag: '/Household_supplies/icons/jezici/mandarinski.png' },
+    es: { name: 'Español', flag: '/Household_supplies/icons/jezici/spanski.png' },
+    pt: { name: 'Português', flag: '/Household_supplies/icons/jezici/portugalski.png' },
+    fr: { name: 'Français', flag: '/Household_supplies/icons/jezici/francuski.png' }
+};
+
+// ===== 2. PREVODI ===== (SKRAĆENO ZA TEST)
+const translations = {
+    sr: {
+        nazad: "Nazad", stanje: "Zalihe", spisak: "Spisak",
+        naziv_proizvoda: "Proizvod:", opis: "Opis:",
+        komad: "Komada:", kolicina: "Količina:", jedinica_mere: "Jed. mere:",
+        datum_unosa: "Datum unosa:", rok_trajanja: "Rok (meseci):",
+        automatski_rok: "Rok ističe:", mesto_skladistenja: "Skladište:",
+        unesi: "Unesi", odustani: "Odustani", pretrazi: "Pretraži",
+        glavne_kategorije: "Glavne kategorije", podkategorije: "Podkategorije",
+        delovi_proizvoda: "Delovi proizvoda", unos_podataka: "Unos podataka",
+        pregled_unosa: "Pregled unosa", nema_proizvoda: "Nema proizvoda",
+        spisak_potreba: "Spisak potreba", azuriraj: "Ažuriraj", obrisi: "Obriši",
+        oznaci_sve: "Označi sve", kopiraj: "Kopiraj", obrisi_oznaceno: "Obriši označeno",
+        exit_poruka: "Hvala na korišćenju! 👋",
+        zamrzivac_1: "Zamrzivač 1", zamrzivac_2: "Zamrzivač 2", zamrzivac_3: "Zamrzivač 3",
+        frizider: "Frižider", ostava: "Ostava", Ostalo: "Ostalo",
+        kg: "kg", g: "g", kom: "kom", l: "l", ml: "ml", pak: "pak", kutija: "kutija"
+    },
+    en: {
+        nazad: "Back", stanje: "Inventory", spisak: "Shopping List",
+        naziv_proizvoda: "Product:", opis: "Description:",
+        komad: "Piece:", kolicina: "Quantity:", jedinica_mere: "Unit:",
+        datum_unosa: "Entry Date:", rok_trajanja: "Shelf Life (months):",
+        automatski_rok: "Auto Expiry:", mesto_skladistenja: "Storage:",
+        unesi: "Enter", odustani: "Cancel", pretrazi: "Search",
+        glavne_kategorije: "Main Categories", podkategorije: "Subcategories",
+        delovi_proizvoda: "Product Parts", unos_podataka: "Data Entry",
+        pregled_unosa: "Entry Review", nema_proizvoda: "No products",
+        spisak_potreba: "Shopping List", azuriraj: "Update", obrisi: "Delete",
+        oznaci_sve: "Select all", kopiraj: "Copy", obrisi_oznaceno: "Delete selected",
+        exit_poruka: "Thanks for using this app! 👋",
+        zamrzivac_1: "Freezer 1", zamrzivac_2: "Freezer 2", zamrzivac_3: "Freezer 3",
+        frizider: "Refrigerator", ostava: "Pantry", Ostalo: "Other",
+        kg: "kg", g: "g", kom: "pcs", l: "l", ml: "ml", pak: "pck", kutija: "box"
+    }
+};
+
+// ===== 3. BOJE =====
+const categoryColors = {
+    "Belo meso": "#FFE295", "Crveno meso": "#F1624B",
+    "Sitna divljač": "#F59AA6", "Krupna divljač": "#E19E94",
+    "Riba": "#00BBF1", "Mlečni proizvodi": "#ACE1F9",
+    "Povrće": "#8FC74A", "Zimnica i kompoti": "#CC98C4",
+    "Testo i Slatkiši": "#FFECAB", "Pića": "#F8E06D",
+    "Hemija i higijena": "#98D6D2", "Ostalo": "#F58634"
+};
+
+const subcategoryColors = {
+    "Belo meso": ["#FFEDB5", "#F2D382"],
+    "Crveno meso": ["#FABFA9", "#F9AA75"],
+    "Sitna divljač": ["#F6C5A4", "#E8A97B"],
+    "Krupna divljač": ["#FBCEC8", "#F6998C"],
+    "Riba": ["#91D8F7", "#D5EFFC"],
+    "Mlečni proizvodi": ["#ACE1F9", "#D5EFFC"],
+    "Povrće": ["#8FC74A", "#A0D29E"],
+    "Zimnica i kompoti": ["#F3B6D1", "#E894B0"],
+    "Testo i Slatkiši": ["#FEE5CB", "#FFECAB"],
+    "Pića": ["#FFD76E", "#EEB832"],
+    "Hemija i higijena": ["#AADBD2", "#6FC7B8"],
+    "Ostalo": ["#D9D9D9", "#BFBFBF"]
+};
+
+// ===== 4. GLAVNE KATEGORIJE =====
+const mainCategories = {
+    sr: ["Belo meso", "Crveno meso", "Sitna divljač", "Krupna divljač", "Riba", "Mlečni proizvodi", "Povrće", "Zimnica i kompoti", "Testo i Slatkiši", "Pića", "Hemija i higijena", "Ostalo"],
+    en: ["White meat", "Red meat", "Small game", "Big game", "Fish", "Dairy products", "Vegetables", "Preserves and compotes", "Dough and Sweets", "Beverages", "Chemicals and hygiene", "Other"]
+};
 
 // ===== 5. PODKATEGORIJE =====
-// ... (tvoj postojeći kod, nisam menjao)
+const subcategories = {
+    sr: {
+        "Belo meso": ["Pileće", "Ćureće", "Guska", "Patka", "Ostalo"],
+        "Crveno meso": ["Svinjsko", "Jagnjeće", "Ovčije", "Juneće", "Govedina", "Od bika", "Konjsko", "Zečije", "Ostalo"],
+        "Sitna divljač": ["Prepelica", "Fazan", "Jarebica", "Divlja patka", "Divlja guska", "Divlji zec", "Golub", "Ostalo"],
+        "Krupna divljač": ["Jelen", "Srna", "Divokoza", "Los", "Irvas", "Divlja svinja", "Bizon", "Kamila", "Lama", "Alpaka", "Kengur", "Krokodil/Aligator", "Gušter", "Zmija", "Ostalo"],
+        "Riba": ["Morska", "Slatkovodna", "Plodovi mora", "Ostalo"],
+        "Mlečni proizvodi": ["Mleko", "Mlečne prerađevine", "Ostalo"],
+        "Povrće": ["Sveže", "Termički obrađeno", "Zamrznuto", "Ostalo"],
+        "Zimnica i kompoti": ["Voće", "Povrće", "Ostalo"],
+        "Testo i Slatkiši": ["Testo", "Slatkiši", "Ostalo"],
+        "Pića": ["Voda", "Vino", "Sok", "Žestoka pića", "Pivo", "Ostalo"],
+        "Hemija i higijena": ["Sanitar", "Lična higijena", "Pribor", "Ostalo"],
+        "Ostalo": ["Ostalo"]
+    },
+    en: {
+        "White meat": ["Chicken", "Turkey", "Goose", "Duck", "Other"],
+        "Red meat": ["Pork", "Lamb", "Sheep", "Veal", "Beef", "Bull", "Horse", "Rabbit", "Other"],
+        "Small game": ["Quail", "Pheasant", "Partridge", "Wild duck", "Wild goose", "Hare", "Pigeon", "Other"],
+        "Big game": ["Deer", "Roe deer", "Wild goat", "Moose", "Reindeer", "Wild boar", "Bison", "Camel", "Llama", "Alpaca", "Kangaroo", "Crocodile/Alligator", "Lizard", "Snake", "Other"],
+        "Fish": ["Sea", "Freshwater", "Seafood", "Other"],
+        "Dairy products": ["Milk", "Dairy processing", "Other"],
+        "Vegetables": ["Fresh", "Heat treated", "Frozen", "Other"],
+        "Preserves and compotes": ["Fruits", "Vegetables", "Other"],
+        "Dough and Sweets": ["Dough", "Sweets", "Other"],
+        "Beverages": ["Water", "Wine", "Juice", "Spirits", "Beer", "Other"],
+        "Chemicals and hygiene": ["Sanitary", "Personal hygiene", "Equipment", "Other"],
+        "Other": ["Other"]
+    }
+};
 
-// ===== 6. POMOĆNE FUNKCIJE =====
+// ===== 6. PRODUCT PARTS =====
+const productParts = {
+    sr: {
+        "Pileće": ["Gril pile", "Pile celo", "Ceo batak", "Karabatak", "Donji batak", "Belo (grudi)", "File", "Leđa", "Krilca", "Ostalo"],
+        "Ćureće": ["Ceo batak", "Karabatak", "Donji batak", "Belo (grudi)", "Krilca", "Leđa", "Ostalo"],
+        "Guska": ["Belo (grudi)", "Ceo batak", "Karabatak", "Donji batak", "Krilca", "Leđa", "Ostalo"],
+        "Patka": ["Belo (grudi)", "Ceo batak", "Karabatak", "Donji batak", "Krilca", "Leđa", "Ostalo"],
+        "Mleko": ["Mleko", "Kefir", "Kisela pavlaka", "Slatka pavlaka", "Ostalo"],
+        "Mlečne prerađevine": ["Urda", "Mladi sir", "Krem sir", "Gouda", "Edamer", "Ostalo"],
+        "Sveže": ["Grašak", "Boranija", "Karfiol", "Brokoli", "Paradajz", "Ostalo"],
+        "Voće": ["Kajsija", "Kruška", "Višnja", "Pekmez od jagoda", "Šljivov pekmez", "Ostalo"],
+        "Povrće": ["Kiseli krastavci", "Kisela paprika", "Paradajz pire", "Cvekla", "Ajvar", "Ostalo"],
+        "Testo": ["Hleb", "Raženi hleb", "Čabata", "Kukuruzni hleb", "Baguette", "Ostalo"],
+        "Slatkiši": ["Kolači", "Torte", "Peciva", "Sladoled", "Čokolada", "Ostalo"],
+        "Voda": ["Mineralna", "Negazirana", "Gazirana", "Ostalo"],
+        "Vino": ["Crno", "Belo", "Roze", "Ostalo"],
+        "Sok": ["Voćni", "Povrtni", "Ostalo"],
+        "Žestoka pića": ["Rakija", "Votka", "Viski", "Ostalo"],
+        "Pivo": ["Tamno", "Svetlo", "Ostalo"],
+        "Sanitar": ["Pranje prozora", "Pranje posuđa", "Pranje podova", "Ostalo"],
+        "Lična higijena": ["Dezodorans", "Brijač", "Šminka", "Sapun", "Šampon", "Ostalo"],
+        "Pribor": ["Kantica", "Kofa", "Krpa za prašinu", "Metla", "Ostalo"],
+        "Ostalo": ["Napomena: Unesite naziv proizvoda"]
+    },
+    en: {
+        "Chicken": ["Grilled chicken", "Whole chicken", "Whole leg", "Breast", "Wings", "Other"],
+        "Turkey": ["Whole leg", "Breast", "Wings", "Other"],
+        "Goose": ["Breast", "Whole leg", "Wings", "Other"],
+        "Duck": ["Breast", "Whole leg", "Wings", "Other"],
+        "Milk": ["Milk", "Kefir", "Sour cream", "Sweet cream", "Other"],
+        "Dairy processing": ["Curd", "Fresh cheese", "Cream cheese", "Gouda", "Edam", "Other"],
+        "Fresh": ["Peas", "Green beans", "Cauliflower", "Broccoli", "Tomato", "Other"],
+        "Fruits": ["Apricot", "Pear", "Sour cherry", "Strawberry jam", "Plum jam", "Other"],
+        "Vegetables": ["Pickles", "Pickled peppers", "Tomato puree", "Beetroot", "Ajvar", "Other"],
+        "Dough": ["Bread", "Rye bread", "Ciabatta", "Corn bread", "Baguette", "Other"],
+        "Sweets": ["Cakes", "Tarts", "Pastries", "Ice cream", "Chocolate", "Other"],
+        "Water": ["Mineral", "Still", "Sparkling", "Other"],
+        "Wine": ["Red", "White", "Rosé", "Other"],
+        "Juice": ["Fruit", "Vegetable", "Other"],
+        "Spirits": ["Brandy", "Vodka", "Whisky", "Other"],
+        "Beer": ["Dark", "Light", "Other"],
+        "Sanitary": ["Window cleaner", "Dish soap", "Floor cleaner", "Other"],
+        "Personal hygiene": ["Deodorant", "Razor", "Makeup", "Soap", "Shampoo", "Other"],
+        "Equipment": ["Bucket", "Bucket", "Duster", "Broom", "Other"],
+        "Other": ["Note: Enter product name"]
+    }
+};
+
+// ===== 7. POMOĆNE FUNKCIJE =====
 function t(key) {
     return translations[currentLang]?.[key] || key;
 }
@@ -106,15 +261,15 @@ function getMainCategories() {
 }
 
 function getSubcategories(category) {
-    const sub = subcategories[currentLang] || subcategories.sr || {};
+    const sub = subcategories[currentLang] || subcategories.sr;
     return sub[category] || ['Ostalo'];
 }
 
 function getProductParts(subcategory) {
-    if (typeof productParts !== 'undefined' && productParts[currentLang] && productParts[currentLang][subcategory]) {
+    if (productParts[currentLang] && productParts[currentLang][subcategory]) {
         return productParts[currentLang][subcategory];
     }
-    if (typeof productParts !== 'undefined' && productParts.sr && productParts.sr[subcategory]) {
+    if (productParts.sr && productParts.sr[subcategory]) {
         return productParts.sr[subcategory];
     }
     return ["Ostalo"];
@@ -145,7 +300,7 @@ function isOtherButton(text) {
     return ostaloVariants.includes(text);
 }
 
-// ===== 7. RENDER FUNKCIJE =====
+// ===== 8. RENDER FUNKCIJE =====
 function renderLanguages() {
     if (!currentLang || currentLang === '') {
         currentLang = 'en';
@@ -200,8 +355,7 @@ function renderSubcategories(category) {
     const content = document.getElementById('mainContent');
     if (!content) return;
 
-    const langSubs = subcategories[currentLang] || subcategories.sr || {};
-    const subData = langSubs[category] || [];
+    const subData = getSubcategories(category);
     const colors = getSubcategoryColors(category);
     
     let html = `<div class="title">${t('podkategorije')}</div>`;
@@ -213,11 +367,10 @@ function renderSubcategories(category) {
         if (!hasOstalo) {
             displayData.push(t('Ostalo') || "Ostalo");
         }
-        
         displayData.forEach((item, idx) => {
             const color = colors[idx % colors.length];
             const safeItem = item.toString().replace(/'/g, "\\'");
-            const hasParts = typeof productParts !== 'undefined' && ((productParts[currentLang] && productParts[currentLang][item]) || (productParts.sr && productParts.sr[item]));
+            const hasParts = productParts[currentLang] && productParts[currentLang][item] && productParts[currentLang][item].length > 0;
             
             if (isOtherButton(item)) {
                 html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('')">${item} ➜</button>`;
@@ -246,7 +399,6 @@ function renderSubcategories(category) {
     } else {
         html += `<button class="category-btn" style="background:#ddd;" onclick="renderDataEntry('')">${t('Ostalo') || "Ostalo"} ➜</button>`;
     }
-    
     html += `</div>`;
     content.innerHTML = html;
 }
@@ -254,8 +406,8 @@ function renderSubcategories(category) {
 function renderSubcategoryGroup(category, groupName) {
     currentScreenState = 'subcategories';
     const content = document.getElementById('mainContent');
-    const sub = subcategories[currentLang] || subcategories.sr || {};
-    let items = (sub[category] && sub[category][groupName]) ? sub[category][groupName] : [];
+    const sub = subcategories[currentLang] || subcategories.sr;
+    let items = sub[category] ? sub[category][groupName] : [];
     const colors = getSubcategoryColors(category);
     
     let html = `<div class="title">${groupName}</div>`;
@@ -269,7 +421,7 @@ function renderSubcategoryGroup(category, groupName) {
         displayItems.forEach((item, idx) => {
             const color = colors[idx % colors.length];
             const safeItem = item.toString().replace(/'/g, "\\'");
-            const hasParts = typeof productParts !== 'undefined' && ((productParts[currentLang] && productParts[currentLang][item]) || (productParts.sr && productParts.sr[item]));
+            const hasParts = productParts[currentLang] && productParts[currentLang][item] && productParts[currentLang][item].length > 0;
             
             if (isOtherButton(item)) {
                 html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('')">${item} ➜</button>`;
@@ -305,11 +457,7 @@ function renderProductParts(subcategory) {
         displayParts.forEach((part, idx) => {
             const color = colors[idx % colors.length];
             const safePart = part.toString().replace(/'/g, "\\'");
-            if (isOtherButton(part)) {
-                html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('')">${part} ➜</button>`;
-            } else {
-                html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('${safePart}')">${part}</button>`;
-            }
+            html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('${safePart}')">${part}</button>`;
         });
     } else {
         html += `<button class="category-btn" style="background:#ddd;" onclick="renderDataEntry('')">${t('Ostalo') || "Ostalo"} ➜</button>`;
@@ -426,6 +574,62 @@ function prikaziSveUnose() {
     });
 }
 
+function updateExpiryDate() {
+    const dateInput = document.getElementById('dateInput');
+    const shelfLifeInput = document.getElementById('shelfLifeInput');
+    const expiryDisplay = document.getElementById('expiryDisplay');
+    if (!dateInput || !shelfLifeInput || !expiryDisplay) return;
+    const date = dateInput.value;
+    const months = parseInt(shelfLifeInput.value) || 0;
+    if (date && months > 0) {
+        const expiry = new Date(date);
+        expiry.setMonth(expiry.getMonth() + months);
+        expiryDisplay.textContent = expiry.toLocaleDateString('sr-RS', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    } else {
+        expiryDisplay.textContent = '-';
+    }
+}
+
+function saveProduct() {
+    const product = document.getElementById('productInput')?.value.trim();
+    const quantity = document.getElementById('quantityInput')?.value.trim();
+    if (!product) {
+        alert('Unesite naziv proizvoda!');
+        document.getElementById('productInput')?.focus();
+        return;
+    }
+    if (!quantity || isNaN(parseFloat(quantity))) {
+        alert('Unesite količinu!');
+        document.getElementById('quantityInput')?.focus();
+        return;
+    }
+    
+    const productData = {
+        product_name: product,
+        description: document.getElementById('descriptionInput')?.value.trim() || '',
+        piece: document.getElementById('pieceInput')?.value.trim() || '-',
+        quantity: parseFloat(quantity),
+        unit: document.getElementById('unitSelect')?.value || 'kg',
+        entry_date: document.getElementById('dateInput')?.value || new Date().toISOString().split('T')[0],
+        shelf_life_months: parseInt(document.getElementById('shelfLifeInput')?.value) || 12,
+        storage_location: document.getElementById('storageSelect')?.value || 'Ostalo'
+    };
+    
+    let zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
+    const existingIndex = zalihe.findIndex(p => p.product_name === productData.product_name);
+    if (existingIndex !== -1) {
+        zalihe[existingIndex] = productData;
+    } else {
+        zalihe.push(productData);
+    }
+    localStorage.setItem('zalihe', JSON.stringify(zalihe));
+    prikaziSveUnose();
+    document.getElementById('pieceInput').value = '';
+    document.getElementById('quantityInput').value = '1';
+    document.getElementById('quantityInput').focus();
+    alert('✅ Proizvod sačuvan!');
+}
+
 function renderInventory() {
     currentScreenState = 'inventory';
     const content = document.getElementById('mainContent');
@@ -514,119 +718,54 @@ function azurirajZalihe() {
     }
     const index = parseInt(selected[0].dataset.index);
     const zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
-    renderUpdateEntry(zalihe[index], index);
-}
-
-function renderUpdateEntry(proizvod, index) {
-    currentScreenState = 'dataEntry';
-    const content = document.getElementById('mainContent');
-    if (!content) return;
-    const today = proizvod.entry_date || new Date().toISOString().split('T')[0];
-    
-    content.innerHTML = `
-        <div class="title">✏️ Ažuriraj - ${proizvod.product_name}</div>
-        <div class="row"><label>${t('naziv_proizvoda')}</label><input type="text" id="updateProductInput" value="${proizvod.product_name || ''}"></div>
-        <div class="row"><label>${t('opis')}</label><input type="text" id="updateDescriptionInput" value="${proizvod.description || ''}"></div>
-        <div class="row">
-            <label>${t('komad')}</label>
-            <div class="inline-group">
-                <input type="text" id="updatePieceInput" value="${proizvod.piece || ''}">
-                <label>${t('kolicina')}</label>
-                <input type="number" id="updateQuantityInput" value="${proizvod.quantity || 1}" step="0.1">
-                <label>${t('jedinica_mere')}</label>
-                <select id="updateUnitSelect">
-                    <option value="kg" ${proizvod.unit === 'kg' ? 'selected' : ''}>${t('kg')}</option>
-                    <option value="g" ${proizvod.unit === 'g' ? 'selected' : ''}>${t('g')}</option>
-                    <option value="kom" ${proizvod.unit === 'kom' ? 'selected' : ''}>${t('kom')}</option>
-                    <option value="l" ${proizvod.unit === 'l' ? 'selected' : ''}>${t('l')}</option>
-                    <option value="ml" ${proizvod.unit === 'ml' ? 'selected' : ''}>${t('ml')}</option>
-                    <option value="pak" ${proizvod.unit === 'pak' ? 'selected' : ''}>${t('pak')}</option>
-                    <option value="kutija" ${proizvod.unit === 'kutija' ? 'selected' : ''}>${t('kutija')}</option>
-                </select>
-            </div>
-        </div>
-        <div class="row">
-            <label>${t('datum_unosa')}</label>
-            <div class="inline-group">
-                <input type="date" id="updateDateInput" value="${today}">
-                <label>${t('rok_trajanja')}</label>
-                <input type="number" id="updateShelfLifeInput" value="${proizvod.shelf_life_months || 12}">
-                <span style="font-size:18px;">mes</span>
-            </div>
-        </div>
-        <div class="row">
-            <label>${t('automatski_rok')}</label>
-            <div class="inline-group"><span id="updateExpiryDisplay">-</span></div>
-        </div>
-        <div class="row">
-            <label>${t('mesto_skladistenja')}</label>
-            <select id="updateStorageSelect">
-                <option value="${t('zamrzivac_1')}" ${proizvod.storage_location === t('zamrzivac_1') ? 'selected' : ''}>❄️ ${t('zamrzivac_1')}</option>
-                <option value="${t('zamrzivac_2')}" ${proizvod.storage_location === t('zamrzivac_2') ? 'selected' : ''}>❄️ ${t('zamrzivac_2')}</option>
-                <option value="${t('zamrzivac_3')}" ${proizvod.storage_location === t('zamrzivac_3') ? 'selected' : ''}>❄️ ${t('zamrzivac_3')}</option>
-                <option value="${t('frizider')}" ${proizvod.storage_location === t('frizider') ? 'selected' : ''}>🧊 ${t('frizider')}</option>
-                <option value="${t('ostava')}" ${proizvod.storage_location === t('ostava') ? 'selected' : ''}>🏠 ${t('ostava')}</option>
-                <option value="${t('Ostalo')}" ${proizvod.storage_location === t('Ostalo') ? 'selected' : ''}>📦 ${t('Ostalo')}</option>
-            </select>
-        </div>
-        <div class="btn-group">
-            <button class="btn-save" onclick="sacuvajAzuriranje(${index})">✅ Sačuvaj</button>
-            <button class="btn-cancel" onclick="renderInventory()">✖ Odustani</button>
-        </div>
-    `;
-    document.getElementById('updateDateInput')?.addEventListener('change', updateUpdateExpiryDate);
-    document.getElementById('updateDateInput')?.addEventListener('input', updateUpdateExpiryDate);
-    document.getElementById('updateShelfLifeInput')?.addEventListener('change', updateUpdateExpiryDate);
-    document.getElementById('updateShelfLifeInput')?.addEventListener('input', updateUpdateExpiryDate);
-    updateUpdateExpiryDate();
-}
-
-function updateUpdateExpiryDate() {
-    const dateInput = document.getElementById('updateDateInput');
-    const shelfLifeInput = document.getElementById('updateShelfLifeInput');
-    const expiryDisplay = document.getElementById('updateExpiryDisplay');
-    if (!dateInput || !shelfLifeInput || !expiryDisplay) return;
-    const date = dateInput.value;
-    const months = parseInt(shelfLifeInput.value) || 0;
-    if (date && months > 0) {
-        const expiry = new Date(date);
-        expiry.setMonth(expiry.getMonth() + months);
-        expiryDisplay.textContent = expiry.toLocaleDateString('sr-RS', { day: '2-digit', month: '2-digit', year: 'numeric' });
-    } else {
-        expiryDisplay.textContent = '-';
+    const proizvod = zalihe[index];
+    renderDataEntry(proizvod.product_name);
+    // Sačuvaj index za ažuriranje
+    window.updateIndex = index;
+    // Promeni dugme "Unesi" u "Ažuriraj"
+    const saveBtn = document.querySelector('.btn-save');
+    if (saveBtn) {
+        saveBtn.textContent = '✅ Ažuriraj';
+        saveBtn.onclick = function() {
+            sacuvajAzuriranje(window.updateIndex);
+        };
     }
 }
 
 function sacuvajAzuriranje(index) {
-    const product = document.getElementById('updateProductInput')?.value.trim();
-    const quantity = document.getElementById('updateQuantityInput')?.value.trim();
-    if (!product) { alert('Unesite naziv proizvoda!'); return; }
-    if (!quantity || isNaN(parseFloat(quantity))) { alert('Unesite količinu!'); return; }
+    const product = document.getElementById('productInput')?.value.trim();
+    const quantity = document.getElementById('quantityInput')?.value.trim();
+    if (!product) {
+        alert('Unesite naziv proizvoda!');
+        return;
+    }
+    if (!quantity || isNaN(parseFloat(quantity))) {
+        alert('Unesite količinu!');
+        return;
+    }
     
-    const novaKolicina = parseFloat(quantity);
-    let zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
-    
-    zalihe[index] = {
+    const productData = {
         product_name: product,
-        description: document.getElementById('updateDescriptionInput')?.value.trim() || '',
-        piece: document.getElementById('updatePieceInput')?.value.trim() || '-',
-        quantity: novaKolicina,
-        unit: document.getElementById('updateUnitSelect')?.value || 'kg',
-        entry_date: document.getElementById('updateDateInput')?.value || new Date().toISOString().split('T')[0],
-        shelf_life_months: parseInt(document.getElementById('updateShelfLifeInput')?.value) || 12,
-        storage_location: document.getElementById('updateStorageSelect')?.value || 'Ostalo'
+        description: document.getElementById('descriptionInput')?.value.trim() || '',
+        piece: document.getElementById('pieceInput')?.value.trim() || '-',
+        quantity: parseFloat(quantity),
+        unit: document.getElementById('unitSelect')?.value || 'kg',
+        entry_date: document.getElementById('dateInput')?.value || new Date().toISOString().split('T')[0],
+        shelf_life_months: parseInt(document.getElementById('shelfLifeInput')?.value) || 12,
+        storage_location: document.getElementById('storageSelect')?.value || 'Ostalo'
     };
+    
+    let zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
+    zalihe[index] = productData;
     localStorage.setItem('zalihe', JSON.stringify(zalihe));
     alert('✅ Proizvod ažuriran!');
     renderInventory();
 }
 
-// ===== SPISAK POTREBA =====
 function renderShoppingList() {
     currentScreenState = 'shopping';
     const content = document.getElementById('mainContent');
     if (!content) return;
-    
     const shopping = JSON.parse(localStorage.getItem('shoppingList') || '[]');
     
     let html = `<div class="title">${t('spisak_potreba')}</div>`;
@@ -668,58 +807,10 @@ function obrisiSaSpiska(index) {
     renderShoppingList();
 }
 
-function saveProduct() {
-    const product = document.getElementById('productInput')?.value.trim();
-    const quantity = document.getElementById('quantityInput')?.value.trim();
-    if (!product) {
-        alert('Unesite naziv proizvoda!');
-        document.getElementById('productInput')?.focus();
-        return;
-    }
-    if (!quantity || isNaN(parseFloat(quantity))) {
-        alert('Unesite količinu!');
-        document.getElementById('quantityInput')?.focus();
-        return;
-    }
-    
-    const productData = {
-        product_name: product,
-        description: document.getElementById('descriptionInput')?.value.trim() || '',
-        piece: document.getElementById('pieceInput')?.value.trim() || '-',
-        quantity: parseFloat(quantity),
-        unit: document.getElementById('unitSelect')?.value || 'kg',
-        entry_date: document.getElementById('dateInput')?.value || new Date().toISOString().split('T')[0],
-        shelf_life_months: parseInt(document.getElementById('shelfLifeInput')?.value) || 12,
-        storage_location: document.getElementById('storageSelect')?.value || 'Ostalo'
-    };
-    
-    let zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
-    const existingIndex = zalihe.findIndex(p => p.product_name === productData.product_name);
-    if (existingIndex !== -1) {
-        zalihe[existingIndex] = productData;
-    } else {
-        zalihe.push(productData);
-    }
-    localStorage.setItem('zalihe', JSON.stringify(zalihe));
-    
-    // Osveži tabelu
-    prikaziSveUnose();
-    
-    // Očisti polja
-    document.getElementById('pieceInput').value = '';
-    document.getElementById('quantityInput').value = '1';
-    document.getElementById('quantityInput').focus();
-    alert('✅ "Product saved!");
-}
-
 // ===== GLAVNA FUNKCIJA ZA NAZAD / ODUSTANI =====
 function handleBackAction() {
     console.log('⬅️ Trenutni ekran stanje:', currentScreenState);
-    console.log('Trenutna kategorija:', currentCategory);
-    console.log('Trenutna podkategorija:', currentSubcategory);
-    
     if (currentScreenState === 'dataEntry') {
-        // Ako imamo podkategoriju, vrati se na delove proizvoda
         if (currentSubcategory) {
             renderProductParts(currentSubcategory);
         } else if (currentCategory) {
@@ -728,22 +819,40 @@ function handleBackAction() {
             renderCategories();
         }
     } else if (currentScreenState === 'productParts') {
-        // Vrati se na podkategorije
         if (currentCategory) {
             renderSubcategories(currentCategory);
         } else {
             renderCategories();
         }
     } else if (currentScreenState === 'subcategories') {
-        // Vrati se na glavne kategorije
         renderCategories();
     } else if (currentScreenState === 'categories') {
-        // Vrati se na jezike
         showScreen('languageScreen');
         renderLanguages();
     } else {
         showScreen('mainScreen');
         renderCategories();
+    }
+}
+
+// ============================================
+// GLOBALNA FUNKCIJA ZA LOGIN
+// ============================================
+function triggerLogin() {
+    console.log("🔐 triggerLogin pozvan!");
+    const phoneInput = document.getElementById('phoneInput');
+    if (!phoneInput) {
+        alert('Greška: Polje za telefon nije pronađeno!');
+        return;
+    }
+    const phone = phoneInput.value.trim();
+    console.log("📱 Unet broj:", phone);
+    if (phone.length >= 9) {
+        console.log("✅ Login uspešan");
+        showScreen('languageScreen');
+        renderLanguages();
+    } else {
+        alert('Unesite validan broj telefona (9+ cifara)!');
     }
 }
 
@@ -780,94 +889,33 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // ===== EXIT DUGMAD =====
-    const exitLoginBtn = document.getElementById('exitLoginBtn');
-    if (exitLoginBtn) {
-        exitLoginBtn.addEventListener('click', exitApp);
-        console.log('✅ Exit login dugme povezano');
-    }
-    
-    const exitLangBtn = document.getElementById('exitLangBtn');
-    if (exitLangBtn) {
-        exitLangBtn.addEventListener('click', exitApp);
-        console.log('✅ Exit language dugme povezano');
-    }
-    
-    const exitMainBtn = document.getElementById('exitMainBtn');
-    if (exitMainBtn) {
-        exitMainBtn.addEventListener('click', exitApp);
-        console.log('✅ Exit main dugme povezano');
-    }
+    document.getElementById('exitLoginBtn')?.addEventListener('click', exitApp);
+    document.getElementById('exitLangBtn')?.addEventListener('click', exitApp);
+    document.getElementById('exitMainBtn')?.addEventListener('click', exitApp);
 
     // ===== BACK DUGME =====
-    const backBtn = document.getElementById('backBtn');
-    if (backBtn) {
-        backBtn.addEventListener('click', handleBackAction);
-        console.log('✅ Back dugme povezano');
-    }
-
+    document.getElementById('backBtn')?.addEventListener('click', handleBackAction);
+    
     // ===== INVENTORY DUGME =====
-    const inventoryBtn = document.getElementById('inventoryBtn');
-    if (inventoryBtn) {
-        inventoryBtn.addEventListener('click', function() { 
-            console.log('📦 Inventory klik');
-            renderInventory(); 
-        });
-        console.log('✅ Inventory dugme povezano');
-    }
-
+    document.getElementById('inventoryBtn')?.addEventListener('click', function() { 
+        console.log('📦 Inventory klik');
+        renderInventory(); 
+    });
+    
     // ===== SHOPPING DUGME =====
-    const shoppingBtn = document.getElementById('shoppingBtn');
-    if (shoppingBtn) {
-        shoppingBtn.addEventListener('click', function() { 
-            console.log('🛒 Shopping klik');
-            renderShoppingList(); 
-        });
-        console.log('✅ Shopping dugme povezano');
-    }
+    document.getElementById('shoppingBtn')?.addEventListener('click', function() { 
+        console.log('🛒 Shopping klik');
+        renderShoppingList(); 
+    });
 
     // ===== SUPPORT DUGMAD =====
-    const supportBtn = document.getElementById('supportBtn');
-    if (supportBtn) {
-        supportBtn.addEventListener('click', openSupportDialog);
-        console.log('✅ Support dugme povezano');
-    }
+    document.getElementById('supportBtn')?.addEventListener('click', openSupportDialog);
+    document.getElementById('closeSupportBtn')?.addEventListener('click', closeSupportDialog);
+    document.getElementById('closeSupportBtn2')?.addEventListener('click', closeSupportDialog);
     
-    const closeSupportBtn = document.getElementById('closeSupportBtn');
-    if (closeSupportBtn) {
-        closeSupportBtn.addEventListener('click', closeSupportDialog);
-    }
-    
-    const closeSupportBtn2 = document.getElementById('closeSupportBtn2');
-    if (closeSupportBtn2) {
-        closeSupportBtn2.addEventListener('click', closeSupportDialog);
-    }
-    
-    // ===== ESC ZATVARA SUPPORT =====
     document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            closeSupportDialog();
-        }
+        if (e.key === 'Escape') closeSupportDialog();
     });
 
     console.log('✅ Svi događaji povezani!');
 });
-// ============================================
-// GLOBALNA FUNKCIJA ZA LOGIN
-// ============================================
-function triggerLogin() {
-    console.log("🔐 triggerLogin pozvan!");
-    const phoneInput = document.getElementById('phoneInput');
-    if (!phoneInput) {
-        alert('Greška: Polje za telefon nije pronađeno!');
-        return;
-    }
-    const phone = phoneInput.value.trim();
-    console.log("📱 Unet broj:", phone);
-    if (phone.length >= 9) {
-        console.log("✅ Login uspešan");
-        showScreen('languageScreen');
-        renderLanguages();
-    } else {
-        alert('Unesite validan broj telefona (9+ cifara)!');
-    }
-}
