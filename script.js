@@ -542,14 +542,14 @@ function renderSubcategoryGroup(category, groupName) {
     currentScreenState = 'subcategories';
     const content = document.getElementById('mainContent');
     const sub = subcategories[currentLang] || subcategories.sr || {};
-    let items = sub[category] ? sub[category][groupName] : [];
+    let items = (sub[category] && sub[category][groupName]) ? sub[category][groupName] : [];
     
-    // Uzimamo specifičnu paletu za grupu ili kategoriju
-    const colors = getSubcategoryColors(groupName.includes('Povrće') ? 'Povrće' : category);
+    // Uzimamo isključivo paletu za roditeljsku kategoriju (npr. Zimnica i kompoti)
+    const colors = getSubcategoryColors(category);
     
     let html = `<div class="title">${groupName}</div>`;
     html += `<div class="categories-grid">`;
-    if (Array.isArray(items)) {
+    if (Array.isArray(items) && items.length > 0) {
         let displayItems = [...items];
         const hasOstalo = displayItems.some(item => isOtherButton(item));
         if (!hasOstalo) {
@@ -558,8 +558,12 @@ function renderSubcategoryGroup(category, groupName) {
         displayItems.forEach((item, idx) => {
             const color = colors[idx % colors.length];
             const safeItem = item.toString().replace(/'/g, "\\'");
+            const hasParts = typeof productParts !== 'undefined' && ((productParts[currentLang] && productParts[currentLang][item]) || (productParts.sr && productParts.sr[item]));
+            
             if (isOtherButton(item)) {
                 html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('')">${item} ➜</button>`;
+            } else if (hasParts) {
+                html += `<button class="category-btn" style="background:${color};" onclick="renderProductParts('${safeItem}')">${item}</button>`;
             } else {
                 html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('${safeItem}')">${item}</button>`;
             }
@@ -576,9 +580,7 @@ function renderProductParts(subcategory) {
     currentSubcategory = subcategory;
     const content = document.getElementById('mainContent');
     let parts = getProductParts(subcategory);
-    
-    // Proveravamo da li podkategorija ima sopstvenu boju, inače koristimo boju glavne kategorije
-    const colors = subcategoryColors[subcategory] || getSubcategoryColors(currentCategory);
+    const colors = getSubcategoryColors(currentCategory);
     
     let html = `<div class="title">${subcategory}</div>`;
     html += `<div style="margin-bottom:15px;text-align:center;font-size:20px;color:#666;">${t('delovi_proizvoda')}</div>`;
@@ -773,21 +775,6 @@ function toggleAllCheckboxes() {
     checkboxes.forEach(cb => cb.checked = selectAll.checked);
 }
 
-function obrisiZalihe() {
-    const selected = document.querySelectorAll('.row-checkbox:checked');
-    if (selected.length === 0) {
-        showModernAlert('No Selection', 'You have not selected any items to delete!', '⚠️');
-        return;
-    }
-    if (!confirm(`Da li ste sigurni da želite da obrišete ${selected.length} stavku/ke?`)) return;
-    const zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
-    const indices = Array.from(selected).map(cb => parseInt(cb.dataset.index));
-    indices.sort((a, b) => b - a);
-    indices.forEach(i => zalihe.splice(i, 1));
-    localStorage.setItem('zalihe', JSON.stringify(zalihe));
-    renderInventory();
-}
-
 function azurirajZalihe() {
     const selected = document.querySelectorAll('.row-checkbox:checked');
     if (selected.length === 0) {
@@ -804,20 +791,75 @@ function azurirajZalihe() {
 }
 
 function renderUpdateEntry(proizvod, index) {
-    showModernAlert('Update', 'Update feature selected for index ' + index, 'ℹ️');
+    currentScreenState = 'dataEntry';
+    const content = document.getElementById('mainContent');
+    if (!content) return;
+    
+    content.innerHTML = `
+        <div class="title">Ažuriranje proizvoda</div>
+        <div class="row"><label>${t('naziv_proizvoda')}</label><input type="text" id="productInput" value="${proizvod.product_name || ''}"></div>
+        <div class="row"><label>${t('opis')}</label><input type="text" id="descriptionInput" value="${proizvod.description || ''}"></div>
+        <div class="row">
+            <label>${t('komad')}</label>
+            <div class="inline-group">
+                <input type="text" id="pieceInput" value="${proizvod.piece || ''}">
+                <label>${t('kolicina')}</label>
+                <input type="number" id="quantityInput" value="${proizvod.quantity || 1}" step="0.1">
+                <label>${t('jedinica_mere')}</label>
+                <select id="unitSelect">
+                    <option value="kg" ${proizvod.unit === 'kg' ? 'selected' : ''}>${t('kg')}</option>
+                    <option value="g" ${proizvod.unit === 'g' ? 'selected' : ''}>${t('g')}</option>
+                    <option value="kom" ${proizvod.unit === 'kom' ? 'selected' : ''}>${t('kom')}</option>
+                    <option value="l" ${proizvod.unit === 'l' ? 'selected' : ''}>${t('l')}</option>
+                    <option value="ml" ${proizvod.unit === 'ml' ? 'selected' : ''}>${t('ml')}</option>
+                    <option value="pak" ${proizvod.unit === 'pak' ? 'selected' : ''}>${t('pak')}</option>
+                    <option value="kutija" ${proizvod.unit === 'kutija' ? 'selected' : ''}>${t('kutija')}</option>
+                </select>
+            </div>
+        </div>
+        <div class="row">
+            <label>${t('datum_unosa')}</label>
+            <div class="inline-group">
+                <input type="date" id="dateInput" value="${proizvod.entry_date || new Date().toISOString().split('T')[0]}">
+                <label>${t('rok_trajanja')}</label>
+                <input type="number" id="shelfLifeInput" value="${proizvod.shelf_life_months || 12}">
+                <span style="font-size:18px;">mes</span>
+            </div>
+        </div>
+        <div class="row">
+            <label>${t('automatski_rok')}</label>
+            <div class="inline-group"><span id="expiryDisplay">-</span></div>
+        </div>
+        <div class="row">
+            <label>${t('mesto_skladistenja')}</label>
+            <select id="storageSelect">
+                <option value="${t('zamrzivac_1')}" ${proizvod.storage_location === t('zamrzivac_1') ? 'selected' : ''}>❄️ ${t('zamrzivac_1')}</option>
+                <option value="${t('zamrzivac_2')}" ${proizvod.storage_location === t('zamrzivac_2') ? 'selected' : ''}>❄️ ${t('zamrzivac_2')}</option>
+                <option value="${t('zamrzivac_3')}" ${proizvod.storage_location === t('zamrzivac_3') ? 'selected' : ''}>❄️ ${t('zamrzivac_3')}</option>
+                <option value="${t('frizider')}" ${proizvod.storage_location === t('frizider') ? 'selected' : ''}>🧊 ${t('frizider')}</option>
+                <option value="${t('ostava')}" ${proizvod.storage_location === t('ostava') ? 'selected' : ''}>🏠 ${t('ostava')}</option>
+                <option value="${t('Ostalo')}" ${proizvod.storage_location === t('Ostalo') ? 'selected' : ''}>📦 ${t('Ostalo')}</option>
+            </select>
+        </div>
+        <div class="btn-group">
+            <button class="btn-save" onclick="saveUpdatedProduct(${index})">✅ Sačuvaj izmene</button>
+            <button class="btn-cancel" onclick="renderInventory()">✖ ${t('odustani')}</button>
+        </div>
+    `;
+    
+    document.getElementById('dateInput')?.addEventListener('change', updateExpiryDate);
+    document.getElementById('shelfLifeInput')?.addEventListener('change', updateExpiryDate);
+    updateExpiryDate();
 }
 
-function saveProduct() {
+function saveUpdatedProduct(index) {
     const product = document.getElementById('productInput')?.value.trim();
     const quantity = document.getElementById('quantityInput')?.value.trim();
-    if (!product) {
-        showModernAlert('Missing Info', 'Please enter a product name!', '📝');
+    if (!product || !quantity) {
+        showModernAlert('Missing Info', 'Please fill in required fields!', '📝');
         return;
     }
-    if (!quantity || isNaN(parseFloat(quantity))) {
-        showModernAlert('Missing Info', 'Please enter a valid quantity!', '📝');
-        return;
-    }
+    
     const productData = {
         product_name: product,
         description: document.getElementById('descriptionInput')?.value.trim() || '',
@@ -830,17 +872,11 @@ function saveProduct() {
     };
     
     let zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
-    
-    // Uvek dodajemo kao novu stavku umesto da menjamo postojeću preko findIndex-a
-    zalihe.push(productData);
-    
+    zalihe[index] = productData;
     localStorage.setItem('zalihe', JSON.stringify(zalihe));
-    if (typeof prikaziSveUnose === 'function') prikaziSveUnose();
     
-    document.getElementById('pieceInput').value = '';
-    document.getElementById('quantityInput').value = '1';
-    document.getElementById('quantityInput').focus();
-    showModernAlert('Success', 'Product saved successfully!', '✅');
+    showModernAlert('Success', 'Product updated successfully!', '✅');
+    renderInventory();
 }
 function updateExpiryDate() {
     const dateInput = document.getElementById('dateInput');
