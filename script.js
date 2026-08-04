@@ -751,55 +751,120 @@ function handleBackAction() {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ DOM je spreman!');
 
+    // ===== LOGIN DUGME =====
     const loginBtn = document.getElementById('loginBtn');
-    const phoneInput = document.getElementById('phoneInput');
-
     if (loginBtn) {
         loginBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            triggerLogin(); 
+            console.log('🖱️ Klik na ENTER dugme');
+            triggerLogin();
         });
+        console.log('✅ Login dugme povezano');
+    } else {
+        console.error('❌ Login dugme nije pronađeno!');
     }
 
+    // ===== ENTER TASTER =====
+    const phoneInput = document.getElementById('phoneInput');
     if (phoneInput) {
         phoneInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
+                console.log('⌨️ Enter taster pritisnut');
                 triggerLogin();
             }
         });
+        console.log('✅ Enter taster povezan');
+    } else {
+        console.error('❌ Phone input nije pronađen!');
     }
     
-    document.getElementById('exitLoginBtn')?.addEventListener('click', exitApp);
-    document.getElementById('exitLangBtn')?.addEventListener('click', exitApp);
-    document.getElementById('exitMainBtn')?.addEventListener('click', exitApp);
-
-    document.getElementById('backBtn')?.addEventListener('click', handleBackAction);
-    document.getElementById('inventoryBtn')?.addEventListener('click', function() { renderInventory(); });
-    document.getElementById('shoppingBtn')?.addEventListener('click', function() { renderShoppingList(); });
-
-    document.getElementById('supportBtn')?.addEventListener('click', openSupportDialog);
-    document.getElementById('closeSupportBtn')?.addEventListener('click', closeSupportDialog);
-    document.getElementById('closeSupportBtn2')?.addEventListener('click', closeSupportDialog);
+    // ===== EXIT DUGMAD =====
+    const exitLoginBtn = document.getElementById('exitLoginBtn');
+    if (exitLoginBtn) {
+        exitLoginBtn.addEventListener('click', exitApp);
+        console.log('✅ Exit login dugme povezano');
+    }
     
+    const exitLangBtn = document.getElementById('exitLangBtn');
+    if (exitLangBtn) {
+        exitLangBtn.addEventListener('click', exitApp);
+        console.log('✅ Exit language dugme povezano');
+    }
+    
+    const exitMainBtn = document.getElementById('exitMainBtn');
+    if (exitMainBtn) {
+        exitMainBtn.addEventListener('click', exitApp);
+        console.log('✅ Exit main dugme povezano');
+    }
+
+    // ===== BACK DUGME =====
+    const backBtn = document.getElementById('backBtn');
+    if (backBtn) {
+        backBtn.addEventListener('click', handleBackAction);
+        console.log('✅ Back dugme povezano');
+    }
+
+    // ===== INVENTORY DUGME =====
+    const inventoryBtn = document.getElementById('inventoryBtn');
+    if (inventoryBtn) {
+        inventoryBtn.addEventListener('click', function() { 
+            console.log('📦 Inventory klik');
+            renderInventory(); 
+        });
+        console.log('✅ Inventory dugme povezano');
+    }
+
+    // ===== SHOPPING DUGME =====
+    const shoppingBtn = document.getElementById('shoppingBtn');
+    if (shoppingBtn) {
+        shoppingBtn.addEventListener('click', function() { 
+            console.log('🛒 Shopping klik');
+            renderShoppingList(); 
+        });
+        console.log('✅ Shopping dugme povezano');
+    }
+
+    // ===== SUPPORT DUGMAD =====
+    const supportBtn = document.getElementById('supportBtn');
+    if (supportBtn) {
+        supportBtn.addEventListener('click', openSupportDialog);
+        console.log('✅ Support dugme povezano');
+    }
+    
+    const closeSupportBtn = document.getElementById('closeSupportBtn');
+    if (closeSupportBtn) {
+        closeSupportBtn.addEventListener('click', closeSupportDialog);
+    }
+    
+    const closeSupportBtn2 = document.getElementById('closeSupportBtn2');
+    if (closeSupportBtn2) {
+        closeSupportBtn2.addEventListener('click', closeSupportDialog);
+    }
+    
+    // ===== ESC ZATVARA SUPPORT =====
     document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') closeSupportDialog();
+        if (e.key === 'Escape') {
+            closeSupportDialog();
+        }
     });
 
     console.log('✅ Svi događaji povezani!');
 });
-
 // ============================================
 // GLOBALNA FUNKCIJA ZA LOGIN
 // ============================================
 function triggerLogin() {
+    console.log("🔐 triggerLogin pozvan!");
     const phoneInput = document.getElementById('phoneInput');
     if (!phoneInput) {
         alert('Greška: Polje za telefon nije pronađeno!');
         return;
     }
     const phone = phoneInput.value.trim();
-    if (phone.length >= 9) {  // ← POPRAVLJENO! SADA JE 9
+    console.log("📱 Unet broj:", phone);
+    if (phone.length >= 9) {
+        console.log("✅ Login uspešan");
         showScreen('languageScreen');
         renderLanguages();
     } else {
