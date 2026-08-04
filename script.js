@@ -52,8 +52,9 @@ function exitApp() {
 }
 
 // ============================================
-// GLOBALNA FUNKCIJA ZA LOGIN
+// GLOBALNE FUNKCIJE
 // ============================================
+
 function triggerLogin() {
     const phoneInput = document.getElementById('phoneInput');
     if (!phoneInput) {
@@ -67,6 +68,13 @@ function triggerLogin() {
     } else {
         alert('Unesite validan broj telefona (9+ cifara)!');
     }
+}
+
+function selectLanguage(langCode) {
+    currentLang = langCode;
+    showScreen('mainScreen');
+    updateHeaderTexts();
+    renderCategories();
 }
 
 function openDB() {
