@@ -626,6 +626,7 @@ function renderShoppingList() {
     currentScreenState = 'shopping';
     const content = document.getElementById('mainContent');
     if (!content) return;
+    
     const shopping = JSON.parse(localStorage.getItem('shoppingList') || '[]');
     
     let html = `<div class="title">${t('spisak_potreba')}</div>`;
@@ -636,20 +637,22 @@ function renderShoppingList() {
     html += `<div class="table-container" style="max-height:400px; overflow-y:auto;">`;
     html += `<div class="table-title">🛒 ${t('spisak_potreba')}</div>`;
     html += `<div id="shoppingTable">`;
-    html += `<div class="table-row header-row" style="display:grid; grid-template-columns:1fr 1fr 0.5fr; gap:2px; background:#f0f0f0; font-weight:bold; border-bottom:2px solid #ccc; padding:5px 0;">`;
+    html += `<div class="table-row header-row" style="display:grid; grid-template-columns:1fr 1fr 0.5fr 0.5fr; gap:2px; background:#f0f0f0; font-weight:bold; border-bottom:2px solid #ccc; padding:5px 0;">`;
     html += `<div class="cell">${t('naziv_proizvoda')}</div>`;
     html += `<div class="cell">${t('opis')}</div>`;
     html += `<div class="cell">${t('kolicina')}</div>`;
+    html += `<div class="cell">Akcija</div>`;
     html += `</div>`;
     
     if (shopping.length === 0) {
-        html += `<div class="table-row"><div class="cell" style="grid-column:span 3;padding:30px;color:#999;text-align:center;">${t('nema_proizvoda')}</div></div>`;
+        html += `<div class="table-row"><div class="cell" style="grid-column:span 4;padding:30px;color:#999;text-align:center;">${t('nema_proizvoda')}</div></div>`;
     } else {
         shopping.forEach((p, index) => {
-            html += `<div class="table-row" style="display:grid; grid-template-columns:1fr 1fr 0.5fr; gap:2px; border-bottom:1px solid #eee; padding:5px 0;">`;
+            html += `<div class="table-row" style="display:grid; grid-template-columns:1fr 1fr 0.5fr 0.5fr; gap:2px; border-bottom:1px solid #eee; padding:5px 0;">`;
             html += `<div class="cell">${p.product_name}</div>`;
             html += `<div class="cell">${p.description || ''}</div>`;
             html += `<div class="cell">${p.quantity}</div>`;
+            html += `<div class="cell"><button onclick="obrisiSaSpiska(${index})" style="background:#f44336;color:white;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;">✖</button></div>`;
             html += `</div>`;
         });
     }
@@ -657,12 +660,27 @@ function renderShoppingList() {
     content.innerHTML = html;
 }
 
-// ===== saveProduct =====
+function obrisiSaSpiska(index) {
+    if (!confirm('Obrišite stavku sa spiska?')) return;
+    let shopping = JSON.parse(localStorage.getItem('shoppingList') || '[]');
+    shopping.splice(index, 1);
+    localStorage.setItem('shoppingList', JSON.stringify(shopping));
+    renderShoppingList();
+}
+
 function saveProduct() {
     const product = document.getElementById('productInput')?.value.trim();
     const quantity = document.getElementById('quantityInput')?.value.trim();
-    if (!product) { alert('Unesite naziv proizvoda!'); return; }
-    if (!quantity || isNaN(parseFloat(quantity))) { alert('Unesite količinu!'); return; }
+    if (!product) {
+        alert('Unesite naziv proizvoda!');
+        document.getElementById('productInput')?.focus();
+        return;
+    }
+    if (!quantity || isNaN(parseFloat(quantity))) {
+        alert('Unesite količinu!');
+        document.getElementById('quantityInput')?.focus();
+        return;
+    }
     
     const productData = {
         product_name: product,
@@ -677,45 +695,50 @@ function saveProduct() {
     
     let zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
     const existingIndex = zalihe.findIndex(p => p.product_name === productData.product_name);
-    if (existingIndex !== -1) { zalihe[existingIndex] = productData; } else { zalihe.push(productData); }
+    if (existingIndex !== -1) {
+        zalihe[existingIndex] = productData;
+    } else {
+        zalihe.push(productData);
+    }
     localStorage.setItem('zalihe', JSON.stringify(zalihe));
+    
+    // Osveži tabelu
     prikaziSveUnose();
+    
+    // Očisti polja
     document.getElementById('pieceInput').value = '';
     document.getElementById('quantityInput').value = '1';
     document.getElementById('quantityInput').focus();
-    alert('✅ Proizvod sačuvan!');
-}
-
-function updateExpiryDate() {
-    const dateInput = document.getElementById('dateInput');
-    const shelfLifeInput = document.getElementById('shelfLifeInput');
-    const expiryDisplay = document.getElementById('expiryDisplay');
-    if (!dateInput || !shelfLifeInput || !expiryDisplay) return;
-    const date = dateInput.value;
-    const months = parseInt(shelfLifeInput.value) || 0;
-    if (date && months > 0) {
-        const expiry = new Date(date);
-        expiry.setMonth(expiry.getMonth() + months);
-        expiryDisplay.textContent = expiry.toLocaleDateString('sr-RS', { day: '2-digit', month: '2-digit', year: 'numeric' });
-    } else {
-        expiryDisplay.textContent = '-';
-    }
+    alert('✅ "Product saved!");
 }
 
 // ===== GLAVNA FUNKCIJA ZA NAZAD / ODUSTANI =====
 function handleBackAction() {
     console.log('⬅️ Trenutni ekran stanje:', currentScreenState);
+    console.log('Trenutna kategorija:', currentCategory);
+    console.log('Trenutna podkategorija:', currentSubcategory);
+    
     if (currentScreenState === 'dataEntry') {
+        // Ako imamo podkategoriju, vrati se na delove proizvoda
         if (currentSubcategory) {
             renderProductParts(currentSubcategory);
-        } else {
+        } else if (currentCategory) {
             renderSubcategories(currentCategory);
+        } else {
+            renderCategories();
         }
     } else if (currentScreenState === 'productParts') {
-        renderSubcategories(currentCategory);
+        // Vrati se na podkategorije
+        if (currentCategory) {
+            renderSubcategories(currentCategory);
+        } else {
+            renderCategories();
+        }
     } else if (currentScreenState === 'subcategories') {
+        // Vrati se na glavne kategorije
         renderCategories();
     } else if (currentScreenState === 'categories') {
+        // Vrati se na jezike
         showScreen('languageScreen');
         renderLanguages();
     } else {
