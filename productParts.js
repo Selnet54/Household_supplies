@@ -534,3 +534,9 @@ const productParts = {
         "Autre": ["Note : Saisir le nom du produit"]
     }
 };
+function getProductPartsColors(partName) {
+    return {
+        background: '#ffffff',
+        text: '#1a237e'
+    };
+}
