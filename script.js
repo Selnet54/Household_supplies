@@ -538,13 +538,14 @@ function renderSubcategories(category) {
     html += `</div>`;
     content.innerHTML = html;
 }
-
 function renderSubcategoryGroup(category, groupName) {
     currentScreenState = 'subcategories';
     const content = document.getElementById('mainContent');
     const sub = subcategories[currentLang] || subcategories.sr || {};
     let items = sub[category] ? sub[category][groupName] : [];
-    const colors = getSubcategoryColors(category);
+    
+    // Uzimamo specifičnu paletu za grupu ili kategoriju
+    const colors = getSubcategoryColors(groupName.includes('Povrće') ? 'Povrće' : category);
     
     let html = `<div class="title">${groupName}</div>`;
     html += `<div class="categories-grid">`;
@@ -575,7 +576,9 @@ function renderProductParts(subcategory) {
     currentSubcategory = subcategory;
     const content = document.getElementById('mainContent');
     let parts = getProductParts(subcategory);
-    const colors = getSubcategoryColors(currentCategory);
+    
+    // Proveravamo da li podkategorija ima sopstvenu boju, inače koristimo boju glavne kategorije
+    const colors = subcategoryColors[subcategory] || getSubcategoryColors(currentCategory);
     
     let html = `<div class="title">${subcategory}</div>`;
     html += `<div style="margin-bottom:15px;text-align:center;font-size:20px;color:#666;">${t('delovi_proizvoda')}</div>`;
@@ -601,7 +604,6 @@ function renderProductParts(subcategory) {
     html += `</div>`;
     content.innerHTML = html;
 }
-
 function renderDataEntry(productName) {
     currentScreenState = 'dataEntry';
     currentProductPart = productName;
