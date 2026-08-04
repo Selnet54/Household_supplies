@@ -69,7 +69,7 @@ function showModernAlert(title, message, icon = '📢') {
 
     setTimeout(() => {
         closeModernAlert();
-    }, 4000);
+    }, 2000);
 }
 
 function closeModernAlert() {
@@ -830,16 +830,18 @@ function saveProduct() {
     };
     
     let zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
-    const existingIndex = zalihe.findIndex(p => p.product_name === productData.product_name);
-    if (existingIndex !== -1) { zalihe[existingIndex] = productData; } else { zalihe.push(productData); }
+    
+    // Uvek dodajemo kao novu stavku umesto da menjamo postojeću preko findIndex-a
+    zalihe.push(productData);
+    
     localStorage.setItem('zalihe', JSON.stringify(zalihe));
     if (typeof prikaziSveUnose === 'function') prikaziSveUnose();
+    
     document.getElementById('pieceInput').value = '';
     document.getElementById('quantityInput').value = '1';
     document.getElementById('quantityInput').focus();
     showModernAlert('Success', 'Product saved successfully!', '✅');
 }
-
 function updateExpiryDate() {
     const dateInput = document.getElementById('dateInput');
     const shelfLifeInput = document.getElementById('shelfLifeInput');
