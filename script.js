@@ -190,7 +190,7 @@ const translations = {
         exit_poruka: "Danke für die Nutzung! 👋",
         zamrzivac_1: "Gefrierschrank 1", zamrzivac_2: "Gefrierschrank 2", zamrzivac_3: "Gefrierschrank 3",
         frizider: "Kühlschrank", ostava: "Vorratskammer", Ostalo: "Andere",
-        kg: "kg", g: "g", kom: "Stk", l: "l", ml: "ml", pak: "Pck", kutija: "Karton"
+        kg: "kg", g: "g", kom: "Stk", l: "l", ml: "ml", pak: "Pck", kutija: "Karton",
         error: "Fehler",
         invalid_input: "Ungültige Eingabe",
         please_enter_phone: "Bitte geben Sie eine gültige Telefonnummer ein (9+ Ziffern)!",
@@ -224,7 +224,7 @@ const translations = {
         exit_poruka: "Köszönjük a használatot! 👋",
         zamrzivac_1: "Mélyhűtő 1", zamrzivac_2: "Mélyhűtő 2", zamrzivac_3: "Mélyhűtő 3",
         frizider: "Hűtőszekrény", ostava: "Spájz", Ostalo: "Egyéb",
-        kg: "kg", g: "g", kom: "db", l: "l", ml: "ml", pak: "csom", kutija: "doboz"
+        kg: "kg", g: "g", kom: "db", l: "l", ml: "ml", pak: "csom", kutija: "doboz",
         error: "Hiba",
         invalid_input: "Érvénytelen bevitel",
         please_enter_phone: "Kérem, adjon meg egy érvényes telefonszámot (9+ számjegy)!",
@@ -258,7 +258,7 @@ const translations = {
         exit_poruka: "Дякуємо за використання! 👋",
         zamrzivac_1: "Морозилка 1", zamrzivac_2: "Морозилка 2", zamrzivac_3: "Морозилка 3",
         frizider: "Холодильник", ostava: "Комора", Ostalo: "Інше",
-        kg: "кг", g: "г", kom: "шт", l: "л", ml: "мл", pak: "уп", kutija: "кор"
+        kg: "кг", g: "г", kom: "шт", l: "л", ml: "мл", pak: "уп", kutija: "кор",
         error: "Помилка",
         invalid_input: "Невірне введення",
         please_enter_phone: "Будь ласка, введіть дійсний номер телефону (9+ цифр)!",
@@ -292,7 +292,7 @@ const translations = {
         exit_poruka: "Спасибо за использование! 👋",
         zamrzivac_1: "Морозилка 1", zamrzivac_2: "Морозилка 2", zamrzivac_3: "Морозилка 3",
         frizider: "Холодильник", ostava: "Кладовая", Ostalo: "Другое",
-        kg: "кг", g: "г", kom: "шт", l: "л", ml: "мл", pak: "уп", kutija: "кор"
+        kg: "кг", g: "г", kom: "шт", l: "л", ml: "мл", pak: "уп", kutija: "кор",
         error: "Ошибка",
         invalid_input: "Неверный ввод",
         please_enter_phone: "Пожалуйста, введите действительный номер телефона (9+ цифр)!",
@@ -326,7 +326,7 @@ const translations = {
         exit_poruka: "感谢使用！👋",
         zamrzivac_1: "冷冻柜 1", zamrzivac_2: "冷冻柜 2", zamrzivac_3: "冷冻柜 3",
         frizider: "冰箱", ostava: "储藏室", Ostalo: "其他",
-        kg: "公斤", g: "克", kom: "件", l: "升", ml: "毫升", pak: "包", kutija: "盒"
+        kg: "公斤", g: "克", kom: "件", l: "升", ml: "毫升", pak: "包", kutija: "盒",
         error: "错误",
         invalid_input: "无效输入",
         please_enter_phone: "请输入有效的电话号码（9位以上）！",
@@ -394,7 +394,7 @@ const translations = {
         exit_poruka: "Obrigado por usar! 👋",
         zamrzivac_1: "Congelador 1", zamrzivac_2: "Congelador 2", zamrzivac_3: "Congelador 3",
         frizider: "Geladeira", ostava: "Despensa", Ostalo: "Outro",
-        kg: "kg", g: "g", kom: "pç", l: "l", ml: "ml", pak: "pc", kutija: "cx"
+        kg: "kg", g: "g", kom: "pç", l: "l", ml: "ml", pak: "pc", kutija: "cx",
         error: "Erro",
         invalid_input: "Entrada inválida",
         please_enter_phone: "Por favor, insira um número de telefone válido (9+ dígitos)!",
@@ -428,7 +428,7 @@ const translations = {
         exit_poruka: "Merci d'utiliser! 👋",
         zamrzivac_1: "Congélateur 1", zamrzivac_2: "Congélateur 2", zamrzivac_3: "Congélateur 3",
         frizider: "Réfrigérateur", ostava: "Garde-manger", Ostalo: "Autre",
-        kg: "kg", g: "g", kom: "pc", l: "l", ml: "ml", pak: "paq", kutija: "boîte"
+        kg: "kg", g: "g", kom: "pc", l: "l", ml: "ml", pak: "paq", kutija: "boîte",
         error: "Erreur",
         invalid_input: "Saisie invalide",
         please_enter_phone: "Veuillez entrer un numéro de téléphone valide (9+ chiffres)!",
