@@ -1267,11 +1267,7 @@ function sacuvajAzuriranje(index) {
   localStorage.setItem('zalihe', JSON.stringify(zalihe));
     alert('✅ Proizvod ažuriran!');
     renderInventory();
-} // <-- OBAVEZNO zatvorena zagrada prethodne funkcije!
-
-// Nova funkcija počinje ovde čisto i bez greške:
-function renderShoppingList() {
-
+} 
 function renderShoppingList() {
     currentScreenState = 'shopping';
     const content = document.getElementById('mainContent');
