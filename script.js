@@ -1248,12 +1248,9 @@ function sacuvajAzuriranje(index) {
         shelf_life_months: parseInt(document.getElementById('updateShelfLifeInput')?.value) || 12,
         storage_location: document.getElementById('updateStorageSelect')?.value || 'Ostalo'
     };
-    localStorage.setItem('zalihe', JSON.stringify(zalihe));
-    showModernAlert(t('success'), t('product_updated'), '✅');
-    renderInventory();
-}
     
-    // Inače ažuriraj
+}
+ 
     zalihe[index] = {
         product_name: product,
         description: document.getElementById('updateDescriptionInput')?.value.trim() || '',
@@ -1264,9 +1261,16 @@ function sacuvajAzuriranje(index) {
         shelf_life_months: parseInt(document.getElementById('updateShelfLifeInput')?.value) || 12,
         storage_location: document.getElementById('updateStorageSelect')?.value || 'Ostalo'
     };
-  localStorage.setItem('zalihe', JSON.stringify(zalihe));
-    alert('✅ Proizvod ažuriran!');
-    renderInventory();
+        localStorage.setItem('zalihe', JSON.stringify(zalihe));
+        showModernAlert(t('success'), t('product_updated'), '✅');
+        renderInventory();
+} 
+
+function renderShoppingList() {
+    currentScreenState = 'shopping';
+    const content = document.getElementById('mainContent');
+    if (!content) return;
+    const shopping = JSON.parse(localStorage.getItem('shoppingList') || '[]');
 } 
 function renderShoppingList() {
     currentScreenState = 'shopping';
