@@ -880,7 +880,6 @@ function renderSubcategories(category) {
     subList.forEach((sub, idx) => {
         const color = colors[idx % colors.length];
         const safeSub = sub.replace(/'/g, "\\'");
-        // Proveri da li postoje delovi proizvoda za ovu podkategoriju
         const hasParts = productParts[currentLang] && productParts[currentLang][sub] && productParts[currentLang][sub].length > 0;
         if (hasParts) {
             html += `<button class="category-btn" style="background:${color};" onclick="renderProductParts('${safeSub}')">${sub}</button>`;
@@ -888,12 +887,22 @@ function renderSubcategories(category) {
             html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('${safeSub}')">${sub} ➜</button>`;
         }
     });
+    html += `</div>`;
+    
+    // Dodato dugme za povratak na glavne kategorije
+    html += `<div style="margin-top:20px;text-align:center;">
+        <button onclick="renderCategories()" style="background:#90caf9;color:#1a237e;border:none;padding:15px 40px;border-radius:10px;font-size:20px;font-weight:bold;cursor:pointer;">◀ ${t('nazad')}</button>
+    </div>`;
+    
+    content.innerHTML = html;
+}
+
 // ===== 16. DELOVI PROIZVODA =====
 function renderProductParts(subcategory) {
     currentSubcategory = subcategory;
     const content = document.getElementById('mainContent');
     const parts = getProductParts(subcategory);
-    const colors = getProductPartsColors(currentCategory);
+    const colors = getSubcategoryColors(currentCategory);
     let html = `<div class="title">${subcategory}</div>`;
     html += `<div style="margin-bottom:15px;text-align:center;font-size:20px;color:#666;">${t('delovi_proizvoda')}</div>`;
     html += `<div class="categories-grid">`;
@@ -907,7 +916,7 @@ function renderProductParts(subcategory) {
         html += `<button class="category-btn" style="background:#ddd;" onclick="renderDataEntry('')">${t('Ostalo') || 'Unesite naziv'}</button>`;
     }
     html += `</div>`;
-    // DODAJ BACK DUGME
+    
     html += `<div style="margin-top:20px;text-align:center;">
         <button onclick="renderSubcategories('${currentCategory.replace(/'/g, "\\'")}')" style="background:#90caf9;color:#1a237e;border:none;padding:15px 40px;border-radius:10px;font-size:20px;font-weight:bold;cursor:pointer;">◀ ${t('nazad')}</button>
     </div>`;
