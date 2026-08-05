@@ -1,6 +1,5 @@
 const CACHE_NAME = 'zalihe-v109';
 
-// SAMO FAJLOVI KOJI STVARNO POSTOJE
 const urlsToCache = [
   '/Household_supplies/',
   '/Household_supplies/index.html',
@@ -57,7 +56,6 @@ self.addEventListener('fetch', event => {
                 }
                 return fetch(event.request)
                     .then(response => {
-                        // Proveri da li je validan odgovor
                         if (!response || response.status !== 200 || response.type !== 'basic') {
                             return response;
                         }
