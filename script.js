@@ -771,9 +771,10 @@ function renderLanguages() {
 
 function selectLanguage(langCode) {
     currentLang = langCode;
-    showScreen('mainScreen');
+    showScreen('mainScreen');  // ← VRATI NA MAIN SCREEN
     updateHeaderTexts();
     renderCategories();
+    console.log('🌍 Izabran jezik:', langCode);
 }
 
 function renderCategories() {
