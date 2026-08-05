@@ -9,14 +9,15 @@
     "theme_color": "#1a237e",
     "orientation": "portrait",
     "icons": [
-    {
-        "src": "/Household_supplies/icons/logo.png?v=2",
-        "sizes": "192x192",
-        "type": "image/png"
-    },
-    {
-        "src": "/Household_supplies/icons/logo.png?v=2",
-        "sizes": "512x512",
-        "type": "image/png"
-    }
-]
+        {
+            "src": "/Household_supplies/icons/logo.png?v=2",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/Household_supplies/icons/logo.png?v=2",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}
