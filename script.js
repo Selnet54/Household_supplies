@@ -63,7 +63,7 @@ function showModernAlert(title, message, icon = '📢') {
     document.getElementById('alertMessage').textContent = message;
     alertDiv.style.display = 'flex';
     alertDiv.classList.add('active');
-    setTimeout(() => { closeModernAlert(); }, 4000);
+    setTimeout(() => { closeModernAlert(); }, 2000);
 }
 
 function closeModernAlert() {
