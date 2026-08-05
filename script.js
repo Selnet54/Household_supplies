@@ -1766,13 +1766,13 @@ function startVoiceRecognition() {
             }, 500);
         }
     };
-    
+
     try {
         recognition.start();
     } catch(e) {
         console.log('🎤 Mikrofon već pokrenut');
     }
-}
+}  // ← OVO JE JEDINI } ZA FUNKCIJU!
 
 // ============================================
 // PROMENI selectLanguage DA IDE NA choiceScreen
