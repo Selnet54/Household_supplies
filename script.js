@@ -1606,8 +1606,17 @@ function triggerLogin() {
 }
 
 // ============================================
-// GLASOVNE KOMANDE (DODATO)
+// GLASOVNE KOMANDE I UPRAVLJANJE EKRANIMA
 // ============================================
+
+// ===== IZBOR JEZIKA =====
+function selectLanguage(langCode) {
+    currentLang = langCode;
+    // OVDE JE BILA GREŠKA: Umesto mainScreen, postavljamo choiceScreen
+    showScreen('choiceScreen'); 
+    updateHeaderTexts();
+    console.log('🌍 Izabran jezik:', langCode);
+}
 
 // ===== IZBOR NAČINA UNOSA =====
 function selectVoiceMode() {
@@ -1626,10 +1635,15 @@ function goBackFromVoice() {
     showScreen('choiceScreen');
 }
 
+// ===== RESTART MIKROFONA =====
+function restartVoiceRecognition() {
+    startVoiceRecognition();
+}
+
 // ===== GLASOVNE KOMANDE =====
 function voiceCommand(command) {
     console.log('🎤 Komanda:', command);
-    console.log('🎤 Trenutni ekran:', currentScreenState);
+    console.log('🎤 Trenutni ekran:', typeof currentScreenState !== 'undefined' ? currentScreenState : 'nepoznato');
     
     switch(command) {
         case 'inventory':
@@ -1653,6 +1667,7 @@ function voiceCommand(command) {
             showModernAlert('Unknown command', 'Say: Inventory, Shopping List, Add Product, or Exit', '🎤');
     }
 }
+
 // ===== PREPOZNAVANJE GOVORA =====
 function startVoiceRecognition() {
     const status = document.getElementById('voiceStatus');
@@ -1701,9 +1716,9 @@ function startVoiceRecognition() {
         console.log('🎤 Prepoznato:', text);
         
         const commands = {
-            'inventory': ['inventory', 'zalihe', 'stock', 'bestand', 'készlet', 'запаси', 'запасы', '库存', 'inventario', 'estoque', 'stock', 'inv', 'invi', 'invito'],
-            'shopping': ['shopping', 'shopping list', 'spisak', 'list', 'einkaufsliste', 'bevásárlólista', 'список', 'список', '购物清单', 'lista', 'lista de compras', 'liste', 'shop', 'shoppi'],
-            'add': ['add', 'add product', 'unos', 'dodaj', 'produkt', 'termék', 'додати', 'добавить', '添加', 'agregar', 'adicionar', 'ajouter', 'ad', 'produkt'],
+            'inventory': ['inventory', 'zalihe', 'stock', 'bestand', 'készlet', 'запаси', 'запасы', '库存', 'inventario', 'estoque', 'inv', 'invi', 'invito'],
+            'shopping': ['shopping', 'shopping list', 'spisak', 'list', 'einkaufsliste', 'bevásárlólista', 'список', '购物清单', 'lista', 'lista de compras', 'liste', 'shop', 'shoppi'],
+            'add': ['add', 'add product', 'unos', 'dodaj', 'produkt', 'termék', 'додати', 'добавить', '添加', 'agregar', 'adicionar', 'ajouter', 'ad'],
             'exit': ['exit', 'quit', 'close', 'zatvori', 'izlaz', 'beenden', 'kilépés', 'вихід', 'выход', '退出', 'salir', 'sair', 'quitter']
         };
         
@@ -1741,61 +1756,7 @@ function startVoiceRecognition() {
     }
 }
 
-// ===== GLASOVNE KOMANDE =====
-function voiceCommand(command) {
-    console.log('🎤 Komanda:', command);
-    switch(command) {
-        case 'inventory':
-            renderInventory();
-            break;
-        case 'shopping':
-            renderShoppingList();
-            break;
-        case 'add':
-            renderDataEntry('');
-            break;
-        case 'exit':
-            exitApp();
-            break;
-        default:
-            showModernAlert('Unknown command', 'Say: Inventory, Shopping List, Add Product, or Exit', '🎤');
-    }
-}
-
-// ===== IZBOR NAČINA UNOSA =====
-function selectVoiceMode() {
-    console.log('🎤 Izabran zvučni unos');
-    showScreen('voiceMenuScreen');
-    startVoiceRecognition();
-}
-
-function selectManualMode() {
-    console.log('✍️ Izabran ručni unos');
-    showScreen('mainScreen');
-    renderCategories();
-}
-
-function goBackFromVoice() {
-    showScreen('choiceScreen');
-}
-
-// ===== RESTART MIKROFONA =====
-function restartVoiceRecognition() {
-    startVoiceRecognition();
-}
-
-// ============================================
-// selectLanguage - VRATI NA MAIN SCREEN
-// ============================================
-function selectLanguage(langCode) {
-    currentLang = langCode;
-    showScreen('mainScreen');
-    updateHeaderTexts();
-    renderCategories();
-    console.log('🌍 Izabran jezik:', langCode);
-}
-
 // ============================================
 // KRAJ FAJLA
 // ============================================
-console.log('✅ Kraj fajla - glasovne komande dodate!');
+console.log('✅ Kraj fajla - glasovne komande uspešno uređene!');
