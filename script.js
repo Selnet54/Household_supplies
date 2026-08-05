@@ -688,9 +688,20 @@ function t(key) {
 }
 
 function showScreen(screenId) {
-    document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
-    const screen = document.getElementById(screenId);
-    if (screen) screen.style.display = 'flex';
+    // Sakrij sve ekrane koji imaju klasu .screen
+    const screens = document.querySelectorAll('.screen');
+    screens.forEach(screen => {
+        screen.style.display = 'none';
+    });
+
+    // Prikaži traženi ekran
+    const targetScreen = document.getElementById(screenId);
+    if (targetScreen) {
+        targetScreen.style.display = 'flex';
+        console.log('📱 Prikazan ekran:', screenId);
+    } else {
+        console.error('❌ Ekran nije pronađen:', screenId);
+    }
 }
 
 function updateHeaderTexts() {
