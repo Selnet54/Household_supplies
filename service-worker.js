@@ -1,4 +1,4 @@
-const CACHE_NAME = 'zalihe-v105';
+const CACHE_NAME = 'zalihe-v108';
 
 // SAMO FAJLOVI KOJI STVARNO POSTOJE
 const urlsToCache = [
@@ -7,8 +7,8 @@ const urlsToCache = [
   '/Household_supplies/script.js',
   '/Household_supplies/productParts.js',
   '/Household_supplies/manifest.json',
-  '/Household_supplies/icons/logo.png',
-  '/Household_supplies/icons/icon-192.png'
+  '/Household_supplies/icons/logo.png'
+  // UKLONI /icons/icon-192.png ako ne postoji
 ];
 
 self.addEventListener('install', event => {
@@ -24,6 +24,7 @@ self.addEventListener('install', event => {
             })
             .catch(error => {
                 console.error('❌ Greška pri keširanju:', error);
+                // Čak i ako keširanje ne uspe, nastavi
             })
     );
 });
