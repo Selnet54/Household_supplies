@@ -277,6 +277,7 @@
     </div>
     <div class="container" id="mainContent"></div>
 </div>
+
 <!-- === MODERNI ALERT KONTEJNER === -->
 <div id="modernAlert" style="position:fixed; top:20px; left:50%; transform:translateX(-50%); background:#d32f2f; color:#FFD700; padding:18px 25px; border-radius:12px; z-index:99999; display:none; align-items:center; box-shadow:0 6px 20px rgba(0,0,0,0.6); border:2px solid #FFD700; font-weight:bold; font-size:18px;">
     <span id="alertIcon" style="font-size:24px; margin-right:12px;">⚠️</span>
@@ -297,6 +298,56 @@
         <button id="confirmNoBtn" style="flex:1; min-width:100px; padding:12px 25px; background:#666; color:white; border:none; border-radius:10px; font-size:18px; font-weight:bold; cursor:pointer; transition:transform 0.2s;">✖ Ne</button>
     </div>
 </div>
+
+<script>
+    // ===== REGISTRACIJA SERVICE WORKER-A =====
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./service-worker.js')
+            .then(function(registration) {
+                console.log('✅ Service Worker registrovan:', registration);
+            })
+            .catch(function(error) {
+                console.log('❌ Service Worker greška:', error);
+            });
+    }
+
+    // ===== INSTALACIJA APLIKACIJE =====
+    let deferredPrompt;
+
+    window.addEventListener('beforeinstallprompt', function(e) {
+        console.log('✅ Chrome nudi instalaciju!');
+        e.preventDefault();
+        deferredPrompt = e;
+        
+        // Prikaži dugme za instalaciju (ako ga ima)
+        const installBtn = document.getElementById('installBtn');
+        if (installBtn) {
+            installBtn.style.display = 'block';
+        }
+    });
+
+    window.addEventListener('appinstalled', function() {
+        console.log('✅ Aplikacija instalirana!');
+        deferredPrompt = null;
+    });
+
+    // Funkcija za ručnu instalaciju
+    function installApp() {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then(function(choiceResult) {
+                if (choiceResult.outcome === 'accepted') {
+                    console.log('✅ Korisnik je prihvatio instalaciju');
+                } else {
+                    console.log('❌ Korisnik je odbio instalaciju');
+                }
+                deferredPrompt = null;
+            });
+        }
+    }
+
+    console.log('✅ PWA pripremljen za instalaciju!');
+</script>
 
 </body>
 </html>
