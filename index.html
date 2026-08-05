@@ -301,19 +301,21 @@
 
 <script>
     // ===== SERVICE WORKER REGISTRACIJA =====
-    // Samo ako smo na pravoj stranici (ne na new-tab-page)
-    if ('serviceWorker' in navigator && window.location.href.includes('selnet54.github.io/Household_supplies')) {
-        window.addEventListener('load', function() {
-            navigator.serviceWorker.register('/Household_supplies/service-worker.js')
-                .then(function(registration) {
-                    console.log('✅ Service Worker registrovan:', registration);
-                })
-                .catch(function(error) {
-                    console.log('❌ Service Worker greška:', error);
-                });
-        });
-    } else {
-        console.log('ℹ️ Service Worker nije registrovan (nije na glavnoj stranici)');
+    try {
+        if ('serviceWorker' in navigator) {
+            // Proveri da li smo na pravoj domeni
+            if (window.location.hostname === 'selnet54.github.io') {
+                navigator.serviceWorker.register('/Household_supplies/service-worker.js')
+                    .then(function(registration) {
+                        console.log('✅ Service Worker registrovan:', registration);
+                    })
+                    .catch(function(error) {
+                        console.log('❌ Service Worker greška:', error);
+                    });
+            }
+        }
+    } catch(e) {
+        console.log('ℹ️ Service Worker nije podržan ili nije na pravoj stranici');
     }
 </script>
 
