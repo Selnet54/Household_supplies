@@ -139,6 +139,7 @@ const translations = {
         copy_error: "Greška pri kopiranju.",
         delete_from_shopping: "Obrišite stavku sa spiska?",
         delete_confirm: "Da li ste sigurni da želite da obrišete {count} stavku/ke?",
+        delete_confirm_title: "Potvrda brisanja",
         list_empty: "Spisak je prazan"
     },
     en: {
@@ -173,6 +174,7 @@ const translations = {
         copy_error: "Failed to copy list!",
         delete_from_shopping: "Delete item from shopping list?",
         delete_confirm: "Are you sure you want to delete {count} item(s)?",
+        delete_confirm_title: "Delete Confirmation",
         list_empty: "Shopping list is empty"
     },
     de: {
@@ -207,6 +209,7 @@ const translations = {
         copy_error: "Fehler beim Kopieren!",
         delete_from_shopping: "Element aus der Einkaufsliste löschen?",
         delete_confirm: "Sind Sie sicher, dass Sie {count} Element(e) löschen möchten?",
+        delete_confirm_title: "Löschbestätigung",
         list_empty: "Einkaufsliste ist leer"
     },
     hu: {
@@ -241,6 +244,7 @@ const translations = {
         copy_error: "Hiba a másolás során!",
         delete_from_shopping: "Törli az elemet a bevásárlólistából?",
         delete_confirm: "Biztosan törölni szeretné {count} elemet?",
+        delete_confirm_title: "Törlés megerősítése",
         list_empty: "A bevásárlólista üres"
     },
     uk: {
@@ -275,6 +279,7 @@ const translations = {
         copy_error: "Помилка копіювання!",
         delete_from_shopping: "Видалити елемент зі списку потреб?",
         delete_confirm: "Ви впевнені, що хочете видалити {count} елемент(ів)?",
+        delete_confirm_title: "Підтвердження видалення",
         list_empty: "Список потреб порожній"
     },
     ru: {
@@ -309,6 +314,7 @@ const translations = {
         copy_error: "Ошибка копирования!",
         delete_from_shopping: "Удалить элемент из списка потребностей?",
         delete_confirm: "Вы уверены, что хотите удалить {count} элемент(ов)?",
+        delete_confirm_title: "Подтверждение удаления",
         list_empty: "Список потребностей пуст"
     },
     zh: {
@@ -343,6 +349,7 @@ const translations = {
         copy_error: "复制失败！",
         delete_from_shopping: "从购物清单中删除此项目？",
         delete_confirm: "您确定要删除 {count} 个项目吗？",
+        delete_confirm_title: "删除确认",
         list_empty: "购物清单为空"
     },
     es: {
@@ -377,6 +384,7 @@ const translations = {
         copy_error: "¡Error al copiar!",
         delete_from_shopping: "¿Eliminar elemento de la lista de compras?",
         delete_confirm: "¿Está seguro de que desea eliminar {count} elemento(s)?",
+        delete_confirm_title: "Confirmación de eliminación",
         list_empty: "La lista de compras está vacía"
     },
     pt: {
@@ -411,6 +419,7 @@ const translations = {
         copy_error: "Erro ao copiar!",
         delete_from_shopping: "Eliminar item da lista de compras?",
         delete_confirm: "Tem a certeza que deseja eliminar {count} item(ns)?",
+        delete_confirm_title: "Confirmação de exclusão",
         list_empty: "A lista de compras está vazia"
     },
     fr: {
@@ -445,6 +454,7 @@ const translations = {
         copy_error: "Erreur lors de la copie!",
         delete_from_shopping: "Supprimer l'élément de la liste de courses?",
         delete_confirm: "Êtes-vous sûr de vouloir supprimer {count} élément(s)?",
+        delete_confirm_title: "Confirmation de suppression",
         list_empty: "La liste de courses est vide"
     }
 };
@@ -1272,22 +1282,21 @@ function renderShoppingList() {
     html += `<div class="table-container" style="max-height:400px; overflow-y:auto;">`;
     html += `<div class="table-title">🛒 ${t('spisak_potreba')}</div>`;
     html += `<div id="shoppingTable">`;
-    html += `<div class="table-row header-row" style="display:grid; grid-template-columns:40px 1fr 1fr 0.5fr; gap:2px; background:#f0f0f0; font-weight:bold; border-bottom:2px solid #ccc; padding:5px 0;">`;
+    // UKLONJENA kolona Akcija - sada samo 3 kolone
+    html += `<div class="table-row header-row" style="display:grid; grid-template-columns:40px 1.5fr 1.5fr; gap:2px; background:#f0f0f0; font-weight:bold; border-bottom:2px solid #ccc; padding:5px 0;">`;
     html += `<div class="cell" style="text-align:center;"><input type="checkbox" id="selectAllShopping" onchange="toggleAllShopping()"></div>`;
     html += `<div class="cell">${t('naziv_proizvoda')}</div>`;
     html += `<div class="cell">${t('opis')}</div>`;
-    html += `<div class="cell">Akcija</div>`;
     html += `</div>`;
     
     if (shopping.length === 0) {
-        html += `<div class="table-row"><div class="cell" style="grid-column:span 4;padding:30px;color:#999;text-align:center;">${t('nema_proizvoda')}</div></div>`;
+        html += `<div class="table-row"><div class="cell" style="grid-column:span 3;padding:30px;color:#999;text-align:center;">${t('nema_proizvoda')}</div></div>`;
     } else {
         shopping.forEach((p, index) => {
-            html += `<div class="table-row" style="display:grid; grid-template-columns:40px 1fr 1fr 0.5fr; gap:2px; border-bottom:1px solid #eee; padding:5px 0;">`;
+            html += `<div class="table-row" style="display:grid; grid-template-columns:40px 1.5fr 1.5fr; gap:2px; border-bottom:1px solid #eee; padding:5px 0;">`;
             html += `<div class="cell" style="text-align:center;"><input type="checkbox" class="shopping-checkbox" data-index="${index}"></div>`;
             html += `<div class="cell">${p.product_name}</div>`;
             html += `<div class="cell">${p.description || ''}</div>`;
-            html += `<div class="cell"><button onclick="obrisiSaSpiska(${index})" style="background:#f44336;color:white;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;">✖</button></div>`;
             html += `</div>`;
         });
     }
@@ -1296,11 +1305,12 @@ function renderShoppingList() {
 }
 
 function obrisiSaSpiska(index) {
-    if (!confirm('Obrišite stavku sa spiska?')) return;
+    if (!confirm(t('delete_from_shopping'))) return;
     let shopping = JSON.parse(localStorage.getItem('shoppingList') || '[]');
     shopping.splice(index, 1);
     localStorage.setItem('shoppingList', JSON.stringify(shopping));
     renderShoppingList();
+    showModernAlert(t('success'), 'Stavka je obrisana!', '✅');
 }
 function oznaciSveShopping() {
     const checkboxes = document.querySelectorAll('.shopping-checkbox');
