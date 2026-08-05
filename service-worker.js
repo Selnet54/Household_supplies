@@ -1,4 +1,4 @@
-const CACHE_NAME = 'zalihe-v108';
+const CACHE_NAME = 'zalihe-v109';
 
 // SAMO FAJLOVI KOJI STVARNO POSTOJE
 const urlsToCache = [
@@ -8,7 +8,6 @@ const urlsToCache = [
   '/Household_supplies/productParts.js',
   '/Household_supplies/manifest.json',
   '/Household_supplies/icons/logo.png'
-  // UKLONI /icons/icon-192.png ako ne postoji
 ];
 
 self.addEventListener('install', event => {
@@ -24,7 +23,6 @@ self.addEventListener('install', event => {
             })
             .catch(error => {
                 console.error('❌ Greška pri keširanju:', error);
-                // Čak i ako keširanje ne uspe, nastavi
             })
     );
 });
@@ -46,6 +44,11 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
+    // IGNORIŠI chrome-extension zahteve
+    if (event.request.url.startsWith('chrome-extension')) {
+        return;
+    }
+    
     event.respondWith(
         caches.match(event.request)
             .then(response => {
@@ -54,6 +57,7 @@ self.addEventListener('fetch', event => {
                 }
                 return fetch(event.request)
                     .then(response => {
+                        // Proveri da li je validan odgovor
                         if (!response || response.status !== 200 || response.type !== 'basic') {
                             return response;
                         }
