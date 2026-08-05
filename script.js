@@ -895,9 +895,9 @@ function renderDataEntry(productName) {
         <div class="row">
             <label>${t('komad')} <span style="color:red;">*</span></label>
             <div class="inline-group">
-                <input type="text" id="pieceInput" placeholder="Unesite komad" required>
+                <input type="text" id="pieceInput">
                 <label>${t('kolicina')} <span style="color:red;">*</span></label>
-                <input type="number" id="quantityInput" placeholder="Količina" step="0.1" required>
+                <input type="number" id="quantityInput" step="0.1">
                 <label>${t('jedinica_mere')}</label>
                 <select id="unitSelect">
                     <option value="kg">${t('kg')}</option>
@@ -915,7 +915,7 @@ function renderDataEntry(productName) {
             <div class="inline-group">
                 <input type="date" id="dateInput" value="${today}">
                 <label>${t('rok_trajanja')} <span style="color:red;">*</span></label>
-                <input type="number" id="shelfLifeInput" placeholder="Meseci" required>
+                <input type="number" id="shelfLifeInput">
                 <span style="font-size:18px;">mes</span>
             </div>
         </div>
@@ -951,7 +951,6 @@ function renderDataEntry(productName) {
     updateExpiryDate();
     prikaziSveUnose();
 }
-
 function prikaziSveUnose() {
     const container = document.getElementById('entriesContainer');
     if (!container) return;
