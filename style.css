@@ -486,3 +486,95 @@ body {
         font-size: 14px;
     }
 }
+/* ===== IZBOR NAČINA UNOSA ===== */
+.choice-container {
+    width: 100%;
+    max-width: 500px;
+    padding: 25px;
+}
+.choice-box {
+    background: #3E4095;
+    border-radius: 20px;
+    padding: 40px 30px;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+}
+.choice-btn {
+    width: 100%;
+    padding: 25px;
+    border: none;
+    border-radius: 16px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-bottom: 15px;
+    transition: transform 0.2s;
+}
+.choice-btn:hover {
+    transform: scale(1.02);
+}
+.choice-voice {
+    background: #4FC3F7;
+    color: #1a237e;
+}
+.choice-manual {
+    background: #FFB300;
+    color: #1a237e;
+}
+
+/* ===== ZVUČNI MENI ===== */
+.voice-menu-container {
+    width: 100%;
+    max-width: 600px;
+    padding: 25px;
+}
+.voice-menu-box {
+    background: #3E4095;
+    border-radius: 20px;
+    padding: 40px 30px;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+}
+.voice-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+.voice-btn {
+    padding: 30px 15px;
+    border: 2px solid #FFD700;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.05);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: center;
+}
+.voice-btn:hover {
+    background: #FFD700;
+    color: #1a237e;
+    transform: scale(1.05);
+}
+.voice-btn-exit {
+    border-color: #f44336;
+}
+.voice-btn-exit:hover {
+    background: #f44336;
+    color: white;
+}
+
+@media (max-width: 500px) {
+    .voice-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+    .voice-btn {
+        padding: 20px 10px;
+    }
+    .voice-btn div:first-child {
+        font-size: 30px;
+    }
+    .voice-btn div:last-child {
+        font-size: 16px;
+    }
+}
