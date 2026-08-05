@@ -1651,28 +1651,50 @@ function restartVoiceRecognition() {
     startVoiceRecognition();
 }
 
-// ===== GLASOVNE KOMANDE =====
+// ============================================
+// GLASOVNE KOMANDE - ISPRAVLJENO
+// ============================================
 function voiceCommand(command) {
-    console.log('🎤 Komanda:', command);
-    console.log('🎤 Trenutni ekran:', typeof currentScreenState !== 'undefined' ? currentScreenState : 'nepoznato');
+    console.log('🎤 Komanda primljena:', command);
     
     switch(command) {
         case 'inventory':
-            console.log('📦 Otvaram zalihe...');
-            renderInventory();
+            console.log('📦 Otvaram zalihe vizuelno i podatke...');
+            showScreen('mainScreen'); // Obavezno prikazujemo glavni ekran
+            if (typeof renderInventory === 'function') {
+                renderInventory();
+            } else {
+                console.error('❌ Funkcija renderInventory ne postoji!');
+            }
             break;
+            
         case 'shopping':
-            console.log('🛒 Otvaram spisak...');
-            renderShoppingList();
+            console.log('🛒 Otvaram spisak potreba...');
+            showScreen('mainScreen'); // Obavezno prikazujemo glavni ekran
+            if (typeof renderShoppingList === 'function') {
+                renderShoppingList();
+            } else {
+                console.error('❌ Funkcija renderShoppingList ne postoji!');
+            }
             break;
+            
         case 'add':
-            console.log('➕ Otvaram unos...');
-            renderDataEntry('');
+            console.log('➕ Otvaram unos podataka...');
+            showScreen('mainScreen'); // Obavezno prikazujemo glavni ekran
+            if (typeof renderDataEntry === 'function') {
+                renderDataEntry('');
+            } else {
+                console.error('❌ Funkcija renderDataEntry ne postoji!');
+            }
             break;
+            
         case 'exit':
-            console.log('🚪 Izlaz...');
-            exitApp();
+            console.log('🚪 Izlaz iz aplikacije...');
+            if (typeof exitApp === 'function') {
+                exitApp();
+            }
             break;
+            
         default:
             console.log('❌ Nepoznata komanda:', command);
             showModernAlert('Unknown command', 'Say: Inventory, Shopping List, Add Product, or Exit', '🎤');
