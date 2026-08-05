@@ -55,7 +55,7 @@ function exitApp() {
 function showModernAlert(title, message, icon = '📢') {
     const alertDiv = document.getElementById('modernAlert');
     if (!alertDiv) {
-        alert(message); // <-- OVDE JE KLJUČNI PROBLEM!
+        alert(message);
         return;
     }
     document.getElementById('alertIcon').textContent = icon;
@@ -74,6 +74,44 @@ function closeModernAlert() {
     }
 }
 
+// ===== MODERNI CONFIRM (DODAJ OVO OVDE) =====
+let confirmCallback = null;
+
+function showModernConfirm(title, message, icon = '⚠️', onYes, onNo) {
+    // Proveri da li modernConfirm postoji u HTML-u
+    const confirmDiv = document.getElementById('modernConfirm');
+    if (!confirmDiv) {
+        // Ako nema, koristi običan confirm
+        if (confirm(message)) {
+            onYes();
+        } else {
+            onNo();
+        }
+        return;
+    }
+    
+    document.getElementById('confirmIcon').textContent = icon;
+    document.getElementById('confirmTitle').textContent = title;
+    document.getElementById('confirmMessage').textContent = message;
+    document.getElementById('modernConfirm').style.display = 'flex';
+    document.getElementById('modernConfirm').classList.add('active');
+    
+    confirmCallback = {
+        onYes: onYes || function() {},
+        onNo: onNo || function() {}
+    };
+}
+
+function closeModernConfirm() {
+    const confirmDiv = document.getElementById('modernConfirm');
+    if (confirmDiv) {
+        confirmDiv.classList.remove('active');
+        confirmDiv.style.display = 'none';
+    }
+    confirmCallback = null;
+}
+
+// Poveži dugmad (ako postoje) - OVO DODAJ U DOMContentLoaded
 // ===== SUPPORT FUNKCIJE =====
 function openSupportDialog() {
     const dialog = document.getElementById('supportDialog');
@@ -90,7 +128,6 @@ function closeSupportDialog() {
         dialog.classList.remove('active');
     }
 }
-
 // ===== 1. JEZICI =====
 const languages = {
     sr: { name: 'Srpski', flag: '/Household_supplies/icons/jezici/srpski.png' },
@@ -1517,8 +1554,33 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         if (e.key === 'Escape') {
             closeSupportDialog();
+            closeModernConfirm(); // DODATO - zatvara i Confirm na ESC
         }
     });
+
+    // ===== MODERNI CONFIRM DUGMAD =====
+    const yesBtn = document.getElementById('confirmYesBtn');
+    const noBtn = document.getElementById('confirmNoBtn');
+    
+    if (yesBtn) {
+        yesBtn.addEventListener('click', function() {
+            if (confirmCallback && confirmCallback.onYes) {
+                confirmCallback.onYes();
+            }
+            closeModernConfirm();
+        });
+        console.log('✅ Confirm Yes dugme povezano');
+    }
+    
+    if (noBtn) {
+        noBtn.addEventListener('click', function() {
+            if (confirmCallback && confirmCallback.onNo) {
+                confirmCallback.onNo();
+            }
+            closeModernConfirm();
+        });
+        console.log('✅ Confirm No dugme povezano');
+    }
 
     console.log('✅ Svi događaji uspešno povezani preko delegiranja!');
 });
