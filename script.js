@@ -771,8 +771,9 @@ function renderLanguages() {
 
 function selectLanguage(langCode) {
     currentLang = langCode;
-    showScreen('choiceScreen');  // ← PROMENJENO!
+    showScreen('mainScreen');
     updateHeaderTexts();
+    renderCategories();
     console.log('🌍 Izabran jezik:', langCode);
 }
 function renderCategories() {
