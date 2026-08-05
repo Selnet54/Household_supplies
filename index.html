@@ -301,9 +301,8 @@
 
 <script>
     // ===== SERVICE WORKER REGISTRACIJA =====
-    const isMainPage = window.location.href.includes('selnet54.github.io/Household_supplies');
-    
-    if ('serviceWorker' in navigator && isMainPage) {
+    // Samo ako smo na pravoj stranici (ne na new-tab-page)
+    if ('serviceWorker' in navigator && window.location.href.includes('selnet54.github.io/Household_supplies')) {
         window.addEventListener('load', function() {
             navigator.serviceWorker.register('/Household_supplies/service-worker.js')
                 .then(function(registration) {
@@ -313,6 +312,8 @@
                     console.log('❌ Service Worker greška:', error);
                 });
         });
+    } else {
+        console.log('ℹ️ Service Worker nije registrovan (nije na glavnoj stranici)');
     }
 </script>
 
