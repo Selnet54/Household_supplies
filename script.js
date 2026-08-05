@@ -893,11 +893,11 @@ function renderDataEntry(productName) {
         <div class="row"><label>${t('naziv_proizvoda')}</label><input type="text" id="productInput" value="${productName || ''}"></div>
         <div class="row"><label>${t('opis')}</label><input type="text" id="descriptionInput"></div>
         <div class="row">
-            <label>${t('komad')}</label>
+            <label>${t('komad')} <span style="color:red;">*</span></label>
             <div class="inline-group">
-                <input type="text" id="pieceInput">
-                <label>${t('kolicina')}</label>
-                <input type="number" id="quantityInput" value="1" step="0.1">
+                <input type="text" id="pieceInput" placeholder="Unesite komad" required>
+                <label>${t('kolicina')} <span style="color:red;">*</span></label>
+                <input type="number" id="quantityInput" placeholder="Količina" step="0.1" required>
                 <label>${t('jedinica_mere')}</label>
                 <select id="unitSelect">
                     <option value="kg">${t('kg')}</option>
@@ -914,8 +914,8 @@ function renderDataEntry(productName) {
             <label>${t('datum_unosa')}</label>
             <div class="inline-group">
                 <input type="date" id="dateInput" value="${today}">
-                <label>${t('rok_trajanja')}</label>
-                <input type="number" id="shelfLifeInput" value="12">
+                <label>${t('rok_trajanja')} <span style="color:red;">*</span></label>
+                <input type="number" id="shelfLifeInput" placeholder="Meseci" required>
                 <span style="font-size:18px;">mes</span>
             </div>
         </div>
@@ -1008,24 +1008,41 @@ function updateExpiryDate() {
 
 function saveProduct() {
     const product = document.getElementById('productInput')?.value.trim();
+    const piece = document.getElementById('pieceInput')?.value.trim();
     const quantity = document.getElementById('quantityInput')?.value.trim();
+    const shelfLife = document.getElementById('shelfLifeInput')?.value.trim();
+    
+    // Provera obaveznih polja
     if (!product) {
         showModernAlert(t('missing_info'), t('enter_product_name'), '📝');
+        document.getElementById('productInput')?.focus();
+        return;
+    }
+    if (!piece) {
+        showModernAlert(t('missing_info'), 'Unesite komad!', '📝');
+        document.getElementById('pieceInput')?.focus();
         return;
     }
     if (!quantity || isNaN(parseFloat(quantity))) {
         showModernAlert(t('missing_info'), t('enter_quantity'), '📝');
+        document.getElementById('quantityInput')?.focus();
         return;
     }
+    if (!shelfLife || isNaN(parseInt(shelfLife))) {
+        showModernAlert(t('missing_info'), 'Unesite rok trajanja (meseci)!', '📝');
+        document.getElementById('shelfLifeInput')?.focus();
+        return;
+    }
+    
     const productData = {
         id: Date.now(),
         product_name: product,
         description: document.getElementById('descriptionInput')?.value.trim() || '',
-        piece: document.getElementById('pieceInput')?.value.trim() || '-',
+        piece: piece,
         quantity: parseFloat(quantity),
         unit: document.getElementById('unitSelect')?.value || 'kg',
         entry_date: document.getElementById('dateInput')?.value || new Date().toISOString().split('T')[0],
-        shelf_life_months: parseInt(document.getElementById('shelfLifeInput')?.value) || 12,
+        shelf_life_months: parseInt(shelfLife),
         storage_location: document.getElementById('storageSelect')?.value || 'Ostalo'
     };
     
@@ -1033,9 +1050,15 @@ function saveProduct() {
     zalihe.push(productData);
     localStorage.setItem('zalihe', JSON.stringify(zalihe));
     prikaziSveUnose();
+    
+    // Resetuj polja (osim productName)
     document.getElementById('pieceInput').value = '';
-    document.getElementById('quantityInput').value = '1';
-    document.getElementById('quantityInput').focus();
+    document.getElementById('quantityInput').value = '';
+    document.getElementById('shelfLifeInput').value = '';
+    document.getElementById('descriptionInput').value = '';
+    document.getElementById('productInput').focus();
+    document.getElementById('productInput').select();
+    
     showModernAlert(t('success'), t('product_saved'), '✅');
 }
 
