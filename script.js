@@ -771,12 +771,10 @@ function renderLanguages() {
 
 function selectLanguage(langCode) {
     currentLang = langCode;
-    showScreen('mainScreen');  // ← VRATI NA MAIN SCREEN
+    showScreen('choiceScreen');  // ← PROMENJENO!
     updateHeaderTexts();
-    renderCategories();
     console.log('🌍 Izabran jezik:', langCode);
 }
-
 function renderCategories() {
     currentScreenState = 'categories';
     const content = document.getElementById('mainContent');
