@@ -1787,7 +1787,7 @@ function restartVoiceRecognition() {
 }
 
 // ============================================
-// selectLanguage - VRATI NA MAIN SCREEN (radi)
+// selectLanguage - VRATI NA MAIN SCREEN
 // ============================================
 function selectLanguage(langCode) {
     currentLang = langCode;
