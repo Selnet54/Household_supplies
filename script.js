@@ -1093,10 +1093,11 @@ function toggleAllCheckboxes() {
 function obrisiZalihe() {
     const selected = document.querySelectorAll('.row-checkbox:checked');
     if (selected.length === 0) {
-        alert('Niste označili nijedan red za brisanje!');
+        showModernAlert(t('no_selection'), t('no_items_selected'), '⚠️');
         return;
     }
-    if (!confirm(`Da li ste sigurni da želite da obrišete ${selected.length} stavku/ke?`)) return;
+    // Koristi showModernAlert umesto confirm (ili ostavi confirm za sada)
+    if (!confirm(t('delete_confirm').replace('{count}', selected.length))) return;
     const zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
     const indices = Array.from(selected).map(cb => parseInt(cb.dataset.index));
     indices.sort((a, b) => b - a);
@@ -1108,11 +1109,11 @@ function obrisiZalihe() {
 function azurirajZalihe() {
     const selected = document.querySelectorAll('.row-checkbox:checked');
     if (selected.length === 0) {
-        alert('Niste označili nijedan red za ažuriranje!');
+        showModernAlert(t('no_selection'), t('no_items_selected'), '⚠️');
         return;
     }
     if (selected.length > 1) {
-        alert('Možete ažurirati samo jedan red odjednom!');
+        showModernAlert(t('error'), 'Možete ažurirati samo jedan red odjednom!', '❌');
         return;
     }
     const index = parseInt(selected[0].dataset.index);
@@ -1253,13 +1254,7 @@ function sacuvajAzuriranje(index) {
     showModernAlert(t('success'), t('product_updated'), '✅');
     renderInventory();
 }
-
-function renderShoppingList() {
-    currentScreenState = 'shopping';
-    const content = document.getElementById('mainContent');
-    if (!content) return;
-    const shopping = JSON.parse(localStorage.getItem('shoppingList') || '[]');
-} 
+ 
 function renderShoppingList() {
     currentScreenState = 'shopping';
     const content = document.getElementById('mainContent');
@@ -1325,7 +1320,7 @@ function toggleAllShopping() {
 function kopirajShopping() {
     const shopping = JSON.parse(localStorage.getItem('shoppingList') || '[]');
     if (shopping.length === 0) {
-        alert(t('nema_proizvoda'));
+        showModernAlert(t('list_empty'), t('no_items_selected'), '🛒');
         return;
     }
     let tekst = `${t('spisak_potreba')}\n${'='.repeat(30)}\n\n`;
@@ -1335,7 +1330,9 @@ function kopirajShopping() {
         tekst += `\n`;
     });
     if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(tekst).then(() => alert('✅ Lista je kopirana!')).catch(() => kopirajFallback(tekst));
+        navigator.clipboard.writeText(tekst).then(() => {
+            showModernAlert(t('success'), t('copied'), '✅');
+        }).catch(() => kopirajFallback(tekst));
     } else {
         kopirajFallback(tekst);
     }
@@ -1348,18 +1345,22 @@ function kopirajFallback(tekst) {
     textarea.style.opacity = '0';
     document.body.appendChild(textarea);
     textarea.select();
-    try { document.execCommand('copy'); alert('✅ Lista je kopirana!'); } 
-    catch (err) { alert('❌ Greška pri kopiranju.'); }
+    try { 
+        document.execCommand('copy'); 
+        showModernAlert(t('success'), t('copied'), '✅');
+    } catch (err) { 
+        showModernAlert(t('error'), t('copy_error'), '❌');
+    }
     document.body.removeChild(textarea);
 }
 
 function obrisiOznacenoShopping() {
     const selected = document.querySelectorAll('.shopping-checkbox:checked');
     if (selected.length === 0) {
-        alert('Niste označili nijednu stavku za brisanje!');
+        showModernAlert(t('no_selection'), t('no_items_selected'), '⚠️');
         return;
     }
-    if (!confirm(`Da li ste sigurni da želite da obrišete ${selected.length} stavku/ke?`)) return;
+    if (!confirm(t('delete_confirm').replace('{count}', selected.length))) return;
     let shopping = JSON.parse(localStorage.getItem('shoppingList') || '[]');
     const indices = Array.from(selected).map(cb => parseInt(cb.dataset.index));
     indices.sort((a, b) => b - a);
@@ -1369,7 +1370,7 @@ function obrisiOznacenoShopping() {
 }
 
 function obrisiSaSpiska(index) {
-    if (!confirm('Obrišite stavku sa spiska?')) return;
+    if (!confirm(t('delete_from_shopping'))) return;
     let shopping = JSON.parse(localStorage.getItem('shoppingList') || '[]');
     shopping.splice(index, 1);
     localStorage.setItem('shoppingList', JSON.stringify(shopping));
@@ -1410,7 +1411,7 @@ function triggerLogin() {
     console.log("🔐 triggerLogin pozvan!");
     const phoneInput = document.getElementById('phoneInput');
     if (!phoneInput) {
-        alert('Greška: Polje za telefon nije pronađeno!');
+        showModernAlert(t('error'), 'Phone input not found!', '❌');
         return;
     }
     const phone = phoneInput.value.trim();
@@ -1420,7 +1421,7 @@ function triggerLogin() {
         showScreen('languageScreen');
         renderLanguages();
     } else {
-        alert('Unesite validan broj telefona (9+ cifara)!');
+        showModernAlert(t('invalid_input'), t('please_enter_phone'), '📱');
     }
 }
 
