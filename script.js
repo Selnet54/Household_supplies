@@ -1630,24 +1630,30 @@ function goBackFromVoice() {
 // ===== GLASOVNE KOMANDE =====
 function voiceCommand(command) {
     console.log('🎤 Komanda:', command);
+    console.log('🎤 Trenutni ekran:', currentScreenState);
+    
     switch(command) {
         case 'inventory':
+            console.log('📦 Otvaram zalihe...');
             renderInventory();
             break;
         case 'shopping':
+            console.log('🛒 Otvaram spisak...');
             renderShoppingList();
             break;
         case 'add':
+            console.log('➕ Otvaram unos...');
             renderDataEntry('');
             break;
         case 'exit':
+            console.log('🚪 Izlaz...');
             exitApp();
             break;
         default:
+            console.log('❌ Nepoznata komanda:', command);
             showModernAlert('Unknown command', 'Say: Inventory, Shopping List, Add Product, or Exit', '🎤');
     }
 }
-
 // ===== PREPOZNAVANJE GOVORA =====
 function startVoiceRecognition() {
     const status = document.getElementById('voiceStatus');
