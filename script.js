@@ -1686,55 +1686,39 @@ function startVoiceRecognition() {
     };
     
     recognition.lang = langMap[currentLang] || 'en-US';
-    recognition.continuous = true;
+    recognition.continuous = false;
     recognition.interimResults = true;
+    recognition.maxAlternatives = 1;
     
     recognition.onstart = function() {
-        status.innerHTML = '🎤 Listening... Say: Inventory, Shopping List, Add Product, or Exit';
+        status.innerHTML = '🎤 Listening... (speak now)';
         status.style.color = '#4FC3F7';
         console.log('🎤 Mikrofon aktivan, jezik:', recognition.lang);
     };
     
     recognition.onresult = function(event) {
-    // Sačekaj malo da se sakupi ceo tekst
-    let finalText = '';
-    for (let i = event.resultIndex; i < event.results.length; i++) {
-        if (event.results[i].isFinal) {
-            finalText = event.results[i][0].transcript.toLowerCase().trim();
-        }
-    }
-    
-    // Ako nema finalnog teksta, uzmi poslednji
-    if (!finalText) {
         const last = event.results.length - 1;
-        finalText = event.results[last][0].transcript.toLowerCase().trim();
-    }
-    
-    status.innerHTML = `🗣️ You said: "${finalText}"`;
-    console.log('🎤 Prepoznato:', finalText);
-    
-    // Prepoznavanje komandi
-    const commands = {
-        'inventory': ['inventory', 'zalihe', 'stock', 'bestand', 'készlet', 'запаси', 'запасы', '库存', 'inventario', 'estoque', 'stock', 'inv', 'invi', 'invito'],
-        'shopping': ['shopping', 'shopping list', 'spisak', 'list', 'einkaufsliste', 'bevásárlólista', 'список', 'список', '购物清单', 'lista', 'lista de compras', 'liste', 'shop', 'shoppi'],
-        'add': ['add', 'add product', 'unos', 'dodaj', 'produkt', 'termék', 'додати', 'добавить', '添加', 'agregar', 'adicionar', 'ajouter', 'ad', 'produkt'],
-        'exit': ['exit', 'quit', 'close', 'zatvori', 'izlaz', 'beenden', 'kilépés', 'вихід', 'выход', '退出', 'salir', 'sair', 'quitter']
-    };
-    
-    for (const [cmd, keywords] of Object.entries(commands)) {
-        if (keywords.some(keyword => finalText.includes(keyword))) {
-            status.innerHTML = `✅ Command: ${cmd}`;
-            status.style.color = '#4CAF50';
-            voiceCommand(cmd);
-            return;
-        }
-    }
-    
-    status.innerHTML = `❌ Unknown: "${finalText}". Try: Inventory, Shopping List, Add Product, or Exit`;
-    status.style.color = '#f44336';
-};
+        const text = event.results[last][0].transcript.toLowerCase().trim();
+        status.innerHTML = `🗣️ You said: "${text}"`;
+        console.log('🎤 Prepoznato:', text);
         
-        status.innerHTML = `❌ Command not recognized. Try: Inventory, Shopping List, Add Product, or Exit`;
+        const commands = {
+            'inventory': ['inventory', 'zalihe', 'stock', 'bestand', 'készlet', 'запаси', 'запасы', '库存', 'inventario', 'estoque', 'stock', 'inv', 'invi', 'invito'],
+            'shopping': ['shopping', 'shopping list', 'spisak', 'list', 'einkaufsliste', 'bevásárlólista', 'список', 'список', '购物清单', 'lista', 'lista de compras', 'liste', 'shop', 'shoppi'],
+            'add': ['add', 'add product', 'unos', 'dodaj', 'produkt', 'termék', 'додати', 'добавить', '添加', 'agregar', 'adicionar', 'ajouter', 'ad', 'produkt'],
+            'exit': ['exit', 'quit', 'close', 'zatvori', 'izlaz', 'beenden', 'kilépés', 'вихід', 'выход', '退出', 'salir', 'sair', 'quitter']
+        };
+        
+        for (const [cmd, keywords] of Object.entries(commands)) {
+            if (keywords.some(keyword => text.includes(keyword))) {
+                status.innerHTML = `✅ Command: ${cmd}`;
+                status.style.color = '#4CAF50';
+                voiceCommand(cmd);
+                return;
+            }
+        }
+        
+        status.innerHTML = `❌ Unknown: "${text}". Try: Inventory, Shopping List, Add Product, or Exit`;
         status.style.color = '#f44336';
     };
     
@@ -1742,47 +1726,74 @@ function startVoiceRecognition() {
         console.error('🎤 Greška:', event.error);
         status.innerHTML = `❌ Error: ${event.error}`;
         status.style.color = '#f44336';
-        
-        if (event.error === 'not-allowed') {
-            status.innerHTML = '❌ Microphone access denied. Please allow microphone access.';
-        }
-        
-        setTimeout(() => {
-            if (document.getElementById('voiceMenuScreen').style.display !== 'none') {
-                startVoiceRecognition();
-            }
-        }, 3000);
     };
     
     recognition.onend = function() {
         console.log('🎤 Mikrofon zaustavljen');
-        const voiceScreen = document.getElementById('voiceMenuScreen');
-        if (voiceScreen && voiceScreen.style.display !== 'none') {
-            setTimeout(() => {
-                try {
-                    recognition.start();
-                } catch(e) {
-                    console.log('🎤 Restart mikrofona...');
-                }
-            }, 500);
-        }
+        status.innerHTML = '🎤 Click the button to speak again';
+        status.style.color = '#aaa';
     };
-
+    
     try {
         recognition.start();
     } catch(e) {
-        console.log('🎤 Mikrofon već pokrenut');
+        console.log('🎤 Greška pri pokretanju:', e);
+        status.innerHTML = '❌ Failed to start microphone';
+        status.style.color = '#f44336';
     }
-}  // ← OVO JE JEDINI } ZA FUNKCIJU!
+}
+
+// ===== GLASOVNE KOMANDE =====
+function voiceCommand(command) {
+    console.log('🎤 Komanda:', command);
+    switch(command) {
+        case 'inventory':
+            renderInventory();
+            break;
+        case 'shopping':
+            renderShoppingList();
+            break;
+        case 'add':
+            renderDataEntry('');
+            break;
+        case 'exit':
+            exitApp();
+            break;
+        default:
+            showModernAlert('Unknown command', 'Say: Inventory, Shopping List, Add Product, or Exit', '🎤');
+    }
+}
+
+// ===== IZBOR NAČINA UNOSA =====
+function selectVoiceMode() {
+    console.log('🎤 Izabran zvučni unos');
+    showScreen('voiceMenuScreen');
+    startVoiceRecognition();
+}
+
+function selectManualMode() {
+    console.log('✍️ Izabran ručni unos');
+    showScreen('mainScreen');
+    renderCategories();
+}
+
+function goBackFromVoice() {
+    showScreen('choiceScreen');
+}
+
+// ===== RESTART MIKROFONA =====
+function restartVoiceRecognition() {
+    startVoiceRecognition();
+}
 
 // ============================================
-// PROMENI selectLanguage DA IDE NA choiceScreen
+// selectLanguage - VRATI NA MAIN SCREEN (radi)
 // ============================================
-// Zameni postojeću selectLanguage funkciju sa ovom:
 function selectLanguage(langCode) {
     currentLang = langCode;
-    showScreen('choiceScreen');
+    showScreen('mainScreen');
     updateHeaderTexts();
+    renderCategories();
     console.log('🌍 Izabran jezik:', langCode);
 }
 
