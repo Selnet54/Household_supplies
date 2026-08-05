@@ -1689,30 +1689,43 @@ function startVoiceRecognition() {
     };
     
     recognition.onresult = function(event) {
-        const last = event.results.length - 1;
-        const text = event.results[last][0].transcript.toLowerCase().trim();
-        status.innerHTML = `🗣️ You said: "${text}"`;
-        console.log('🎤 Prepoznato:', text);
-        
-        const commands = {
-            'inventory': ['inventory', 'zalihe', 'stock', 'bestand', 'készlet', 'запаси', 'запасы', '库存', 'inventario', 'estoque', 'stock'],
-            'shopping': ['shopping', 'shopping list', 'spisak', 'list', 'einkaufsliste', 'bevásárlólista', 'список', 'список', '购物清单', 'lista', 'lista de compras', 'liste'],
-            'add': ['add', 'add product', 'unos', 'dodaj', 'produkt', 'termék', 'додати', 'добавить', '添加', 'agregar', 'adicionar', 'ajouter'],
-            'exit': ['exit', 'quit', 'close', 'zatvori', 'izlaz', 'beenden', 'kilépés', 'вихід', 'выход', '退出', 'salir', 'sair', 'quitter']
-        };
-        
-        for (const [cmd, keywords] of Object.entries(commands)) {
-            if (keywords.some(keyword => text.includes(keyword))) {
-                status.innerHTML = `✅ Command recognized: ${cmd}`;
-                status.style.color = '#4CAF50';
-                voiceCommand(cmd);
-                setTimeout(() => {
-                    status.innerHTML = '🎤 Listening... Say: Inventory, Shopping List, Add Product, or Exit';
-                    status.style.color = '#4FC3F7';
-                }, 2000);
-                return;
-            }
+    // Sačekaj malo da se sakupi ceo tekst
+    let finalText = '';
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+            finalText = event.results[i][0].transcript.toLowerCase().trim();
         }
+    }
+    
+    // Ako nema finalnog teksta, uzmi poslednji
+    if (!finalText) {
+        const last = event.results.length - 1;
+        finalText = event.results[last][0].transcript.toLowerCase().trim();
+    }
+    
+    status.innerHTML = `🗣️ You said: "${finalText}"`;
+    console.log('🎤 Prepoznato:', finalText);
+    
+    // Prepoznavanje komandi
+    const commands = {
+        'inventory': ['inventory', 'zalihe', 'stock', 'bestand', 'készlet', 'запаси', 'запасы', '库存', 'inventario', 'estoque', 'stock', 'inv', 'invi', 'invito'],
+        'shopping': ['shopping', 'shopping list', 'spisak', 'list', 'einkaufsliste', 'bevásárlólista', 'список', 'список', '购物清单', 'lista', 'lista de compras', 'liste', 'shop', 'shoppi'],
+        'add': ['add', 'add product', 'unos', 'dodaj', 'produkt', 'termék', 'додати', 'добавить', '添加', 'agregar', 'adicionar', 'ajouter', 'ad', 'produkt'],
+        'exit': ['exit', 'quit', 'close', 'zatvori', 'izlaz', 'beenden', 'kilépés', 'вихід', 'выход', '退出', 'salir', 'sair', 'quitter']
+    };
+    
+    for (const [cmd, keywords] of Object.entries(commands)) {
+        if (keywords.some(keyword => finalText.includes(keyword))) {
+            status.innerHTML = `✅ Command: ${cmd}`;
+            status.style.color = '#4CAF50';
+            voiceCommand(cmd);
+            return;
+        }
+    }
+    
+    status.innerHTML = `❌ Unknown: "${finalText}". Try: Inventory, Shopping List, Add Product, or Exit`;
+    status.style.color = '#f44336';
+};
         
         status.innerHTML = `❌ Command not recognized. Try: Inventory, Shopping List, Add Product, or Exit`;
         status.style.color = '#f44336';
