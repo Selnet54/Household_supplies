@@ -1,4 +1,4 @@
-const CACHE_NAME = 'zalihe-v104';
+const CACHE_NAME = 'zalihe-v105';
 
 // SAMO FAJLOVI KOJI STVARNO POSTOJE
 const urlsToCache = [
