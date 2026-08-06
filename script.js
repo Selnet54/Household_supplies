@@ -1738,17 +1738,20 @@ function triggerLogin() {
 // ============================================
 // ===== IZBOR JEZIKA =====
 function selectLanguage(langCode) {
+    // 1. Odmah postavi novi jezik kao aktuelan
     currentLang = langCode;
     
-    // Prvo prevedi
+    // 2. Opciono: Sačuvaj u localStorage da aplikacija pamti izbor
+    localStorage.setItem('selectedLang', langCode);
+    
+    // 3. ODMAH osveži tekstove na ekranu 3 pre nego što se prikaže
     updateChoiceScreenTexts();
     
-// Sačekaj 50ms da se prevodi apliciraju
-setTimeout(function() {
+    // 4. Odmah prikaži ekran 3 bez ikakvog kašnjenja (izbacujemo setTimeout)
     showScreen('choiceScreen');
-    updateChoiceScreenTexts(); // Pozovite ovde da biste osigurali da je ekran aktivan
-    console.log('🌍 Izabran jezik:', langCode);
-}, 50);
+    
+    console.log('🌍 Izabran jezik i uspešno osvežen ekran 3:', langCode);
+}
 // ============================================
 // GLASOVNE KOMANDE I UPRAVLJANJE EKRANIMA
 // ============================================
