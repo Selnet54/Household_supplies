@@ -4,7 +4,12 @@
 console.log('✅ Script.js je učitan!');
 
 // ===== TRENUTNO STANJE =====
-let currentLang = 'en';
+// ===== TRENUTNO STANJE =====
+window.currentLang = 'en'; // Postavljamo na window da bude globalno vidljiva svuda
+let currentCategory = '';
+let currentSubcategory = '';
+let currentProductPart = '';
+let currentScreenState = 'languages'; = 'en';
 let currentCategory = '';
 let currentSubcategory = '';
 let currentProductPart = '';
@@ -1738,19 +1743,13 @@ function triggerLogin() {
 // ============================================
 // ===== IZBOR JEZIKA =====
 function selectLanguage(langCode) {
-    // 1. Odmah postavi novi jezik kao aktuelan
-    currentLang = langCode;
-    
-    // 2. Opciono: Sačuvaj u localStorage da aplikacija pamti izbor
+    window.currentLang = langCode; // Ažuriramo globalnu window promenljivu
     localStorage.setItem('selectedLang', langCode);
     
-    // 3. ODMAH osveži tekstove na ekranu 3 pre nego što se prikaže
     updateChoiceScreenTexts();
-    
-    // 4. Odmah prikaži ekran 3 bez ikakvog kašnjenja (izbacujemo setTimeout)
     showScreen('choiceScreen');
     
-    console.log('🌍 Izabran jezik i uspešno osvežen ekran 3:', langCode);
+    console.log('🌍 Izabran jezik:', window.currentLang);
 }
 // ============================================
 // GLASOVNE KOMANDE I UPRAVLJANJE EKRANIMA
