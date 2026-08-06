@@ -1745,187 +1745,43 @@ function selectLanguage(langCode) {
     console.log('🌍 Izabran jezik:', langCode);
 }
 
+// ============================================
+// GLASOVNE KOMANDE I UPRAVLJANJE EKRANIMA
+// ============================================
+
 // ===== IZBOR NAČINA UNOSA =====
 function selectVoiceMode() {
     console.log('🎤 Izabran zvučni unos');
-    
-    // DIREKTNO POSTAVI TEKSTOVE NA EKRANU (ne oslanjaj se na updateChoiceScreenTexts)
-    const t = translations[currentLang] || translations['en'];
-    
-    // Postavi tekstove za voiceMenuScreen DIREKTNO
-    const voiceMenuBox = document.querySelector('#voiceMenuScreen .voice-menu-box');
-    if (voiceMenuBox) {
-        // Naslov
-        const titleDiv = voiceMenuBox.querySelector('div:first-child');
-        if (titleDiv) titleDiv.textContent = '🎤 ' + (t.voiceControl || 'Voice Control');
-        
-        // Opis
-        const descDiv = voiceMenuBox.querySelector('div:nth-child(2)');
-        if (descDiv) descDiv.textContent = t.voiceDesc2 || 'Say what you want to do:';
-    }
-    
-    // Dugmad
-    const invBtn = document.querySelector('#voiceMenuScreen .voice-btn[onclick*="inventory"]');
-    if (invBtn) invBtn.innerHTML = '<div style="font-size:40px;">📦</div><div style="font-size:20px; font-weight:bold;">' + (t.inventory || 'Inventory') + '</div>';
-    
-    const shopBtn = document.querySelector('#voiceMenuScreen .voice-btn[onclick*="shopping"]');
-    if (shopBtn) shopBtn.innerHTML = '<div style="font-size:40px;">🛒</div><div style="font-size:20px; font-weight:bold;">' + (t.shopping || 'Shopping List') + '</div>';
-    
-    const addBtn = document.querySelector('#voiceMenuScreen .voice-btn[onclick*="add"]');
-    if (addBtn) addBtn.innerHTML = '<div style="font-size:40px;">➕</div><div style="font-size:20px; font-weight:bold;">' + (t.add || 'Add Product') + '</div>';
-    
-    const exitBtn = document.querySelector('#voiceMenuScreen .voice-btn-exit');
-    if (exitBtn) exitBtn.innerHTML = '<div style="font-size:40px;">🚪</div><div style="font-size:20px; font-weight:bold;">' + (t.exit || 'EXIT') + '</div>';
-    
-    // Back dugme
-    const backBtn = document.getElementById('backFromVoiceBtn');
-    if (backBtn) backBtn.textContent = '◀ ' + (t.back || 'Back');
-    
-    // Voice Status
-    const status = document.getElementById('voiceStatus');
-    if (status) status.textContent = t.voiceStatus || '🎤 Say: "Inventory", "Shopping List", "Add Product", or "Exit"';
-    
+    updateChoiceScreenTexts();
     showScreen('voiceMenuScreen');
     startVoiceRecognition();
 }
-// ============================================
-// GLASOVNE KOMANDE - ISPRAVLJENO
-// ============================================
+
+function selectManualMode() {
+    console.log('✍️ Izabran ručni unos');
+    showScreen('mainScreen');
+    renderCategories();
+}
+
+function goBackFromVoice() {
+    updateChoiceScreenTexts();
+    showScreen('choiceScreen');
+}
+
+// ===== RESTART MIKROFONA =====
+function restartVoiceRecognition() {
+    startVoiceRecognition();
+}
+
+// ===== GLASOVNE KOMANDE =====
 function voiceCommand(command) {
-    console.log('🎤 Komanda primljena:', command);
-    
-    switch(command) {
-        case 'inventory':
-            console.log('📦 Otvaram zalihe vizuelno i podatke...');
-            showScreen('mainScreen'); // Obavezno prikazujemo glavni ekran
-            if (typeof renderInventory === 'function') {
-                renderInventory();
-            } else {
-                console.error('❌ Funkcija renderInventory ne postoji!');
-            }
-            break;
-            
-        case 'shopping':
-            console.log('🛒 Otvaram spisak potreba...');
-            showScreen('mainScreen'); // Obavezno prikazujemo glavni ekran
-            if (typeof renderShoppingList === 'function') {
-                renderShoppingList();
-            } else {
-                console.error('❌ Funkcija renderShoppingList ne postoji!');
-            }
-            break;
-            
-        case 'add':
-            console.log('➕ Otvaram unos podataka...');
-            showScreen('mainScreen'); // Obavezno prikazujemo glavni ekran
-            if (typeof renderDataEntry === 'function') {
-                renderDataEntry('');
-            } else {
-                console.error('❌ Funkcija renderDataEntry ne postoji!');
-            }
-            break;
-            
-        case 'exit':
-            console.log('🚪 Izlaz iz aplikacije...');
-            if (typeof exitApp === 'function') {
-                exitApp();
-            }
-            break;
-            
-        default:
-            console.log('❌ Nepoznata komanda:', command);
-            showModernAlert('Unknown command', 'Say: Inventory, Shopping List, Add Product, or Exit', '🎤');
-    }
+    // ... tvoj postojeći kod ...
 }
 
 // ===== PREPOZNAVANJE GOVORA =====
-let activeRecognition = null;
-let isProcessing = false;
-
 function startVoiceRecognition() {
-    isProcessing = false;
-    
-    const status = document.getElementById('voiceStatus');
-    if (!status) {
-        console.error('❌ voiceStatus element not found');
-        return;
-    }
-    
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-        status.innerHTML = '❌ Voice recognition not supported in this browser';
-        status.style.color = '#f44336';
-        return;
-    }
-    
-    if (activeRecognition) {
-        try { activeRecognition.stop(); } catch(e) {}
-        activeRecognition = null;
-    }
-    
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const recognition = new SpeechRecognition();
-    activeRecognition = recognition;
-    
-    const langMap = {
-        'sr': 'sr-RS', 'en': 'en-US', 'de': 'de-DE', 'hu': 'hu-HU',
-        'uk': 'uk-UA', 'ru': 'ru-RU', 'zh': 'zh-CN', 'es': 'es-ES',
-        'pt': 'pt-PT', 'fr': 'fr-FR'
-    };
-    
-    recognition.lang = langMap[currentLang] || 'en-US';
-    recognition.continuous = false;
-    recognition.interimResults = true;
-    recognition.maxAlternatives = 1;
-    
-    recognition.onstart = function() {
-        isProcessing = false;
-        status.innerHTML = '🎤 Listening... (speak now)';
-        status.style.color = '#4FC3F7';
-        console.log('🎤 Mikrofon aktivan, jezik:', recognition.lang);
-    };
-    
-   recognition.onresult = function(event) {
-        if (isProcessing) return;
-        
-        const last = event.results.length - 1;
-        const text = event.results[last][0].transcript.toLowerCase().trim();
-        status.innerHTML = `🗣️ You said: "${text}"`;
-        console.log('🎤 Prepoznato:', text);
-        
-        const commands = {
-            'inventory': ['inventory', 'zalihe', 'stock', 'bestand', 'készlet', 'запаси', 'запасы', '库存', 'inventario', 'estoque', 'inv', 'invi', 'invito'],
-            'shopping': ['shopping', 'shopping list', 'spisak', 'list', 'einkaufsliste', 'bevásárlólista', 'список', '购物清单', 'lista', 'lista de compras', 'liste', 'shop', 'shoppi'],
-            'add': ['add', 'add product', 'unos', 'dodaj', 'produkt', 'termék', 'додати', 'добавить', '添加', 'agregar', 'adicionar', 'ajouter', 'ad'],
-            'exit': ['exit', 'quit', 'close', 'zatvori', 'izlaz', 'beenden', 'kilépés', 'вихід', 'выход', '退出', 'salir', 'sair', 'quitter']
-        };
-        
-        let matchedCommand = null;
-        
-        // Obična petlja umesto .some() i unutrašnjih povrataka
-        for (const cmd in commands) {
-            const keywords = commands[cmd];
-            for (let i = 0; i < keywords.length; i++) {
-                if (text.includes(keywords[i])) {
-                    matchedCommand = cmd;
-                    break;
-                }
-            }
-            if (matchedCommand) break;
-        }
-        
-        if (matchedCommand) {
-            isProcessing = true;
-            status.innerHTML = `✅ Command: ${matchedCommand}`;
-            status.style.color = '#4CAF50';
-            
-            try { recognition.stop(); } catch(e) {}
-            
-            voiceCommand(matchedCommand);
-        } else {
-            status.innerHTML = `❌ Unknown: "${text}". Try: Inventory, Shopping, Add, or Exit`;
-            status.style.color = '#f44336';
-        }
-    };
+    // ... tvoj postojeći kod ...
+}
 
 // ============================================
 // KRAJ FAJLA
