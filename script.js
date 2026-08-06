@@ -1831,6 +1831,8 @@ function voiceCommand(command) {
 }
 
 // ===== PREPOZNAVANJE GOVORA =====
+let activeRecognition = null; // Globalna promenljiva da pratimo aktivnu instancu
+
 function startVoiceRecognition() {
     const status = document.getElementById('voiceStatus');
     if (!status) {
@@ -1844,8 +1846,15 @@ function startVoiceRecognition() {
         return;
     }
     
+    // Ako je prethodni mikrofon još otvoren, obavezno ga zaustavi pre novog
+    if (activeRecognition) {
+        try { activeRecognition.stop(); } catch(e) {}
+        activeRecognition = null;
+    }
+    
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
+    activeRecognition = recognition; // Sačuvaj instancu
     
     const langMap = {
         'sr': 'sr-RS',
@@ -1892,6 +1901,26 @@ function startVoiceRecognition() {
                 return;
             }
         }
+    };
+
+    recognition.onerror = function(event) {
+        console.error('🎤 Greška:', event.error);
+        status.innerHTML = `❌ Error: ${event.error}`;
+        status.style.color = '#f44336';
+    };
+
+    recognition.onend = function() {
+        console.log('🎤 Mikrofon zaustavljen');
+        activeRecognition = null;
+        // Možete dodati i automatski poruku ili dozvoliti ponovni klik na dugme
+    };
+
+    try {
+        recognition.start();
+    } catch (err) {
+        console.error('Greška pri pokretanju:', err);
+    }
+}
         
         status.innerHTML = `❌ Unknown: "${text}". Try: Inventory, Shopping List, Add Product, or Exit`;
         status.style.color = '#f44336';
