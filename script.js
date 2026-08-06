@@ -177,7 +177,16 @@ const translations = {
         delete_from_shopping: "Obrišite stavku sa spiska?",
         delete_confirm: "Da li ste sigurni da želite da obrišete {count} stavku/ke?",
         delete_confirm_title: "Potvrda brisanja",
-        list_empty: "Spisak je prazan"
+        list_empty: "Spisak je prazan",
+        choiceTitle: "Način unosa podataka",
+        voiceInput: "Glasovni unos",
+        manualInput: "Ručni unos",
+        exit: "IZLAZ",
+        voiceControl: "Glasovna kontrola",
+        inventory: "Zalihe",
+        shopping: "Spisak potreba",
+        add: "Dodaj proizvod",
+        back: "Nazad"
     },
     en: {
         nazad: "Back", stanje: "Inventory", spisak: "Shopping List",
@@ -212,7 +221,25 @@ const translations = {
         delete_from_shopping: "Delete item from shopping list?",
         delete_confirm: "Are you sure you want to delete {count} item(s)?",
         delete_confirm_title: "Delete Confirmation",
-        list_empty: "Shopping list is empty"
+        choiceTitle: "Data entry method",
+        voiceInput: "Voice input",
+        manualInput: "Manual input",
+        exit: "EXIT",
+        voiceControl: "Voice control",
+        inventory: "Inventory",
+        shopping: "Shopping list",
+        add: "Add product",
+        back: "Back",
+        list_empty: "Shopping list is empty",
+        choiceTitle: "Data entry method",
+        voiceInput: "Voice input",
+        manualInput: "Manual input",
+        exit: "EXIT",
+        voiceControl: "Voice control",
+        inventory: "Inventory",
+        shopping: "Shopping list",
+        add: "Add product",
+        back: "Back"
     },
     de: {
         nazad: "Zurück", stanje: "Bestand", spisak: "Einkaufsliste",
@@ -247,7 +274,16 @@ const translations = {
         delete_from_shopping: "Element aus der Einkaufsliste löschen?",
         delete_confirm: "Sind Sie sicher, dass Sie {count} Element(e) löschen möchten?",
         delete_confirm_title: "Löschbestätigung",
-        list_empty: "Einkaufsliste ist leer"
+        list_empty: "Einkaufsliste ist leer",
+        choiceTitle: "Dateneingabemethode",
+        voiceInput: "Spracheingabe",
+        manualInput: "Manuelle Eingabe",
+        exit: "BEENDEN",
+        voiceControl: "Sprachsteuerung",
+        inventory: "Bestand",
+        shopping: "Einkaufsliste",
+        add: "Produkt hinzufügen",
+        back: "Zurück"
     },
     hu: {
         nazad: "Vissza", stanje: "Készlet", spisak: "Bevásárlólista",
@@ -282,7 +318,17 @@ const translations = {
         delete_from_shopping: "Törli az elemet a bevásárlólistából?",
         delete_confirm: "Biztosan törölni szeretné {count} elemet?",
         delete_confirm_title: "Törlés megerősítése",
-        list_empty: "A bevásárlólista üres"
+        list_empty: "A bevásárlólista üres",
+        choiceTitle: "Adatbevitel módja",
+        voiceInput: "Hangalapú bevitel",
+        manualInput: "Kézi bevitel",
+        exit: "KILÉPÉS",
+        voiceControl: "Hangvezérlés",
+        inventory: "Készlet",
+        shopping: "Bevásárlólista",
+        add: "Termék hozzáadása",
+        back: "Vissza"
+            
     },
     uk: {
         nazad: "Назад", stanje: "Запаси", spisak: "Список",
@@ -317,7 +363,16 @@ const translations = {
         delete_from_shopping: "Видалити елемент зі списку потреб?",
         delete_confirm: "Ви впевнені, що хочете видалити {count} елемент(ів)?",
         delete_confirm_title: "Підтвердження видалення",
-        list_empty: "Список потреб порожній"
+        list_empty: "Список потреб порожній",
+        choiceTitle: "Спосіб введення даних",
+        voiceInput: "Голосове введення",
+        manualInput: "Ручне введення",
+        exit: "ВИХІД",
+        voiceControl: "Голосове керування",
+        inventory: "Запаси",
+        shopping: "Список покупок",
+        add: "Додати товар",
+        back: "Назад"
     },
     ru: {
         nazad: "Назад", stanje: "Запасы", spisak: "Список",
@@ -352,7 +407,16 @@ const translations = {
         delete_from_shopping: "Удалить элемент из списка потребностей?",
         delete_confirm: "Вы уверены, что хотите удалить {count} элемент(ов)?",
         delete_confirm_title: "Подтверждение удаления",
-        list_empty: "Список потребностей пуст"
+        list_empty: "Список потребностей пуст",
+        choiceTitle: "Способ ввода данных",
+        voiceInput: "Голосовой ввод",
+        manualInput: "Ручной ввод",
+        exit: "ВЫХОД",
+        voiceControl: "Голосовое управление",
+        inventory: "Запасы",
+        shopping: "Список покупок",
+        add: "Добавить товар",
+        back: "Назад"
     },
     zh: {
         nazad: "返回", stanje: "库存", spisak: "购物清单",
@@ -387,7 +451,16 @@ const translations = {
         delete_from_shopping: "从购物清单中删除此项目？",
         delete_confirm: "您确定要删除 {count} 个项目吗？",
         delete_confirm_title: "删除确认",
-        list_empty: "购物清单为空"
+        list_empty: "购物清单为空",
+        choiceTitle: "数据输入方式",
+        voiceInput: "语音输入",
+        manualInput: "手动输入",
+        exit: "退出",
+        voiceControl: "语音控制",
+        inventory: "库存",
+        shopping: "购物清单",
+        add: "添加产品",
+        back: "返回"
     },
     es: {
         nazad: "Atrás", stanje: "Inventario", spisak: "Lista de Compras",
@@ -422,7 +495,16 @@ const translations = {
         delete_from_shopping: "¿Eliminar elemento de la lista de compras?",
         delete_confirm: "¿Está seguro de que desea eliminar {count} elemento(s)?",
         delete_confirm_title: "Confirmación de eliminación",
-        list_empty: "La lista de compras está vacía"
+        list_empty: "La lista de compras está vacía",
+        choiceTitle: "Método de entrada de datos",
+        voiceInput: "Entrada de voz",
+        manualInput: "Entrada manual",
+        exit: "SALIR",
+        voiceControl: "Control de voz",
+        inventory: "Inventario",
+        shopping: "Lista de compras",
+        add: "Agregar producto",
+        back: "Volver"
     },
     pt: {
         nazad: "Voltar", stanje: "Estoque", spisak: "Lista de Compras",
@@ -457,7 +539,16 @@ const translations = {
         delete_from_shopping: "Eliminar item da lista de compras?",
         delete_confirm: "Tem a certeza que deseja eliminar {count} item(ns)?",
         delete_confirm_title: "Confirmação de exclusão",
-        list_empty: "A lista de compras está vazia"
+        list_empty: "A lista de compras está vazia",
+        choiceTitle: "Método de entrada de dados",
+        voiceInput: "Entrada de voz",
+        manualInput: "Entrada manual",
+        exit: "SAIR",
+        voiceControl: "Controle de voz",
+        inventory: "Estoque",
+        shopping: "Lista de compras",
+        add: "Adicionar produto",
+        back: "Voltar"
     },
     fr: {
         nazad: "Retour", stanje: "Stock", spisak: "Liste de Courses",
@@ -492,7 +583,16 @@ const translations = {
         delete_from_shopping: "Supprimer l'élément de la liste de courses?",
         delete_confirm: "Êtes-vous sûr de vouloir supprimer {count} élément(s)?",
         delete_confirm_title: "Confirmation de suppression",
-        list_empty: "La liste de courses est vide"
+        list_empty: "La liste de courses est vide",
+        choiceTitle: "Méthode de saisie des données",
+        voiceInput: "Saisie vocale",
+        manualInput: "Saisie manuelle",
+        exit: "QUITTER",
+        voiceControl: "Commande vocale",
+        inventory: "Stock",
+        shopping: "Liste de courses",
+        add: "Ajouter un produit",
+        back: "Retour"
     }
 };
 // ===== POMOĆNA FUNKCIJA ZA PREVODE =====
