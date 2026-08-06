@@ -1876,7 +1876,7 @@ function startVoiceRecognition() {
         console.log('🎤 Mikrofon aktivan, jezik:', recognition.lang);
     };
     
-    recognition.onresult = function(event) {
+   recognition.onresult = function(event) {
         if (isProcessing) return;
         
         const last = event.results.length - 1;
@@ -1918,25 +1918,6 @@ function startVoiceRecognition() {
             status.style.color = '#f44336';
         }
     };
-    recognition.onerror = function(event) {
-        console.error('🎤 Greška:', event.error);
-        status.innerHTML = `❌ Error: ${event.error}`;
-        status.style.color = '#f44336';
-    };
-
-    recognition.onend = function() {
-        console.log('🎤 Mikrofon zaustavljen');
-        activeRecognition = null;
-    };
-
-    try {
-        recognition.start();
-    } catch (e) {
-        console.log('🎤 Greška pri pokretanju:', e);
-        status.innerHTML = '❌ Failed to start microphone';
-        status.style.color = '#f44336';
-    }
-}
 
 // ============================================
 // KRAJ FAJLA
