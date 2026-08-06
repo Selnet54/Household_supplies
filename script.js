@@ -1743,12 +1743,12 @@ function selectLanguage(langCode) {
     // Prvo prevedi
     updateChoiceScreenTexts();
     
-    // Sačekaj 50ms da se prevodi apliciraju
-    setTimeout(function() {
-        showScreen('choiceScreen');
-        console.log('🌍 Izabran jezik:', langCode);
-    }, 50);
-}
+// Sačekaj 50ms da se prevodi apliciraju
+setTimeout(function() {
+    showScreen('choiceScreen');
+    updateChoiceScreenTexts(); // Pozovite ovde da biste osigurali da je ekran aktivan
+    console.log('🌍 Izabran jezik:', langCode);
+}, 50);
 // ============================================
 // GLASOVNE KOMANDE I UPRAVLJANJE EKRANIMA
 // ============================================
