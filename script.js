@@ -1759,15 +1759,20 @@ function selectLanguage(langCode) {
 function selectVoiceMode() {
     console.log('🎤 Izabran zvučni unos');
     
-    // DIREKTNO POSTAVI TEKSTOVE NA EKRANU
+    // DIREKTNO POSTAVI TEKSTOVE NA EKRANU (ne oslanjaj se na updateChoiceScreenTexts)
     const t = translations[currentLang] || translations['en'];
     
-    // Postavi tekstove za voiceMenuScreen
-    const voiceTitle = document.querySelector('#voiceMenuScreen .voice-menu-box > div:first-child');
-    if (voiceTitle) voiceTitle.textContent = '🎤 ' + (t.voiceControl || 'Voice Control');
-    
-    const voiceDesc = document.querySelector('#voiceMenuScreen .voice-menu-box > div:nth-child(2)');
-    if (voiceDesc) voiceDesc.textContent = t.voiceDesc || 'Say what you want to do:';
+    // Postavi tekstove za voiceMenuScreen DIREKTNO
+    const voiceMenuBox = document.querySelector('#voiceMenuScreen .voice-menu-box');
+    if (voiceMenuBox) {
+        // Naslov
+        const titleDiv = voiceMenuBox.querySelector('div:first-child');
+        if (titleDiv) titleDiv.textContent = '🎤 ' + (t.voiceControl || 'Voice Control');
+        
+        // Opis
+        const descDiv = voiceMenuBox.querySelector('div:nth-child(2)');
+        if (descDiv) descDiv.textContent = t.voiceDesc2 || 'Say what you want to do:';
+    }
     
     // Dugmad
     const invBtn = document.querySelector('#voiceMenuScreen .voice-btn[onclick*="inventory"]');
@@ -1782,8 +1787,13 @@ function selectVoiceMode() {
     const exitBtn = document.querySelector('#voiceMenuScreen .voice-btn-exit');
     if (exitBtn) exitBtn.innerHTML = '<div style="font-size:40px;">🚪</div><div style="font-size:20px; font-weight:bold;">' + (t.exit || 'EXIT') + '</div>';
     
+    // Back dugme
     const backBtn = document.getElementById('backFromVoiceBtn');
     if (backBtn) backBtn.textContent = '◀ ' + (t.back || 'Back');
+    
+    // Voice Status
+    const status = document.getElementById('voiceStatus');
+    if (status) status.textContent = t.voiceStatus || '🎤 Say: "Inventory", "Shopping List", "Add Product", or "Exit"';
     
     showScreen('voiceMenuScreen');
     startVoiceRecognition();
