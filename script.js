@@ -1746,15 +1746,6 @@ function triggerLogin() {
 // GLASOVNE KOMANDE I UPRAVLJANJE EKRANIMA
 // ============================================
 
-// ===== IZBOR JEZIKA =====
-function selectLanguage(langCode) {
-    currentLang = langCode;
-    // OVDE JE BILA GREŠKA: Umesto mainScreen, postavljamo choiceScreen
-    showScreen('choiceScreen'); 
-    updateHeaderTexts();
-    console.log('🌍 Izabran jezik:', langCode);
-}
-
 // ===== IZBOR NAČINA UNOSA =====
 function selectVoiceMode() {
     console.log('🎤 Izabran zvučni unos');
