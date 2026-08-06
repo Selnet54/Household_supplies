@@ -1739,12 +1739,51 @@ function triggerLogin() {
 // ===== IZBOR JEZIKA =====
 function selectLanguage(langCode) {
     currentLang = langCode;
-    // OVDE JE BILA GREŠKA: Umesto mainScreen, postavljamo choiceScreen
-    showScreen('choiceScreen'); 
-    updateHeaderTexts();
+    
+    // DIREKTNO POSTAVI TEKSTOVE
+    const t = translations[currentLang] || translations['en'];
+    
+    // choiceScreen
+    const choiceTitle = document.getElementById('choiceTitleText');
+    if (choiceTitle) choiceTitle.innerText = t.choiceTitle || "How do you want to enter data?";
+    
+    const voiceTitle = document.getElementById('voiceTitleText');
+    if (voiceTitle) voiceTitle.innerText = t.voiceInput || "Voice Input";
+    
+    const voiceDesc = document.getElementById('voiceDescText');
+    if (voiceDesc) voiceDesc.innerText = t.voiceDesc || "Speak and I will enter";
+    
+    const manualTitle = document.getElementById('manualTitleText');
+    if (manualTitle) manualTitle.innerText = t.manualInput || "Manual Input";
+    
+    const manualDesc = document.getElementById('manualDescText');
+    if (manualDesc) manualDesc.innerText = t.manualDesc || "Type data manually";
+    
+    const exitBtn = document.getElementById('exitChoiceBtn');
+    if (exitBtn) exitBtn.innerText = "✖ " + (t.exit || "EXIT");
+    
+    // voiceMenuScreen (da bude spremno)
+    const voiceMenuTitle = document.getElementById('voiceMenuTitleText');
+    if (voiceMenuTitle) voiceMenuTitle.innerText = "🎤 " + (t.voiceControl || "Voice Control");
+    
+    const invMenu = document.getElementById('invMenuText');
+    if (invMenu) invMenu.innerText = t.inventory || "Inventory";
+    
+    const shopMenu = document.getElementById('shopMenuText');
+    if (shopMenu) shopMenu.innerText = t.shopping || "Shopping List";
+    
+    const addMenu = document.getElementById('addMenuText');
+    if (addMenu) addMenu.innerText = t.add || "Add Product";
+    
+    const exitMenu = document.getElementById('exitMenuText');
+    if (exitMenu) exitMenu.innerText = t.exit || "EXIT";
+    
+    const backVoice = document.getElementById('backVoiceText');
+    if (backVoice) backVoice.innerText = "◀ " + (t.back || "Back");
+    
+    showScreen('choiceScreen');
     console.log('🌍 Izabran jezik:', langCode);
 }
-
 // ============================================
 // GLASOVNE KOMANDE I UPRAVLJANJE EKRANIMA
 // ============================================
