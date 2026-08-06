@@ -1831,9 +1831,12 @@ function voiceCommand(command) {
 }
 
 // ===== PREPOZNAVANJE GOVORA =====
-let activeRecognition = null; // Globalna promenljiva da pratimo aktivnu instancu
+let activeRecognition = null;
+let isProcessing = false;
 
 function startVoiceRecognition() {
+    isProcessing = false;
+    
     const status = document.getElementById('voiceStatus');
     if (!status) {
         console.error('❌ voiceStatus element not found');
@@ -1846,7 +1849,6 @@ function startVoiceRecognition() {
         return;
     }
     
-    // Ako je prethodni mikrofon još otvoren, obavezno ga zaustavi pre novog
     if (activeRecognition) {
         try { activeRecognition.stop(); } catch(e) {}
         activeRecognition = null;
@@ -1854,22 +1856,15 @@ function startVoiceRecognition() {
     
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
-    activeRecognition = recognition; // Sačuvaj instancu
+    activeRecognition = recognition;
     
     const langMap = {
-        'sr': 'sr-RS',
-        'en': 'en-US',
-        'de': 'de-DE',
-        'hu': 'hu-HU',
-        'uk': 'uk-UA',
-        'ru': 'ru-RU',
-        'zh': 'zh-CN',
-        'es': 'es-ES',
-        'pt': 'pt-PT',
-        'fr': 'fr-FR'
+        'sr': 'sr-RS', 'en': 'en-US', 'de': 'de-DE', 'hu': 'hu-HU',
+        'uk': 'uk-UA', 'ru': 'ru-RU', 'zh': 'zh-CN', 'es': 'es-ES',
+        'pt': 'pt-PT', 'fr': 'fr-FR'
     };
     
-recognition.lang = langMap[currentLang] || 'en-US';
+    recognition.lang = langMap[currentLang] || 'en-US';
     recognition.continuous = false;
     recognition.interimResults = true;
     recognition.maxAlternatives = 1;
@@ -1908,6 +1903,10 @@ recognition.lang = langMap[currentLang] || 'en-US';
                 return;
             }
         }
+        
+        // Ako prepozna tekst ali nije nijedna komanda
+        status.innerHTML = `❌ Unknown: "${text}". Try: Inventory, Shopping, Add, or Exit`;
+        status.style.color = '#f44336';
     };
 
     recognition.onerror = function(event) {
@@ -1923,74 +1922,7 @@ recognition.lang = langMap[currentLang] || 'en-US';
 
     try {
         recognition.start();
-    } catch (err) {
-        console.error('Greška pri pokretanju:', err);
-    }
-}
-        
-        const commands = {
-            'inventory': ['inventory', 'zalihe', 'stock', 'bestand', 'készlet', 'запаси', 'запасы', '库存', 'inventario', 'estoque', 'inv', 'invi', 'invito'],
-            'shopping': ['shopping', 'shopping list', 'spisak', 'list', 'einkaufsliste', 'bevásárlólista', 'список', '购物清单', 'lista', 'lista de compras', 'liste', 'shop', 'shoppi'],
-            'add': ['add', 'add product', 'unos', 'dodaj', 'produkt', 'termék', 'додати', 'добавить', '添加', 'agregar', 'adicionar', 'ajouter', 'ad'],
-            'exit': ['exit', 'quit', 'close', 'zatvori', 'izlaz', 'beenden', 'kilépés', 'вихід', 'выход', '退出', 'salir', 'sair', 'quitter']
-        };
-        
-        for (const [cmd, keywords] of Object.entries(commands)) {
-            if (keywords.some(keyword => text.includes(keyword))) {
-                isProcessing = true; // Označi da je rešeno
-                status.innerHTML = `✅ Command: ${cmd}`;
-                status.style.color = '#4CAF50';
-                
-                try { recognition.stop(); } catch(e) {} // Odmah gasi mikrofon
-                
-                voiceCommand(cmd);
-                return;
-            }
-        }
-    };
-
-    recognition.onerror = function(event) {
-        console.error('🎤 Greška:', event.error);
-        status.innerHTML = `❌ Error: ${event.error}`;
-        status.style.color = '#f44336';
-    };
-
-    recognition.onend = function() {
-        console.log('🎤 Mikrofon zaustavljen');
-        activeRecognition = null;
-    };
-
-    try {
-        recognition.start();
-    } catch (err) {
-        console.error('Greška pri pokretanju:', err);
-    }
-}
-
-// Pomoćna funkcija da resetuje flag
-function resetProcessingFlag() {
-    return false;
-}
-        
-        status.innerHTML = `❌ Unknown: "${text}". Try: Inventory, Shopping List, Add Product, or Exit`;
-        status.style.color = '#f44336';
-    };
-    
-    recognition.onerror = function(event) {
-        console.error('🎤 Greška:', event.error);
-        status.innerHTML = `❌ Error: ${event.error}`;
-        status.style.color = '#f44336';
-    };
-    
-    recognition.onend = function() {
-        console.log('🎤 Mikrofon zaustavljen');
-        status.innerHTML = '🎤 Click the button to speak again';
-        status.style.color = '#aaa';
-    };
-    
-    try {
-        recognition.start();
-    } catch(e) {
+    } catch (e) {
         console.log('🎤 Greška pri pokretanju:', e);
         status.innerHTML = '❌ Failed to start microphone';
         status.style.color = '#f44336';
