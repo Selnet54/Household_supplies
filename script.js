@@ -1752,7 +1752,9 @@ function selectLanguage(langCode) {
 // ===== IZBOR NAČINA UNOSA =====
 function selectVoiceMode() {
     console.log('🎤 Izabran zvučni unos');
-    updateChoiceScreenTexts(); // <--- DODAJTE OVU LINIJU OVDJE!
+    
+    updateChoiceScreenTexts(); // <--- OVDJE MORA BITI POZVANO DA BI SE EKRAN 4 PREVEO!
+    
     showScreen('voiceMenuScreen');
     startVoiceRecognition();
 }
