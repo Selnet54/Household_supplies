@@ -903,15 +903,6 @@ function updateChoiceScreenTexts() {
     if(document.getElementById('backVoiceText')) document.getElementById('backVoiceText').innerText = "◀ " + (t.back || "Back");
 }
 
-function selectLanguage(langCode) {
-    currentLang = langCode; // 1. Prvo zapamti jezik
-    
-    updateChoiceScreenTexts(); // 2. Odmah prevedi ekrane dok su u pozadini
-    
-    showScreen('choiceScreen'); // 3. Tek onda prikaži ekran
-    
-    console.log('🌍 Izabran jezik:', langCode);
-}
 function renderCategories() {
     currentScreenState = 'categories';
     const content = document.getElementById('mainContent');
@@ -1745,6 +1736,14 @@ function triggerLogin() {
 // ============================================
 // GLASOVNE KOMANDE I UPRAVLJANJE EKRANIMA
 // ============================================
+// ===== IZBOR JEZIKA =====
+function selectLanguage(langCode) {
+    currentLang = langCode;
+    // OVDE JE BILA GREŠKA: Umesto mainScreen, postavljamo choiceScreen
+    showScreen('choiceScreen'); 
+    updateHeaderTexts();
+    console.log('🌍 Izabran jezik:', langCode);
+}
 
 // ===== IZBOR NAČINA UNOSA =====
 function selectVoiceMode() {
