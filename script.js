@@ -879,11 +879,31 @@ function renderLanguages() {
     });
     console.log('✅ Jezici prikazani');
 }
+// ============================================
+// 1. OVDJE UBACITE FUNKCIJU ZA AŽURIRANJE TEKSTOVA
+// ============================================
+function updateChoiceScreenTexts() {
+    const t = choiceTranslations[currentLang] || choiceTranslations['en']; 
 
+    // EKRAN 3: Izbor načina unosa
+    if(document.getElementById('choiceTitleText')) document.getElementById('choiceTitleText').innerText = t.choiceTitle;
+    if(document.getElementById('voiceTitleText')) document.getElementById('voiceTitleText').innerText = t.voiceInput;
+    if(document.getElementById('manualTitleText')) document.getElementById('manualTitleText').innerText = t.manualInput;
+
+    // EKRAN 4: Zvučni meni
+    if(document.getElementById('voiceMenuTitleText')) document.getElementById('voiceMenuTitleText').innerText = "🎤 " + t.voiceControl;
+    if(document.getElementById('invMenuText')) document.getElementById('invMenuText').innerText = t.inventory;
+    if(document.getElementById('shopMenuText')) document.getElementById('shopMenuText').innerText = t.shopping;
+    if(document.getElementById('addMenuText')) document.getElementById('addMenuText').innerText = t.add;
+    if(document.getElementById('exitMenuText')) document.getElementById('exitMenuText').innerText = t.exit;
+    if(document.getElementById('backVoiceText')) document.getElementById('backVoiceText').innerText = "◀ " + t.back;
+}
 function selectLanguage(langCode) {
-    currentLang = langCode;
-    showScreen('choiceScreen');  // ← PROMENI OVO!
-    updateHeaderTexts();
+    currentLang = langCode; 
+    
+    updateChoiceScreenTexts(); // <--- OVO TREBA DA BUDE OVDJE
+    
+    showScreen('choiceScreen'); 
     console.log('🌍 Izabran jezik:', langCode);
 }
 function renderCategories() {
