@@ -1869,68 +1869,64 @@ function startVoiceRecognition() {
         'fr': 'fr-FR'
     };
     
-    recognition.lang = langMap[currentLang] || 'en-US';
+recognition.lang = langMap[currentLang] || 'en-US';
     recognition.continuous = false;
     recognition.interimResults = true;
     recognition.maxAlternatives = 1;
     
     recognition.onstart = function() {
-        status.innerHTML = '🎤 Listening... (speak now)';
-        status.style.color = '#4FC3F7';
-        console.log('🎤 Mikrofon aktivan, jezik:', recognition.lang);
-    };
-    let activeRecognition = null;
-let isProcessing = false; // Neka bude van funkcije, na vrhu skripte uz ostale globalne promenljive
-
-function startVoiceRecognition() {
-    isProcessing = resetProcessingFlag(); // Resetujemo na početku
-    
-    const status = document.getElementById('voiceStatus');
-    if (!status) {
-        console.error('❌ voiceStatus element not found');
-        return;
-    }
-    
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-        status.innerHTML = '❌ Voice recognition not supported in this browser';
-        status.style.color = '#f44336';
-        return;
-    }
-    
-    if (activeRecognition) {
-        try { activeRecognition.stop(); } catch(e) {}
-        activeRecognition = null;
-    }
-    
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const recognition = new SpeechRecognition();
-    activeRecognition = recognition;
-    
-    const langMap = {
-        'sr': 'sr-RS', 'en': 'en-US', 'de': 'de-DE', 'hu': 'hu-HU',
-        'uk': 'uk-UA', 'ru': 'ru-RU', 'zh': 'zh-CN', 'es': 'es-ES',
-        'pt': 'pt-PT', 'fr': 'fr-FR'
-    };
-    
-    recognition.lang = langMap[currentLang] || 'en-US';
-    recognition.continuous = false;
-    recognition.interimResults = true;
-    recognition.maxAlternatives = 1;
-    
-    recognition.onstart = function() {
-        isProcessing = false; // Osiguramo da je spreman kad počne
+        isProcessing = false;
         status.innerHTML = '🎤 Listening... (speak now)';
         status.style.color = '#4FC3F7';
         console.log('🎤 Mikrofon aktivan, jezik:', recognition.lang);
     };
     
     recognition.onresult = function(event) {
-        if (isProcessing) return; // Ako je već obradio, ignoriši dalje slogove
+        if (isProcessing) return;
         
         const last = event.results.length - 1;
         const text = event.results[last][0].transcript.toLowerCase().trim();
         status.innerHTML = `🗣️ You said: "${text}"`;
         console.log('🎤 Prepoznato:', text);
+        
+        const commands = {
+            'inventory': ['inventory', 'zalihe', 'stock', 'bestand', 'készlet', 'запаси', 'запасы', '库存', 'inventario', 'estoque', 'inv', 'invi', 'invito'],
+            'shopping': ['shopping', 'shopping list', 'spisak', 'list', 'einkaufsliste', 'bevásárlólista', 'список', '购物清单', 'lista', 'lista de compras', 'liste', 'shop', 'shoppi'],
+            'add': ['add', 'add product', 'unos', 'dodaj', 'produkt', 'termék', 'додати', 'добавить', '添加', 'agregar', 'adicionar', 'ajouter', 'ad'],
+            'exit': ['exit', 'quit', 'close', 'zatvori', 'izlaz', 'beenden', 'kilépés', 'вихід', 'выход', '退出', 'salir', 'sair', 'quitter']
+        };
+        
+        for (const [cmd, keywords] of Object.entries(commands)) {
+            if (keywords.some(keyword => text.includes(keyword))) {
+                isProcessing = true;
+                status.innerHTML = `✅ Command: ${cmd}`;
+                status.style.color = '#4CAF50';
+                
+                try { recognition.stop(); } catch(e) {}
+                
+                voiceCommand(cmd);
+                return;
+            }
+        }
+    };
+
+    recognition.onerror = function(event) {
+        console.error('🎤 Greška:', event.error);
+        status.innerHTML = `❌ Error: ${event.error}`;
+        status.style.color = '#f44336';
+    };
+
+    recognition.onend = function() {
+        console.log('🎤 Mikrofon zaustavljen');
+        activeRecognition = null;
+    };
+
+    try {
+        recognition.start();
+    } catch (err) {
+        console.error('Greška pri pokretanju:', err);
+    }
+}
         
         const commands = {
             'inventory': ['inventory', 'zalihe', 'stock', 'bestand', 'készlet', 'запаси', 'запасы', '库存', 'inventario', 'estoque', 'inv', 'invi', 'invito'],
