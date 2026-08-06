@@ -266,17 +266,26 @@
     <div class="choice-container">
         <div class="choice-box">
             <div class="logo-text" style="font-size:32px; margin-bottom:10px;">SUPPLIES</div>
-            <div style="font-size:18px; color:#aaa; margin-bottom:30px;">How do you want to enter data?</div>
+            <!-- 1. ID za glavni tekst -->
+            <div id="choiceTitleText" style="font-size:18px; color:#aaa; margin-bottom:30px;">How do you want to enter data?</div>
+            
             <button id="voiceChoiceBtn" class="choice-btn choice-voice" onclick="selectVoiceMode(); return false;">
                 <div style="font-size:48px; margin-bottom:8px;">🎤</div>
-                <div style="font-size:24px; font-weight:bold;">Voice Input</div>
-                <div style="font-size:16px; color:#aaa; margin-top:5px;">Speak and I will enter</div>
+                <!-- 2. ID za naslov glasa -->
+                <div id="voiceTitleText" style="font-size:24px; font-weight:bold;">Voice Input</div>
+                <!-- 3. ID za podtekst glasa -->
+                <div id="voiceDescText" style="font-size:16px; color:#aaa; margin-top:5px;">Speak and I will enter</div>
             </button>
+            
             <button id="manualChoiceBtn" class="choice-btn choice-manual" onclick="selectManualMode(); return false;">
                 <div style="font-size:48px; margin-bottom:8px;">✍️</div>
-                <div style="font-size:24px; font-weight:bold;">Manual Input</div>
-                <div style="font-size:16px; color:#aaa; margin-top:5px;">Type data manually</div>
+                <!-- 4. ID za naslov ručnog unosa -->
+                <div id="manualTitleText" style="font-size:24px; font-weight:bold;">Manual Input</div>
+                <!-- 5. ID za podtekst ručnog unosa -->
+                <div id="manualDescText" style="font-size:16px; color:#aaa; margin-top:5px;">Type data manually</div>
             </button>
+            
+            <!-- 6. ID za exit dugme -->
             <button id="exitChoiceBtn" class="btn btn-red" style="margin-top:20px;" onclick="exitApp();">✖ EXIT</button>
         </div>
     </div>
