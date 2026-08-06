@@ -1891,24 +1891,33 @@ function startVoiceRecognition() {
             'exit': ['exit', 'quit', 'close', 'zatvori', 'izlaz', 'beenden', 'kilépés', 'вихід', 'выход', '退出', 'salir', 'sair', 'quitter']
         };
         
-        for (const [cmd, keywords] of Object.entries(commands)) {
-            if (keywords.some(keyword => text.includes(keyword))) {
-                isProcessing = true;
-                status.innerHTML = `✅ Command: ${cmd}`;
-                status.style.color = '#4CAF50';
-                
-                try { recognition.stop(); } catch(e) {}
-                
-                voiceCommand(cmd);
-                return;
+        let matchedCommand = null;
+        
+        // Obična petlja umesto .some() i unutrašnjih povrataka
+        for (const cmd in commands) {
+            const keywords = commands[cmd];
+            for (let i = 0; i < keywords.length; i++) {
+                if (text.includes(keywords[i])) {
+                    matchedCommand = cmd;
+                    break;
+                }
             }
+            if (matchedCommand) break;
         }
         
-        // Ako prepozna tekst ali nije nijedna komanda
-        status.innerHTML = `❌ Unknown: "${text}". Try: Inventory, Shopping, Add, or Exit`;
-        status.style.color = '#f44336';
+        if (matchedCommand) {
+            isProcessing = true;
+            status.innerHTML = `✅ Command: ${matchedCommand}`;
+            status.style.color = '#4CAF50';
+            
+            try { recognition.stop(); } catch(e) {}
+            
+            voiceCommand(matchedCommand);
+        } else {
+            status.innerHTML = `❌ Unknown: "${text}". Try: Inventory, Shopping, Add, or Exit`;
+            status.style.color = '#f44336';
+        }
     };
-
     recognition.onerror = function(event) {
         console.error('🎤 Greška:', event.error);
         status.innerHTML = `❌ Error: ${event.error}`;
