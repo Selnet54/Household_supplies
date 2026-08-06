@@ -904,10 +904,11 @@ function updateChoiceScreenTexts() {
 }
 
 function selectLanguage(langCode) {
-    currentLang = langCode; 
+    currentLang = langCode; // 1. Prvo zapamti jezik
     
-    showScreen('choiceScreen'); // Prvo prebaci na ekran...
-    updateChoiceScreenTexts(); // ...a odmah zatim osveži tekstove dok je ekran aktivan!
+    updateChoiceScreenTexts(); // 2. Odmah prevedi ekrane dok su u pozadini
+    
+    showScreen('choiceScreen'); // 3. Tek onda prikaži ekran
     
     console.log('🌍 Izabran jezik:', langCode);
 }
