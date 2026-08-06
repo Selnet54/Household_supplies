@@ -4,16 +4,11 @@
 console.log('✅ Script.js je učitan!');
 
 // ===== TRENUTNO STANJE =====
-// ===== TRENUTNO STANJE =====
-window.currentLang = 'en'; // Postavljamo na window da bude globalno vidljiva svuda
-let currentCategory = '';
-let currentSubcategory = '';
-let currentProductPart = '';
-let currentScreenState = 'languages'; = 'en';
-let currentCategory = '';
-let currentSubcategory = '';
-let currentProductPart = '';
+let currentLang = 'en';
 let currentScreenState = 'languages';
+let currentCategory = '';
+let currentSubcategory = '';
+let currentProductPart = '';
 
 // ===== 0. EXIT FUNKCIJA =====
 function exitApp() {
