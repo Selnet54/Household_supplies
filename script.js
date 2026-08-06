@@ -1752,6 +1752,7 @@ function selectLanguage(langCode) {
 // ===== IZBOR NAČINA UNOSA =====
 function selectVoiceMode() {
     console.log('🎤 Izabran zvučni unos');
+    updateChoiceScreenTexts(); // <--- DODAJTE OVU LINIJU OVDJE!
     showScreen('voiceMenuScreen');
     startVoiceRecognition();
 }
