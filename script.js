@@ -1879,8 +1879,54 @@ function startVoiceRecognition() {
         status.style.color = '#4FC3F7';
         console.log('🎤 Mikrofon aktivan, jezik:', recognition.lang);
     };
+    let activeRecognition = null;
+let isProcessing = false; // Neka bude van funkcije, na vrhu skripte uz ostale globalne promenljive
+
+function startVoiceRecognition() {
+    isProcessing = resetProcessingFlag(); // Resetujemo na početku
+    
+    const status = document.getElementById('voiceStatus');
+    if (!status) {
+        console.error('❌ voiceStatus element not found');
+        return;
+    }
+    
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        status.innerHTML = '❌ Voice recognition not supported in this browser';
+        status.style.color = '#f44336';
+        return;
+    }
+    
+    if (activeRecognition) {
+        try { activeRecognition.stop(); } catch(e) {}
+        activeRecognition = null;
+    }
+    
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    activeRecognition = recognition;
+    
+    const langMap = {
+        'sr': 'sr-RS', 'en': 'en-US', 'de': 'de-DE', 'hu': 'hu-HU',
+        'uk': 'uk-UA', 'ru': 'ru-RU', 'zh': 'zh-CN', 'es': 'es-ES',
+        'pt': 'pt-PT', 'fr': 'fr-FR'
+    };
+    
+    recognition.lang = langMap[currentLang] || 'en-US';
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.maxAlternatives = 1;
+    
+    recognition.onstart = function() {
+        isProcessing = false; // Osiguramo da je spreman kad počne
+        status.innerHTML = '🎤 Listening... (speak now)';
+        status.style.color = '#4FC3F7';
+        console.log('🎤 Mikrofon aktivan, jezik:', recognition.lang);
+    };
     
     recognition.onresult = function(event) {
+        if (isProcessing) return; // Ako je već obradio, ignoriši dalje slogove
+        
         const last = event.results.length - 1;
         const text = event.results[last][0].transcript.toLowerCase().trim();
         status.innerHTML = `🗣️ You said: "${text}"`;
@@ -1895,8 +1941,12 @@ function startVoiceRecognition() {
         
         for (const [cmd, keywords] of Object.entries(commands)) {
             if (keywords.some(keyword => text.includes(keyword))) {
+                isProcessing = true; // Označi da je rešeno
                 status.innerHTML = `✅ Command: ${cmd}`;
                 status.style.color = '#4CAF50';
+                
+                try { recognition.stop(); } catch(e) {} // Odmah gasi mikrofon
+                
                 voiceCommand(cmd);
                 return;
             }
@@ -1912,7 +1962,6 @@ function startVoiceRecognition() {
     recognition.onend = function() {
         console.log('🎤 Mikrofon zaustavljen');
         activeRecognition = null;
-        // Možete dodati i automatski poruku ili dozvoliti ponovni klik na dugme
     };
 
     try {
@@ -1920,6 +1969,11 @@ function startVoiceRecognition() {
     } catch (err) {
         console.error('Greška pri pokretanju:', err);
     }
+}
+
+// Pomoćna funkcija da resetuje flag
+function resetProcessingFlag() {
+    return false;
 }
         
         status.innerHTML = `❌ Unknown: "${text}". Try: Inventory, Shopping List, Add Product, or Exit`;
