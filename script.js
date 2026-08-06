@@ -883,8 +883,8 @@ function renderLanguages() {
 // 1. OVDJE UBACITE FUNKCIJU ZA AŽURIRANJE TEKSTOVA
 // ============================================
 function updateChoiceScreenTexts() {
-    const t = choiceTranslations[currentLang] || choiceTranslations['en']; 
-
+    const t = translations[currentLang] || translations['en'];
+    
     // EKRAN 3: Izbor načina unosa
     if(document.getElementById('choiceTitleText')) document.getElementById('choiceTitleText').innerText = t.choiceTitle;
     if(document.getElementById('voiceTitleText')) document.getElementById('voiceTitleText').innerText = t.voiceInput;
