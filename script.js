@@ -883,12 +883,15 @@ function renderLanguages() {
 // 1. OVDJE UBACITE FUNKCIJU ZA AŽURIRANJE TEKSTOVA
 // ============================================
 function updateChoiceScreenTexts() {
-    const t = translations[currentLang] || translations['en'];
-    
+    const t = translations[currentLang] || translations['en']; 
+
     // EKRAN 3: Izbor načina unosa
     if(document.getElementById('choiceTitleText')) document.getElementById('choiceTitleText').innerText = t.choiceTitle;
     if(document.getElementById('voiceTitleText')) document.getElementById('voiceTitleText').innerText = t.voiceInput;
+    if(document.getElementById('voiceDescText')) document.getElementById('voiceDescText').innerText = t.voiceDesc || "Speak and I will enter";
     if(document.getElementById('manualTitleText')) document.getElementById('manualTitleText').innerText = t.manualInput;
+    if(document.getElementById('manualDescText')) document.getElementById('manualDescText').innerText = t.manualDesc || "Type data manually";
+    if(document.getElementById('exitChoiceBtn')) document.getElementById('exitChoiceBtn').innerText = "✖ " + t.exit;
 
     // EKRAN 4: Zvučni meni
     if(document.getElementById('voiceMenuTitleText')) document.getElementById('voiceMenuTitleText').innerText = "🎤 " + t.voiceControl;
