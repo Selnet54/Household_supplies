@@ -1743,10 +1743,13 @@ function triggerLogin() {
 // ============================================
 // ===== IZBOR JEZIKA =====
 function selectLanguage(langCode) {
-    window.currentLang = langCode; // Ažuriramo globalnu window promenljivu
+    window.currentLang = langCode; // 1. Postavimo globalni jezik
     localStorage.setItem('selectedLang', langCode);
     
-    updateChoiceScreenTexts();
+    // 2. MORAMO ovde pozvati funkciju da se tekstovi osveže!
+    updateChoiceScreenTexts(); 
+    
+    // 3. Tek onda prikažemo ekran
     showScreen('choiceScreen');
     
     console.log('🌍 Izabran jezik:', window.currentLang);
