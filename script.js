@@ -1759,27 +1759,35 @@ function selectLanguage(langCode) {
 function selectVoiceMode() {
     console.log('🎤 Izabran zvučni unos');
     
-    updateChoiceScreenTexts(); // <--- OVDJE MORA BITI POZVANO DA BI SE EKRAN 4 PREVEO!
+    // DIREKTNO POSTAVI TEKSTOVE NA EKRANU
+    const t = translations[currentLang] || translations['en'];
+    
+    // Postavi tekstove za voiceMenuScreen
+    const voiceTitle = document.querySelector('#voiceMenuScreen .voice-menu-box > div:first-child');
+    if (voiceTitle) voiceTitle.textContent = '🎤 ' + (t.voiceControl || 'Voice Control');
+    
+    const voiceDesc = document.querySelector('#voiceMenuScreen .voice-menu-box > div:nth-child(2)');
+    if (voiceDesc) voiceDesc.textContent = t.voiceDesc || 'Say what you want to do:';
+    
+    // Dugmad
+    const invBtn = document.querySelector('#voiceMenuScreen .voice-btn[onclick*="inventory"]');
+    if (invBtn) invBtn.innerHTML = '<div style="font-size:40px;">📦</div><div style="font-size:20px; font-weight:bold;">' + (t.inventory || 'Inventory') + '</div>';
+    
+    const shopBtn = document.querySelector('#voiceMenuScreen .voice-btn[onclick*="shopping"]');
+    if (shopBtn) shopBtn.innerHTML = '<div style="font-size:40px;">🛒</div><div style="font-size:20px; font-weight:bold;">' + (t.shopping || 'Shopping List') + '</div>';
+    
+    const addBtn = document.querySelector('#voiceMenuScreen .voice-btn[onclick*="add"]');
+    if (addBtn) addBtn.innerHTML = '<div style="font-size:40px;">➕</div><div style="font-size:20px; font-weight:bold;">' + (t.add || 'Add Product') + '</div>';
+    
+    const exitBtn = document.querySelector('#voiceMenuScreen .voice-btn-exit');
+    if (exitBtn) exitBtn.innerHTML = '<div style="font-size:40px;">🚪</div><div style="font-size:20px; font-weight:bold;">' + (t.exit || 'EXIT') + '</div>';
+    
+    const backBtn = document.getElementById('backFromVoiceBtn');
+    if (backBtn) backBtn.textContent = '◀ ' + (t.back || 'Back');
     
     showScreen('voiceMenuScreen');
     startVoiceRecognition();
 }
-
-function selectManualMode() {
-    console.log('✍️ Izabran ručni unos');
-    showScreen('mainScreen');
-    renderCategories();
-}
-
-function goBackFromVoice() {
-    showScreen('choiceScreen');
-}
-
-// ===== RESTART MIKROFONA =====
-function restartVoiceRecognition() {
-    startVoiceRecognition();
-}
-
 // ============================================
 // GLASOVNE KOMANDE - ISPRAVLJENO
 // ============================================
