@@ -1653,6 +1653,55 @@ showScreen = function(screenId) {
     updateHeaderTexts();
 };
 // ============================================
+// IZBOR NAČINA UNOSA (DODAJ OVO)
+// ============================================
+
+function selectVoiceMode() {
+    console.log('🎤 Izabran zvučni unos');
+    try {
+        // Ažuriraj tekstove na trenutnom jeziku
+        updateChoiceScreenTexts();
+        // Prikaži ekran za glasovni meni
+        showScreen('voiceMenuScreen');
+        // Pokreni prepoznavanje glasa nakon 500ms
+        setTimeout(function() {
+            startVoiceRecognition();
+        }, 500);
+    } catch(e) {
+        console.error('❌ Greška u selectVoiceMode:', e);
+        showModernAlert('Greška', 'Došlo je do greške pri pokretanju glasovnog unosa', '❌');
+    }
+}
+
+function selectManualMode() {
+    console.log('✍️ Izabran ručni unos');
+    try {
+        // Prikaži glavni ekran
+        showScreen('mainScreen');
+        // Sačekaj da se ekran prikaže pa renderuj kategorije
+        setTimeout(function() {
+            renderCategories();
+        }, 100);
+    } catch(e) {
+        console.error('❌ Greška u selectManualMode:', e);
+        showModernAlert('Greška', 'Došlo je do greške pri pokretanju ručnog unosa', '❌');
+    }
+}
+
+function goBackFromVoice() {
+    console.log('◀ Povratak sa glasovnog menija');
+    // Zaustavi prepoznavanje glasa ako je aktivno
+    if (recognition) {
+        try { 
+            recognition.stop(); 
+        } catch(e) {}
+        recognition = null;
+    }
+    // Ažuriraj tekstove i vrati se na izbor
+    updateChoiceScreenTexts();
+    showScreen('choiceScreen');
+}
+// ============================================
 // KRAJ FAJLA
 // ============================================
 console.log('✅ Kraj fajla');
