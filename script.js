@@ -1845,20 +1845,29 @@ function startVoiceRecognition() {
         console.error("❌ Neuspešno pokretanje mikrofona:", e);
     }
 }
-// ===== SLUŠAČ ZA LOGIN / ENTER DUGME =====
-const loginBtn = document.getElementById('loginBtn');
-if (loginBtn) {
-    loginBtn.addEventListener('click', function() {
-        console.log("🖱️ Klik na ENTER dugme");
-        // Ovde pozivate funkciju koja proverava uneti telefon i prelazi dalje (npr. triggerLogin())
-        if (typeof triggerLogin === 'function') {
-            triggerLogin();
-        } else {
-            // Ako se funkcija zove drugačije, ovde možete direktno preći na ekran sa jezicima:
-            showScreen('languageScreen');
-        }
-    });
-}
+// Automatsko povezivanje ENTER dugmeta preko ID-ja
+document.addEventListener('DOMContentLoaded', function() {
+    const loginBtn = document.getElementById('loginBtn');
+    if (loginBtn) {
+        loginBtn.onclick = function() {
+            console.log("🖱️ Kliknuto na ENTER dugme!");
+            
+            const phoneInput = document.getElementById('phoneInput');
+            const phoneNumber = phoneInput ? phoneInput.value.trim() : '';
+            
+            if (typeof checkPhoneNumber === 'function') {
+                checkPhoneNumber(phoneNumber);
+            } else if (typeof triggerLogin === 'function') {
+                triggerLogin();
+            } else {
+                showScreen('languageScreen');
+                if (typeof renderLanguageGrid === 'function') {
+                    renderLanguageGrid();
+                }
+            }
+        };
+    }
+});
 // ============================================
 // KRAJ FAJLA
 // ============================================
