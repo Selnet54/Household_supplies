@@ -879,7 +879,7 @@ function renderLanguages() {
     });
     console.log('✅ Jezici prikazani');
 }
-
+// ============================================
 // ============================================
 // 1. FUNKCIJA ZA AŽURIRANJE TEKSTOVA (Ažurirana)
 // ============================================
@@ -1783,27 +1783,34 @@ function voiceCommand(command) {
 // ===== PREPOZNAVANJE GOVORA =====
 let recognition = null;
 
-// ===== GLOBALNA PROMENLJIVA ZA PREPOZNAVANJE =====
-let recognition = null;
-
-// ===== JEDINSTVENA FUNKCIJA ZA GLASOVNO UPRAVLJANJE =====
-// ===== JEDINSTVENA FUNKCIJA ZA GLASOVNO UPRAVLJANJE =====
 function startVoiceRecognition() {
+    // Provera da li pretraživač podržava prepoznavanje govora
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    
     if (!SpeechRecognition) {
-        console.warn("⚠️ Pretraživač ne podržava Speech Recognition.");
+        console.warn("⚠️ Prepoznavanje govora nije podržano u ovom pretraživaču.");
         return;
     }
 
-    // Koristimo već postojeću 'recognition' promenljivu
-    if (window.recognition) {
-        try { window.recognition.stop(); } catch (e) {}
+    if (recognition) {
+        try {
+            recognition.stop();
+        } catch (e) {
+            // Ignoriši ako je već zaustavljeno
+        }
     }
 
     recognition = new SpeechRecognition();
     
-    const langMap = { 'hu': 'hu-HU', 'sr': 'sr-RS' };
-    recognition.lang = langMap[currentLang] || 'en-US';
+    // Postavljamo jezik na osnovu trenutnog izabranog jezika (currentLang)
+    // Ako je mađarski (hu), postavi 'hu-HU', za srpski 'sr-RS', podrazumevano 'en-US'
+    if (currentLang === 'hu') {
+        recognition.lang = 'hu-HU';
+    } else if (currentLang === 'sr') {
+        recognition.lang = 'sr-RS';
+    } else {
+        recognition.lang = 'en-US';
+    }
 
     recognition.continuous = true;
     recognition.interimResults = false;
@@ -1811,28 +1818,130 @@ function startVoiceRecognition() {
     recognition.onresult = function(event) {
         const transcript = event.results[event.results.length - 1][0].transcript.trim().toLowerCase();
         console.log("🎤 Prepoznati govor:", transcript);
+        
+        // Prosleđujemo prepoznati tekst funkciji za komande
+        voiceCommand(transcript);
+    };
+
+    recognition.onerror = function(event) {
+        console.error("❌ Greška u prepoznavanju govora:", event.error);
+    };
+
+    recognition.onend = function() {
+        // Automatski restartuj mikrofon ako smo još uvek na ekranu zvučnog menija
+        if (currentScreenState === 'voiceMenuScreen' || document.getElementById('voiceMenuScreen').style.display === 'block') {
+            try {
+                recognition.start();
+            } catch (e) {
+                // Već radi
+            }
+        }
+    };
+
+    try {
+        recognition.start();
+        console.log("🎤 Mikrofon je pokrenut za jezik:", recognition.lang);
+    } catch (e) {
+        console.error("❌ Neuspešno pokretanje mikrofona:", e);
+    }
+}
+// ===== DIREKTNO HVATANJE KLIKA NA LOGIN DUGME =====
+window.addEventListener('click', function(event) {
+    // Proveravamo da li je kliknuto baš na dugme sa id-jem 'loginBtn' ili unutar njega
+    const btn = event.target.closest('#loginBtn');
+    if (btn) {
+        console.log("🖱️ Uspešno uhvaćen klik na ENTER dugme!");
+        
+        const phoneInput = document.getElementById('phoneInput');
+        const phoneNumber = phoneInput ? phoneInput.value.trim() : '';
+        
+        if (typeof checkPhoneNumber === 'function') {
+            checkPhoneNumber(phoneNumber);
+        } else if (typeof triggerLogin === 'function') {
+            triggerLogin();
+        } else {
+            showScreen('languageScreen');
+            if (typeof renderLanguageGrid === 'function') {
+                renderLanguageGrid();
+            }
+        }
+    }
+});
+// ===== KONAČNA POPRAVKA ZA MIKROFON I PREPOZNAVANJE GOVORA =====
+// Zameni ovaj blok na dnu tvog fajla da glatko i bez pucanja pokreće mikrofon.
+
+let recognition = null;
+
+function startVoiceRecognition() {
+    // 1. Očisti staru instancu ako postoji
+    if (recognition) {
+        try {
+            recognition.stop();
+        } catch (e) {}
+    }
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        console.error("❌ Pretraživač ne podržava Speech Recognition.");
+        return;
+    }
+
+    recognition = new SpeechRecognition();
+
+    // 2. Postavljanje jezika tačno onako kako je bilo i ranije
+    if (currentLang === 'hu') {
+        recognition.lang = 'hu-HU';
+    } else if (currentLang === 'sr') {
+        recognition.lang = 'sr-RS';
+    } else {
+        recognition.lang = 'en-US';
+    }
+
+    recognition.continuous = true;
+    recognition.interimResults = false;
+
+    recognition.onresult = function(event) {
+        const transcript = event.results[event.results.length - 1][0].transcript.trim().toLowerCase();
+        console.log("🎤 Prepoznati govor:", transcript);
+        
+        // Prosleđujemo prepoznati tekst funkciji za komande
         if (typeof voiceCommand === 'function') {
             voiceCommand(transcript);
         }
     };
 
     recognition.onerror = function(event) {
-        console.warn("⚠️ Greška mikrofona:", event.error);
+        console.warn("⚠️ Greška mikrofona (ignorisana da spreči blokadu):", event.error);
     };
 
     recognition.onend = function() {
+        // Automatski restartuj mikrofon samo ako smo još uvek na ekranu zvučnog menija
         const voiceMenuScreen = document.getElementById('voiceMenuScreen');
         if (voiceMenuScreen && window.getComputedStyle(voiceMenuScreen).display === 'flex') {
             setTimeout(() => {
-                try { recognition.start(); } catch (e) {}
-            }, 500);
+                try {
+                    recognition.start();
+                } catch (e) {
+                    // Već radi ili se restartuje
+                }
+            }, 300);
         }
     };
 
+    // 3. Pokretanje sa try-catch blokom da spreči rušenje skripte
     try {
         recognition.start();
-        console.log("🎙️ Mikrofon pokrenut na jeziku:", recognition.lang);
+        console.log("🎙️ Mikrofon je uspešno pokrenut na jeziku:", recognition.lang);
     } catch (e) {
-        console.error("Greška pri pokretanju:", e);
+        console.error("Greška pri startovanju mikrofona:", e);
     }
 }
+
+// ============================================
+// KRAJ FAJLA
+// ============================================
+console.log('✅ Kraj fajla - rešenje za mikrofon primenjeno!');
+// ============================================
+// KRAJ FAJLA
+// ============================================
+console.log('✅ Kraj fajla - rešenje aktivirano!');
