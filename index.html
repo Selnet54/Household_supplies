@@ -380,7 +380,132 @@
         console.log('✅ Aplikacija instalirana!');
         deferredPrompt = null;
     });
-</script>
+    <!-- ===== GLAVNI EKRAN SA SADRŽAJEM ===== -->
+    <div id="mainScreen" class="screen" style="display:none; flex-direction:column; background:#f5f5f5; min-height:100vh;">
+        <!-- Header -->
+        <div class="header">
+            <button class="btn-header btn-back" onclick="renderCategories()">◀ <span id="backText">Nazad</span></button>
+            <button class="btn-header btn-inventory" onclick="renderInventory()"><span id="invText">Zalihe</span></button>
+            <button class="btn-header btn-shopping" onclick="renderShoppingList()"><span id="shopText">Spisak</span></button>
+            <button class="btn-header btn-exit" onclick="exitApp()">✖ <span id="exitText">Izlaz</span></button>
+        </div>
+        <!-- Glavni sadržaj -->
+        <div id="mainContent" class="container"></div>
+    </div>
 
+    <!-- ===== EKRAN ZA IZBOR NAČINA UNOSA ===== -->
+    <div id="choiceScreen" class="screen" style="display:none; background:#1a237e; padding:20px;">
+        <div class="languages-box" style="width:100%; max-width:600px;">
+            <h2 style="color:#FFD700; font-size:28px; margin-bottom:30px;" id="choiceTitleText">Način unosa podataka</h2>
+            
+            <button onclick="selectVoiceMode()" style="width:100%; padding:30px; margin-bottom:15px; background:#4CAF50; color:white; border:none; border-radius:16px; font-size:24px; font-weight:bold; cursor:pointer;">
+                <div style="font-size:48px;">🎤</div>
+                <div id="voiceTitleText">Glasovni unos</div>
+                <div style="font-size:16px; font-weight:normal; margin-top:5px;" id="voiceDescText">Govori i uneću</div>
+            </button>
+            
+            <button onclick="selectManualMode()" style="width:100%; padding:30px; margin-bottom:15px; background:#2196F3; color:white; border:none; border-radius:16px; font-size:24px; font-weight:bold; cursor:pointer;">
+                <div style="font-size:48px;">✍️</div>
+                <div id="manualTitleText">Ručni unos</div>
+                <div style="font-size:16px; font-weight:normal; margin-top:5px;" id="manualDescText">Unesi podatke ručno</div>
+            </button>
+            
+            <button onclick="exitApp()" style="width:100%; padding:20px; background:#f44336; color:white; border:none; border-radius:16px; font-size:22px; font-weight:bold; cursor:pointer;" id="exitChoiceBtn">
+                ✖ IZLAZ
+            </button>
+        </div>
+    </div>
+
+    <!-- ===== EKRAN ZA GLASOVNI MENI ===== -->
+    <div id="voiceMenuScreen" class="screen" style="display:none; background:#1a237e; padding:20px;">
+        <div class="languages-box" style="width:100%; max-width:600px;">
+            <h2 style="color:#FFD700; font-size:28px; margin-bottom:20px;" id="voiceMenuTitleText">🎤 Glasovna kontrola</h2>
+            
+            <div id="voiceStatus" style="background:white; padding:20px; border-radius:12px; margin-bottom:20px; color:#333; font-size:18px; text-align:center; min-height:60px;">
+                🎤 Reci: "Zalihe", "Spisak", "Dodaj proizvod" ili "Izlaz"
+            </div>
+            
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:15px;">
+                <button onclick="voiceCommand('inventory')" style="padding:20px; background:#81c784; color:white; border:none; border-radius:12px; font-size:20px; font-weight:bold; cursor:pointer;">
+                    📦 <span id="invMenuText">Zalihe</span>
+                </button>
+                <button onclick="voiceCommand('shopping')" style="padding:20px; background:#ffd54f; color:#333; border:none; border-radius:12px; font-size:20px; font-weight:bold; cursor:pointer;">
+                    🛒 <span id="shopMenuText">Spisak</span>
+                </button>
+                <button onclick="voiceCommand('add')" style="padding:20px; background:#4CAF50; color:white; border:none; border-radius:12px; font-size:20px; font-weight:bold; cursor:pointer;">
+                    ➕ <span id="addMenuText">Dodaj proizvod</span>
+                </button>
+                <button onclick="voiceCommand('exit')" style="padding:20px; background:#f44336; color:white; border:none; border-radius:12px; font-size:20px; font-weight:bold; cursor:pointer;">
+                    🚪 <span id="exitMenuText">Izlaz</span>
+                </button>
+            </div>
+            
+            <button onclick="goBackFromVoice()" style="width:100%; padding:15px; background:#90caf9; color:#1a237e; border:none; border-radius:12px; font-size:20px; font-weight:bold; cursor:pointer;" id="backVoiceText">
+                ◀ Nazad
+            </button>
+        </div>
+    </div>
+
+    <!-- ===== MODERN ALERT ===== -->
+    <div id="modernAlert" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); justify-content:center; align-items:center; z-index:9999; backdrop-filter:blur(5px);">
+        <div style="background:white; border-radius:24px; padding:40px; max-width:400px; width:90%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.5); animation:slideIn 0.3s ease;">
+            <div style="font-size:64px; margin-bottom:15px;" id="alertIcon">📢</div>
+            <h2 style="color:#1a237e; margin-bottom:10px; font-size:28px;" id="alertTitle">Obaveštenje</h2>
+            <p style="font-size:18px; color:#555; margin-bottom:25px;" id="alertMessage">Poruka</p>
+            <button onclick="closeModernAlert()" style="background:#1a237e; color:white; border:none; padding:12px 40px; border-radius:12px; font-size:18px; cursor:pointer; font-weight:bold;">OK</button>
+        </div>
+    </div>
+
+    <!-- ===== MODERN CONFIRM ===== -->
+    <div id="modernConfirm" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); justify-content:center; align-items:center; z-index:9999; backdrop-filter:blur(5px);">
+        <div style="background:white; border-radius:24px; padding:40px; max-width:400px; width:90%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.5); animation:slideIn 0.3s ease;">
+            <div style="font-size:64px; margin-bottom:15px;" id="confirmIcon">⚠️</div>
+            <h2 style="color:#1a237e; margin-bottom:10px; font-size:28px;" id="confirmTitle">Potvrda</h2>
+            <p style="font-size:18px; color:#555; margin-bottom:25px;" id="confirmMessage">Da li ste sigurni?</p>
+            <div style="display:flex; gap:10px;">
+                <button onclick="closeModernConfirm(); if(confirmCallback && confirmCallback.onYes) confirmCallback.onYes();" style="flex:1; background:#4CAF50; color:white; border:none; padding:12px; border-radius:12px; font-size:18px; cursor:pointer; font-weight:bold;">✅ Da</button>
+                <button onclick="closeModernConfirm(); if(confirmCallback && confirmCallback.onNo) confirmCallback.onNo();" style="flex:1; background:#f44336; color:white; border:none; padding:12px; border-radius:12px; font-size:18px; cursor:pointer; font-weight:bold;">✖ Ne</button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .languages-grid { grid-template-columns: 1fr 1fr 1fr; }
+            .categories-grid { grid-template-columns: 1fr 1fr; }
+            .category-btn { padding: 30px 10px; font-size: 20px; min-height: 100px; }
+            .btn-header { font-size: 16px; padding: 12px 6px; }
+            .login-box { padding: 30px 20px; }
+            .lang-btn-main { padding: 15px 8px; min-height: 100px; font-size: 18px; }
+            .lang-btn-main img { width: 60px; height: 45px; }
+            .container { padding: 20px; }
+            .title { font-size: 26px; }
+        }
+        
+        @media (max-width: 480px) {
+            .languages-grid { grid-template-columns: 1fr 1fr; }
+            .categories-grid { grid-template-columns: 1fr; }
+            .lang-btn-main .lang-name { font-size: 14px; }
+        }
+    </style>
+
+    <script>
+        // ===== FIX za base href =====
+        (function() {
+            const base = document.querySelector('base');
+            if (base) {
+                const href = base.getAttribute('href');
+                if (href && !href.endsWith('/')) {
+                    base.setAttribute('href', href + '/');
+                }
+            }
+        })();
+    </script>
 </body>
 </html>
