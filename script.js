@@ -186,7 +186,11 @@ const translations = {
         inventory: "Zalihe",
         shopping: "Spisak potreba",
         add: "Dodaj proizvod",
-        back: "Nazad"
+        back: "Nazad",
+        voiceStatus: "🎤 Reci: 'Zalihe', 'Spisak', 'Dodaj proizvod' ili 'Izlaz'",
+        voiceDesc: "Govori i uneću",
+        manualDesc: "Unesi podatke ručno"
+        
     },
     en: {
         nazad: "Back", stanje: "Inventory", spisak: "Shopping List",
@@ -239,7 +243,10 @@ const translations = {
         inventory: "Inventory",
         shopping: "Shopping list",
         add: "Add product",
-        back: "Back"
+        back: "Back",
+        voiceStatus: "🎤 Say: 'Inventory', 'Shopping List', 'Add Product', or 'Exit'",
+        voiceDesc: "Speak and I will enter",
+        manualDesc: "Type data manually"
     },
     de: {
         nazad: "Zurück", stanje: "Bestand", spisak: "Einkaufsliste",
@@ -283,7 +290,10 @@ const translations = {
         inventory: "Bestand",
         shopping: "Einkaufsliste",
         add: "Produkt hinzufügen",
-        back: "Zurück"
+        back: "Zurück",
+        voiceStatus: "🎤 Sage: 'Bestand', 'Einkaufsliste', 'Produkt hinzufügen' oder 'Beenden'",
+        voiceDesc: "Sprich und ich werde eingeben",
+        manualDesc: "Daten manuell eingeben"
     },
     hu: {
         nazad: "Vissza", stanje: "Készlet", spisak: "Bevásárlólista",
@@ -327,7 +337,10 @@ const translations = {
         inventory: "Készlet",
         shopping: "Bevásárlólista",
         add: "Termék hozzáadása",
-        back: "Vissza"
+        back: "Vissza",
+        voiceStatus: "🎤 Mondd: 'Készlet', 'Bevásárlólista', 'Termék hozzáadása' vagy 'Kilépés'",
+        voiceDesc: "Beszélj és beírom",
+        manualDesc: "Adatok kézi bevitele"
             
     },
     uk: {
@@ -372,7 +385,10 @@ const translations = {
         inventory: "Запаси",
         shopping: "Список покупок",
         add: "Додати товар",
-        back: "Назад"
+        back: "Назад",
+        voiceStatus: "🎤 Скажіть: 'Запаси', 'Список', 'Додати товар' або 'Вихід'",
+        voiceDesc: "Говоріть і я введу",
+        manualDesc: "Введіть дані вручну"
     },
     ru: {
         nazad: "Назад", stanje: "Запасы", spisak: "Список",
@@ -416,7 +432,10 @@ const translations = {
         inventory: "Запасы",
         shopping: "Список покупок",
         add: "Добавить товар",
-        back: "Назад"
+        back: "Назад",
+        voiceStatus: "🎤 Скажите: 'Запасы', 'Список', 'Добавить товар' или 'Выход'",
+        voiceDesc: "Говорите и я введу",
+        manualDesc: "Введите данные вручную"
     },
     zh: {
         nazad: "返回", stanje: "库存", spisak: "购物清单",
@@ -460,7 +479,10 @@ const translations = {
         inventory: "库存",
         shopping: "购物清单",
         add: "添加产品",
-        back: "返回"
+        back: "返回",
+        voiceStatus: "🎤 说：'库存'，'购物清单'，'添加产品'或'退出'",
+        voiceDesc: "说话我会输入",
+        manualDesc: "手动输入数据"
     },
     es: {
         nazad: "Atrás", stanje: "Inventario", spisak: "Lista de Compras",
@@ -504,7 +526,10 @@ const translations = {
         inventory: "Inventario",
         shopping: "Lista de compras",
         add: "Agregar producto",
-        back: "Volver"
+        back: "Volver",
+        voiceStatus: "🎤 Di: 'Inventario', 'Lista de compras', 'Agregar producto' o 'Salir'",
+        voiceDesc: "Habla y lo ingresaré",
+        manualDesc: "Ingresar datos manualmente"
     },
     pt: {
         nazad: "Voltar", stanje: "Estoque", spisak: "Lista de Compras",
@@ -548,7 +573,10 @@ const translations = {
         inventory: "Estoque",
         shopping: "Lista de compras",
         add: "Adicionar produto",
-        back: "Voltar"
+        back: "Voltar",
+        voiceStatus: "🎤 Diga: 'Estoque', 'Lista de compras', 'Adicionar produto' ou 'Sair'",
+        voiceDesc: "Fale e eu vou entrar",
+        manualDesc: "Inserir dados manualmente"
     },
     fr: {
         nazad: "Retour", stanje: "Stock", spisak: "Liste de Courses",
@@ -592,7 +620,10 @@ const translations = {
         inventory: "Stock",
         shopping: "Liste de courses",
         add: "Ajouter un produit",
-        back: "Retour"
+        back: "Retour",
+        voiceStatus: "🎤 Dites: 'Stock', 'Liste de courses', 'Ajouter un produit' ou 'Quitter'",
+        voiceDesc: "Parlez et je vais entrer",
+        manualDesc: "Saisir les données manuellement"
     }
 };
 // ===== POMOĆNA FUNKCIJA ZA PREVODE =====
@@ -1225,7 +1256,406 @@ function goBackFromVoice() {
     updateChoiceScreenTexts();
     showScreen('choiceScreen');
 }
+// ============================================
+// RENDER INVENTORY - ZALIHE
+// ============================================
+function renderInventory() {
+    currentScreenState = 'inventory';
+    const content = document.getElementById('mainContent');
+    if (!content) return;
+    
+    // Uzmi podatke iz localStorage
+    let products = JSON.parse(localStorage.getItem('products') || '[]');
+    
+    if (products.length === 0) {
+        content.innerHTML = `
+            <div class="title">${t('stanje')}</div>
+            <div style="text-align:center;padding:40px;color:#999;font-size:18px;">
+                📦 ${t('nema_proizvoda')}
+            </div>
+        `;
+        return;
+    }
+    
+    let html = `<div class="title">${t('stanje')}</div>`;
+    html += `<div style="overflow-x:auto;">`;
+    html += `<table style="width:100%;border-collapse:collapse;background:white;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.1);">`;
+    
+    // Zaglavlje
+    html += `<thead style="background:#1a237e;color:white;">`;
+    html += `<tr>`;
+    html += `<th style="padding:12px;text-align:left;">${t('naziv_proizvoda')}</th>`;
+    html += `<th style="padding:12px;text-align:left;">${t('kolicina')}</th>`;
+    html += `<th style="padding:12px;text-align:left;">${t('jedinica_mere')}</th>`;
+    html += `<th style="padding:12px;text-align:left;">${t('mesto_skladistenja')}</th>`;
+    html += `<th style="padding:12px;text-align:center;">Akcije</th>`;
+    html += `</tr>`;
+    html += `</thead>`;
+    html += `<tbody>`;
+    
+    products.forEach((product, index) => {
+        const qty = product.kolicina || product.quantity || 0;
+        if (qty <= 0) return; // Preskoči ako je količina 0
+        
+        html += `<tr style="border-bottom:1px solid #eee;">`;
+        html += `<td style="padding:12px;"><strong>${product.naziv || product.name || 'N/A'}</strong></td>`;
+        html += `<td style="padding:12px;">${qty}</td>`;
+        html += `<td style="padding:12px;">${product.jedinica || product.unit || 'kom'}</td>`;
+        html += `<td style="padding:12px;">${product.mesto || product.storage || 'N/A'}</td>`;
+        html += `<td style="padding:12px;text-align:center;">
+            <button onclick="moveToShopping(${index})" style="background:#FF9800;color:white;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;font-size:12px;">
+                🛒 ${t('spisak')}
+            </button>
+        </td>`;
+        html += `</tr>`;
+    });
+    
+    html += `</tbody>`;
+    html += `</table>`;
+    html += `</div>`;
+    
+    content.innerHTML = html;
+}
 
+// ============================================
+// RENDER SHOPPING LIST - SPISAK POTREBA
+// ============================================
+function renderShoppingList() {
+    currentScreenState = 'shopping';
+    const content = document.getElementById('mainContent');
+    if (!content) return;
+    
+    let shoppingList = JSON.parse(localStorage.getItem('shoppingList') || '[]');
+    
+    if (shoppingList.length === 0) {
+        content.innerHTML = `
+            <div class="title">${t('spisak_potreba')}</div>
+            <div style="text-align:center;padding:40px;color:#999;font-size:18px;">
+                🛒 ${t('list_empty') || 'Shopping list is empty'}
+            </div>
+        `;
+        return;
+    }
+    
+    let html = `<div class="title">${t('spisak_potreba')}</div>`;
+    html += `<div style="margin-bottom:15px;display:flex;gap:10px;flex-wrap:wrap;">`;
+    html += `<button onclick="selectAllShopping()" style="background:#4CAF50;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;">${t('oznaci_sve')}</button>`;
+    html += `<button onclick="copyShoppingList()" style="background:#2196F3;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;">${t('kopiraj')}</button>`;
+    html += `<button onclick="deleteSelectedShopping()" style="background:#f44336;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;">${t('obrisi_oznaceno')}</button>`;
+    html += `</div>`;
+    
+    html += `<div style="overflow-x:auto;">`;
+    html += `<table style="width:100%;border-collapse:collapse;background:white;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.1);">`;
+    html += `<thead style="background:#1a237e;color:white;">`;
+    html += `<tr>`;
+    html += `<th style="padding:12px;text-align:center;width:40px;"><input type="checkbox" id="selectAllCheckbox" onchange="toggleAllShoppingCheckboxes()"></th>`;
+    html += `<th style="padding:12px;text-align:left;">${t('naziv_proizvoda')}</th>`;
+    html += `<th style="padding:12px;text-align:left;">${t('kolicina')}</th>`;
+    html += `<th style="padding:12px;text-align:center;">Akcije</th>`;
+    html += `</tr>`;
+    html += `</thead>`;
+    html += `<tbody>`;
+    
+    shoppingList.forEach((item, index) => {
+        html += `<tr style="border-bottom:1px solid #eee;">`;
+        html += `<td style="padding:12px;text-align:center;"><input type="checkbox" class="shopping-checkbox" data-index="${index}"></td>`;
+        html += `<td style="padding:12px;"><strong>${item.naziv || item.name || 'N/A'}</strong></td>`;
+        html += `<td style="padding:12px;">${item.kolicina || item.quantity || 0}</td>`;
+        html += `<td style="padding:12px;text-align:center;">
+            <button onclick="removeFromShopping(${index})" style="background:#f44336;color:white;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;font-size:12px;">
+                ✖ ${t('obrisi')}
+            </button>
+        </td>`;
+        html += `</tr>`;
+    });
+    
+    html += `</tbody>`;
+    html += `</table>`;
+    html += `</div>`;
+    
+    content.innerHTML = html;
+}
+
+// ============================================
+// RENDER DATA ENTRY - UNOS PODATAKA
+// ============================================
+function renderDataEntry(subcategory) {
+    currentScreenState = 'dataEntry';
+    currentSubcategory = subcategory || '';
+    const content = document.getElementById('mainContent');
+    if (!content) return;
+    
+    const storageOptions = [
+        t('zamrzivac_1'), t('zamrzivac_2'), t('zamrzivac_3'),
+        t('frizider'), t('ostava'), t('Ostalo')
+    ];
+    
+    const unitOptions = ['kg', 'g', 'kom', 'l', 'ml', 'pak', 'kutija'];
+    
+    let html = `<div class="title">${t('unos_podataka')}</div>`;
+    html += `<div style="background:white;padding:20px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1);max-width:600px;margin:0 auto;">`;
+    
+    // Naziv proizvoda
+    html += `<div style="margin-bottom:15px;">`;
+    html += `<label style="display:block;font-weight:bold;margin-bottom:5px;color:#1a237e;">${t('naziv_proizvoda')}</label>`;
+    html += `<input type="text" id="productName" placeholder="${t('naziv_proizvoda')}" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;font-size:16px;">`;
+    html += `</div>`;
+    
+    // Količina
+    html += `<div style="margin-bottom:15px;">`;
+    html += `<label style="display:block;font-weight:bold;margin-bottom:5px;color:#1a237e;">${t('kolicina')}</label>`;
+    html += `<input type="number" id="productQuantity" placeholder="0" min="0" step="0.1" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;font-size:16px;">`;
+    html += `</div>`;
+    
+    // Jedinica mere
+    html += `<div style="margin-bottom:15px;">`;
+    html += `<label style="display:block;font-weight:bold;margin-bottom:5px;color:#1a237e;">${t('jedinica_mere')}</label>`;
+    html += `<select id="productUnit" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;font-size:16px;">`;
+    unitOptions.forEach(unit => {
+        html += `<option value="${unit}">${t(unit) || unit}</option>`;
+    });
+    html += `</select>`;
+    html += `</div>`;
+    
+    // Mesto skladištenja
+    html += `<div style="margin-bottom:15px;">`;
+    html += `<label style="display:block;font-weight:bold;margin-bottom:5px;color:#1a237e;">${t('mesto_skladistenja')}</label>`;
+    html += `<select id="productStorage" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;font-size:16px;">`;
+    storageOptions.forEach(place => {
+        html += `<option value="${place}">${place}</option>`;
+    });
+    html += `</select>`;
+    html += `</div>`;
+    
+    // Dugmad
+    html += `<div style="display:flex;gap:10px;margin-top:20px;">`;
+    html += `<button onclick="saveProduct()" style="flex:1;background:#4CAF50;color:white;border:none;padding:12px;border-radius:6px;font-size:16px;cursor:pointer;font-weight:bold;">✅ ${t('unesi')}</button>`;
+    html += `<button onclick="renderCategories()" style="flex:1;background:#f44336;color:white;border:none;padding:12px;border-radius:6px;font-size:16px;cursor:pointer;font-weight:bold;">✖ ${t('odustani')}</button>`;
+    html += `</div>`;
+    
+    html += `</div>`;
+    content.innerHTML = html;
+}
+
+// ============================================
+// POMOĆNE FUNKCIJE ZA RAD SA PODACIMA
+// ============================================
+
+// Sačuvaj proizvod
+function saveProduct() {
+    const name = document.getElementById('productName')?.value.trim();
+    const quantity = parseFloat(document.getElementById('productQuantity')?.value);
+    const unit = document.getElementById('productUnit')?.value || 'kom';
+    const storage = document.getElementById('productStorage')?.value || t('Ostalo');
+    
+    if (!name) {
+        showModernAlert(t('missing_info'), t('enter_product_name'), '⚠️');
+        return;
+    }
+    
+    if (isNaN(quantity) || quantity <= 0) {
+        showModernAlert(t('invalid_input'), t('enter_quantity'), '⚠️');
+        return;
+    }
+    
+    // Uzmi postojeće proizvode
+    let products = JSON.parse(localStorage.getItem('products') || '[]');
+    
+    // Dodaj novi proizvod
+    const newProduct = {
+        naziv: name,
+        kolicina: quantity,
+        jedinica: unit,
+        mesto: storage,
+        kategorija: currentCategory || '',
+        podkategorija: currentSubcategory || '',
+        datum: new Date().toISOString().split('T')[0]
+    };
+    
+    products.push(newProduct);
+    localStorage.setItem('products', JSON.stringify(products));
+    
+    showModernAlert(t('success'), t('product_saved'), '✅');
+    
+    // Resetuj polja
+    document.getElementById('productName').value = '';
+    document.getElementById('productQuantity').value = '';
+    
+    // Osveži prikaz
+    setTimeout(() => {
+        renderInventory();
+    }, 500);
+}
+
+// Prebaci u shopping listu
+function moveToShopping(index) {
+    let products = JSON.parse(localStorage.getItem('products') || '[]');
+    if (index < 0 || index >= products.length) return;
+    
+    const product = products[index];
+    if (!product) return;
+    
+    // Uzmi shopping listu
+    let shoppingList = JSON.parse(localStorage.getItem('shoppingList') || '[]');
+    
+    // Proveri da li već postoji
+    const existingIndex = shoppingList.findIndex(item => 
+        item.naziv === product.naziv && item.jedinica === product.jedinica
+    );
+    
+    if (existingIndex >= 0) {
+        shoppingList[existingIndex].kolicina += product.kolicina;
+    } else {
+        shoppingList.push({
+            naziv: product.naziv,
+            kolicina: product.kolicina,
+            jedinica: product.jedinica
+        });
+    }
+    
+    localStorage.setItem('shoppingList', JSON.stringify(shoppingList));
+    
+    // Smanji količinu u inventaru na 0
+    products[index].kolicina = 0;
+    localStorage.setItem('products', JSON.stringify(products));
+    
+    showModernAlert(t('success'), t('shopping_moved'), '🛒');
+    renderInventory();
+}
+
+// Ukloni iz shopping liste
+function removeFromShopping(index) {
+    let shoppingList = JSON.parse(localStorage.getItem('shoppingList') || '[]');
+    if (index < 0 || index >= shoppingList.length) return;
+    
+    const itemName = shoppingList[index].naziv || 'item';
+    showModernConfirm(
+        t('delete_confirm_title') || 'Delete Confirmation',
+        t('delete_from_shopping') || `Delete "${itemName}" from shopping list?`,
+        '⚠️',
+        function() {
+            shoppingList.splice(index, 1);
+            localStorage.setItem('shoppingList', JSON.stringify(shoppingList));
+            renderShoppingList();
+        },
+        function() {
+            // Odustani
+        }
+    );
+}
+
+// Selektuj sve u shopping listi
+function selectAllShopping() {
+    const checkboxes = document.querySelectorAll('.shopping-checkbox');
+    const mainCheckbox = document.getElementById('selectAllCheckbox');
+    const isChecked = mainCheckbox ? mainCheckbox.checked : true;
+    
+    checkboxes.forEach(cb => {
+        cb.checked = isChecked;
+    });
+}
+
+function toggleAllShoppingCheckboxes() {
+    const mainCheckbox = document.getElementById('selectAllCheckbox');
+    if (!mainCheckbox) return;
+    
+    const checkboxes = document.querySelectorAll('.shopping-checkbox');
+    checkboxes.forEach(cb => {
+        cb.checked = mainCheckbox.checked;
+    });
+}
+
+// Kopiraj shopping listu
+function copyShoppingList() {
+    const shoppingList = JSON.parse(localStorage.getItem('shoppingList') || '[]');
+    if (shoppingList.length === 0) {
+        showModernAlert(t('list_empty'), 'Nothing to copy', '📋');
+        return;
+    }
+    
+    let text = '🛒 SHOPPING LIST\n' + '='.repeat(30) + '\n\n';
+    shoppingList.forEach((item, i) => {
+        text += `${i+1}. ${item.naziv || 'N/A'} - ${item.kolicina || 0} ${item.jedinica || ''}\n`;
+    });
+    
+    navigator.clipboard.writeText(text).then(() => {
+        showModernAlert(t('success'), t('copied'), '📋');
+    }).catch(() => {
+        showModernAlert(t('error'), t('copy_error'), '❌');
+    });
+}
+
+// Obriši selektovane iz shopping liste
+function deleteSelectedShopping() {
+    const checkboxes = document.querySelectorAll('.shopping-checkbox:checked');
+    if (checkboxes.length === 0) {
+        showModernAlert(t('no_selection'), t('no_items_selected'), '⚠️');
+        return;
+    }
+    
+    const count = checkboxes.length;
+    showModernConfirm(
+        t('delete_confirm_title'),
+        t('delete_confirm').replace('{count}', count),
+        '⚠️',
+        function() {
+            let shoppingList = JSON.parse(localStorage.getItem('shoppingList') || '[]');
+            const indices = [];
+            checkboxes.forEach(cb => {
+                const idx = parseInt(cb.dataset.index);
+                if (!isNaN(idx)) indices.push(idx);
+            });
+            
+            // Sortiraj opadajuće i obriši
+            indices.sort((a, b) => b - a);
+            indices.forEach(idx => {
+                if (idx >= 0 && idx < shoppingList.length) {
+                    shoppingList.splice(idx, 1);
+                }
+            });
+            
+            localStorage.setItem('shoppingList', JSON.stringify(shoppingList));
+            renderShoppingList();
+        },
+        function() {
+            // Odustani
+        }
+    );
+}
+
+// ============================================
+// AŽURIRAJ VOICE STATUS
+// ============================================
+function updateVoiceStatus(text) {
+    const status = document.getElementById('voiceStatus');
+    if (status) {
+        status.innerHTML = text;
+    }
+}
+
+// ============================================
+// DODATNA PODEŠAVANJA ZA RENDER
+// ============================================
+// Dodaj ovo u showScreen funkciju za bolje upravljanje
+const originalShowScreen = showScreen;
+showScreen = function(screenId) {
+    // Sakrij sve ekrane
+    document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+    
+    // Pokaži traženi ekran
+    const target = document.getElementById(screenId);
+    if (target) {
+        target.style.display = 'flex';
+        
+        // Ako je mainScreen, prikaži kategorije
+        if (screenId === 'mainScreen' && currentScreenState === '') {
+            renderCategories();
+        }
+    }
+    
+    // Ažuriraj header
+    updateHeaderTexts();
+};
 // ============================================
 // KRAJ FAJLA
 // ============================================
