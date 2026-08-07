@@ -1141,29 +1141,66 @@ function startVoiceRecognition() {
 function voiceCommand(command) {
     console.log('🎤 Komanda:', command);
     
-    const cmd = command.toLowerCase();
+    const cmd = command.toLowerCase().trim();
     
-    if (cmd.includes('inventory') || cmd.includes('zalihe') || cmd.includes('stock') || cmd.includes('inv')) {
+    // ===== INVENTORY / ZALIHE (SVi JEZICI) =====
+    if (cmd.includes('inventory') || cmd.includes('zalihe') || cmd.includes('stock') || 
+        cmd.includes('készlet') || cmd.includes('keszlet') || cmd.includes('bestand') || 
+        cmd.includes('запаси') || cmd.includes('запасы') || cmd.includes('库存') || 
+        cmd.includes('inventario') || cmd.includes('estoque') || cmd.includes('stock') ||
+        cmd.includes('inv') || cmd.includes('zal')) {
         console.log('📦 Otvaram zalihe');
         showScreen('mainScreen');
-        renderInventory();
-    } else if (cmd.includes('shopping') || cmd.includes('spisak') || cmd.includes('list') || cmd.includes('shop')) {
+        setTimeout(function() {
+            renderInventory();
+        }, 100);
+        return;
+    }
+    
+    // ===== SHOPPING / SPISAK (SVI JEZICI) =====
+    if (cmd.includes('shopping') || cmd.includes('spisak') || cmd.includes('list') || 
+        cmd.includes('bevásárlólista') || cmd.includes('bevasarlolista') || cmd.includes('einkaufsliste') ||
+        cmd.includes('список') || cmd.includes('список') || cmd.includes('购物清单') ||
+        cmd.includes('lista') || cmd.includes('lista de compras') || cmd.includes('liste') ||
+        cmd.includes('shop') || cmd.includes('spis')) {
         console.log('🛒 Otvaram spisak');
         showScreen('mainScreen');
-        renderShoppingList();
-    } else if (cmd.includes('add') || cmd.includes('dodaj') || cmd.includes('unos') || cmd.includes('product') || cmd.includes('novi')) {
+        setTimeout(function() {
+            renderShoppingList();
+        }, 100);
+        return;
+    }
+    
+    // ===== ADD / DODAJ (SVI JEZICI) =====
+    if (cmd.includes('add') || cmd.includes('dodaj') || cmd.includes('unos') || 
+        cmd.includes('product') || cmd.includes('termék') || cmd.includes('termek') || 
+        cmd.includes('produkt') || cmd.includes('додати') || cmd.includes('добавить') ||
+        cmd.includes('添加') || cmd.includes('agregar') || cmd.includes('adicionar') ||
+        cmd.includes('ajouter') || cmd.includes('novi') || cmd.includes('hozzáadás') ||
+        cmd.includes('novo') || cmd.includes('nouveau')) {
         console.log('➕ Otvaram unos');
         showScreen('mainScreen');
-        renderDataEntry('');
-    } else if (cmd.includes('exit') || cmd.includes('izlaz') || cmd.includes('quit') || cmd.includes('close') || cmd.includes('zatvori')) {
+        setTimeout(function() {
+            renderDataEntry('');
+        }, 100);
+        return;
+    }
+    
+    // ===== EXIT / IZLAZ (SVI JEZICI) =====
+    if (cmd.includes('exit') || cmd.includes('izlaz') || cmd.includes('quit') || 
+        cmd.includes('close') || cmd.includes('kilépés') || cmd.includes('kilepes') || 
+        cmd.includes('beenden') || cmd.includes('вихід') || cmd.includes('выход') ||
+        cmd.includes('退出') || cmd.includes('salir') || cmd.includes('sair') ||
+        cmd.includes('quitter') || cmd.includes('zatvori') || cmd.includes('kis')) {
         console.log('🚪 Izlaz');
         exitApp();
-    } else {
-        console.log('❌ Nepoznata komanda:', cmd);
-        showModernAlert('Unknown command', 'Say: Inventory, Shopping, Add, or Exit', '🎤');
+        return;
     }
+    
+    // ===== NEPOZNATA KOMANDA =====
+    console.log('❌ Nepoznata komanda:', cmd);
+    showModernAlert('Unknown Command', `"${command}" not recognized. Try: Inventory, Shopping, Add, or Exit`, '🎤');
 }
-
 // ===== IZBOR NAČINA UNOSA =====
 function selectVoiceMode() {
     console.log('🎤 Izabran zvučni unos');
