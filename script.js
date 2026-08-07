@@ -1845,30 +1845,30 @@ function startVoiceRecognition() {
         console.error("❌ Neuspešno pokretanje mikrofona:", e);
     }
 }
-// Automatsko povezivanje ENTER dugmeta preko ID-ja
-document.addEventListener('DOMContentLoaded', function() {
-    const loginBtn = document.getElementById('loginBtn');
-    if (loginBtn) {
-        loginBtn.onclick = function() {
-            console.log("🖱️ Kliknuto na ENTER dugme!");
-            
-            const phoneInput = document.getElementById('phoneInput');
-            const phoneNumber = phoneInput ? phoneInput.value.trim() : '';
-            
-            if (typeof checkPhoneNumber === 'function') {
-                checkPhoneNumber(phoneNumber);
-            } else if (typeof triggerLogin === 'function') {
-                triggerLogin();
-            } else {
-                showScreen('languageScreen');
-                if (typeof renderLanguageGrid === 'function') {
-                    renderLanguageGrid();
-                }
+// ===== DIREKTNO HVATANJE KLIKA NA LOGIN DUGME =====
+window.addEventListener('click', function(event) {
+    // Proveravamo da li je kliknuto baš na dugme sa id-jem 'loginBtn' ili unutar njega
+    const btn = event.target.closest('#loginBtn');
+    if (btn) {
+        console.log("🖱️ Uspešno uhvaćen klik na ENTER dugme!");
+        
+        const phoneInput = document.getElementById('phoneInput');
+        const phoneNumber = phoneInput ? phoneInput.value.trim() : '';
+        
+        if (typeof checkPhoneNumber === 'function') {
+            checkPhoneNumber(phoneNumber);
+        } else if (typeof triggerLogin === 'function') {
+            triggerLogin();
+        } else {
+            showScreen('languageScreen');
+            if (typeof renderLanguageGrid === 'function') {
+                renderLanguageGrid();
             }
-        };
+        }
     }
 });
+
 // ============================================
 // KRAJ FAJLA
 // ============================================
-console.log('✅ Kraj fajla - glasovne komande uspešno uređene!');
+console.log('✅ Kraj fajla - rešenje aktivirano!');
