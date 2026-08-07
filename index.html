@@ -416,36 +416,86 @@
         </div>
     </div>
 
-    <!-- ===== EKRAN ZA GLASOVNI MENI ===== -->
-    <div id="voiceMenuScreen" class="screen" style="display:none; background:#1a237e; padding:20px;">
-        <div class="languages-box" style="width:100%; max-width:600px;">
-            <h2 style="color:#FFD700; font-size:28px; margin-bottom:20px;" id="voiceMenuTitleText">🎤 Glasovna kontrola</h2>
-            
-            <div id="voiceStatus" style="background:white; padding:20px; border-radius:12px; margin-bottom:20px; color:#333; font-size:18px; text-align:center; min-height:60px;">
-                🎤 Reci: "Zalihe", "Spisak", "Dodaj proizvod" ili "Izlaz"
-            </div>
-            
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:15px;">
-                <button onclick="voiceCommand('inventory')" style="padding:20px; background:#81c784; color:white; border:none; border-radius:12px; font-size:20px; font-weight:bold; cursor:pointer;">
-                    📦 <span id="invMenuText">Zalihe</span>
-                </button>
-                <button onclick="voiceCommand('shopping')" style="padding:20px; background:#ffd54f; color:#333; border:none; border-radius:12px; font-size:20px; font-weight:bold; cursor:pointer;">
-                    🛒 <span id="shopMenuText">Spisak</span>
-                </button>
-                <button onclick="voiceCommand('add')" style="padding:20px; background:#4CAF50; color:white; border:none; border-radius:12px; font-size:20px; font-weight:bold; cursor:pointer;">
-                    ➕ <span id="addMenuText">Dodaj proizvod</span>
-                </button>
-                <button onclick="voiceCommand('exit')" style="padding:20px; background:#f44336; color:white; border:none; border-radius:12px; font-size:20px; font-weight:bold; cursor:pointer;">
-                    🚪 <span id="exitMenuText">Izlaz</span>
-                </button>
-            </div>
-            
-            <button onclick="goBackFromVoice()" style="width:100%; padding:15px; background:#90caf9; color:#1a237e; border:none; border-radius:12px; font-size:20px; font-weight:bold; cursor:pointer;" id="backVoiceText">
-                ◀ Nazad
-            </button>
-        </div>
-    </div>
-
+    // ===== VOICE COMMAND (ISPRAVNA VERZIJA) =====
+function voiceCommand(command) {
+    console.log('🎤 Komanda:', command);
+    
+    const cmd = command.toLowerCase().trim();
+    
+    // ===== INVENTORY / ZALIHE =====
+    if (cmd === 'inventory' || cmd === 'zalihe' || cmd === 'stock' || 
+        cmd.includes('inventory') || cmd.includes('zalihe') || cmd.includes('stock') || 
+        cmd.includes('készlet') || cmd.includes('keszlet') || cmd.includes('bestand') || 
+        cmd.includes('запаси') || cmd.includes('запасы') || cmd.includes('库存') || 
+        cmd.includes('inventario') || cmd.includes('estoque') || 
+        cmd.includes('inv') || cmd.includes('zal') || cmd.includes('stanje')) {
+        console.log('📦 Otvaram zalihe');
+        showScreen('mainScreen');
+        setTimeout(function() {
+            renderInventory();
+        }, 100);
+        return; // ✅ ZAVRŠI - bez alerta
+    }
+    
+    // ===== SHOPPING / SPISAK =====
+    if (cmd === 'shopping' || cmd === 'spisak' || cmd === 'list' ||
+        cmd.includes('shopping') || cmd.includes('spisak') || cmd.includes('list') || 
+        cmd.includes('bevásárlólista') || cmd.includes('bevasarlolista') || cmd.includes('einkaufsliste') ||
+        cmd.includes('список') || cmd.includes('список') || cmd.includes('购物清单') ||
+        cmd.includes('lista') || cmd.includes('lista de compras') || cmd.includes('liste') ||
+        cmd.includes('shop') || cmd.includes('spis') || cmd.includes('potreba') || cmd.includes('potreb')) {
+        console.log('🛒 Otvaram spisak');
+        showScreen('mainScreen');
+        setTimeout(function() {
+            renderShoppingList();
+        }, 100);
+        return; // ✅ ZAVRŠI - bez alerta
+    }
+    
+    // ===== ADD / DODAJ =====
+    if (cmd === 'add' || cmd === 'dodaj' || 
+        cmd.includes('add') || cmd.includes('dodaj') || cmd.includes('unos') || 
+        cmd.includes('product') || cmd.includes('termék') || cmd.includes('termek') || 
+        cmd.includes('produkt') || cmd.includes('додати') || cmd.includes('добавить') ||
+        cmd.includes('添加') || cmd.includes('agregar') || cmd.includes('adicionar') ||
+        cmd.includes('ajouter') || cmd.includes('novi') || cmd.includes('hozzáadás') ||
+        cmd.includes('novo') || cmd.includes('nouveau') || cmd.includes('dodavanje')) {
+        console.log('➕ Otvaram unos');
+        showScreen('mainScreen');
+        setTimeout(function() {
+            renderDataEntry('');
+        }, 100);
+        return; // ✅ ZAVRŠI - bez alerta
+    }
+    
+    // ===== EXIT / IZLAZ =====
+    if (cmd === 'exit' || cmd === 'izlaz' || 
+        cmd.includes('exit') || cmd.includes('izlaz') || cmd.includes('quit') || 
+        cmd.includes('close') || cmd.includes('kilépés') || cmd.includes('kilepes') || 
+        cmd.includes('beenden') || cmd.includes('вихід') || cmd.includes('выход') ||
+        cmd.includes('退出') || cmd.includes('salir') || cmd.includes('sair') ||
+        cmd.includes('quitter') || cmd.includes('zatvori') || cmd.includes('kis') ||
+        cmd.includes('izadji') || cmd.includes('izadi')) {
+        console.log('🚪 Izlaz');
+        exitApp();
+        return; // ✅ ZAVRŠI - bez alerta
+    }
+    
+    // ===== NEPOZNATA KOMANDA - SAMO OVDE SE POZIVA ALERT =====
+    console.log('❌ Nepoznata komanda:', cmd);
+    
+    // ⭐ KORISTI PREVODE ZA TRENUTNI JEZIK
+    const unknownTitle = t('unknown_command_title') || 'Nepoznata komanda';
+    const notRecognized = t('not_recognized') || 'nije prepoznata';
+    const tryCommands = t('try_commands') || 'Pokušajte: Zalihe, Spisak, Dodaj proizvod ili Izlaz';
+    
+    // ⭐ PRIKAZI PORUKU NA PRAVOM JEZIKU - SAMO ZA NEPOZNATE KOMANDE
+    showModernAlert(
+        unknownTitle,
+        `"${command}" ${notRecognized}. ${tryCommands}`,
+        '🎤'
+    );
+}
     <!-- ===== MODERN ALERT ===== -->
     <div id="modernAlert" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); justify-content:center; align-items:center; z-index:9999; backdrop-filter:blur(5px);">
         <div style="background:white; border-radius:24px; padding:40px; max-width:400px; width:90%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.5); animation:slideIn 0.3s ease;">
