@@ -883,8 +883,11 @@ function renderLanguages() {
 // ============================================
 // 1. FUNKCIJA ZA AŽURIRANJE TEKSTOVA (Ažurirana)
 // ============================================
-function updateChoiceScreenTexts() {
-    const t = translations[currentLang] || translations['en']; 
+// EKRAN 4: Zvučni meni - voiceStatus
+const voiceStatus = document.getElementById('voiceStatus');
+if (voiceStatus) {
+    voiceStatus.innerHTML = t.voiceStatus || '🎤 Say: "Inventory", "Shopping List", "Add Product", or "Exit"';
+}
 
     // EKRAN 3: Izbor načina unosa
     if(document.getElementById('choiceTitleText')) document.getElementById('choiceTitleText').innerText = t.choiceTitle || "How do you want to enter data?";
