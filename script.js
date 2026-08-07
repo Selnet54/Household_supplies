@@ -1937,9 +1937,6 @@ function startVoiceRecognition() {
     }
 }
 
-// ============================================
-// KRAJ FAJLA
-// ============================================
 console.log('✅ Kraj fajla - rešenje za mikrofon primenjeno!');
 // ============================================
 // KRAJ FAJLA
