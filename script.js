@@ -1787,6 +1787,7 @@ let recognition = null;
 let recognition = null;
 
 // ===== JEDINSTVENA FUNKCIJA ZA GLASOVNO UPRAVLJANJE =====
+// ===== JEDINSTVENA FUNKCIJA ZA GLASOVNO UPRAVLJANJE =====
 function startVoiceRecognition() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
@@ -1794,8 +1795,9 @@ function startVoiceRecognition() {
         return;
     }
 
-    if (recognition) {
-        try { recognition.stop(); } catch (e) {}
+    // Koristimo već postojeću 'recognition' promenljivu
+    if (window.recognition) {
+        try { window.recognition.stop(); } catch (e) {}
     }
 
     recognition = new SpeechRecognition();
@@ -1834,26 +1836,3 @@ function startVoiceRecognition() {
         console.error("Greška pri pokretanju:", e);
     }
 }
-
-// ===== EVENT LISTENER ZA LOGIN DUGME =====
-window.addEventListener('click', function(event) {
-    const btn = event.target.closest('#loginBtn');
-    if (btn) {
-        console.log("🖱️ Kliknuto na login dugme!");
-        const phoneInput = document.getElementById('phoneInput');
-        const phoneNumber = phoneInput ? phoneInput.value.trim() : '';
-        
-        if (typeof checkPhoneNumber === 'function') {
-            checkPhoneNumber(phoneNumber);
-        } else if (typeof triggerLogin === 'function') {
-            triggerLogin();
-        } else {
-            showScreen('languageScreen');
-            if (typeof renderLanguageGrid === 'function') {
-                renderLanguageGrid();
-            }
-        }
-    }
-});
-
-console.log('✅ Skripta uspešno očišćena i spremna!');
