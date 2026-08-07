@@ -1746,61 +1746,52 @@ function selectLanguage(langCode) {
 }
 
 // ===== IZBOR NAČINA UNOSA =====
+// ===== IZBOR NAČINA UNOSA =====
 function selectVoiceMode() {
     console.log('🎤 Izabran zvučni unos');
+    
+    // Prvo prevedi tekstove na 4. ekranu
     updateChoiceScreenTexts();
+    
+    // Prikaži 4. ekran
     showScreen('voiceMenuScreen');
-    startVoiceRecognition();
-}
-
-function selectManualMode() {
-    console.log('✍️ Izabran ručni unos');
-    showScreen('mainScreen');
-    renderCategories();
-}
-
-function goBackFromVoice() {
-    updateChoiceScreenTexts();
-    showScreen('choiceScreen');
-}
-
-// ===== GLASOVNE KOMANDE =====
-function voiceCommand(command) {
-    console.log('🎤 Komanda:', command);
     
-    // Proveri da li komanda sadrži ključne reči
-    const cmd = command.toLowerCase();
-    
-    if (cmd.includes('inventory') || cmd.includes('zalihe') || cmd.includes('stock')) {
-        showScreen('mainScreen');
-        renderInventory();
-    } else if (cmd.includes('shopping') || cmd.includes('spisak') || cmd.includes('list')) {
-        showScreen('mainScreen');
-        renderShoppingList();
-    } else if (cmd.includes('add') || cmd.includes('dodaj') || cmd.includes('unos') || cmd.includes('product')) {
-        showScreen('mainScreen');
-        renderDataEntry('');
-    } else if (cmd.includes('exit') || cmd.includes('izlaz') || cmd.includes('quit') || cmd.includes('close')) {
-        exitApp();
-    } else {
-        showModernAlert('Unknown command', 'Say: Inventory, Shopping, Add, or Exit', '🎤');
-    }
+    // Sačekaj malo da se ekran prikaže pa startuj mikrofon
+    setTimeout(function() {
+        startVoiceRecognition();
+    }, 300);
 }
 
 // ===== PREPOZNAVANJE GOVORA =====
 let recognition = null;
+let isListening = false;
 
 function startVoiceRecognition() {
-    // Očisti staru instancu
-    if (recognition) {
-        try { recognition.stop(); } catch(e) {}
-        recognition = null;
+    // Ako već sluša, nemoj ponovo startovati
+    if (isListening) {
+        console.log('🎤 Mikrofon već sluša');
+        return;
+    }
+
+    const status = document.getElementById('voiceStatus');
+    if (!status) {
+        console.error('❌ voiceStatus element not found');
+        return;
     }
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-        console.error("❌ Speech Recognition not supported");
+        status.innerHTML = '❌ Speech recognition not supported in this browser';
+        console.error('❌ Speech Recognition not supported');
         return;
+    }
+
+    // Očisti staru instancu
+    if (recognition) {
+        try { 
+            recognition.stop(); 
+        } catch(e) {}
+        recognition = null;
     }
 
     recognition = new SpeechRecognition();
@@ -1814,41 +1805,56 @@ function startVoiceRecognition() {
     recognition.lang = langMap[currentLang] || 'en-US';
     recognition.continuous = false;
     recognition.interimResults = true;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = function() {
+        isListening = true;
+        status.innerHTML = '🎤 Listening... (speak now)';
+        status.style.color = '#4FC3F7';
+        console.log('🎤 Mikrofon aktivan, jezik:', recognition.lang);
+    };
 
     recognition.onresult = function(event) {
         const last = event.results.length - 1;
         const text = event.results[last][0].transcript.trim();
-        console.log("🎤 Prepoznato:", text);
+        console.log('🎤 Prepoznato:', text);
+        status.innerHTML = `🗣️ You said: "${text}"`;
         
-        const status = document.getElementById('voiceStatus');
-        if (status) status.innerHTML = `🗣️ You said: "${text}"`;
-        
+        // Prosledi komandu
         voiceCommand(text);
     };
 
     recognition.onerror = function(event) {
-        console.warn("⚠️ Speech error:", event.error);
-        const status = document.getElementById('voiceStatus');
-        if (status) status.innerHTML = `❌ Error: ${event.error}`;
+        console.warn('⚠️ Speech error:', event.error);
+        status.innerHTML = `❌ Error: ${event.error}`;
+        status.style.color = '#f44336';
+        isListening = false;
+        
+        // Ako je greška 'not-allowed', korisnik nije dozvolio mikrofon
+        if (event.error === 'not-allowed') {
+            status.innerHTML = '❌ Please allow microphone access in browser settings';
+        }
     };
 
     recognition.onend = function() {
-        console.log("🎤 Mikrofon zaustavljen");
-        const status = document.getElementById('voiceStatus');
-        if (status) status.innerHTML = '🎤 Click the button to speak again';
+        isListening = false;
+        console.log('🎤 Mikrofon zaustavljen');
+        status.innerHTML = '🎤 Click the button to speak again';
+        status.style.color = '#aaa';
     };
 
     try {
         recognition.start();
-        console.log("🎤 Mikrofon pokrenut na:", recognition.lang);
-        const status = document.getElementById('voiceStatus');
-        if (status) status.innerHTML = '🎤 Listening... (speak now)';
+        console.log('🎤 Mikrofon startovan na:', recognition.lang);
     } catch(e) {
-        console.error("❌ Greška pri startovanju:", e);
+        console.error('❌ Greška pri startovanju:', e);
+        status.innerHTML = '❌ Failed to start microphone';
+        status.style.color = '#f44336';
     }
 }
 
 function restartVoiceRecognition() {
+    isListening = false;
     startVoiceRecognition();
 }
 
