@@ -879,7 +879,7 @@ function renderLanguages() {
     });
     console.log('✅ Jezici prikazani');
 }
-// ============================================
+
 // ============================================
 // 1. FUNKCIJA ZA AŽURIRANJE TEKSTOVA (Ažurirana)
 // ============================================
