@@ -1845,7 +1845,20 @@ function startVoiceRecognition() {
         console.error("❌ Neuspešno pokretanje mikrofona:", e);
     }
 }
-
+// ===== SLUŠAČ ZA LOGIN / ENTER DUGME =====
+const loginBtn = document.getElementById('loginBtn');
+if (loginBtn) {
+    loginBtn.addEventListener('click', function() {
+        console.log("🖱️ Klik na ENTER dugme");
+        // Ovde pozivate funkciju koja proverava uneti telefon i prelazi dalje (npr. triggerLogin())
+        if (typeof triggerLogin === 'function') {
+            triggerLogin();
+        } else {
+            // Ako se funkcija zove drugačije, ovde možete direktno preći na ekran sa jezicima:
+            showScreen('languageScreen');
+        }
+    });
+}
 // ============================================
 // KRAJ FAJLA
 // ============================================
