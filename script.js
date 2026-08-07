@@ -5,10 +5,10 @@ console.log('✅ Script.js je učitan!');
 
 // ===== TRENUTNO STANJE =====
 let currentLang = 'en';
-let currentScreenState = 'languages';
 let currentCategory = '';
 let currentSubcategory = '';
 let currentProductPart = '';
+let currentScreenState = 'languages';
 
 // ===== 0. EXIT FUNKCIJA =====
 function exitApp() {
@@ -1736,18 +1736,17 @@ function triggerLogin() {
 // ============================================
 // GLASOVNE KOMANDE I UPRAVLJANJE EKRANIMA
 // ============================================
-// ===== IZBOR JEZIKA =====
 function selectLanguage(langCode) {
-    window.currentLang = langCode; // 1. Postavimo globalni jezik
+    currentLang = langCode; // Postavljamo čistu globalnu promenljivu
     localStorage.setItem('selectedLang', langCode);
     
-    // 2. MORAMO ovde pozvati funkciju da se tekstovi osveže!
+    // Odmah osvežavamo tekstove na 3. ekranu
     updateChoiceScreenTexts(); 
     
-    // 3. Tek onda prikažemo ekran
+    // Prikazujemo 3. ekran
     showScreen('choiceScreen');
     
-    console.log('🌍 Izabran jezik:', window.currentLang);
+    console.log('🌍 Izabran jezik:', currentLang);
 }
 // ============================================
 // GLASOVNE KOMANDE I UPRAVLJANJE EKRANIMA
