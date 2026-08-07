@@ -1713,13 +1713,13 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ============================================
-// GLOBALNA FUNKCIJA ZA LOGIN
+// GLOBALNA FUNKCIJA ZA LOGIN (SAMO JEDNOM!)
 // ============================================
 function triggerLogin() {
     console.log("🔐 triggerLogin pozvan!");
     const phoneInput = document.getElementById('phoneInput');
     if (!phoneInput) {
-        showModernAlert('Error', 'Phone input not found!', '❌');
+        showModernAlert(t('error'), 'Phone input not found!', '❌');
         return;
     }
     const phone = phoneInput.value.trim();
@@ -1729,28 +1729,21 @@ function triggerLogin() {
         showScreen('languageScreen');
         renderLanguages();
     } else {
-        showModernAlert('Invalid Input', 'Please enter a valid phone number (9+ digits)!', '📱');
+        showModernAlert(t('invalid_input'), t('please_enter_phone'), '📱');
     }
 }
 
 // ============================================
 // GLASOVNE KOMANDE I UPRAVLJANJE EKRANIMA
 // ============================================
+
+// ===== IZBOR JEZIKA =====
 function selectLanguage(langCode) {
-    currentLang = langCode; // Postavljamo čistu globalnu promenljivu
-    localStorage.setItem('selectedLang', langCode);
-    
-    // Odmah osvežavamo tekstove na 3. ekranu
-    updateChoiceScreenTexts(); 
-    
-    // Prikazujemo 3. ekran
+    currentLang = langCode;
+    updateChoiceScreenTexts();
     showScreen('choiceScreen');
-    
-    console.log('🌍 Izabran jezik:', currentLang);
+    console.log('🌍 Izabran jezik:', langCode);
 }
-// ============================================
-// GLASOVNE KOMANDE I UPRAVLJANJE EKRANIMA
-// ============================================
 
 // ===== IZBOR NAČINA UNOSA =====
 function selectVoiceMode() {
@@ -1771,68 +1764,95 @@ function goBackFromVoice() {
     showScreen('choiceScreen');
 }
 
-// ===== RESTART MIKROFONA =====
-function restartVoiceRecognition() {
-    startVoiceRecognition();
-}
-
 // ===== GLASOVNE KOMANDE =====
 function voiceCommand(command) {
-    // ... tvoj postojeći kod ...
+    console.log('🎤 Komanda:', command);
+    
+    // Proveri da li komanda sadrži ključne reči
+    const cmd = command.toLowerCase();
+    
+    if (cmd.includes('inventory') || cmd.includes('zalihe') || cmd.includes('stock')) {
+        showScreen('mainScreen');
+        renderInventory();
+    } else if (cmd.includes('shopping') || cmd.includes('spisak') || cmd.includes('list')) {
+        showScreen('mainScreen');
+        renderShoppingList();
+    } else if (cmd.includes('add') || cmd.includes('dodaj') || cmd.includes('unos') || cmd.includes('product')) {
+        showScreen('mainScreen');
+        renderDataEntry('');
+    } else if (cmd.includes('exit') || cmd.includes('izlaz') || cmd.includes('quit') || cmd.includes('close')) {
+        exitApp();
+    } else {
+        showModernAlert('Unknown command', 'Say: Inventory, Shopping, Add, or Exit', '🎤');
+    }
 }
+
 // ===== PREPOZNAVANJE GOVORA =====
 let recognition = null;
 
-// ===== GLOBALNA PROMENLJIVA ZA PREPOZNAVANJE =====
-let recognition = null;
-
-// ===== JEDINSTVENA FUNKCIJA ZA GLASOVNO UPRAVLJANJE =====
-// ===== JEDINSTVENA FUNKCIJA ZA GLASOVNO UPRAVLJANJE =====
 function startVoiceRecognition() {
+    // Očisti staru instancu
+    if (recognition) {
+        try { recognition.stop(); } catch(e) {}
+        recognition = null;
+    }
+
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-        console.warn("⚠️ Pretraživač ne podržava Speech Recognition.");
+        console.error("❌ Speech Recognition not supported");
         return;
     }
 
-    // Koristimo već postojeću 'recognition' promenljivu
-    if (window.recognition) {
-        try { window.recognition.stop(); } catch (e) {}
-    }
-
     recognition = new SpeechRecognition();
-    
-    const langMap = { 'hu': 'hu-HU', 'sr': 'sr-RS' };
-    recognition.lang = langMap[currentLang] || 'en-US';
 
-    recognition.continuous = true;
-    recognition.interimResults = false;
+    // Postavi jezik
+    const langMap = {
+        'sr': 'sr-RS', 'en': 'en-US', 'de': 'de-DE', 'hu': 'hu-HU',
+        'uk': 'uk-UA', 'ru': 'ru-RU', 'zh': 'zh-CN', 'es': 'es-ES',
+        'pt': 'pt-PT', 'fr': 'fr-FR'
+    };
+    recognition.lang = langMap[currentLang] || 'en-US';
+    recognition.continuous = false;
+    recognition.interimResults = true;
 
     recognition.onresult = function(event) {
-        const transcript = event.results[event.results.length - 1][0].transcript.trim().toLowerCase();
-        console.log("🎤 Prepoznati govor:", transcript);
-        if (typeof voiceCommand === 'function') {
-            voiceCommand(transcript);
-        }
+        const last = event.results.length - 1;
+        const text = event.results[last][0].transcript.trim();
+        console.log("🎤 Prepoznato:", text);
+        
+        const status = document.getElementById('voiceStatus');
+        if (status) status.innerHTML = `🗣️ You said: "${text}"`;
+        
+        voiceCommand(text);
     };
 
     recognition.onerror = function(event) {
-        console.warn("⚠️ Greška mikrofona:", event.error);
+        console.warn("⚠️ Speech error:", event.error);
+        const status = document.getElementById('voiceStatus');
+        if (status) status.innerHTML = `❌ Error: ${event.error}`;
     };
 
     recognition.onend = function() {
-        const voiceMenuScreen = document.getElementById('voiceMenuScreen');
-        if (voiceMenuScreen && window.getComputedStyle(voiceMenuScreen).display === 'flex') {
-            setTimeout(() => {
-                try { recognition.start(); } catch (e) {}
-            }, 500);
-        }
+        console.log("🎤 Mikrofon zaustavljen");
+        const status = document.getElementById('voiceStatus');
+        if (status) status.innerHTML = '🎤 Click the button to speak again';
     };
 
     try {
         recognition.start();
-        console.log("🎙️ Mikrofon pokrenut na jeziku:", recognition.lang);
-    } catch (e) {
-        console.error("Greška pri pokretanju:", e);
+        console.log("🎤 Mikrofon pokrenut na:", recognition.lang);
+        const status = document.getElementById('voiceStatus');
+        if (status) status.innerHTML = '🎤 Listening... (speak now)';
+    } catch(e) {
+        console.error("❌ Greška pri startovanju:", e);
     }
 }
+
+function restartVoiceRecognition() {
+    startVoiceRecognition();
+}
+
+// ============================================
+// KRAJ FAJLA
+// ============================================
+console.log('✅ Kraj fajla - sve radi!');
