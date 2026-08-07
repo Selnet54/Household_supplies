@@ -1780,10 +1780,70 @@ function restartVoiceRecognition() {
 function voiceCommand(command) {
     // ... tvoj postojeći kod ...
 }
-
 // ===== PREPOZNAVANJE GOVORA =====
+let recognition = null;
+
 function startVoiceRecognition() {
-    // ... tvoj postojeći kod ...
+    // Provera da li pretraživač podržava prepoznavanje govora
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    
+    if (!SpeechRecognition) {
+        console.warn("⚠️ Prepoznavanje govora nije podržano u ovom pretraživaču.");
+        return;
+    }
+
+    if (recognition) {
+        try {
+            recognition.stop();
+        } catch (e) {
+            // Ignoriši ako je već zaustavljeno
+        }
+    }
+
+    recognition = new SpeechRecognition();
+    
+    // Postavljamo jezik na osnovu trenutnog izabranog jezika (currentLang)
+    // Ako je mađarski (hu), postavi 'hu-HU', za srpski 'sr-RS', podrazumevano 'en-US'
+    if (currentLang === 'hu') {
+        recognition.lang = 'hu-HU';
+    } else if (currentLang === 'sr') {
+        recognition.lang = 'sr-RS';
+    } else {
+        recognition.lang = 'en-US';
+    }
+
+    recognition.continuous = true;
+    recognition.interimResults = false;
+
+    recognition.onresult = function(event) {
+        const transcript = event.results[event.results.length - 1][0].transcript.trim().toLowerCase();
+        console.🎤 Prepoznati govor:`, transcript);
+        
+        // Prosleđujemo prepoznati tekst funkciji za komande
+        voiceCommand(transcript);
+    };
+
+    recognition.onerror = function(event) {
+        console.error("❌ Greška u prepoznavanju govora:", event.error);
+    };
+
+    recognition.onend = function() {
+        // Automatski restartuj mikrofon ako smo još uvek na ekranu zvučnog menija
+        if (currentScreenState === 'voiceMenuScreen' || document.getElementById('voiceMenuScreen').style.display === 'block') {
+            try {
+                recognition.start();
+            } catch (e) {
+                // Već radi
+            }
+        }
+    };
+
+    try {
+        recognition.start();
+        console.log("🎤 Mikrofon je pokrenut za jezik:", recognition.lang);
+    } catch (e) {
+        console.error("❌ Neuspešno pokretanje mikrofona:", e);
+    }
 }
 
 // ============================================
