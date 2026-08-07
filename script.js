@@ -1066,11 +1066,112 @@ function triggerLogin() {
 // ============================================
 // GLASOVNE KOMANDE
 // ============================================
+// ===== START VOICE RECOGNITION =====
+let recognition = null;
+
+function startVoiceRecognition() {
+    console.log('🎤 startVoiceRecognition pozvan');
+    
+    const status = document.getElementById('voiceStatus');
+    if (!status) {
+        console.error('❌ voiceStatus element not found');
+        return;
+    }
+    
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        status.innerHTML = '❌ Speech recognition not supported';
+        console.error('❌ Speech Recognition not supported');
+        return;
+    }
+    
+    if (recognition) {
+        try { recognition.stop(); } catch(e) {}
+        recognition = null;
+    }
+    
+    recognition = new SpeechRecognition();
+    
+    const langMap = {
+        'sr': 'sr-RS', 'en': 'en-US', 'de': 'de-DE', 'hu': 'hu-HU',
+        'uk': 'uk-UA', 'ru': 'ru-RU', 'zh': 'zh-CN', 'es': 'es-ES',
+        'pt': 'pt-PT', 'fr': 'fr-FR'
+    };
+    
+    recognition.lang = langMap[currentLang] || 'en-US';
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    
+    recognition.onstart = function() {
+        console.log('🎤 Mikrofon aktivan na:', recognition.lang);
+        status.innerHTML = '🎤 Listening... (speak now)';
+        status.style.color = '#4FC3F7';
+    };
+    
+    recognition.onresult = function(event) {
+        const last = event.results.length - 1;
+        const text = event.results[last][0].transcript.trim();
+        console.log('🎤 Prepoznato:', text);
+        status.innerHTML = `🗣️ You said: "${text}"`;
+        voiceCommand(text);
+    };
+    
+    recognition.onerror = function(event) {
+        console.warn('⚠️ Speech error:', event.error);
+        status.innerHTML = `❌ Error: ${event.error}`;
+        status.style.color = '#f44336';
+    };
+    
+    recognition.onend = function() {
+        console.log('🎤 Mikrofon zaustavljen');
+        status.innerHTML = '🎤 Click the button to speak again';
+        status.style.color = '#aaa';
+    };
+    
+    try {
+        recognition.start();
+        console.log('✅ Mikrofon startovan');
+    } catch(e) {
+        console.error('❌ Greška:', e);
+        status.innerHTML = '❌ Failed to start microphone';
+    }
+}
+
+// ===== VOICE COMMAND (DODAJ OVO) =====
+function voiceCommand(command) {
+    console.log('🎤 Komanda:', command);
+    
+    const cmd = command.toLowerCase();
+    
+    if (cmd.includes('inventory') || cmd.includes('zalihe') || cmd.includes('stock') || cmd.includes('inv')) {
+        console.log('📦 Otvaram zalihe');
+        showScreen('mainScreen');
+        renderInventory();
+    } else if (cmd.includes('shopping') || cmd.includes('spisak') || cmd.includes('list') || cmd.includes('shop')) {
+        console.log('🛒 Otvaram spisak');
+        showScreen('mainScreen');
+        renderShoppingList();
+    } else if (cmd.includes('add') || cmd.includes('dodaj') || cmd.includes('unos') || cmd.includes('product') || cmd.includes('novi')) {
+        console.log('➕ Otvaram unos');
+        showScreen('mainScreen');
+        renderDataEntry('');
+    } else if (cmd.includes('exit') || cmd.includes('izlaz') || cmd.includes('quit') || cmd.includes('close') || cmd.includes('zatvori')) {
+        console.log('🚪 Izlaz');
+        exitApp();
+    } else {
+        console.log('❌ Nepoznata komanda:', cmd);
+        showModernAlert('Unknown command', 'Say: Inventory, Shopping, Add, or Exit', '🎤');
+    }
+}
+
+// ===== IZBOR NAČINA UNOSA =====
 function selectVoiceMode() {
     console.log('🎤 Izabran zvučni unos');
     updateChoiceScreenTexts();
     showScreen('voiceMenuScreen');
-    startVoiceRecognition();
+    setTimeout(function() {
+        startVoiceRecognition();
+    }, 500);
 }
 
 function selectManualMode() {
@@ -1080,6 +1181,10 @@ function selectManualMode() {
 }
 
 function goBackFromVoice() {
+    if (recognition) {
+        try { recognition.stop(); } catch(e) {}
+        recognition = null;
+    }
     updateChoiceScreenTexts();
     showScreen('choiceScreen');
 }
