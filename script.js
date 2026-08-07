@@ -1670,21 +1670,30 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // ===== ENTER TASTER NA INPUT POLJU =====
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') {
-            const activeElement = document.activeElement;
-            if (activeElement && activeElement.id === 'phoneInput') {
-                e.preventDefault();
-                console.log('⌨️ Enter taster pritisnut na phoneInput-u');
+    // ===== DIREKTNO POVEZIVANJE ENTER DUGMETA =====
+document.addEventListener('DOMContentLoaded', function() {
+    const loginBtn = document.getElementById('loginBtn');
+    if (loginBtn) {
+        loginBtn.addEventListener('click', function(event) {
+            event.preventDefault();
+            console.log("🖱️ ENTER dugme uspešno kliknuto!");
+            
+            const phoneInput = document.getElementById('phoneInput');
+            const phoneNumber = phoneInput ? phoneInput.value.trim() : '';
+            
+            if (typeof checkPhoneNumber === 'function') {
+                checkPhoneNumber(phoneNumber);
+            } else if (typeof triggerLogin === 'function') {
                 triggerLogin();
+            } else {
+                showScreen('languageScreen');
+                if (typeof renderLanguageGrid === 'function') {
+                    renderLanguageGrid();
+                }
             }
-        }
-        if (e.key === 'Escape') {
-            closeSupportDialog();
-            closeModernConfirm();
-        }
-    });
-
+        });
+    }
+});
     // ===== MODERNI CONFIRM DUGMAD =====
     const yesBtn = document.getElementById('confirmYesBtn');
     const noBtn = document.getElementById('confirmNoBtn');
