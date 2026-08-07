@@ -879,7 +879,7 @@ function renderLanguages() {
     });
     console.log('✅ Jezici prikazani');
 }
-// ============================================
+
 // ============================================
 // 1. FUNKCIJA ZA AŽURIRANJE TEKSTOVA (Ažurirana)
 // ============================================
@@ -1817,7 +1817,7 @@ function startVoiceRecognition() {
 
     recognition.onresult = function(event) {
         const transcript = event.results[event.results.length - 1][0].transcript.trim().toLowerCase();
-        console.🎤 Prepoznati govor:`, transcript);
+        console.log("🎤 Prepoznati govor:", transcript);
         
         // Prosleđujemo prepoznati tekst funkciji za komande
         voiceCommand(transcript);
@@ -1845,8 +1845,103 @@ function startVoiceRecognition() {
         console.error("❌ Neuspešno pokretanje mikrofona:", e);
     }
 }
+// ===== DIREKTNO HVATANJE KLIKA NA LOGIN DUGME =====
+window.addEventListener('click', function(event) {
+    // Proveravamo da li je kliknuto baš na dugme sa id-jem 'loginBtn' ili unutar njega
+    const btn = event.target.closest('#loginBtn');
+    if (btn) {
+        console.log("🖱️ Uspešno uhvaćen klik na ENTER dugme!");
+        
+        const phoneInput = document.getElementById('phoneInput');
+        const phoneNumber = phoneInput ? phoneInput.value.trim() : '';
+        
+        if (typeof checkPhoneNumber === 'function') {
+            checkPhoneNumber(phoneNumber);
+        } else if (typeof triggerLogin === 'function') {
+            triggerLogin();
+        } else {
+            showScreen('languageScreen');
+            if (typeof renderLanguageGrid === 'function') {
+                renderLanguageGrid();
+            }
+        }
+    }
+});
+// ===== KONAČNA POPRAVKA ZA MIKROFON I PREPOZNAVANJE GOVORA =====
+// Zameni ovaj blok na dnu tvog fajla da glatko i bez pucanja pokreće mikrofon.
+
+let recognition = null;
+
+function startVoiceRecognition() {
+    // 1. Očisti staru instancu ako postoji
+    if (recognition) {
+        try {
+            recognition.stop();
+        } catch (e) {}
+    }
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        console.error("❌ Pretraživač ne podržava Speech Recognition.");
+        return;
+    }
+
+    recognition = new SpeechRecognition();
+
+    // 2. Postavljanje jezika tačno onako kako je bilo i ranije
+    if (currentLang === 'hu') {
+        recognition.lang = 'hu-HU';
+    } else if (currentLang === 'sr') {
+        recognition.lang = 'sr-RS';
+    } else {
+        recognition.lang = 'en-US';
+    }
+
+    recognition.continuous = true;
+    recognition.interimResults = false;
+
+    recognition.onresult = function(event) {
+        const transcript = event.results[event.results.length - 1][0].transcript.trim().toLowerCase();
+        console.log("🎤 Prepoznati govor:", transcript);
+        
+        // Prosleđujemo prepoznati tekst funkciji za komande
+        if (typeof voiceCommand === 'function') {
+            voiceCommand(transcript);
+        }
+    };
+
+    recognition.onerror = function(event) {
+        console.warn("⚠️ Greška mikrofona (ignorisana da spreči blokadu):", event.error);
+    };
+
+    recognition.onend = function() {
+        // Automatski restartuj mikrofon samo ako smo još uvek na ekranu zvučnog menija
+        const voiceMenuScreen = document.getElementById('voiceMenuScreen');
+        if (voiceMenuScreen && window.getComputedStyle(voiceMenuScreen).display === 'flex') {
+            setTimeout(() => {
+                try {
+                    recognition.start();
+                } catch (e) {
+                    // Već radi ili se restartuje
+                }
+            }, 300);
+        }
+    };
+
+    // 3. Pokretanje sa try-catch blokom da spreči rušenje skripte
+    try {
+        recognition.start();
+        console.log("🎙️ Mikrofon je uspešno pokrenut na jeziku:", recognition.lang);
+    } catch (e) {
+        console.error("Greška pri startovanju mikrofona:", e);
+    }
+}
 
 // ============================================
 // KRAJ FAJLA
 // ============================================
-console.log('✅ Kraj fajla - glasovne komande uspešno uređene!');
+console.log('✅ Kraj fajla - rešenje za mikrofon primenjeno!');
+// ============================================
+// KRAJ FAJLA
+// ============================================
+console.log('✅ Kraj fajla - rešenje aktivirano!');
