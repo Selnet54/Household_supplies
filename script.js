@@ -1105,6 +1105,8 @@ function startVoiceRecognition() {
     
     const status = document.getElementById('voiceStatus');
     if (!status) {
+        // ❌ IZBRIŠI OVO ako postoji:
+        // showModernAlert('Error', 'Voice status element not found!', '❌');
         console.error('❌ voiceStatus element not found');
         return;
     }
@@ -1112,6 +1114,8 @@ function startVoiceRecognition() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
         status.innerHTML = '❌ Speech recognition not supported';
+        // ❌ IZBRIŠI OVO ako postoji:
+        // showModernAlert('Error', 'Speech recognition not supported!', '❌');
         console.error('❌ Speech Recognition not supported');
         return;
     }
@@ -1169,92 +1173,84 @@ function startVoiceRecognition() {
 }
 
 // ===== VOICE COMMAND (DODAJ OVO) =====
+// ===== VOICE COMMAND (ISPRAVNA VERZIJA - BEZ SUVIŠNIH ALERTA) =====
 function voiceCommand(command) {
     console.log('🎤 Komanda:', command);
     
     const cmd = command.toLowerCase().trim();
     
-    // ===== INVENTORY / ZALIHE (SVi JEZICI) =====
+    // ===== INVENTORY / ZALIHE =====
     if (cmd.includes('inventory') || cmd.includes('zalihe') || cmd.includes('stock') || 
         cmd.includes('készlet') || cmd.includes('keszlet') || cmd.includes('bestand') || 
         cmd.includes('запаси') || cmd.includes('запасы') || cmd.includes('库存') || 
         cmd.includes('inventario') || cmd.includes('estoque') || cmd.includes('stock') ||
-        cmd.includes('inv') || cmd.includes('zal')) {
+        cmd.includes('inv') || cmd.includes('zal') || cmd.includes('stanje')) {
         console.log('📦 Otvaram zalihe');
         showScreen('mainScreen');
         setTimeout(function() {
             renderInventory();
         }, 100);
+        // ✅ ZAVRŠI - bez alerta!
         return;
     }
     
-    // ===== SHOPPING / SPISAK (SVI JEZICI) =====
+    // ===== SHOPPING / SPISAK =====
     if (cmd.includes('shopping') || cmd.includes('spisak') || cmd.includes('list') || 
         cmd.includes('bevásárlólista') || cmd.includes('bevasarlolista') || cmd.includes('einkaufsliste') ||
         cmd.includes('список') || cmd.includes('список') || cmd.includes('购物清单') ||
         cmd.includes('lista') || cmd.includes('lista de compras') || cmd.includes('liste') ||
-        cmd.includes('shop') || cmd.includes('spis')) {
+        cmd.includes('shop') || cmd.includes('spis') || cmd.includes('potreba') || cmd.includes('potreb')) {
         console.log('🛒 Otvaram spisak');
         showScreen('mainScreen');
         setTimeout(function() {
             renderShoppingList();
         }, 100);
+        // ✅ ZAVRŠI - bez alerta!
         return;
     }
     
-    // ===== ADD / DODAJ (SVI JEZICI) =====
+    // ===== ADD / DODAJ =====
     if (cmd.includes('add') || cmd.includes('dodaj') || cmd.includes('unos') || 
         cmd.includes('product') || cmd.includes('termék') || cmd.includes('termek') || 
         cmd.includes('produkt') || cmd.includes('додати') || cmd.includes('добавить') ||
         cmd.includes('添加') || cmd.includes('agregar') || cmd.includes('adicionar') ||
         cmd.includes('ajouter') || cmd.includes('novi') || cmd.includes('hozzáadás') ||
-        cmd.includes('novo') || cmd.includes('nouveau')) {
+        cmd.includes('novo') || cmd.includes('nouveau') || cmd.includes('dodavanje')) {
         console.log('➕ Otvaram unos');
         showScreen('mainScreen');
         setTimeout(function() {
             renderDataEntry('');
         }, 100);
+        // ✅ ZAVRŠI - bez alerta!
         return;
     }
     
-    // ===== EXIT / IZLAZ (SVI JEZICI) =====
+    // ===== EXIT / IZLAZ =====
     if (cmd.includes('exit') || cmd.includes('izlaz') || cmd.includes('quit') || 
         cmd.includes('close') || cmd.includes('kilépés') || cmd.includes('kilepes') || 
         cmd.includes('beenden') || cmd.includes('вихід') || cmd.includes('выход') ||
         cmd.includes('退出') || cmd.includes('salir') || cmd.includes('sair') ||
-        cmd.includes('quitter') || cmd.includes('zatvori') || cmd.includes('kis')) {
+        cmd.includes('quitter') || cmd.includes('zatvori') || cmd.includes('kis') ||
+        cmd.includes('izadji') || cmd.includes('izadi')) {
         console.log('🚪 Izlaz');
         exitApp();
+        // ✅ ZAVRŠI - bez alerta!
         return;
     }
     
-    // ===== NEPOZNATA KOMANDA =====
+    // ===== NEPOZNATA KOMANDA - JEDINO MESTO GDE SE POZIVA ALERT =====
     console.log('❌ Nepoznata komanda:', cmd);
-    showModernAlert('Unknown Command', `"${command}" not recognized. Try: Inventory, Shopping, Add, or Exit`, '🎤');
-}
-// ===== IZBOR NAČINA UNOSA =====
-function selectVoiceMode() {
-    console.log('🎤 Izabran zvučni unos');
-    updateChoiceScreenTexts();
-    showScreen('voiceMenuScreen');
-    setTimeout(function() {
-        startVoiceRecognition();
-    }, 500);
-}
-
-function selectManualMode() {
-    console.log('✍️ Izabran ručni unos');
-    showScreen('mainScreen');
-    renderCategories();
-}
-
-function goBackFromVoice() {
-    if (recognition) {
-        try { recognition.stop(); } catch(e) {}
-        recognition = null;
-    }
-    updateChoiceScreenTexts();
-    showScreen('choiceScreen');
+    
+    // ⭐ SAMO OVDE se poziva showModernAlert - kada komanda NIJE prepoznata
+    const unknownTitle = t('unknown_command_title') || 'Nepoznata komanda';
+    const notRecognized = t('not_recognized') || 'nije prepoznata';
+    const tryCommands = t('try_commands') || 'Pokušajte: Zalihe, Spisak, Dodaj proizvod ili Izlaz';
+    
+    showModernAlert(
+        unknownTitle,
+        `"${command}" ${notRecognized}. ${tryCommands}`,
+        '🎤'
+    );
 }
 // ============================================
 // RENDER INVENTORY - ZALIHE
