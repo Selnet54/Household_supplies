@@ -880,14 +880,11 @@ function renderLanguages() {
     console.log('✅ Jezici prikazani');
 }
 
-// ============================================
-// 1. FUNKCIJA ZA AŽURIRANJE TEKSTOVA (Ažurirana)
-// ============================================
-// EKRAN 4: Zvučni meni - voiceStatus
-const voiceStatus = document.getElementById('voiceStatus');
-if (voiceStatus) {
-    voiceStatus.innerHTML = t.voiceStatus || '🎤 Say: "Inventory", "Shopping List", "Add Product", or "Exit"';
-}
+    // EKRAN 4: Zvučni meni - voiceStatus
+    const voiceStatus = document.getElementById('voiceStatus');
+    if (voiceStatus) {
+        voiceStatus.innerHTML = t.voiceStatus || '🎤 Say: "Inventory", "Shopping List", "Add Product", or "Exit"';
+    }
 
     // EKRAN 3: Izbor načina unosa
     if(document.getElementById('choiceTitleText')) document.getElementById('choiceTitleText').innerText = t.choiceTitle || "How do you want to enter data?";
@@ -904,8 +901,9 @@ if (voiceStatus) {
     if(document.getElementById('addMenuText')) document.getElementById('addMenuText').innerText = t.add;
     if(document.getElementById('exitMenuText')) document.getElementById('exitMenuText').innerText = t.exit;
     if(document.getElementById('backVoiceText')) document.getElementById('backVoiceText').innerText = "◀ " + (t.back || "Back");
-}
+}  // ← OVO ZATVARA updateChoiceScreenTexts
 
+// ===== RENDER KATEGORIJE =====
 function renderCategories() {
     currentScreenState = 'categories';
     const content = document.getElementById('mainContent');
