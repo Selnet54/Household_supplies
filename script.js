@@ -1291,11 +1291,6 @@ function renderShoppingList() {
     content.innerHTML = html;
 }
 
-
-// ============================================
-// POMOĆNE FUNKCIJE ZA RAD SA PODACIMA
-// ============================================
-
 // ============================================
 // SAČUVAJ PROIZVOD - PUNI PODACI
 // ============================================
@@ -1535,9 +1530,13 @@ function selectVoiceMode() {
 function selectManualMode() {
     console.log('✍️ Izabran ručni unos');
     try {
-        // Prikaži glavni ekran
+        // Resetuj stanje na početak
+        currentScreenState = 'categories';
+        currentCategory = '';
+        currentSubcategory = '';
+        currentProductPart = '';
+        
         showScreen('mainScreen');
-        // Sačekaj da se ekran prikaže pa renderuj kategorije
         setTimeout(function() {
             renderCategories();
         }, 100);
@@ -1546,7 +1545,6 @@ function selectManualMode() {
         showModernAlert('Greška', 'Došlo je do greške pri pokretanju ručnog unosa', '❌');
     }
 }
-
 function goBackFromVoice() {
     console.log('◀ Povratak sa glasovnog menija');
     // Zaustavi prepoznavanje glasa ako je aktivno
