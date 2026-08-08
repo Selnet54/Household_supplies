@@ -1791,6 +1791,66 @@ window.currentProductPart = currentProductPart;
 
 console.log('✅ Sve funkcije izvezene za voiceCommands!');
 // ============================================
+// RENDER DELOVI PROIZVODA
+// ============================================
+function renderProductParts(subcategory) {
+    currentScreenState = 'productParts';
+    currentSubcategory = subcategory;
+    const content = document.getElementById('mainContent');
+    if (!content) return;
+
+    const parts = getProductParts(subcategory);
+    
+    let html = `<div class="title">${t('delovi_proizvoda')}</div>`;
+    html += `<div style="font-size:20px; color:#1a237e; text-align:center; margin-bottom:20px;">${subcategory}</div>`;
+    html += `<div class="categories-grid">`;
+    
+    parts.forEach(part => {
+        const safePart = part.toString().replace(/'/g, "\\'");
+        html += `<button class="category-btn" style="background:#90caf9;" onclick="renderDataEntry('${safePart}')">${part}</button>`;
+    });
+    
+    html += `</div>`;
+    content.innerHTML = html;
+}
+// ============================================
+// RENDER PODKATEGORIJA GRUPA
+// ============================================
+function renderSubcategoryGroup(category, groupName) {
+    console.log('📂 renderSubcategoryGroup pozvan za:', category, groupName);
+    currentScreenState = 'subcategories';
+    currentCategory = category;
+    const content = document.getElementById('mainContent');
+    if (!content) return;
+
+    const langSubs = subcategories[currentLang] || subcategories.sr || {};
+    const subData = langSubs[category] || {};
+    const items = subData[groupName] || [];
+    const colors = getSubcategoryColors(category);
+    
+    let html = `<div class="title">${t('podkategorije')}</div>`;
+    html += `<div style="font-size:20px; color:#1a237e; text-align:center; margin-bottom:20px;">${groupName}</div>`;
+    html += `<div class="categories-grid">`;
+    
+    items.forEach((item, idx) => {
+        const color = colors[idx % colors.length];
+        const safeItem = item.toString().replace(/'/g, "\\'");
+        
+        const hasParts = typeof productParts !== 'undefined' && 
+            ((productParts[currentLang] && productParts[currentLang][item]) || 
+             (productParts.sr && productParts.sr[item]));
+        
+        if (hasParts) {
+            html += `<button class="category-btn" style="background:${color};" onclick="renderProductParts('${safeItem}')">${item}</button>`;
+        } else {
+            html += `<button class="category-btn" style="background:${color};" onclick="renderDataEntry('${safeItem}')">${item}</button>`;
+        }
+    });
+    
+    html += `</div>`;
+    content.innerHTML = html;
+}
+// ============================================
 // KRAJ FAJLA
 // ============================================
 console.log('✅ Kraj fajla');
