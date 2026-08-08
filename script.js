@@ -1373,52 +1373,75 @@ function renderDataEntry(subcategory) {
 // POMOĆNE FUNKCIJE ZA RAD SA PODACIMA
 // ============================================
 
-// Sačuvaj proizvod
+// ============================================
+// SAČUVAJ PROIZVOD - PUNI PODACI
+// ============================================
 function saveProduct() {
     const name = document.getElementById('productName')?.value.trim();
+    const description = document.getElementById('productDescription')?.value.trim() || '';
     const quantity = parseFloat(document.getElementById('productQuantity')?.value);
     const unit = document.getElementById('productUnit')?.value || 'kom';
-    const storage = document.getElementById('productStorage')?.value || t('Ostalo');
+    const storage = document.getElementById('productStorage')?.value || t('Ostalo') || 'Ostalo';
+    const shelfLife = parseInt(document.getElementById('productShelfLife')?.value) || 0;
+    
+    // Izračunaj datum isteka
+    let expiryDate = '';
+    if (shelfLife > 0) {
+        const today = new Date();
+        today.setMonth(today.getMonth() + shelfLife);
+        expiryDate = today.toISOString().split('T')[0];
+    }
     
     if (!name) {
-        showModernAlert(t('missing_info'), t('enter_product_name'), '⚠️');
+        showModernAlert(t('missing_info') || 'Nedostaju podaci', t('enter_product_name') || 'Unesite naziv proizvoda!', '⚠️');
         return;
     }
     
     if (isNaN(quantity) || quantity <= 0) {
-        showModernAlert(t('invalid_input'), t('enter_quantity'), '⚠️');
+        showModernAlert(t('invalid_input') || 'Neispravan unos', t('enter_quantity') || 'Unesite količinu!', '⚠️');
         return;
     }
     
     // Uzmi postojeće proizvode
     let products = JSON.parse(localStorage.getItem('products') || '[]');
     
-    // Dodaj novi proizvod
+    // Kreiraj novi proizvod sa svim podacima
     const newProduct = {
         naziv: name,
+        opis: description,
         kolicina: quantity,
         jedinica: unit,
         mesto: storage,
         kategorija: currentCategory || '',
         podkategorija: currentSubcategory || '',
-        datum: new Date().toISOString().split('T')[0]
+        deo: currentProductPart || '',
+        rok_trajanja: shelfLife,
+        datum_isteka: expiryDate,
+        datum_unosa: new Date().toISOString().split('T')[0]
     };
     
     products.push(newProduct);
     localStorage.setItem('products', JSON.stringify(products));
     
-    showModernAlert(t('success'), t('product_saved'), '✅');
+    showModernAlert(t('success') || 'Uspešno', t('product_saved') || 'Proizvod sačuvan!', '✅');
     
     // Resetuj polja
     document.getElementById('productName').value = '';
+    document.getElementById('productDescription').value = '';
     document.getElementById('productQuantity').value = '';
+    document.getElementById('productShelfLife').value = '';
+    
+    // Resetuj prikaz roka
+    const expiryDisplay = document.getElementById('expiryDisplay');
+    if (expiryDisplay) {
+        expiryDisplay.textContent = '-';
+    }
     
     // Osveži prikaz
-    setTimeout(() => {
+    setTimeout(function() {
         renderInventory();
     }, 500);
 }
-
 // Prebaci u shopping listu
 function moveToShopping(index) {
     let products = JSON.parse(localStorage.getItem('products') || '[]');
@@ -1690,6 +1713,254 @@ showScreen = function(screenId) {
         }
     }
 };
+// ============================================
+// RENDER DATA ENTRY - PUNI UNOS PODATAKA
+// ============================================
+function renderDataEntry(productPart) {
+    currentScreenState = 'dataEntry';
+    currentProductPart = productPart || '';
+    const content = document.getElementById('mainContent');
+    if (!content) {
+        console.error('❌ mainContent nije pronađen');
+        return;
+    }
+    
+    const storageOptions = [
+        t('zamrzivac_1') || 'Zamrzivač 1',
+        t('zamrzivac_2') || 'Zamrzivač 2', 
+        t('zamrzivac_3') || 'Zamrzivač 3',
+        t('frizider') || 'Frižider',
+        t('ostava') || 'Ostava',
+        t('Ostalo') || 'Ostalo'
+    ];
+    
+    const unitOptions = ['kg', 'g', 'kom', 'l', 'ml', 'pak', 'kutija'];
+    
+    let html = `<div class="title">${t('unos_podataka') || 'Unos podataka'}</div>`;
+    html += `<div style="background:white;padding:25px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1);max-width:700px;margin:0 auto;">`;
+    
+    // Kategorija (samo prikaz)
+    html += `<div class="row">`;
+    html += `<label>${t('glavne_kategorije') || 'Kategorija'}</label>`;
+    html += `<div style="flex:1;padding:16px;background:#f0f0f0;border-radius:12px;font-size:22px;font-weight:bold;color:#1a237e;">${currentCategory || 'N/A'}</div>`;
+    html += `</div>`;
+    
+    // Podkategorija (samo prikaz)
+    html += `<div class="row">`;
+    html += `<label>${t('podkategorije') || 'Podkategorija'}</label>`;
+    html += `<div style="flex:1;padding:16px;background:#f0f0f0;border-radius:12px;font-size:22px;font-weight:bold;color:#1a237e;">${currentSubcategory || 'N/A'}</div>`;
+    html += `</div>`;
+    
+    // Deo proizvoda (samo prikaz)
+    if (currentProductPart) {
+        html += `<div class="row">`;
+        html += `<label>${t('delovi_proizvoda') || 'Deo'}</label>`;
+        html += `<div style="flex:1;padding:16px;background:#f0f0f0;border-radius:12px;font-size:22px;font-weight:bold;color:#1a237e;">${currentProductPart}</div>`;
+        html += `</div>`;
+    }
+    
+    // Naziv proizvoda
+    html += `<div class="row">`;
+    html += `<label>${t('naziv_proizvoda') || 'Proizvod'}</label>`;
+    html += `<input type="text" id="productName" placeholder="${t('naziv_proizvoda') || 'Naziv proizvoda'}" style="flex:1;padding:16px;border:2px solid #ddd;border-radius:12px;font-size:22px;">`;
+    html += `</div>`;
+    
+    // Opis
+    html += `<div class="row">`;
+    html += `<label>${t('opis') || 'Opis'}</label>`;
+    html += `<input type="text" id="productDescription" placeholder="${t('opis') || 'Opis proizvoda'}" style="flex:1;padding:16px;border:2px solid #ddd;border-radius:12px;font-size:22px;">`;
+    html += `</div>`;
+    
+    // Količina i jedinica mere
+    html += `<div class="row">`;
+    html += `<label>${t('kolicina') || 'Količina'}</label>`;
+    html += `<div class="inline-group">`;
+    html += `<input type="number" id="productQuantity" placeholder="0" min="0" step="0.1" style="flex:2;padding:16px;border:2px solid #ddd;border-radius:12px;font-size:22px;">`;
+    html += `<select id="productUnit" style="flex:1;padding:16px;border:2px solid #ddd;border-radius:12px;font-size:22px;">`;
+    unitOptions.forEach(unit => {
+        html += `<option value="${unit}">${t(unit) || unit}</option>`;
+    });
+    html += `</select>`;
+    html += `</div>`;
+    html += `</div>`;
+    
+    // Rok trajanja
+    html += `<div class="row">`;
+    html += `<label>${t('rok_trajanja') || 'Rok (meseci)'}</label>`;
+    html += `<input type="number" id="productShelfLife" placeholder="12" min="0" style="flex:1;padding:16px;border:2px solid #ddd;border-radius:12px;font-size:22px;">`;
+    html += `</div>`;
+    
+    // Automatski rok
+    html += `<div class="row">`;
+    html += `<label>${t('automatski_rok') || 'Rok ističe'}</label>`;
+    html += `<div id="expiryDisplay" style="flex:1;padding:16px;background:#f0f0f0;border-radius:12px;font-size:22px;font-weight:bold;color:#1a237e;text-align:center;">-</div>`;
+    html += `</div>`;
+    
+    // Mesto skladištenja
+    html += `<div class="row">`;
+    html += `<label>${t('mesto_skladistenja') || 'Skladište'}</label>`;
+    html += `<select id="productStorage" style="flex:1;padding:16px;border:2px solid #ddd;border-radius:12px;font-size:22px;">`;
+    storageOptions.forEach(place => {
+        html += `<option value="${place}">${place}</option>`;
+    });
+    html += `</select>`;
+    html += `</div>`;
+    
+    // Datum unosa
+    html += `<div class="row">`;
+    html += `<label>${t('datum_unosa') || 'Datum unosa'}</label>`;
+    html += `<div style="flex:1;padding:16px;background:#f0f0f0;border-radius:12px;font-size:22px;font-weight:bold;color:#1a237e;">${new Date().toISOString().split('T')[0]}</div>`;
+    html += `</div>`;
+    
+    // Dugmad
+    html += `<div class="btn-group">`;
+    html += `<button onclick="saveProduct()" class="btn-save">✅ ${t('unesi') || 'Unesi'}</button>`;
+    html += `<button onclick="goBack()" class="btn-cancel">✖ ${t('odustani') || 'Odustani'}</button>`;
+    html += `</div>`;
+    
+    html += `</div>`;
+    content.innerHTML = html;
+    
+    // ⭐ AUTO-IZRAČUNAVANJE ROKA
+    const shelfLifeInput = document.getElementById('productShelfLife');
+    const expiryDisplay = document.getElementById('expiryDisplay');
+    if (shelfLifeInput && expiryDisplay) {
+        shelfLifeInput.addEventListener('input', function() {
+            const months = parseInt(this.value) || 0;
+            if (months > 0) {
+                const today = new Date();
+                today.setMonth(today.getMonth() + months);
+                expiryDisplay.textContent = today.toISOString().split('T')[0];
+            } else {
+                expiryDisplay.textContent = '-';
+            }
+        });
+    }
+}
+// ============================================
+// RENDER DATA ENTRY - PUNI UNOS PODATAKA
+// ============================================
+function renderDataEntry(productPart) {
+    currentScreenState = 'dataEntry';
+    currentProductPart = productPart || '';
+    const content = document.getElementById('mainContent');
+    if (!content) {
+        console.error('❌ mainContent nije pronađen');
+        return;
+    }
+    
+    const storageOptions = [
+        t('zamrzivac_1') || 'Zamrzivač 1',
+        t('zamrzivac_2') || 'Zamrzivač 2', 
+        t('zamrzivac_3') || 'Zamrzivač 3',
+        t('frizider') || 'Frižider',
+        t('ostava') || 'Ostava',
+        t('Ostalo') || 'Ostalo'
+    ];
+    
+    const unitOptions = ['kg', 'g', 'kom', 'l', 'ml', 'pak', 'kutija'];
+    
+    let html = `<div class="title">${t('unos_podataka') || 'Unos podataka'}</div>`;
+    html += `<div style="background:white;padding:25px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1);max-width:700px;margin:0 auto;">`;
+    
+    // Kategorija (samo prikaz)
+    html += `<div class="row">`;
+    html += `<label>${t('glavne_kategorije') || 'Kategorija'}</label>`;
+    html += `<div style="flex:1;padding:16px;background:#f0f0f0;border-radius:12px;font-size:22px;font-weight:bold;color:#1a237e;">${currentCategory || 'N/A'}</div>`;
+    html += `</div>`;
+    
+    // Podkategorija (samo prikaz)
+    html += `<div class="row">`;
+    html += `<label>${t('podkategorije') || 'Podkategorija'}</label>`;
+    html += `<div style="flex:1;padding:16px;background:#f0f0f0;border-radius:12px;font-size:22px;font-weight:bold;color:#1a237e;">${currentSubcategory || 'N/A'}</div>`;
+    html += `</div>`;
+    
+    // Deo proizvoda (samo prikaz)
+    if (currentProductPart) {
+        html += `<div class="row">`;
+        html += `<label>${t('delovi_proizvoda') || 'Deo'}</label>`;
+        html += `<div style="flex:1;padding:16px;background:#f0f0f0;border-radius:12px;font-size:22px;font-weight:bold;color:#1a237e;">${currentProductPart}</div>`;
+        html += `</div>`;
+    }
+    
+    // Naziv proizvoda
+    html += `<div class="row">`;
+    html += `<label>${t('naziv_proizvoda') || 'Proizvod'}</label>`;
+    html += `<input type="text" id="productName" placeholder="${t('naziv_proizvoda') || 'Naziv proizvoda'}" style="flex:1;padding:16px;border:2px solid #ddd;border-radius:12px;font-size:22px;">`;
+    html += `</div>`;
+    
+    // Opis
+    html += `<div class="row">`;
+    html += `<label>${t('opis') || 'Opis'}</label>`;
+    html += `<input type="text" id="productDescription" placeholder="${t('opis') || 'Opis proizvoda'}" style="flex:1;padding:16px;border:2px solid #ddd;border-radius:12px;font-size:22px;">`;
+    html += `</div>`;
+    
+    // Količina i jedinica mere
+    html += `<div class="row">`;
+    html += `<label>${t('kolicina') || 'Količina'}</label>`;
+    html += `<div class="inline-group">`;
+    html += `<input type="number" id="productQuantity" placeholder="0" min="0" step="0.1" style="flex:2;padding:16px;border:2px solid #ddd;border-radius:12px;font-size:22px;">`;
+    html += `<select id="productUnit" style="flex:1;padding:16px;border:2px solid #ddd;border-radius:12px;font-size:22px;">`;
+    unitOptions.forEach(unit => {
+        html += `<option value="${unit}">${t(unit) || unit}</option>`;
+    });
+    html += `</select>`;
+    html += `</div>`;
+    html += `</div>`;
+    
+    // Rok trajanja
+    html += `<div class="row">`;
+    html += `<label>${t('rok_trajanja') || 'Rok (meseci)'}</label>`;
+    html += `<input type="number" id="productShelfLife" placeholder="12" min="0" style="flex:1;padding:16px;border:2px solid #ddd;border-radius:12px;font-size:22px;">`;
+    html += `</div>`;
+    
+    // Automatski rok
+    html += `<div class="row">`;
+    html += `<label>${t('automatski_rok') || 'Rok ističe'}</label>`;
+    html += `<div id="expiryDisplay" style="flex:1;padding:16px;background:#f0f0f0;border-radius:12px;font-size:22px;font-weight:bold;color:#1a237e;text-align:center;">-</div>`;
+    html += `</div>`;
+    
+    // Mesto skladištenja
+    html += `<div class="row">`;
+    html += `<label>${t('mesto_skladistenja') || 'Skladište'}</label>`;
+    html += `<select id="productStorage" style="flex:1;padding:16px;border:2px solid #ddd;border-radius:12px;font-size:22px;">`;
+    storageOptions.forEach(place => {
+        html += `<option value="${place}">${place}</option>`;
+    });
+    html += `</select>`;
+    html += `</div>`;
+    
+    // Datum unosa
+    html += `<div class="row">`;
+    html += `<label>${t('datum_unosa') || 'Datum unosa'}</label>`;
+    html += `<div style="flex:1;padding:16px;background:#f0f0f0;border-radius:12px;font-size:22px;font-weight:bold;color:#1a237e;">${new Date().toISOString().split('T')[0]}</div>`;
+    html += `</div>`;
+    
+    // Dugmad
+    html += `<div class="btn-group">`;
+    html += `<button onclick="saveProduct()" class="btn-save">✅ ${t('unesi') || 'Unesi'}</button>`;
+    html += `<button onclick="goBack()" class="btn-cancel">✖ ${t('odustani') || 'Odustani'}</button>`;
+    html += `</div>`;
+    
+    html += `</div>`;
+    content.innerHTML = html;
+    
+    // ⭐ AUTO-IZRAČUNAVANJE ROKA
+    const shelfLifeInput = document.getElementById('productShelfLife');
+    const expiryDisplay = document.getElementById('expiryDisplay');
+    if (shelfLifeInput && expiryDisplay) {
+        shelfLifeInput.addEventListener('input', function() {
+            const months = parseInt(this.value) || 0;
+            if (months > 0) {
+                const today = new Date();
+                today.setMonth(today.getMonth() + months);
+                expiryDisplay.textContent = today.toISOString().split('T')[0];
+            } else {
+                expiryDisplay.textContent = '-';
+            }
+        });
+    }
+}
 // ============================================
 // KRAJ FAJLA
 // ============================================
