@@ -11,9 +11,6 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-    <script src="productParts.js" defer></script>
-    <script src="script.js" defer></script>
-
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; background: #1a237e; color: #333; min-height: 100vh; }
@@ -168,37 +165,94 @@
         .voice-btn-exit { border-color: #f44336; }
         .voice-btn-exit:hover { background: #f44336; color: white; }
 
-        @media (max-width: 600px) {
-            .container { padding: 20px; margin: 10px; }
-            .row { flex-direction: column; align-items: stretch; }
-            .row label { width: 100%; text-align: left; font-size: 20px; }
-            .row input, .row select { width: 100%; padding: 16px; font-size: 22px; }
-            .inline-group { flex-direction: row; }
-            .btn-group { flex-direction: column; }
-            .btn-save, .btn-cancel { width: 100%; font-size: 24px; }
-            .table-row { font-size: 16px; }
-            .categories-grid { grid-template-columns: 1fr 1fr; }
-            .languages-grid { grid-template-columns: 1fr 1fr 1fr; }
-            .lang-btn-main { min-height: 100px; padding: 15px 8px; }
-            .lang-btn-main img { width: 60px; height: 45px; }
-            .login-box { padding: 30px 20px; }
-            .logo-img { width: 100px; height: 100px; }
-            .logo-text { font-size: 32px; }
-            .support-box { padding: 25px 20px; }
-            .voice-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
-            .voice-btn { padding: 20px 10px; }
-            .voice-btn div:first-child { font-size: 30px; }
-            .voice-btn div:last-child { font-size: 16px; }
+        /* ===== MODERN ALERT ===== */
+        #modernAlert {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            backdrop-filter: blur(5px);
         }
-        @media (max-width: 400px) {
-            .languages-grid { grid-template-columns: 1fr 1fr; }
+        #modernAlert .alert-box {
+            background: white;
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            animation: slideIn 0.3s ease;
+        }
+        #modernAlert .alert-icon { font-size: 64px; margin-bottom: 15px; }
+        #modernAlert .alert-title { color: #1a237e; margin-bottom: 10px; font-size: 28px; }
+        #modernAlert .alert-message { font-size: 18px; color: #555; margin-bottom: 25px; }
+        #modernAlert .alert-btn { background: #1a237e; color: white; border: none; padding: 12px 40px; border-radius: 12px; font-size: 18px; cursor: pointer; font-weight: bold; }
+
+        /* ===== MODERN CONFIRM ===== */
+        #modernConfirm {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            backdrop-filter: blur(5px);
+        }
+        #modernConfirm .confirm-box {
+            background: white;
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            animation: slideIn 0.3s ease;
+        }
+        #modernConfirm .confirm-icon { font-size: 64px; margin-bottom: 15px; }
+        #modernConfirm .confirm-title { color: #1a237e; margin-bottom: 10px; font-size: 28px; }
+        #modernConfirm .confirm-message { font-size: 18px; color: #555; margin-bottom: 25px; }
+        #modernConfirm .confirm-buttons { display: flex; gap: 10px; }
+        #modernConfirm .confirm-yes { flex: 1; background: #4CAF50; color: white; border: none; padding: 12px; border-radius: 12px; font-size: 18px; cursor: pointer; font-weight: bold; }
+        #modernConfirm .confirm-no { flex: 1; background: #f44336; color: white; border: none; padding: 12px; border-radius: 12px; font-size: 18px; cursor: pointer; font-weight: bold; }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .languages-grid { grid-template-columns: 1fr 1fr 1fr; }
             .categories-grid { grid-template-columns: 1fr 1fr; }
+            .category-btn { padding: 30px 10px; font-size: 20px; min-height: 100px; }
+            .btn-header { font-size: 16px; padding: 12px 6px; }
+            .login-box { padding: 30px 20px; }
+            .lang-btn-main { padding: 15px 8px; min-height: 100px; font-size: 18px; }
+            .lang-btn-main img { width: 60px; height: 45px; }
+            .container { padding: 20px; }
+            .title { font-size: 26px; }
+        }
+
+        @media (max-width: 480px) {
+            .languages-grid { grid-template-columns: 1fr 1fr; }
+            .categories-grid { grid-template-columns: 1fr; }
+            .lang-btn-main .lang-name { font-size: 14px; }
         }
     </style>
 </head>
 <body>
 
-<!-- EKRAN 1: LOGIN -->
+<!-- ===== EKRAN 1: LOGIN ===== -->
 <div id="loginScreen" class="screen">
     <div class="login-container">
         <div class="login-box">
@@ -219,7 +273,7 @@
 </div>
 
 <!-- ===== SUPPORT DIJALOG ===== -->
-<div id="supportDialog" class="support-overlay" style="display:none;">
+<div id="supportDialog" class="support-overlay">
     <div class="support-box">
         <button class="support-close" onclick="document.getElementById('supportDialog').style.display='none'; document.getElementById('supportDialog').classList.remove('active');">✖</button>
         <h2>📧 Support</h2>
@@ -250,7 +304,7 @@
     </div>
 </div>
 
-<!-- EKRAN 2: JEZICI -->
+<!-- ===== EKRAN 2: JEZICI ===== -->
 <div id="languageScreen" class="screen" style="display:none;">
     <div class="languages-container">
         <div class="languages-box">
@@ -261,38 +315,31 @@
     </div>
 </div>
 
-<!-- EKRAN 3: IZBOR NAČINA UNOSA -->
-<!-- EKRAN 3: IZBOR NAČINA UNOSA -->
+<!-- ===== EKRAN 3: IZBOR NAČINA UNOSA ===== -->
 <div id="choiceScreen" class="screen" style="display:none;">
     <div class="choice-container">
         <div class="choice-box">
             <div class="logo-text" style="font-size:32px; margin-bottom:10px;">SUPPLIES</div>
-            <!-- 1. ID za glavni tekst -->
             <div id="choiceTitleText" style="font-size:18px; color:#aaa; margin-bottom:30px;">How do you want to enter data?</div>
-            
+
             <button id="voiceChoiceBtn" class="choice-btn choice-voice" onclick="selectVoiceMode(); return false;">
                 <div style="font-size:48px; margin-bottom:8px;">🎤</div>
-                <!-- 2. ID za naslov glasa -->
                 <div id="voiceTitleText" style="font-size:24px; font-weight:bold;">Voice Input</div>
-                <!-- 3. ID za podtekst glasa -->
                 <div id="voiceDescText" style="font-size:16px; color:#aaa; margin-top:5px;">Speak and I will enter</div>
             </button>
-            
+
             <button id="manualChoiceBtn" class="choice-btn choice-manual" onclick="selectManualMode(); return false;">
                 <div style="font-size:48px; margin-bottom:8px;">✍️</div>
-                <!-- 4. ID za naslov ručnog unosa -->
                 <div id="manualTitleText" style="font-size:24px; font-weight:bold;">Manual Input</div>
-                <!-- 5. ID za podtekst ručnog unosa -->
                 <div id="manualDescText" style="font-size:16px; color:#aaa; margin-top:5px;">Type data manually</div>
             </button>
-            
-            <!-- 6. ID za exit dugme -->
+
             <button id="exitChoiceBtn" class="btn btn-red" style="margin-top:20px;" onclick="exitApp();">✖ EXIT</button>
         </div>
     </div>
 </div>
 
-<!-- <!-- EKRAN 4: ZVUČNI UNOS - GLAVNI MENI -->
+<!-- ===== EKRAN 4: ZVUČNI UNOS - GLAVNI MENI ===== -->
 <div id="voiceMenuScreen" class="screen" style="display:none;">
     <div class="voice-menu-container">
         <div class="voice-menu-box">
@@ -326,38 +373,43 @@
     </div>
 </div>
 
-<!-- EKRAN 5: GLAVNI -->
-<div id="mainScreen" class="screen" style="display:none; flex-direction:column;">
+<!-- ===== EKRAN 5: GLAVNI EKRAN ===== -->
+<div id="mainScreen" class="screen" style="display:none; flex-direction:column; background:#f5f5f5; min-height:100vh;">
     <div class="header">
-        <button id="backBtn" class="btn-header btn-back">◀ <span id="backText">Nazad</span></button>
-        <button id="inventoryBtn" class="btn-header btn-inventory">📦 <span id="invText">Zalihe</span></button>
-        <button id="shoppingBtn" class="btn-header btn-shopping">🛒 <span id="shopText">Spisak</span></button>
-        <button id="exitMainBtn" class="btn-header btn-exit" onclick="exitApp();">✕ EXIT</button>
+        <button class="btn-header btn-back" onclick="renderCategories()">◀ <span id="backText">Nazad</span></button>
+        <button class="btn-header btn-inventory" onclick="renderInventory()"><span id="invText">Zalihe</span></button>
+        <button class="btn-header btn-shopping" onclick="renderShoppingList()"><span id="shopText">Spisak</span></button>
+        <button class="btn-header btn-exit" onclick="exitApp()">✖ <span id="exitText">Izlaz</span></button>
     </div>
-    <div class="container" id="mainContent"></div>
+    <div id="mainContent" class="container"></div>
 </div>
 
-<!-- MODERNI ALERT -->
-<div id="modernAlert" style="position:fixed; top:20px; left:50%; transform:translateX(-50%); background:#d32f2f; color:#FFD700; padding:18px 25px; border-radius:12px; z-index:99999; display:none; align-items:center; box-shadow:0 6px 20px rgba(0,0,0,0.6); border:2px solid #FFD700; font-weight:bold; font-size:18px;">
-    <span id="alertIcon" style="font-size:24px; margin-right:12px;">⚠️</span>
-    <div>
-        <div id="alertTitle" style="font-size:18px; color:#FFD700;">Title</div>
-        <div id="alertMessage" style="font-size:16px; color:#fff; font-weight:normal;">Message</div>
-    </div>
-    <button onclick="closeModernAlert()" style="margin-left:20px; background:none; border:none; color:#FFD700; font-size:20px; cursor:pointer; font-weight:bold;">✖</button>
-</div>
-
-<!-- MODERNI CONFIRM -->
-<div id="modernConfirm" style="position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:#1a237e; color:#FFD700; padding:30px 35px; border-radius:16px; z-index:999999; display:none; align-items:center; flex-direction:column; box-shadow:0 10px 40px rgba(0,0,0,0.8); border:3px solid #FFD700; min-width:320px; max-width:90%;">
-    <span id="confirmIcon" style="font-size:48px; margin-bottom:10px;">⚠️</span>
-    <div id="confirmTitle" style="font-size:22px; color:#FFD700; font-weight:bold; margin-bottom:8px; text-align:center;">Potvrda</div>
-    <div id="confirmMessage" style="font-size:18px; color:#ffffff; text-align:center; margin-bottom:20px; line-height:1.5;">Da li ste sigurni?</div>
-    <div style="display:flex; gap:15px; justify-content:center; flex-wrap:wrap; width:100%;">
-        <button id="confirmYesBtn" style="flex:1; min-width:100px; padding:12px 25px; background:#4CAF50; color:white; border:none; border-radius:10px; font-size:18px; font-weight:bold; cursor:pointer;">✅ Da</button>
-        <button id="confirmNoBtn" style="flex:1; min-width:100px; padding:12px 25px; background:#666; color:white; border:none; border-radius:10px; font-size:18px; font-weight:bold; cursor:pointer;">✖ Ne</button>
+<!-- ===== MODERN ALERT ===== -->
+<div id="modernAlert">
+    <div class="alert-box">
+        <div class="alert-icon" id="alertIcon">📢</div>
+        <h2 class="alert-title" id="alertTitle">Obaveštenje</h2>
+        <p class="alert-message" id="alertMessage">Poruka</p>
+        <button class="alert-btn" onclick="closeModernAlert()">OK</button>
     </div>
 </div>
 
+<!-- ===== MODERN CONFIRM ===== -->
+<div id="modernConfirm">
+    <div class="confirm-box">
+        <div class="confirm-icon" id="confirmIcon">⚠️</div>
+        <h2 class="confirm-title" id="confirmTitle">Potvrda</h2>
+        <p class="confirm-message" id="confirmMessage">Da li ste sigurni?</p>
+        <div class="confirm-buttons">
+            <button class="confirm-yes" onclick="closeModernConfirm(); if(confirmCallback && confirmCallback.onYes) confirmCallback.onYes();">✅ Da</button>
+            <button class="confirm-no" onclick="closeModernConfirm(); if(confirmCallback && confirmCallback.onNo) confirmCallback.onNo();">✖ Ne</button>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================ -->
+<!-- ⭐ SCRIPT TAGOVI - NA KRAJU BODY ⭐ -->
+<!-- ============================================ -->
 <script>
     // ===== SERVICE WORKER REGISTRACIJA =====
     if ('serviceWorker' in navigator) {
@@ -380,182 +432,23 @@
         console.log('✅ Aplikacija instalirana!');
         deferredPrompt = null;
     });
-    <!-- ===== GLAVNI EKRAN SA SADRŽAJEM ===== -->
-    <div id="mainScreen" class="screen" style="display:none; flex-direction:column; background:#f5f5f5; min-height:100vh;">
-        <!-- Header -->
-        <div class="header">
-            <button class="btn-header btn-back" onclick="renderCategories()">◀ <span id="backText">Nazad</span></button>
-            <button class="btn-header btn-inventory" onclick="renderInventory()"><span id="invText">Zalihe</span></button>
-            <button class="btn-header btn-shopping" onclick="renderShoppingList()"><span id="shopText">Spisak</span></button>
-            <button class="btn-header btn-exit" onclick="exitApp()">✖ <span id="exitText">Izlaz</span></button>
-        </div>
-        <!-- Glavni sadržaj -->
-        <div id="mainContent" class="container"></div>
-    </div>
 
-    <!-- ===== EKRAN ZA IZBOR NAČINA UNOSA ===== -->
-    <div id="choiceScreen" class="screen" style="display:none; background:#1a237e; padding:20px;">
-        <div class="languages-box" style="width:100%; max-width:600px;">
-            <h2 style="color:#FFD700; font-size:28px; margin-bottom:30px;" id="choiceTitleText">Način unosa podataka</h2>
-            
-            <button onclick="selectVoiceMode()" style="width:100%; padding:30px; margin-bottom:15px; background:#4CAF50; color:white; border:none; border-radius:16px; font-size:24px; font-weight:bold; cursor:pointer;">
-                <div style="font-size:48px;">🎤</div>
-                <div id="voiceTitleText">Glasovni unos</div>
-                <div style="font-size:16px; font-weight:normal; margin-top:5px;" id="voiceDescText">Govori i uneću</div>
-            </button>
-            
-            <button onclick="selectManualMode()" style="width:100%; padding:30px; margin-bottom:15px; background:#2196F3; color:white; border:none; border-radius:16px; font-size:24px; font-weight:bold; cursor:pointer;">
-                <div style="font-size:48px;">✍️</div>
-                <div id="manualTitleText">Ručni unos</div>
-                <div style="font-size:16px; font-weight:normal; margin-top:5px;" id="manualDescText">Unesi podatke ručno</div>
-            </button>
-            
-            <button onclick="exitApp()" style="width:100%; padding:20px; background:#f44336; color:white; border:none; border-radius:16px; font-size:22px; font-weight:bold; cursor:pointer;" id="exitChoiceBtn">
-                ✖ IZLAZ
-            </button>
-        </div>
-    </div>
-
-    // ===== VOICE COMMAND (ISPRAVNA VERZIJA) =====
-function voiceCommand(command) {
-    console.log('🎤 Komanda:', command);
-    
-    const cmd = command.toLowerCase().trim();
-    
-    // ===== INVENTORY / ZALIHE =====
-    if (cmd === 'inventory' || cmd === 'zalihe' || cmd === 'stock' || 
-        cmd.includes('inventory') || cmd.includes('zalihe') || cmd.includes('stock') || 
-        cmd.includes('készlet') || cmd.includes('keszlet') || cmd.includes('bestand') || 
-        cmd.includes('запаси') || cmd.includes('запасы') || cmd.includes('库存') || 
-        cmd.includes('inventario') || cmd.includes('estoque') || 
-        cmd.includes('inv') || cmd.includes('zal') || cmd.includes('stanje')) {
-        console.log('📦 Otvaram zalihe');
-        showScreen('mainScreen');
-        setTimeout(function() {
-            renderInventory();
-        }, 100);
-        return; // ✅ ZAVRŠI - bez alerta
-    }
-    
-    // ===== SHOPPING / SPISAK =====
-    if (cmd === 'shopping' || cmd === 'spisak' || cmd === 'list' ||
-        cmd.includes('shopping') || cmd.includes('spisak') || cmd.includes('list') || 
-        cmd.includes('bevásárlólista') || cmd.includes('bevasarlolista') || cmd.includes('einkaufsliste') ||
-        cmd.includes('список') || cmd.includes('список') || cmd.includes('购物清单') ||
-        cmd.includes('lista') || cmd.includes('lista de compras') || cmd.includes('liste') ||
-        cmd.includes('shop') || cmd.includes('spis') || cmd.includes('potreba') || cmd.includes('potreb')) {
-        console.log('🛒 Otvaram spisak');
-        showScreen('mainScreen');
-        setTimeout(function() {
-            renderShoppingList();
-        }, 100);
-        return; // ✅ ZAVRŠI - bez alerta
-    }
-    
-    // ===== ADD / DODAJ =====
-    if (cmd === 'add' || cmd === 'dodaj' || 
-        cmd.includes('add') || cmd.includes('dodaj') || cmd.includes('unos') || 
-        cmd.includes('product') || cmd.includes('termék') || cmd.includes('termek') || 
-        cmd.includes('produkt') || cmd.includes('додати') || cmd.includes('добавить') ||
-        cmd.includes('添加') || cmd.includes('agregar') || cmd.includes('adicionar') ||
-        cmd.includes('ajouter') || cmd.includes('novi') || cmd.includes('hozzáadás') ||
-        cmd.includes('novo') || cmd.includes('nouveau') || cmd.includes('dodavanje')) {
-        console.log('➕ Otvaram unos');
-        showScreen('mainScreen');
-        setTimeout(function() {
-            renderDataEntry('');
-        }, 100);
-        return; // ✅ ZAVRŠI - bez alerta
-    }
-    
-    // ===== EXIT / IZLAZ =====
-    if (cmd === 'exit' || cmd === 'izlaz' || 
-        cmd.includes('exit') || cmd.includes('izlaz') || cmd.includes('quit') || 
-        cmd.includes('close') || cmd.includes('kilépés') || cmd.includes('kilepes') || 
-        cmd.includes('beenden') || cmd.includes('вихід') || cmd.includes('выход') ||
-        cmd.includes('退出') || cmd.includes('salir') || cmd.includes('sair') ||
-        cmd.includes('quitter') || cmd.includes('zatvori') || cmd.includes('kis') ||
-        cmd.includes('izadji') || cmd.includes('izadi')) {
-        console.log('🚪 Izlaz');
-        exitApp();
-        return; // ✅ ZAVRŠI - bez alerta
-    }
-    
-    // ===== NEPOZNATA KOMANDA - SAMO OVDE SE POZIVA ALERT =====
-    console.log('❌ Nepoznata komanda:', cmd);
-    
-    // ⭐ KORISTI PREVODE ZA TRENUTNI JEZIK
-    const unknownTitle = t('unknown_command_title') || 'Nepoznata komanda';
-    const notRecognized = t('not_recognized') || 'nije prepoznata';
-    const tryCommands = t('try_commands') || 'Pokušajte: Zalihe, Spisak, Dodaj proizvod ili Izlaz';
-    
-    // ⭐ PRIKAZI PORUKU NA PRAVOM JEZIKU - SAMO ZA NEPOZNATE KOMANDE
-    showModernAlert(
-        unknownTitle,
-        `"${command}" ${notRecognized}. ${tryCommands}`,
-        '🎤'
-    );
-}
-    <!-- ===== MODERN ALERT ===== -->
-    <div id="modernAlert" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); justify-content:center; align-items:center; z-index:9999; backdrop-filter:blur(5px);">
-        <div style="background:white; border-radius:24px; padding:40px; max-width:400px; width:90%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.5); animation:slideIn 0.3s ease;">
-            <div style="font-size:64px; margin-bottom:15px;" id="alertIcon">📢</div>
-            <h2 style="color:#1a237e; margin-bottom:10px; font-size:28px;" id="alertTitle">Obaveštenje</h2>
-            <p style="font-size:18px; color:#555; margin-bottom:25px;" id="alertMessage">Poruka</p>
-            <button onclick="closeModernAlert()" style="background:#1a237e; color:white; border:none; padding:12px 40px; border-radius:12px; font-size:18px; cursor:pointer; font-weight:bold;">OK</button>
-        </div>
-    </div>
-
-    <!-- ===== MODERN CONFIRM ===== -->
-    <div id="modernConfirm" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); justify-content:center; align-items:center; z-index:9999; backdrop-filter:blur(5px);">
-        <div style="background:white; border-radius:24px; padding:40px; max-width:400px; width:90%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.5); animation:slideIn 0.3s ease;">
-            <div style="font-size:64px; margin-bottom:15px;" id="confirmIcon">⚠️</div>
-            <h2 style="color:#1a237e; margin-bottom:10px; font-size:28px;" id="confirmTitle">Potvrda</h2>
-            <p style="font-size:18px; color:#555; margin-bottom:25px;" id="confirmMessage">Da li ste sigurni?</p>
-            <div style="display:flex; gap:10px;">
-                <button onclick="closeModernConfirm(); if(confirmCallback && confirmCallback.onYes) confirmCallback.onYes();" style="flex:1; background:#4CAF50; color:white; border:none; padding:12px; border-radius:12px; font-size:18px; cursor:pointer; font-weight:bold;">✅ Da</button>
-                <button onclick="closeModernConfirm(); if(confirmCallback && confirmCallback.onNo) confirmCallback.onNo();" style="flex:1; background:#f44336; color:white; border:none; padding:12px; border-radius:12px; font-size:18px; cursor:pointer; font-weight:bold;">✖ Ne</button>
-            </div>
-        </div>
-    </div>
-
-    <style>
-        @keyframes slideIn {
-            from { transform: translateY(-50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        
-        /* RESPONSIVE */
-        @media (max-width: 768px) {
-            .languages-grid { grid-template-columns: 1fr 1fr 1fr; }
-            .categories-grid { grid-template-columns: 1fr 1fr; }
-            .category-btn { padding: 30px 10px; font-size: 20px; min-height: 100px; }
-            .btn-header { font-size: 16px; padding: 12px 6px; }
-            .login-box { padding: 30px 20px; }
-            .lang-btn-main { padding: 15px 8px; min-height: 100px; font-size: 18px; }
-            .lang-btn-main img { width: 60px; height: 45px; }
-            .container { padding: 20px; }
-            .title { font-size: 26px; }
-        }
-        
-        @media (max-width: 480px) {
-            .languages-grid { grid-template-columns: 1fr 1fr; }
-            .categories-grid { grid-template-columns: 1fr; }
-            .lang-btn-main .lang-name { font-size: 14px; }
-        }
-    </style>
-
-    <script>
-        // ===== FIX za base href =====
-        (function() {
-            const base = document.querySelector('base');
-            if (base) {
-                const href = base.getAttribute('href');
-                if (href && !href.endsWith('/')) {
-                    base.setAttribute('href', href + '/');
-                }
+    // ===== FIX za base href =====
+    (function() {
+        const base = document.querySelector('base');
+        if (base) {
+            const href = base.getAttribute('href');
+            if (href && !href.endsWith('/')) {
+                base.setAttribute('href', href + '/');
             }
-        })();
-    </script>
+        }
+    })();
+</script>
+
+<!-- ⭐ VOICE COMMANDS (PRVO) -->
+<script src="voiceCommands.js" defer></script>
+<!-- ⭐ GLAVNI SCRIPT (DRUGO) -->
+<script src="script.js" defer></script>
+
 </body>
 </html>
