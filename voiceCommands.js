@@ -161,45 +161,41 @@ function voiceCommand(command) {
     console.log('🔍 Procesiram:', cmd);
     
     // ============================================
-    // ZALIHE / INVENTORY
-    // ============================================
-    if (cmd.includes('zalihe') || cmd.includes('zaliha') || cmd.includes('zalih') || 
-        cmd.includes('zalehe') || cmd.includes('zali') || cmd.includes('zale') ||
-        cmd.includes('zal') || cmd.includes('stanje') || cmd.includes('stanja') ||
-        cmd.includes('inventory') || cmd.includes('inv') || cmd.includes('stock') ||
-        cmd.includes('keslet') || cmd.includes('keszlet') || cmd.includes('készlet') || 
-        cmd.includes('kezlet') || cmd.includes('bestand') || cmd.includes('запаси') || 
-        cmd.includes('запасы') || cmd.includes('库存') || cmd.includes('inventario') || 
-        cmd.includes('estoque') || cmd.includes('raktár') || cmd.includes('raktar')) {
-        console.log('📦 Otvaram zalihe');
-        currentScreenState = 'inventory';
-        showScreen('mainScreen');
-        setTimeout(function() {
-            renderInventory();
-        }, 100);
-        return true;
-    }
+// ZALIHE / INVENTORY
+// ============================================
+if (cmd.includes('zalihe') || cmd.includes('zaliha') || cmd.includes('zalih') || 
+    cmd.includes('zalehe') || cmd.includes('zali') || cmd.includes('zale') ||
+    cmd.includes('zal') || cmd.includes('stanje') || cmd.includes('stanja') ||
+    cmd.includes('inventory') || cmd.includes('inv') || cmd.includes('stock') ||
+    cmd.includes('keslet') || cmd.includes('keszlet') || cmd.includes('készlet') || 
+    cmd.includes('kezlet') || cmd.includes('bestand') || cmd.includes('запаси') || 
+    cmd.includes('запасы') || cmd.includes('库存') || cmd.includes('inventario') || 
+    cmd.includes('estoque') || cmd.includes('raktár') || cmd.includes('raktar')) {
+    console.log('📦 Otvaram originalne zalihe');
+    currentScreenState = 'inventory';
+    showScreen('mainScreen');
+    renderInventory();  // ORIGINALNI renderInventory
+    return true;
+}
     
     // ============================================
-    // SPISAK / SHOPPING
-    // ============================================
-    if (cmd.includes('spisak') || cmd.includes('spiska') || cmd.includes('spis') || 
-        cmd.includes('potreba') || cmd.includes('potreb') || cmd.includes('potrebe') ||
-        cmd.includes('lista') || cmd.includes('shopping') || cmd.includes('shop') || 
-        cmd.includes('list') || cmd.includes('bevásárlólista') || cmd.includes('bevasarlolista') ||
-        cmd.includes('bevasarlas') || cmd.includes('vasarlas') || cmd.includes('bolti') ||
-        cmd.includes('einkaufsliste') || cmd.includes('список') || cmd.includes('购物清单') ||
-        cmd.includes('lista de compras') || cmd.includes('liste')) {
-        console.log('🛒 Otvaram spisak');
-        currentScreenState = 'shopping';
-        showScreen('mainScreen');
-        setTimeout(function() {
-            renderShoppingList();
-        }, 100);
-        return true;
-    }
+// SPISAK / SHOPPING
+// ============================================
+if (cmd.includes('spisak') || cmd.includes('spiska') || cmd.includes('spis') || 
+    cmd.includes('potreba') || cmd.includes('potreb') || cmd.includes('potrebe') ||
+    cmd.includes('lista') || cmd.includes('shopping') || cmd.includes('shop') || 
+    cmd.includes('list') || cmd.includes('bevásárlólista') || cmd.includes('bevasarlolista') ||
+    cmd.includes('bevasarlas') || cmd.includes('vasarlas') || cmd.includes('bolti') ||
+    cmd.includes('einkaufsliste') || cmd.includes('список') || cmd.includes('购物清单') ||
+    cmd.includes('lista de compras') || cmd.includes('liste')) {
+    console.log('🛒 Otvaram originalni spisak');
+    currentScreenState = 'shopping';
+    showScreen('mainScreen');
+    renderShoppingList();  // ORIGINALNI renderShoppingList
+    return true;
+}
     
-    // ============================================
+ // ============================================
 // DODAJ / ADD - IDE NA KATEGORIJE (originalni tok)
 // ============================================
 if (cmd.includes('dodaj') || cmd.includes('dodavanje') || cmd.includes('dodat') || 
@@ -210,19 +206,16 @@ if (cmd.includes('dodaj') || cmd.includes('dodavanje') || cmd.includes('dodat') 
     cmd.includes('додати') || cmd.includes('добавить') || cmd.includes('添加') || 
     cmd.includes('agregar') || cmd.includes('adicionar') || cmd.includes('ajouter') || 
     cmd.includes('nouveau')) {
-    console.log('➕ Otvaram unos - idem na kategorije');
+    console.log('➕ Otvaram originalni program - kategorije');
     // Resetuj stanje za novi unos
     currentScreenState = 'categories';
     currentCategory = '';
     currentSubcategory = '';
     currentProductPart = '';
     showScreen('mainScreen');
-    setTimeout(function() {
-        renderCategories();  // ⭐ IDE NA KATEGORIJE
-    }, 100);
+    renderCategories();  // ⭐ DIREKTNO, BEZ setTimeout
     return true;
 }
-    
     // ============================================
     // IZLAZ / EXIT
     // ============================================
