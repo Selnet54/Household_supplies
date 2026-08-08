@@ -1527,19 +1527,23 @@ function selectVoiceMode() {
     }
 }
 
-function selectManualMode() {
-    console.log('✍️ Izabran ručni unos');
-    try {
-        // Resetuj stanje na početak originalnog programa
-        currentScreenState = 'categories';
-        currentCategory = '';
-        currentSubcategory = '';
-        currentProductPart = '';
-        
-        showScreen('mainScreen');
-        // Direktno pozovi renderCategories bez setTimeout
-        renderCategories();
-    } catch(e) {
+function goBackFromVoice() {
+    console.log('◀ Povratak sa glasovnog menija');
+    // Zaustavi prepoznavanje glasa ako je aktivno
+    if (recognition) {
+        try { 
+            recognition.stop(); 
+        } catch(e) {}
+        recognition = null;
+    }
+    // Resetuj stanje i vrati se na izbor
+    currentScreenState = '';
+    currentCategory = '';
+    currentSubcategory = '';
+    currentProductPart = '';
+    updateChoiceScreenTexts();
+    showScreen('choiceScreen');
+} catch(e) {
         console.error('❌ Greška u selectManualMode:', e);
         showModernAlert('Greška', 'Došlo je do greške pri pokretanju ručnog unosa', '❌');
     }
