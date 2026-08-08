@@ -160,7 +160,7 @@ function voiceCommand(command) {
     const cmd = command.toLowerCase().trim();
     console.log('🔍 Procesiram:', cmd);
     
-    // ============================================
+// ============================================
 // ZALIHE / INVENTORY
 // ============================================
 if (cmd.includes('zalihe') || cmd.includes('zaliha') || cmd.includes('zalih') || 
@@ -174,11 +174,11 @@ if (cmd.includes('zalihe') || cmd.includes('zaliha') || cmd.includes('zalih') ||
     console.log('📦 Otvaram originalne zalihe');
     currentScreenState = 'inventory';
     showScreen('mainScreen');
-    renderInventory();  // ORIGINALNI renderInventory
+    renderInventory();  // ⭐ ORIGINALNI
     return true;
 }
-    
-    // ============================================
+
+// ============================================
 // SPISAK / SHOPPING
 // ============================================
 if (cmd.includes('spisak') || cmd.includes('spiska') || cmd.includes('spis') || 
@@ -191,12 +191,12 @@ if (cmd.includes('spisak') || cmd.includes('spiska') || cmd.includes('spis') ||
     console.log('🛒 Otvaram originalni spisak');
     currentScreenState = 'shopping';
     showScreen('mainScreen');
-    renderShoppingList();  // ORIGINALNI renderShoppingList
+    renderShoppingList();  // ⭐ ORIGINALNI
     return true;
 }
     
- // ============================================
-// DODAJ / ADD - IDE NA KATEGORIJE (originalni tok)
+// ============================================
+// DODAJ / ADD - IDE NA ORIGINALNI PROGRAM
 // ============================================
 if (cmd.includes('dodaj') || cmd.includes('dodavanje') || cmd.includes('dodat') || 
     cmd.includes('doda') || cmd.includes('unos') || cmd.includes('novi') || 
