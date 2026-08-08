@@ -1638,6 +1638,59 @@ function goBackFromVoice() {
     showScreen('choiceScreen');
 }
 // ============================================
+// NAVIGACIJA - VRATI SE NA PRETHODNI EKRAN
+// ============================================
+let navigationHistory = [];
+
+function goBack() {
+    console.log('◀ Povratak na prethodni ekran');
+    console.log('📋 Istorija:', navigationHistory);
+    
+    if (navigationHistory.length > 1) {
+        // Ukloni trenutni ekran
+        navigationHistory.pop();
+        // Uzmi prethodni
+        const previousScreen = navigationHistory.pop();
+        console.log('📱 Vraćam se na:', previousScreen);
+        showScreen(previousScreen);
+        
+        if (previousScreen === 'mainScreen') {
+            setTimeout(function() {
+                renderCategories();
+            }, 100);
+        }
+    } else if (navigationHistory.length === 1) {
+        // Samo jedan ekran u istoriji - vrati se na choiceScreen
+        navigationHistory = [];
+        showScreen('choiceScreen');
+    } else {
+        // Nema istorije
+        showScreen('choiceScreen');
+    }
+}
+
+// Modifikuj showScreen da pamti istoriju
+const originalShowScreen = showScreen;
+showScreen = function(screenId) {
+    // Sakrij sve ekrane
+    document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+    
+    // Pokaži traženi ekran
+    const target = document.getElementById(screenId);
+    if (target) {
+        target.style.display = 'flex';
+        console.log('📱 Prikazan ekran:', screenId);
+        
+        // Dodaj u istoriju (osim login i language)
+        if (screenId !== 'loginScreen' && screenId !== 'languageScreen') {
+            if (navigationHistory.length === 0 || navigationHistory[navigationHistory.length - 1] !== screenId) {
+                navigationHistory.push(screenId);
+                console.log('📝 Dodato u istoriju:', screenId);
+            }
+        }
+    }
+};
+// ============================================
 // KRAJ FAJLA
 // ============================================
 console.log('✅ Kraj fajla');
