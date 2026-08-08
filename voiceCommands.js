@@ -200,28 +200,28 @@ function voiceCommand(command) {
     }
     
     // ============================================
-    // DODAJ / ADD - IDE NA KATEGORIJE (originalni tok)
-    // ============================================
-    if (cmd.includes('dodaj') || cmd.includes('dodavanje') || cmd.includes('dodat') || 
-        cmd.includes('doda') || cmd.includes('unos') || cmd.includes('novi') || 
-        cmd.includes('novo') || cmd.includes('add') || cmd.includes('product') ||
-        cmd.includes('hozzáadás') || cmd.includes('hozzaadas') || cmd.includes('hozza') ||
-        cmd.includes('termék') || cmd.includes('termek') || cmd.includes('produkt') || 
-        cmd.includes('додати') || cmd.includes('добавить') || cmd.includes('添加') || 
-        cmd.includes('agregar') || cmd.includes('adicionar') || cmd.includes('ajouter') || 
-        cmd.includes('nouveau')) {
-        console.log('➕ Otvaram unos - idem na kategorije');
-        // Resetuj stanje za novi unos
-        currentScreenState = 'categories';
-        currentCategory = '';
-        currentSubcategory = '';
-        currentProductPart = '';
-        showScreen('mainScreen');
-        setTimeout(function() {
-            renderCategories();  // ⭐ IDE NA KATEGORIJE
-        }, 100);
-        return true;
-    }
+// DODAJ / ADD - IDE NA KATEGORIJE (originalni tok)
+// ============================================
+if (cmd.includes('dodaj') || cmd.includes('dodavanje') || cmd.includes('dodat') || 
+    cmd.includes('doda') || cmd.includes('unos') || cmd.includes('novi') || 
+    cmd.includes('novo') || cmd.includes('add') || cmd.includes('product') ||
+    cmd.includes('hozzáadás') || cmd.includes('hozzaadas') || cmd.includes('hozza') ||
+    cmd.includes('termék') || cmd.includes('termek') || cmd.includes('produkt') || 
+    cmd.includes('додати') || cmd.includes('добавить') || cmd.includes('添加') || 
+    cmd.includes('agregar') || cmd.includes('adicionar') || cmd.includes('ajouter') || 
+    cmd.includes('nouveau')) {
+    console.log('➕ Otvaram unos - idem na kategorije');
+    // Resetuj stanje za novi unos
+    currentScreenState = 'categories';
+    currentCategory = '';
+    currentSubcategory = '';
+    currentProductPart = '';
+    showScreen('mainScreen');
+    setTimeout(function() {
+        renderCategories();  // ⭐ IDE NA KATEGORIJE
+    }, 100);
+    return true;
+}
     
     // ============================================
     // IZLAZ / EXIT
