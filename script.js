@@ -1616,8 +1616,6 @@ function goBack() {
 // ============================================
 // SHOW SCREEN SA ISTORIJOM
 // ============================================
-// ⭐ OVDE NEMA navigationHistory - samo showScreen funkcija
-
 function showScreen(screenId) {
     console.log('📱 Prikazujem ekran:', screenId);
     
@@ -1632,9 +1630,14 @@ function showScreen(screenId) {
         console.log('✅ target.style.display:', target.style.display);
         console.log('✅ target.classList:', target.classList);
         
-        // ... ostatak koda
-    }
-}
+        // Ako je mainScreen, prikaži kategorije
+        if (screenId === 'mainScreen') {
+            if (currentScreenState === '' || currentScreenState === 'categories') {
+                setTimeout(function() {
+                    renderCategories();
+                }, 50);
+            }
+        }
         
         // Dodaj u istoriju (osim login i language)
         if (screenId !== 'loginScreen' && screenId !== 'languageScreen') {
@@ -1650,7 +1653,6 @@ function showScreen(screenId) {
     // Ažuriraj header
     updateHeaderTexts();
 }
-
 // ============================================
 // RENDER DATA ENTRY - PUNI UNOS PODATAKA
 // ============================================
