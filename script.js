@@ -964,6 +964,20 @@ function renderCategories() {
     html += `</div>`;
     content.innerHTML = html;
     console.log('✅ renderCategories: prikazane kategorije');
+    console.log('✅ content.innerHTML:', content.innerHTML.substring(0, 200));
+    
+    // ⭐ FORSIRAJ PRIKAZ
+    content.style.display = 'block';
+    content.style.visibility = 'visible';
+    
+    const mainScreen = document.getElementById('mainScreen');
+    if (mainScreen) {
+        mainScreen.style.display = 'flex';
+        console.log('✅ mainScreen forisrano prikazan');
+    }
+    
+    // ⭐ TEST - CRVENI TEKST
+    document.body.innerHTML += '<div style="position:fixed;top:10px;left:10px;background:red;color:white;padding:10px;z-index:9999;font-size:20px;">🔥 renderCategories JE POZVAN!</div>';
 }
 
 function renderSubcategories(category) {
