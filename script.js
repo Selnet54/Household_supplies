@@ -1589,29 +1589,6 @@ function updateVoiceStatus(text) {
 }
 
 // ============================================
-// DODATNA PODEŠAVANJA ZA RENDER
-// ============================================
-// Dodaj ovo u showScreen funkciju za bolje upravljanje
-const originalShowScreen = showScreen;
-showScreen = function(screenId) {
-    // Sakrij sve ekrane
-    document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
-    
-    // Pokaži traženi ekran
-    const target = document.getElementById(screenId);
-    if (target) {
-        target.style.display = 'flex';
-        
-        // Ako je mainScreen, prikaži kategorije
-        if (screenId === 'mainScreen' && currentScreenState === '') {
-            renderCategories();
-        }
-    }
-    
-    // Ažuriraj header
-    updateHeaderTexts();
-};
-// ============================================
 // IZBOR NAČINA UNOSA (DODAJ OVO)
 // ============================================
 
@@ -1692,9 +1669,14 @@ function goBack() {
     }
 }
 
-// Modifikuj showScreen da pamti istoriju
-const originalShowScreen = showScreen;
-showScreen = function(screenId) {
+// ============================================
+// SHOW SCREEN SA ISTORIJOM
+// ============================================
+let navigationHistory = [];
+
+function showScreen(screenId) {
+    console.log('📱 Prikazujem ekran:', screenId);
+    
     // Sakrij sve ekrane
     document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
     
@@ -1702,17 +1684,32 @@ showScreen = function(screenId) {
     const target = document.getElementById(screenId);
     if (target) {
         target.style.display = 'flex';
-        console.log('📱 Prikazan ekran:', screenId);
+        console.log('✅ Ekran prikazan:', screenId);
+        
+        // Ako je mainScreen, prikaži kategorije
+        if (screenId === 'mainScreen') {
+            // Proveri da li treba renderovati kategorije
+            if (currentScreenState === '' || currentScreenState === 'categories') {
+                setTimeout(function() {
+                    renderCategories();
+                }, 50);
+            }
+        }
         
         // Dodaj u istoriju (osim login i language)
         if (screenId !== 'loginScreen' && screenId !== 'languageScreen') {
             if (navigationHistory.length === 0 || navigationHistory[navigationHistory.length - 1] !== screenId) {
                 navigationHistory.push(screenId);
-                console.log('📝 Dodato u istoriju:', screenId);
+                console.log('📝 Dodato u istoriju:', screenId, navigationHistory);
             }
         }
+    } else {
+        console.error('❌ Ekran nije pronađen:', screenId);
     }
-};
+    
+    // Ažuriraj header
+    updateHeaderTexts();
+}
 // ============================================
 // RENDER DATA ENTRY - PUNI UNOS PODATAKA
 // ============================================
