@@ -1752,6 +1752,45 @@ function renderDataEntry(productPart) {
     }
 }
 // ============================================
+// IZVOZ FUNKCIJA ZA VOICE COMMANDS
+// ============================================
+console.log('🔗 Izvozim funkcije za voiceCommands...');
+
+// Proveri da li su funkcije definisane
+if (typeof renderInventory === 'undefined') {
+    console.error('❌ renderInventory nije definisan!');
+} else {
+    console.log('✅ renderInventory je definisan');
+}
+
+if (typeof renderCategories === 'undefined') {
+    console.error('❌ renderCategories nije definisan!');
+} else {
+    console.log('✅ renderCategories je definisan');
+}
+
+if (typeof showScreen === 'undefined') {
+    console.error('❌ showScreen nije definisan!');
+} else {
+    console.log('✅ showScreen je definisan');
+}
+
+// Izvezi sve funkcije u globalni prostor (window)
+window.renderInventory = renderInventory;
+window.renderShoppingList = renderShoppingList;
+window.renderCategories = renderCategories;
+window.renderDataEntry = renderDataEntry;
+window.showScreen = showScreen;
+window.goBack = goBack;
+window.exitApp = exitApp;
+window.t = t;
+window.currentScreenState = currentScreenState;
+window.currentCategory = currentCategory;
+window.currentSubcategory = currentSubcategory;
+window.currentProductPart = currentProductPart;
+
+console.log('✅ Sve funkcije izvezene za voiceCommands!');
+// ============================================
 // KRAJ FAJLA
 // ============================================
 console.log('✅ Kraj fajla');
