@@ -822,23 +822,6 @@ function t(key) {
     return translations[currentLang]?.[key] || key;
 }
 
-function showScreen(screenId) {
-    // Sakrij sve ekrane koji imaju klasu .screen
-    const screens = document.querySelectorAll('.screen');
-    screens.forEach(screen => {
-        screen.style.display = 'none';
-    });
-
-    // Prikaži traženi ekran
-    const targetScreen = document.getElementById(screenId);
-    if (targetScreen) {
-        targetScreen.style.display = 'flex';
-        console.log('📱 Prikazan ekran:', screenId);
-    } else {
-        console.error('❌ Ekran nije pronađen:', screenId);
-    }
-}
-
 function updateHeaderTexts() {
     const backText = document.getElementById('backText');
     const invText = document.getElementById('invText');
@@ -1308,66 +1291,6 @@ function renderShoppingList() {
     content.innerHTML = html;
 }
 
-// ============================================
-// RENDER DATA ENTRY - UNOS PODATAKA
-// ============================================
-function renderDataEntry(subcategory) {
-    currentScreenState = 'dataEntry';
-    currentSubcategory = subcategory || '';
-    const content = document.getElementById('mainContent');
-    if (!content) return;
-    
-    const storageOptions = [
-        t('zamrzivac_1'), t('zamrzivac_2'), t('zamrzivac_3'),
-        t('frizider'), t('ostava'), t('Ostalo')
-    ];
-    
-    const unitOptions = ['kg', 'g', 'kom', 'l', 'ml', 'pak', 'kutija'];
-    
-    let html = `<div class="title">${t('unos_podataka')}</div>`;
-    html += `<div style="background:white;padding:20px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1);max-width:600px;margin:0 auto;">`;
-    
-    // Naziv proizvoda
-    html += `<div style="margin-bottom:15px;">`;
-    html += `<label style="display:block;font-weight:bold;margin-bottom:5px;color:#1a237e;">${t('naziv_proizvoda')}</label>`;
-    html += `<input type="text" id="productName" placeholder="${t('naziv_proizvoda')}" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;font-size:16px;">`;
-    html += `</div>`;
-    
-    // Količina
-    html += `<div style="margin-bottom:15px;">`;
-    html += `<label style="display:block;font-weight:bold;margin-bottom:5px;color:#1a237e;">${t('kolicina')}</label>`;
-    html += `<input type="number" id="productQuantity" placeholder="0" min="0" step="0.1" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;font-size:16px;">`;
-    html += `</div>`;
-    
-    // Jedinica mere
-    html += `<div style="margin-bottom:15px;">`;
-    html += `<label style="display:block;font-weight:bold;margin-bottom:5px;color:#1a237e;">${t('jedinica_mere')}</label>`;
-    html += `<select id="productUnit" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;font-size:16px;">`;
-    unitOptions.forEach(unit => {
-        html += `<option value="${unit}">${t(unit) || unit}</option>`;
-    });
-    html += `</select>`;
-    html += `</div>`;
-    
-    // Mesto skladištenja
-    html += `<div style="margin-bottom:15px;">`;
-    html += `<label style="display:block;font-weight:bold;margin-bottom:5px;color:#1a237e;">${t('mesto_skladistenja')}</label>`;
-    html += `<select id="productStorage" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;font-size:16px;">`;
-    storageOptions.forEach(place => {
-        html += `<option value="${place}">${place}</option>`;
-    });
-    html += `</select>`;
-    html += `</div>`;
-    
-    // Dugmad
-    html += `<div style="display:flex;gap:10px;margin-top:20px;">`;
-    html += `<button onclick="saveProduct()" style="flex:1;background:#4CAF50;color:white;border:none;padding:12px;border-radius:6px;font-size:16px;cursor:pointer;font-weight:bold;">✅ ${t('unesi')}</button>`;
-    html += `<button onclick="renderCategories()" style="flex:1;background:#f44336;color:white;border:none;padding:12px;border-radius:6px;font-size:16px;cursor:pointer;font-weight:bold;">✖ ${t('odustani')}</button>`;
-    html += `</div>`;
-    
-    html += `</div>`;
-    content.innerHTML = html;
-}
 
 // ============================================
 // POMOĆNE FUNKCIJE ZA RAD SA PODACIMA
