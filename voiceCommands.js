@@ -1,6 +1,7 @@
 // ============================================
 // VOICE COMMANDS - SVI JEZICI I VARIJANTE
 // ============================================
+console.log('🎤 voiceCommands.js je učitan!');
 
 // ============================================
 // INVENTORY / ZALIHE - SVE VARIJANTE
@@ -159,6 +160,12 @@ function processVoiceCommand(command) {
     const cmd = command.toLowerCase().trim();
     console.log('🔍 Procesiram:', cmd);
     
+    // ⭐ DODATO - IGNORIŠI REČI KRAĆE OD 2 SLOVA
+    if (cmd.length < 2) {
+        console.log('⏭️ Preskačem kratku reč (manje od 2 slova):', cmd);
+        return false;
+    }
+    
     // Proveri sve komande
     if (checkInventoryCommand(cmd)) {
         console.log('📦 Otvaram zalihe');
@@ -199,7 +206,7 @@ function processVoiceCommand(command) {
 }
 
 // ============================================
-// NOVA VOICE COMMAND FUNKCIJA
+// VOICE COMMAND FUNKCIJA
 // ============================================
 function voiceCommand(command) {
     const found = processVoiceCommand(command);
@@ -217,3 +224,5 @@ function voiceCommand(command) {
         );
     }
 }
+
+console.log('✅ voiceCommands.js je spreman!');
