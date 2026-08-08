@@ -1530,16 +1530,15 @@ function selectVoiceMode() {
 function selectManualMode() {
     console.log('✍️ Izabran ručni unos');
     try {
-        // Resetuj stanje na početak
+        // Resetuj stanje na početak originalnog programa
         currentScreenState = 'categories';
         currentCategory = '';
         currentSubcategory = '';
         currentProductPart = '';
         
         showScreen('mainScreen');
-        setTimeout(function() {
-            renderCategories();
-        }, 100);
+        // Direktno pozovi renderCategories bez setTimeout
+        renderCategories();
     } catch(e) {
         console.error('❌ Greška u selectManualMode:', e);
         showModernAlert('Greška', 'Došlo je do greške pri pokretanju ručnog unosa', '❌');
@@ -1554,7 +1553,11 @@ function goBackFromVoice() {
         } catch(e) {}
         recognition = null;
     }
-    // Ažuriraj tekstove i vrati se na izbor
+    // Resetuj stanje i vrati se na izbor načina unosa
+    currentScreenState = '';
+    currentCategory = '';
+    currentSubcategory = '';
+    currentProductPart = '';
     updateChoiceScreenTexts();
     showScreen('choiceScreen');
 }
