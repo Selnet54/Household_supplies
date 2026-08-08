@@ -931,10 +931,26 @@ function updateChoiceScreenTexts() {
 // RENDER FUNKCIJE
 // ============================================
 function renderCategories() {
+    console.log('📂 renderCategories POZVAN!');
+    console.log('📂 currentLang:', currentLang);
+    console.log('📂 currentScreenState:', currentScreenState);
+    
     currentScreenState = 'categories';
     const content = document.getElementById('mainContent');
-    if (!content) return;
+    if (!content) {
+        console.error('❌ mainContent nije pronađen!');
+        return;
+    }
+    
     const catList = getMainCategories();
+    console.log('📂 Kategorije:', catList);
+    
+    if (!catList || catList.length === 0) {
+        console.error('❌ Nema kategorija!');
+        content.innerHTML = '<div class="title">Greška - nema kategorija</div>';
+        return;
+    }
+    
     let html = `<div class="title">${t('glavne_kategorije')}</div>`;
     html += `<div class="categories-grid">`;
     catList.forEach(cat => {
@@ -947,6 +963,7 @@ function renderCategories() {
     });
     html += `</div>`;
     content.innerHTML = html;
+    console.log('✅ renderCategories: prikazane kategorije');
 }
 
 function renderSubcategories(category) {
@@ -1598,15 +1615,12 @@ function showScreen(screenId) {
     if (target) {
         target.style.display = 'flex';
         console.log('✅ Ekran prikazan:', screenId);
+        console.log('✅ target.style.display:', target.style.display);
+        console.log('✅ target.classList:', target.classList);
         
-        // Ako je mainScreen, prikaži kategorije
-        if (screenId === 'mainScreen') {
-            if (currentScreenState === '' || currentScreenState === 'categories') {
-                setTimeout(function() {
-                    renderCategories();
-                }, 50);
-            }
-        }
+        // ... ostatak koda
+    }
+}
         
         // Dodaj u istoriju (osim login i language)
         if (screenId !== 'loginScreen' && screenId !== 'languageScreen') {
