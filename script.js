@@ -1098,10 +1098,9 @@ function triggerLogin() {
     }
 }
 
+/// ============================================
+// START VOICE RECOGNITION (POPRAVLJENO)
 // ============================================
-// GLASOVNE KOMANDE
-// ============================================
-// ===== START VOICE RECOGNITION =====
 let recognition = null;
 
 function startVoiceRecognition() {
@@ -1109,8 +1108,6 @@ function startVoiceRecognition() {
     
     const status = document.getElementById('voiceStatus');
     if (!status) {
-        // ❌ IZBRIŠI OVO ako postoji:
-        // showModernAlert('Error', 'Voice status element not found!', '❌');
         console.error('❌ voiceStatus element not found');
         return;
     }
@@ -1118,8 +1115,6 @@ function startVoiceRecognition() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
         status.innerHTML = '❌ Speech recognition not supported';
-        // ❌ IZBRIŠI OVO ako postoji:
-        // showModernAlert('Error', 'Speech recognition not supported!', '❌');
         console.error('❌ Speech Recognition not supported');
         return;
     }
@@ -1139,7 +1134,7 @@ function startVoiceRecognition() {
     
     recognition.lang = langMap[currentLang] || 'en-US';
     recognition.continuous = false;
-    recognition.interimResults = true;
+    recognition.interimResults = true;  // ⭐ VAŽNO: prima privremene rezultate
     
     recognition.onstart = function() {
         console.log('🎤 Mikrofon aktivan na:', recognition.lang);
@@ -1147,17 +1142,34 @@ function startVoiceRecognition() {
         status.style.color = '#4FC3F7';
     };
     
+    // ⭐ OVO JE POPRAVLJENI onresult - IGNORIŠE "k" dok govoriš
     recognition.onresult = function(event) {
+        console.log('📝 Rezultati:', event.results);
+        
         const last = event.results.length - 1;
-        const text = event.results[last][0].transcript.trim();
-        console.log('🎤 Prepoznato:', text);
+        const result = event.results[last];
+        
+        // ⭐ IGNORIŠI INTERIM REZULTATE (još uvek govori)
+        if (!result.isFinal) {
+            console.log('⏳ Još uvek govori... (interim)');
+            return;
+        }
+        
+        const text = result[0].transcript.trim();
+        console.log('🎤 Prepoznato (finalno):', text);
         status.innerHTML = `🗣️ You said: "${text}"`;
+        
+        // ⭐ POZOVI voiceCommand SAMO ZA FINALNE REZULTATE
         voiceCommand(text);
     };
     
     recognition.onerror = function(event) {
         console.warn('⚠️ Speech error:', event.error);
-        status.innerHTML = `❌ Error: ${event.error}`;
+        if (event.error === 'not-allowed') {
+            status.innerHTML = '❌ Please allow microphone access';
+        } else {
+            status.innerHTML = `❌ Error: ${event.error}`;
+        }
         status.style.color = '#f44336';
     };
     
