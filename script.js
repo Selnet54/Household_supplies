@@ -1513,11 +1513,8 @@ function updateVoiceStatus(text) {
 function selectVoiceMode() {
     console.log('🎤 Izabran zvučni unos');
     try {
-        // Ažuriraj tekstove na trenutnom jeziku
         updateChoiceScreenTexts();
-        // Prikaži ekran za glasovni meni
         showScreen('voiceMenuScreen');
-        // Pokreni prepoznavanje glasa nakon 500ms
         setTimeout(function() {
             startVoiceRecognition();
         }, 500);
@@ -1527,37 +1524,29 @@ function selectVoiceMode() {
     }
 }
 
-function goBackFromVoice() {
-    console.log('◀ Povratak sa glasovnog menija');
-    // Zaustavi prepoznavanje glasa ako je aktivno
-    if (recognition) {
-        try { 
-            recognition.stop(); 
-        } catch(e) {}
-        recognition = null;
-    }
-    // Resetuj stanje i vrati se na izbor
-    currentScreenState = '';
-    currentCategory = '';
-    currentSubcategory = '';
-    currentProductPart = '';
-    updateChoiceScreenTexts();
-    showScreen('choiceScreen');
-} catch(e) {
+function selectManualMode() {
+    console.log('✍️ Izabran ručni unos');
+    try {
+        currentScreenState = 'categories';
+        currentCategory = '';
+        currentSubcategory = '';
+        currentProductPart = '';
+        showScreen('mainScreen');
+        renderCategories();
+    } catch(e) {
         console.error('❌ Greška u selectManualMode:', e);
         showModernAlert('Greška', 'Došlo je do greške pri pokretanju ručnog unosa', '❌');
     }
 }
+
 function goBackFromVoice() {
     console.log('◀ Povratak sa glasovnog menija');
-    // Zaustavi prepoznavanje glasa ako je aktivno
     if (recognition) {
         try { 
             recognition.stop(); 
         } catch(e) {}
         recognition = null;
     }
-    // Resetuj stanje i vrati se na izbor načina unosa
     currentScreenState = '';
     currentCategory = '';
     currentSubcategory = '';
