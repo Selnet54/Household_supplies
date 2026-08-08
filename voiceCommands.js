@@ -152,23 +152,27 @@ function checkExitCommand(cmd) {
 }
 
 // ============================================
-// GLAVNA FUNKCIJA ZA OBRADU KOMANDI
+// VOICE COMMAND - GLAVNA FUNKCIJA
 // ============================================
-function processVoiceCommand(command) {
+function voiceCommand(command) {
     console.log('🎤 Komanda:', command);
     
     const cmd = command.toLowerCase().trim();
     console.log('🔍 Procesiram:', cmd);
     
-    // ⭐ DODATO - IGNORIŠI REČI KRAĆE OD 2 SLOVA
-    if (cmd.length < 2) {
-        console.log('⏭️ Preskačem kratku reč (manje od 2 slova):', cmd);
-        return false;
-    }
-    
-    // Proveri sve komande
-    if (checkInventoryCommand(cmd)) {
+    // ============================================
+    // ZALIHE / INVENTORY
+    // ============================================
+    if (cmd.includes('zalihe') || cmd.includes('zaliha') || cmd.includes('zalih') || 
+        cmd.includes('zalehe') || cmd.includes('zali') || cmd.includes('zale') ||
+        cmd.includes('zal') || cmd.includes('stanje') || cmd.includes('stanja') ||
+        cmd.includes('inventory') || cmd.includes('inv') || cmd.includes('stock') ||
+        cmd.includes('keslet') || cmd.includes('keszlet') || cmd.includes('készlet') || 
+        cmd.includes('kezlet') || cmd.includes('bestand') || cmd.includes('запаси') || 
+        cmd.includes('запасы') || cmd.includes('库存') || cmd.includes('inventario') || 
+        cmd.includes('estoque') || cmd.includes('raktár') || cmd.includes('raktar')) {
         console.log('📦 Otvaram zalihe');
+        currentScreenState = 'inventory';
         showScreen('mainScreen');
         setTimeout(function() {
             renderInventory();
@@ -176,8 +180,18 @@ function processVoiceCommand(command) {
         return true;
     }
     
-    if (checkShoppingCommand(cmd)) {
+    // ============================================
+    // SPISAK / SHOPPING
+    // ============================================
+    if (cmd.includes('spisak') || cmd.includes('spiska') || cmd.includes('spis') || 
+        cmd.includes('potreba') || cmd.includes('potreb') || cmd.includes('potrebe') ||
+        cmd.includes('lista') || cmd.includes('shopping') || cmd.includes('shop') || 
+        cmd.includes('list') || cmd.includes('bevásárlólista') || cmd.includes('bevasarlolista') ||
+        cmd.includes('bevasarlas') || cmd.includes('vasarlas') || cmd.includes('bolti') ||
+        cmd.includes('einkaufsliste') || cmd.includes('список') || cmd.includes('购物清单') ||
+        cmd.includes('lista de compras') || cmd.includes('liste')) {
         console.log('🛒 Otvaram spisak');
+        currentScreenState = 'shopping';
         showScreen('mainScreen');
         setTimeout(function() {
             renderShoppingList();
@@ -185,44 +199,60 @@ function processVoiceCommand(command) {
         return true;
     }
     
-    if (checkAddCommand(cmd)) {
-        console.log('➕ Otvaram unos');
+    // ============================================
+    // DODAJ / ADD - IDE NA KATEGORIJE (originalni tok)
+    // ============================================
+    if (cmd.includes('dodaj') || cmd.includes('dodavanje') || cmd.includes('dodat') || 
+        cmd.includes('doda') || cmd.includes('unos') || cmd.includes('novi') || 
+        cmd.includes('novo') || cmd.includes('add') || cmd.includes('product') ||
+        cmd.includes('hozzáadás') || cmd.includes('hozzaadas') || cmd.includes('hozza') ||
+        cmd.includes('termék') || cmd.includes('termek') || cmd.includes('produkt') || 
+        cmd.includes('додати') || cmd.includes('добавить') || cmd.includes('添加') || 
+        cmd.includes('agregar') || cmd.includes('adicionar') || cmd.includes('ajouter') || 
+        cmd.includes('nouveau')) {
+        console.log('➕ Otvaram unos - idem na kategorije');
+        // Resetuj stanje za novi unos
+        currentScreenState = 'categories';
+        currentCategory = '';
+        currentSubcategory = '';
+        currentProductPart = '';
         showScreen('mainScreen');
         setTimeout(function() {
-            renderDataEntry('');
+            renderCategories();  // ⭐ IDE NA KATEGORIJE
         }, 100);
         return true;
     }
     
-    if (checkExitCommand(cmd)) {
+    // ============================================
+    // IZLAZ / EXIT
+    // ============================================
+    if (cmd.includes('izlaz') || cmd.includes('izadji') || cmd.includes('izadi') || 
+        cmd.includes('izlazi') || cmd.includes('exit') || cmd.includes('quit') || 
+        cmd.includes('close') || cmd.includes('kilépés') || cmd.includes('kilepes') || 
+        cmd.includes('kilep') || cmd.includes('beenden') || cmd.includes('вихід') || 
+        cmd.includes('выход') || cmd.includes('退出') || cmd.includes('salir') || 
+        cmd.includes('sair') || cmd.includes('quitter') || cmd.includes('zatvori') || 
+        cmd.includes('kis')) {
         console.log('🚪 Izlaz');
         exitApp();
         return true;
     }
     
-    // Nije pronađena komanda
+    // ============================================
+    // NEPOZNATA KOMANDA
+    // ============================================
     console.log('❌ Nepoznata komanda:', cmd);
-    return false;
-}
-
-// ============================================
-// VOICE COMMAND FUNKCIJA
-// ============================================
-function voiceCommand(command) {
-    const found = processVoiceCommand(command);
     
-    if (!found) {
-        // Prikaži alert na pravom jeziku
-        const unknownTitle = t('unknown_command_title') || 'Nepoznata komanda';
-        const notRecognized = t('not_recognized') || 'nije prepoznata';
-        const tryCommands = t('try_commands') || 'Pokušajte: Zalihe, Spisak, Dodaj proizvod ili Izlaz';
-        
-        showModernAlert(
-            unknownTitle,
-            `"${command}" ${notRecognized}. ${tryCommands}`,
-            '🎤'
-        );
-    }
+    const unknownTitle = t('unknown_command_title') || 'Nepoznata komanda';
+    const notRecognized = t('not_recognized') || 'nije prepoznata';
+    const tryCommands = t('try_commands') || 'Pokušajte: Zalihe, Spisak, Dodaj proizvod ili Izlaz';
+    
+    showModernAlert(
+        unknownTitle,
+        `"${command}" ${notRecognized}. ${tryCommands}`,
+        '🎤'
+    );
+    return false;
 }
 
 console.log('✅ voiceCommands.js je spreman!');
