@@ -1623,6 +1623,141 @@ function goBackFromVoice() {
     showScreen('choiceScreen');
 }
 // ============================================
+// GLASOVNA KONTROLA I MAPIRANJE JEZIKA (VOICE ADDON)
+// ============================================
+
+let recognition = null;
+
+// Mapiranje naših skraćenica jezika na standardne jezičke kodove za Web Speech API
+const speechLangMap = {
+    sr: 'sr-RS',
+    en: 'en-US',
+    de: 'de-DE',
+    hu: 'hu-HU',
+    uk: 'uk-UA',
+    ru: 'ru-RU',
+    zh: 'zh-CN',
+    es: 'es-ES',
+    pt: 'pt-PT',
+    fr: 'fr-FR'
+};
+
+// Glasovna sinteza (da aplikacija odgovori glasom)
+function speakText(text) {
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel(); // Prekini prethodni govor
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = speechLangMap[currentLang] || 'en-US';
+        utterance.rate = 1.0;
+        window.speechSynthesis.speak(utterance);
+    }
+}
+
+// Glavna funkcija za pokretanje prepoznavanja glasa
+function startVoiceRecognition() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    
+    if (!SpeechRecognition) {
+        showModernAlert('Greška', 'Vaš pretraživač ne podržava glasovne komande.', '❌');
+        return;
+    }
+
+    if (recognition) {
+        try { recognition.stop(); } catch(e) {}
+    }
+
+    recognition = new SpeechRecognition();
+    recognition.lang = speechLangMap[currentLang] || 'en-US';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    const statusEl = document.getElementById('voiceStatusText');
+    const outputEl = document.getElementById('recognizedTextOutput');
+    const micIcon = document.getElementById('micIcon');
+
+    if (statusEl) statusEl.textContent = translations[currentLang]?.listening || "Slušam... Govorite komandu";
+    if (micIcon) micIcon.style.animation = "pulse 1.5s infinite";
+
+    recognition.onstart = function() {
+        console.log('🎤 Glasovno prepoznavanje pokrenuto na jeziku:', recognition.lang);
+    };
+
+    recognition.onresult = function(event) {
+        const speechResult = event.results[0][0].transcript.toLowerCase().trim();
+        console.log('🗣️ Prepoznato:', speechResult);
+        if (outputEl) outputEl.textContent = `"${speechResult}"`;
+        
+        // Obrada komandi na osnovu glasa
+        processVoiceCommand(speechResult);
+    };
+
+    recognition.onerror = function(event) {
+        console.error('⚠️ Greška u prepoznavanju glasa:', event.error);
+        if (statusEl) statusEl.textContent = "Greška u prepoznavanju. Pokušajte ponovo.";
+        if (micIcon) micIcon.style.animation = "none";
+    };
+
+    recognition.onend = function() {
+        if (micIcon) micIcon.style.animation = "none";
+        console.log('🎤 Glasovno prepoznavanje završeno.');
+    };
+
+    recognition.start();
+}
+
+// Analiza izgovorenog teksta i usmeravanje na elemente app
+function processVoiceCommand(command) {
+    const lang = currentLang;
+    
+    // 1. Komanda za Zalihe / Stanje
+    const inventoryKeywords = ['stanje', 'zalihe', 'inventory', 'stock', 'bestand', 'készlet', 'запаси', '库存', 'inventario', 'stock'];
+    if (inventoryKeywords.some(keyword => command.includes(keyword))) {
+        speakText(translations[lang]?.stanje || "Inventory");
+        renderInventory();
+        return;
+    }
+
+    // 2. Komanda za Spisak potreba / Shopping list
+    const shoppingKeywords = ['spisak', 'kupovina', 'potrebe', 'shopping', 'einkaufsliste', 'bevásárlólista', 'список', '购物清单', 'lista de compras', 'liste de courses'];
+    if (shoppingKeywords.some(keyword => command.includes(keyword))) {
+        speakText(translations[lang]?.spisak || "Shopping List");
+        renderShoppingList();
+        return;
+    }
+
+    // 3. Komanda za Kategorije / Početak unosa
+    const categoryKeywords = ['kategorije', 'kategorija', 'categories', 'kategorien', 'kategóriák', 'категорії', 'категории', '类别', 'categorías', 'catégories'];
+    if (categoryKeywords.some(keyword => command.includes(keyword))) {
+        speakText("Categories");
+        showScreen('mainScreen');
+        renderCategories();
+        return;
+    }
+
+    // 4. Provera da li korisnik izgovara neku od glavnih kategorija direktno
+    const catList = getMainCategories();
+    let matchedCategory = null;
+    catList.forEach(cat => {
+        if (command.includes(cat.toLowerCase())) {
+            matchedCategory = cat;
+        }
+    });
+
+    if (matchedCategory) {
+        speakText(matchedCategory);
+        showScreen('mainScreen');
+        renderSubcategories(matchedCategory);
+        return;
+    }
+
+    // Ako komanda nije prepoznata
+    speakText("Molim vas ponovite komandu.");
+    showModernAlert('Nepoznata komanda', `Nije prepoznato: "${command}"`, '❓');
+    setTimeout(() => {
+        startVoiceRecognition();
+    }, 2000);
+}
+// ============================================
 // KRAJ FAJLA
 // ============================================
 console.log('✅ Kraj fajla');
