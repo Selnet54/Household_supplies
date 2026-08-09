@@ -502,6 +502,30 @@ const translations = {
         list_empty: "La liste de courses est vide"
     }
 };
+function updateInterfaceLanguage() {
+    const lang = typeof currentLang !== 'undefined' ? currentLang : 'sr';
+    
+    const getTxt = (key, fallback) => {
+        if (typeof translations !== 'undefined' && translations[lang] && translations[lang][key]) {
+            return translations[lang][key];
+        }
+        return fallback;
+    };
+
+    const texts = {
+        'choiceTitleText': getTxt('unos_podataka', 'How do you want to enter data?'),
+        'invMenuText': getTxt('stanje', 'Inventory'),
+        'shopMenuText': getTxt('spisak', 'Shopping List'),
+        'addMenuText': getTxt('unos_podataka', 'Add Product'),
+        'exitChoiceBtn': getTxt('odustani', 'EXIT'),
+        'exitMenuText': getTxt('nazad', 'EXIT')
+    };
+
+    for (const [id, text] of Object.entries(texts)) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = text;
+    }
+}
 // ===== POMOĆNA FUNKCIJA ZA PREVODE =====
 function t(key) {
     return translations[currentLang]?.[key] || key;
