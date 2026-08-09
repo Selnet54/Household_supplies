@@ -89,7 +89,7 @@ function checkAddCommand(cmd) {
         'unos', 'novi', 'novo', 'product', 'proizvod', 'dodajte',
         // Mađarski
         'hozza', 'hozzá', 'hozzaad', 'hozzáad', 'hozzaadas', 'hozzáadás',
-        'uj', 'új', 'termek', 'termék', 'hozzad', 'hozza', 'hozzáadni', 'beszúr',
+        'uj', 'új', 'termek', 'termék', 'hozzad', 'hozza', 'hozzaadni', 'beszúr',
         // Nemački
         'produkt', 'hinzufügen', 'neu', 'einfügen', 'addieren',
         // Ruski
