@@ -1596,7 +1596,32 @@ window.t = t;
 window.currentLang = currentLang;
 
 console.log('✅ Originalne funkcije izvezene!');
+// ============================================
+// FUNKCIJE ZA 3. EKRAN (IZBOR NAČINA UNOSA)
+// ============================================
 
+function selectVoiceMode() {
+    console.log('🎤 Izabran zvučni unos');
+    showScreen('voiceMenuScreen');
+    setTimeout(function() {
+        startVoiceRecognition();
+    }, 500);
+}
+
+function selectManualMode() {
+    console.log('✍️ Izabran ručni unos');
+    showScreen('mainScreen');
+    renderCategories();
+}
+
+function goBackFromVoice() {
+    console.log('◀ Povratak sa glasovnog menija');
+    if (recognition) {
+        try { recognition.stop(); } catch(e) {}
+        recognition = null;
+    }
+    showScreen('choiceScreen');
+}
 // ============================================
 // KRAJ FAJLA
 // ============================================
