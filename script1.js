@@ -81,24 +81,31 @@ function showModernConfirm(title, message, icon = '⚠️', onYes, onNo) {
     // Proveri da li modernConfirm postoji u HTML-u
     const confirmDiv = document.getElementById('modernConfirm');
     if (!confirmDiv) {
-        // Ako nema, koristi običan confirm
+        // Ako nema, koristi običan confirm uz proveru postojanja funkcija
         if (confirm(message)) {
-            onYes();
+            if (typeof onYes === 'function') onYes();
         } else {
-            onNo();
+            if (typeof onNo === 'function') onNo();
         }
         return;
     }
     
-    document.getElementById('confirmIcon').textContent = icon;
-    document.getElementById('confirmTitle').textContent = title;
-    document.getElementById('confirmMessage').textContent = message;
-    document.getElementById('modernConfirm').style.display = 'flex';
-    document.getElementById('modernConfirm').classList.add('active');
+    // Postavljanje elemenata sa bezbednom proverom postojanja DOM čvorova
+    const iconEl = document.getElementById('confirmIcon');
+    const titleEl = document.getElementById('confirmTitle');
+    const messageEl = document.getElementById('confirmMessage');
+
+    if (iconEl) iconEl.textContent = icon;
+    if (titleEl) titleEl.textContent = title;
+    if (messageEl) messageEl.textContent = message;
+
+    confirmDiv.style.display = 'flex';
+    confirmDiv.classList.add('active');
     
+    // Čuvanje callback funkcija sa bezbednim fallback-om na praznu funkciju
     confirmCallback = {
-        onYes: onYes || function() {},
-        onNo: onNo || function() {}
+        onYes: typeof onYes === 'function' ? onYes : function() {},
+        onNo: typeof onNo === 'function' ? onNo : function() {}
     };
 }
 
