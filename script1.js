@@ -1503,6 +1503,12 @@ function triggerLogin() {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ DOM je spreman!');
 
+    // ODMAH OVDE UBACUJEMO POZIVE ZA JEZIK I HEDER:
+    updateHeaderLanguage();
+    if (typeof updateInterfaceLanguage === 'function') {
+        updateInterfaceLanguage();
+    }
+
     // Slušamo sve klikove na nivou celog dokumenta
     document.addEventListener('click', function(e) {
         // ===== LOGIN DUGME (ENTER) =====
@@ -1763,6 +1769,24 @@ function processVoiceCommand(command) {
     setTimeout(() => {
         startVoiceRecognition();
     }, 2000);
+}
+// ============================================
+// AŽURIRANJE JEZIKA HEDERA I DUGMETA NAZAD
+// ============================================
+function updateHeaderLanguage() {
+    const lang = getCurrentLang();
+    
+    // 1. Naslov u hederu
+    const headerTitle = document.getElementById('headerTitle') || document.querySelector('.header-title');
+    if (headerTitle && typeof t === 'function') {
+        headerTitle.textContent = t('inventory_title') || headerTitle.textContent;
+    }
+    
+    // 2. Tekst na dugmetu "Nazad" u hederu
+    const backBtnText = document.getElementById('backBtnText') || document.querySelector('.back-btn span');
+    if (backBtnText && typeof t === 'function') {
+        backBtnText.textContent = t('back') || 'Nazad';
+    }
 }
 // ============================================
 // KRAJ FAJLA
