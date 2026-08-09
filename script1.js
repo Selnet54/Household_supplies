@@ -771,9 +771,7 @@ function renderLanguages() {
 
 function selectLanguage(langCode) {
     currentLang = langCode;
-    showScreen('mainScreen');
-    updateHeaderTexts();
-    renderCategories();
+    showScreen('choiceScreen');  // ← IDE NA IZBOR
 }
 
 function renderCategories() {
