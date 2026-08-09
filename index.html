@@ -433,7 +433,7 @@
         deferredPrompt = null;
     });
 
-      // ===== FIX za base href =====
+    // ===== FIX za base href =====
     (function() {
         const base = document.querySelector('base');
         if (base) {
@@ -445,12 +445,18 @@
     })();
 </script>
 
-<!-- ⭐ PRVO: productParts.js (sadrži delove proizvoda) -->
+<!-- ⭐ REDOSLED UČITAVANJA: -->
+<!-- 1. productParts.js - delovi proizvoda -->
 <script src="productParts.js" defer></script>
-<!-- ⭐ DRUGO: voiceCommands.js (sadrži glasovne komande) -->
-<script src="voiceCommands.js" defer></script>
-<!-- ⭐ TREĆE: script.js (glavna aplikacija) -->
+
+<!-- 2. script.js - ORIGINALNA aplikacija (TVOJ KOD) -->
 <script src="script.js" defer></script>
+
+<!-- 3. voice_addon.js - DODATAK za glasovne komande -->
+<script src="voice_addon.js" defer></script>
+
+<!-- 4. voiceCommands.js - glasovne komande -->
+<script src="voiceCommands.js" defer></script>
 
 </body>
 </html>
