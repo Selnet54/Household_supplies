@@ -1,201 +1,168 @@
 // ============================================
-// VOICE COMMANDS - PROŠIRENA VERZIJA (Ekran 4, Heder, Forma, Zalihe)
+// VOICE COMMANDS - USKLAĐENO SA HTML-OM (Ekran 3 i Ekran 4)
 // ============================================
-console.log('🎤 voiceCommands.js (Prošireni) je učitan!');
+console.log('🎤 voiceCommands.js je učitan!');
 
-// Pomoćna funkcija za detekciju trenutnog jezika aplikacije (podrazumevano 'sr')
 function getCurrentLang() {
     return window.currentLanguage || localStorage.getItem('appLanguage') || 'sr';
 }
 
-// ============================================
-// GLAVNA FUNKCIJA ZA GLASOVNE KOMANDE
-// ============================================
+// Glavna funkcija za obradu glasovnih komandi
 function voiceCommand(command) {
     console.log('🎤 Primljena komanda:', command);
     const cmd = command.toLowerCase().trim();
     const lang = getCurrentLang();
 
-    // 1. IZLAZ / ZATVARANJE
+    // 1. IZLAZ / EXIT
     if (checkExitCommand(cmd)) {
         console.log('🚪 Izlaz iz aplikacije');
         if (typeof exitApp === 'function') exitApp();
         return true;
     }
 
-    // 2. NAVIGACIJA PO HEDERU U ZALIHAMA (ili otvaranje zaliha)
+    // 2. ZALIHE (Inventory)
     if (checkInventoryCommand(cmd)) {
-        console.log('📦 Otvaranje zaliha i navigacija po hederu');
-        currentScreenState = 'inventory';
-        if (typeof showScreen === 'function') showScreen('mainScreen');
+        console.log('📦 Prelaz na zalihe');
+        // Sakrij glasovni meni (ekran 4) i prikaži zalihe
+        hideAllScreens();
+        const mainScreen = document.getElementById('mainScreen');
+        if (mainScreen) mainScreen.style.display = 'block';
+        window.currentScreenState = 'inventory';
         if (typeof renderInventory === 'function') renderInventory();
-        
-        // Ako je korisnik naglasio navigaciju u hederu (npr. "pretraži zalihe", "filter zaliha", "sortiraj")
         handleInventoryHeaderNavigation(cmd);
         return true;
     }
 
-    // 3. SPISAK / SHOPPING LISTA
+    // 3. SPISAK (Shopping List)
     if (checkShoppingCommand(cmd)) {
-        console.log('🛒 Otvaranje spiska');
-        currentScreenState = 'shopping';
-        if (typeof showScreen === 'function') showScreen('mainScreen');
+        console.log('🛒 Prelaz na spisak');
+        hideAllScreens();
+        const mainScreen = document.getElementById('mainScreen');
+        if (mainScreen) mainScreen.style.display = 'block';
+        window.currentScreenState = 'shopping';
         if (typeof renderShoppingList === 'function') renderShoppingList();
         return true;
     }
 
-    // 4. EKRAN 4 / UNOS PROIZVODA (Kategorije i delovi iz productParts.js)
+    // 4. DODAJ PROIZVOD (Add Product -> Otvara kategorije/delove iz productParts.js)
     if (checkAddCommand(cmd)) {
-        console.log('➕ Otvaranje ekrana za unos (Kategorije)');
-        currentScreenState = 'categories';
-        currentCategory = '';
-        currentSubcategory = '';
-        currentProductPart = '';
-        if (typeof showScreen === 'function') showScreen('mainScreen');
+        console.log('➕ Otvaranje kategorija za unos');
+        hideAllScreens();
+        const mainScreen = document.getElementById('mainScreen');
+        if (mainScreen) mainScreen.style.display = 'block';
+        window.currentScreenState = 'categories';
         if (typeof renderCategories === 'function') renderCategories();
         return true;
     }
 
-    // 5. AUTOMATSKI UNOS PODATAKA REČIMA U POSTOJEĆU FORMU I ZALIHE
-    // Ako se nalazimo u formi za unos ili korisnik diktira ceo artikl (npr. "dodaj pileće grudi 5 komada")
+    // 5. DIREKTAN UNOS REČIMA U FORMU / ZALIHE
     if (processDirectDataInput(cmd, lang)) {
         return true;
     }
 
-    // 6. AKO JE OTVOREN EKRAN 4 (Kategorije ili Delovi) - Glasovni izbor kategorije/dela
+    // 6. GLASOVNI IZBOR KATEGORIJA/DELOVA (ako smo na ekranu kategorija)
     if (window.currentScreenState === 'categories' || window.currentScreenState === 'subcategories') {
-        if (handleScreen4VoiceSelection(cmd, lang)) {
+        if (handleProductPartsVoice(cmd, lang)) {
             return true;
         }
     }
 
-    // Nepoznata komanda
-    console.log('❌ Nepoznata komanda:', cmd);
-    const unknownTitle = (typeof t === 'function' ? t('unknown_command_title') : null) || 'Nepoznata komanda';
-    const notRecognized = 'nije prepoznata u ovom kontekstu.';
-    
-    if (typeof showModernAlert === 'function') {
-        showModernAlert(unknownTitle, `"${command}" ${notRecognized}`, '🎤');
+    // Ako komanda nije prepoznata, prikaži status na Ekranu 4 ako postoji
+    const voiceStatus = document.getElementById('voiceStatus');
+    if (voiceStatus) {
+        voiceStatus.innerText = `❌ Nije prepoznato: "${command}"`;
     }
+
     return false;
 }
 
 // ============================================
-// POMOĆNE FUNKCIJE ZA OBRADU KONTEKSTA
+// POMOĆNE FUNKCIJE ZA PROVERU REČI
 // ============================================
-
 function checkInventoryCommand(cmd) {
     const k = ['zalihe', 'zaliha', 'stanje', 'inventory', 'inv', 'stock', 'keszlet', 'bestand', 'запасы', '库存', 'inventario'];
-    return k.some(word => cmd.includes(word));
+    return k.some(w => cmd.includes(w));
 }
 
 function checkShoppingCommand(cmd) {
     const k = ['spisak', 'lista', 'shopping', 'shop', 'list', 'bevásárlólista', 'einkaufsliste', 'список', '购物清单'];
-    return k.some(word => cmd.includes(word));
+    return k.some(w => cmd.includes(w));
 }
 
 function checkAddCommand(cmd) {
     const k = ['dodaj', 'unos', 'novi', 'novo', 'add', 'hozzáadás', 'hinzufügen', 'добавить', '添加', 'agregar'];
-    return k.some(word => cmd.includes(word));
+    return k.some(w => cmd.includes(w));
 }
 
 function checkExitCommand(cmd) {
     const k = ['izlaz', 'zatvori', 'exit', 'quit', 'close', 'kilépés', 'beenden', 'выход', '退出', 'salir'];
-    return k.some(word => cmd.includes(word));
+    return k.some(w => cmd.includes(w));
 }
 
-// Navigacija po dugmadima u hederu kada su zalihe otvorene
+// Sakrivanje svih ekrana (pomoćna funkcija da se osigura prelaz na `mainScreen` ili drugi ekran)
+function hideAllScreens() {
+    document.querySelectorAll('.screen').forEach(screen => {
+        screen.style.display = 'none';
+    });
+}
+
+// Navigacija po hederu zaliha
 function handleInventoryHeaderNavigation(cmd) {
-    // Primeri komandi za heder zaliha: "pretraži", "sortiraj", "filter", "osveži"
     if (cmd.includes('pretrazi') || cmd.includes('search') || cmd.includes('traži')) {
-        const searchInput = document.getElementById('inventorySearch') || document.querySelector('.inventory-header input');
-        if (searchInput) searchInput.focus();
-    } else if (cmd.includes('sort') || cmd.includes('sortiraj')) {
-        const sortBtn = document.getElementById('inventorySortBtn') || document.querySelector('.inventory-header .sort-btn');
-        if (sortBtn) sortBtn.click();
-    } else if (cmd.includes('filter') || cmd.includes('filtriraj')) {
-        const filterBtn = document.getElementById('inventoryFilterBtn') || document.querySelector('.inventory-header .filter-btn');
-        if (filterBtn) filterBtn.click();
+        const inp = document.getElementById('inventorySearch');
+        if (inp) inp.focus();
     }
 }
 
-// Automatski unos podataka rečima u postojeću formu i upis u zalihe
+// Automatski unos podataka u formu i upis
 function processDirectDataInput(cmd, lang) {
-    // Proveravamo da li postoji aktivna forma za unos na ekranu
-    const formInput = document.getElementById('productNameInput') || document.querySelector('input[name="productName"]') || document.querySelector('.form-input');
+    let cleanText = cmd.replace(/dodaj|add|hozzáadd|добавить|添加/g, '').trim();
+    const formInput = document.getElementById('productNameInput') || document.querySelector('input[name="productName"]');
     
-    if (formInput || cmd.startsWith('dodaj ')) {
-        console.log('📝 Detektovan direktan unos rečima u formu');
+    if (formInput && cleanText.length > 0) {
+        formInput.value = cleanText;
+        formInput.dispatchEvent(new Event('input', { bubbles: true }));
         
-        // Očisti komandu od reči "dodaj" da ostane čisti naziv
-        let cleanText = cmd.replace(/dodaj|add|hozzáadd|добавить|添加/g, '').trim();
-        
-        if (cleanText.length > 0) {
-            // 1. Automatski unesi u polje forme
-            if (formInput) {
-                formInput.value = cleanText;
-                formInput.dispatchEvent(new Event('input', { bubbles: true }));
-                formInput.dispatchEvent(new Event('change', { bubbles: true }));
-            }
-            
-            // 2. Automatski prosledi u zalihe (poziv tvoje funkcije za čuvanje/unos)
-            if (typeof saveProductToInventory === 'function') {
-                saveProductToInventory(cleanText);
-            } else if (typeof addProduct === 'function') {
-                addProduct(cleanText);
-            } else {
-                // Alternativa: klikni na dugme "Sačuvaj" / "Dodaj" ako postoji
-                const saveBtn = document.getElementById('saveProductBtn') || document.querySelector('.btn-save');
-                if (saveBtn) saveBtn.click();
-            }
-            return true;
+        if (typeof saveProductToInventory === 'function') {
+            saveProductToInventory(cleanText);
+        } else if (typeof addProduct === 'function') {
+            addProduct(cleanText);
         }
+        return true;
     }
     return false;
 }
 
-// Glasovna interakcija sa 4. ekranom (Kategorije i delovi iz productParts.js)
-function handleScreen4VoiceSelection(cmd, lang) {
+// Povezivanje sa productParts.js kroz glasovne komande
+function handleProductPartsVoice(cmd, lang) {
     if (typeof productParts === 'undefined') return false;
-    
     const langParts = productParts[lang] || productParts['sr'];
     const categories = Object.keys(langParts);
 
-    // Proveri da li je korisnik izgovorio neku od kategorija (npr. "Pileće", "Mleko", itd.)
+    // Provera kategorije
     const matchedCategory = categories.find(cat => cmd.includes(cat.toLowerCase()));
-    
     if (matchedCategory) {
-        console.log('📂 Glasovno izabrana kategorija:', matchedCategory);
         window.currentCategory = matchedCategory;
         window.currentScreenState = 'subcategories';
-        
-        // Pozovi render funkciju za podkategorije/delove 4. ekrana
         if (typeof renderSubcategories === 'function') {
             renderSubcategories(matchedCategory);
-        } else if (typeof renderProductParts === 'function') {
-            renderProductParts(matchedCategory);
         }
         return true;
     }
 
-    // Ako je kategorija već izabrana, proveri da li je izgovoren neki deo iz te kategorije
+    // Provera dela proizvoda u izabranoj kategoriji
     if (window.currentCategory && langParts[window.currentCategory]) {
         const partsList = langParts[window.currentCategory];
-        const matchedPart = partsList.find(part => cmd.includes(part.toLowerCase()));
-        
+        const matchedPart = partsList.find(p => cmd.includes(p.toLowerCase()));
         if (matchedPart) {
-            console.log('🥩 Glasovno izabran deo proizvoda:', matchedPart);
             window.currentProductPart = matchedPart;
-            
-            // Unesi u formu i automatski sačuvaj u zalihe
             processDirectDataInput(window.currentCategory + ' ' + matchedPart, lang);
             return true;
         }
     }
-
     return false;
 }
 
-// Izvoz u globalni prozor
+// Eksportovanje funkcije u globalni prostor
 window.voiceCommand = voiceCommand;
-console.log('✅ Prošireni voiceCommands.js spreman!');
+console.log('✅ voiceCommands.js prilagođen HTML-u je spreman!');
