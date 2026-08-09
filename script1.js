@@ -1558,7 +1558,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // ===== MODERNI CONFIRM DUGMAD =====
+       // ===== CONFIRM DUGMAD =====
     const yesBtn = document.getElementById('confirmYesBtn');
     const noBtn = document.getElementById('confirmNoBtn');
     
@@ -1584,3 +1584,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
     console.log('✅ Svi događaji uspešno povezani preko delegiranja!');
 });
+
+// ============================================
+// GLOBALNE FUNKCIJE ZA VOICE ADDON
+// ============================================
+window.renderInventory = renderInventory;
+window.renderShoppingList = renderShoppingList;
+window.renderCategories = renderCategories;
+window.renderDataEntry = renderDataEntry;
+window.showScreen = showScreen;
+window.exitApp = exitApp;
+window.t = t;
+window.currentLang = currentLang;
+
+console.log('✅ Originalne funkcije izvezene!');
+
+// ============================================
+// KRAJ FAJLA
+// ============================================
+console.log('✅ Kraj fajla');
