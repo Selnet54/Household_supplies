@@ -778,6 +778,15 @@ function renderLanguages() {
 
 function selectLanguage(langCode) {
     currentLang = langCode;
+    
+    // DODAJ OVO OVDJE: Da se jezik odmah primeni na heder i interfejs
+    if (typeof updateHeaderLanguage === 'function') {
+        updateHeaderLanguage();
+    }
+    if (typeof updateInterfaceLanguage === 'function') {
+        updateInterfaceLanguage();
+    }
+
     showScreen('choiceScreen');  // ← IDE NA IZBOR
 }
 
