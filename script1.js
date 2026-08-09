@@ -803,7 +803,7 @@ function renderLanguages() {
 function selectLanguage(langCode) {
     currentLang = langCode;
     
-    // DODAJ OVO OVDJE: Da se jezik odmah primeni na heder i interfejs
+    // Primeni jezik na heder i interfejs ekrana 3 i 4
     if (typeof updateHeaderLanguage === 'function') {
         updateHeaderLanguage();
     }
@@ -811,9 +811,8 @@ function selectLanguage(langCode) {
         updateInterfaceLanguage();
     }
 
-    showScreen('choiceScreen');  // ← IDE NA IZBOR
+    showScreen('choiceScreen');  // Prikazuje 3. ekran
 }
-
 function renderCategories() {
     currentScreenState = 'categories';
     const content = document.getElementById('mainContent');
