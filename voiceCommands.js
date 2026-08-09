@@ -247,5 +247,8 @@ if (cmd.includes('dodaj') || cmd.includes('dodavanje') || cmd.includes('dodat') 
     );
     return false;
 }
-
-console.log('✅ voiceCommands.js je spreman!');
+// ============================================
+// IZVOZ FUNKCIJA
+// ============================================
+window.voiceCommand = voiceCommand;
+console.log('✅ voiceCommands.js spreman!');
