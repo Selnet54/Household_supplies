@@ -819,9 +819,23 @@ function selectLanguage(langCode) {
     showScreen('choiceScreen');  // Prikazuje 3. ekran
 }
 function renderCategories() {
+    console.log('📂 renderCategories pozvan za jezik:', currentLang);
+    
+    const mainScreen = document.getElementById('mainScreen');
+    if (mainScreen && mainScreen.style.display !== 'flex') {
+        document.querySelectorAll('.screen').forEach(s => {
+            s.style.display = 'none';
+            s.classList.remove('active');
+        });
+        mainScreen.style.display = 'flex';
+        mainScreen.classList.add('active');
+        console.log('✅ mainScreen prikazan iz renderCategories');
+    }
+    
     currentScreenState = 'categories';
     const content = document.getElementById('mainContent');
     if (!content) return;
+    
     const catList = getMainCategories();
     let html = `<div class="title">${t('glavne_kategorije')}</div>`;
     html += `<div class="categories-grid">`;
@@ -1141,9 +1155,28 @@ function saveProduct() {
 }
 
 function renderInventory() {
+    // ===== DODAJ OVO =====
+    console.log('📦 renderInventory pozvan za jezik:', currentLang);
+    
+    // PROVERI DA LI JE MAIN SCREEN PRIKAZAN
+    const mainScreen = document.getElementById('mainScreen');
+    if (mainScreen && mainScreen.style.display !== 'flex') {
+        // Sakrij sve ekrane
+        document.querySelectorAll('.screen').forEach(s => {
+            s.style.display = 'none';
+            s.classList.remove('active');
+        });
+        // Prikaži mainScreen
+        mainScreen.style.display = 'flex';
+        mainScreen.classList.add('active');
+        console.log('✅ mainScreen prikazan iz renderInventory');
+    }
+    // ===== KRAJ DODATKA =====
+    
     currentScreenState = 'inventory';
     const content = document.getElementById('mainContent');
     if (!content) return;
+    
     const zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
     const aktivneZalihe = zalihe.filter(p => p.quantity > 0);
     
@@ -1367,9 +1400,23 @@ function sacuvajAzuriranje(index) {
 }
  
 function renderShoppingList() {
+    console.log('🛒 renderShoppingList pozvan za jezik:', currentLang);
+    
+    const mainScreen = document.getElementById('mainScreen');
+    if (mainScreen && mainScreen.style.display !== 'flex') {
+        document.querySelectorAll('.screen').forEach(s => {
+            s.style.display = 'none';
+            s.classList.remove('active');
+        });
+        mainScreen.style.display = 'flex';
+        mainScreen.classList.add('active');
+        console.log('✅ mainScreen prikazan iz renderShoppingList');
+    }
+    
     currentScreenState = 'shopping';
     const content = document.getElementById('mainContent');
     if (!content) return;
+    
     const shopping = JSON.parse(localStorage.getItem('shoppingList') || '[]');
     
     let html = `<div class="title">${t('spisak_potreba')}</div>`;
@@ -1383,7 +1430,6 @@ function renderShoppingList() {
     html += `<div class="table-container" style="max-height:400px; overflow-y:auto;">`;
     html += `<div class="table-title">🛒 ${t('spisak_potreba')}</div>`;
     html += `<div id="shoppingTable">`;
-    // UKLONJENA kolona Akcija - sada samo 3 kolone
     html += `<div class="table-row header-row" style="display:grid; grid-template-columns:40px 1.5fr 1.5fr; gap:2px; background:#f0f0f0; font-weight:bold; border-bottom:2px solid #ccc; padding:5px 0;">`;
     html += `<div class="cell" style="text-align:center;"><input type="checkbox" id="selectAllShopping" onchange="toggleAllShopping()"></div>`;
     html += `<div class="cell">${t('naziv_proizvoda')}</div>`;
