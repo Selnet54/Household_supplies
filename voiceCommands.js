@@ -373,9 +373,9 @@ document.addEventListener('click', function(e) {
         }
     }
 });
-
 // Eksportovanje funkcije u globalni prostor
 window.voiceCommand = voiceCommand;
 window.goBackFromVoice = goBackFromVoice;
 
 console.log('✅ voiceCommands.js je spreman!');
+console.log('✅ voiceCommand dostupan:', typeof window.voiceCommand === 'function');
