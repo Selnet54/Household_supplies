@@ -1,7 +1,10 @@
 // ============================================
-// VOICE COMMANDS - USKLAĐENO SA HTML-OM (Ekran 3 i Ekran 4)
+// VOICE COMMANDS - POPRAVLJENA VERZIJA
 // ============================================
 console.log('🎤 voiceCommands.js je učitan!');
+
+// GLOBALNA VARIJABLA ZA PRAĆENJE
+window.voiceCommandProcessing = false;
 
 function getCurrentLang() {
     return window.currentLanguage || localStorage.getItem('appLanguage') || 'sr';
@@ -10,95 +13,103 @@ function getCurrentLang() {
 // Glavna funkcija za obradu glasovnih komandi
 function voiceCommand(command) {
     console.log('🎤 Primljena komanda:', command);
+    
+    // SPREČI DUPLO IZVRŠAVANJE
+    if (window.voiceCommandProcessing) {
+        console.log('⏳ Već se obrađuje komanda, preskačem');
+        return false;
+    }
+    window.voiceCommandProcessing = true;
+    
     const cmd = command.toLowerCase().trim();
     const lang = getCurrentLang();
 
-    // FUNKCIJA ZA SIGURNO SAKRIVANJE SVIH EKRANA
-    function forceHideAllScreens() {
-        // Sakrij sve ekrane
-        document.querySelectorAll('.screen').forEach(screen => {
-            screen.style.display = 'none';
-            screen.classList.remove('active');
-        });
+    // FUNKCIJA ZA ČIŠĆENJE
+    function cleanup() {
+        window.voiceCommandProcessing = false;
         
-        // SPECIFIČNO sakrij voiceMenuScreen
+        // ZAUSTAVI VOICE RECOGNITION AKO POSTOJI
+        if (window.recognition) {
+            try {
+                window.recognition.stop();
+                window.recognition = null;
+                console.log('🛑 Recognition zaustavljen');
+            } catch(e) {}
+        }
+    }
+
+    // 1. IZLAZ / EXIT
+    if (checkExitCommand(cmd)) {
+        console.log('🚪 Izlaz iz aplikacije');
+        cleanup();
+        
+        // Sakrij voice menu
         const voiceMenu = document.getElementById('voiceMenuScreen');
         if (voiceMenu) {
             voiceMenu.style.display = 'none';
             voiceMenu.classList.remove('active');
         }
         
-        // Sakrij i sve moguće varijante
-        document.querySelectorAll('[id*="voice"],[id*="Voice"],[class*="voice"]').forEach(el => {
-            el.style.display = 'none';
+        // Sakrij sve ekrane
+        document.querySelectorAll('.screen').forEach(s => {
+            s.style.display = 'none';
+            s.classList.remove('active');
         });
-    }
-
-    // PRIKAŽI STATUS NA 4. EKRANU
-    function setVoiceStatus(text, isSuccess = true) {
-        const status = document.getElementById('voiceStatus');
-        if (status) {
-            status.innerText = text;
-            status.style.color = isSuccess ? '#4CAF50' : '#f44336';
+        
+        // Prikaži login
+        const login = document.getElementById('loginScreen');
+        if (login) {
+            login.style.display = 'flex';
+            login.classList.add('active');
         }
-        // Emituj događaj da je komanda obrađena
-        document.dispatchEvent(new CustomEvent('voiceCommandProcessed', { 
-            detail: { success: isSuccess, command: command }
-        }));
-    }
-
-    // 1. IZLAZ / EXIT
-    if (checkExitCommand(cmd)) {
-        console.log('🚪 Izlaz iz aplikacije');
-        setVoiceStatus('✅ Izlazim iz aplikacije...', true);
-        forceHideAllScreens();
+        
         if (typeof exitApp === 'function') exitApp();
         return true;
     }
 
-    // 2. ZALIHE (Inventory) - GLAVNA FUNKCIJA
+    // 2. ZALIHE (Inventory)
     if (checkInventoryCommand(cmd)) {
-        console.log('📦 Prelaz na zalihe - POČINJE');
+        console.log('📦 Prelaz na zalihe');
+        cleanup();
         
-        // 1. Prisilno sakrij SVE ekrane
-        forceHideAllScreens();
+        // SAKRIVAJ SVE EKRANE
+        document.querySelectorAll('.screen').forEach(s => {
+            s.style.display = 'none';
+            s.classList.remove('active');
+        });
         
-        // 2. SAČEKAJ 100ms da se DOM osveži
-        setTimeout(() => {
-            // 3. Prikaži mainScreen
-            const mainScreen = document.getElementById('mainScreen');
-            if (mainScreen) {
-                mainScreen.style.display = 'block';
-                mainScreen.classList.add('active');
-                console.log('✅ mainScreen prikazan');
-            } else {
-                console.error('❌ mainScreen nije pronađen!');
-            }
-            
-            // 4. Postavi stanje
-            window.currentScreenState = 'inventory';
-            
-            // 5. Renderuj inventory
-            if (typeof renderInventory === 'function') {
-                renderInventory();
-                console.log('✅ renderInventory pozvan');
-            } else {
-                console.error('❌ renderInventory nije definisan!');
-            }
-            
-            // 6. Ažuriraj status
-            const status = document.getElementById('voiceStatus');
-            if (status) {
-                status.innerText = '📦 Prikazane zalihe';
-                status.style.color = '#4CAF50';
-            }
-            
-            // 7. Emituj uspešan događaj
-            document.dispatchEvent(new CustomEvent('voiceCommandProcessed', { 
-                detail: { success: true, command: 'inventory' }
-            }));
-            
-        }, 100);
+        // EKSPLICITNO SAKRIJ VOICE MENU
+        const voiceMenu = document.getElementById('voiceMenuScreen');
+        if (voiceMenu) {
+            voiceMenu.style.display = 'none';
+            voiceMenu.classList.remove('active');
+        }
+        
+        // PRIKAŽI MAIN SCREEN
+        const mainScreen = document.getElementById('mainScreen');
+        if (mainScreen) {
+            mainScreen.style.display = 'flex';
+            mainScreen.classList.add('active');
+            console.log('✅ mainScreen prikazan');
+        }
+        
+        // POSTAVI STANJE
+        window.currentScreenState = 'inventory';
+        
+        // RENDER INVENTORY
+        if (typeof renderInventory === 'function') {
+            renderInventory();
+            console.log('✅ renderInventory pozvan');
+        } else {
+            console.error('❌ renderInventory nije definisan!');
+        }
+        
+        // AŽURIRAJ STATUS
+        const status = document.getElementById('voiceStatus');
+        if (status) {
+            status.innerText = '✅ Komanda izvršena: Zalihe';
+            status.style.color = '#4CAF50';
+        }
         
         return true;
     }
@@ -106,18 +117,33 @@ function voiceCommand(command) {
     // 3. SPISAK (Shopping List)
     if (checkShoppingCommand(cmd)) {
         console.log('🛒 Prelaz na spisak');
-        setVoiceStatus('🛒 Otvaram spisak...', true);
-        forceHideAllScreens();
+        cleanup();
         
-        setTimeout(() => {
-            const mainScreen = document.getElementById('mainScreen');
-            if (mainScreen) {
-                mainScreen.style.display = 'block';
-                mainScreen.classList.add('active');
-            }
-            window.currentScreenState = 'shopping';
-            if (typeof renderShoppingList === 'function') renderShoppingList();
-        }, 100);
+        document.querySelectorAll('.screen').forEach(s => {
+            s.style.display = 'none';
+            s.classList.remove('active');
+        });
+        
+        const voiceMenu = document.getElementById('voiceMenuScreen');
+        if (voiceMenu) {
+            voiceMenu.style.display = 'none';
+            voiceMenu.classList.remove('active');
+        }
+        
+        const mainScreen = document.getElementById('mainScreen');
+        if (mainScreen) {
+            mainScreen.style.display = 'flex';
+            mainScreen.classList.add('active');
+        }
+        
+        window.currentScreenState = 'shopping';
+        if (typeof renderShoppingList === 'function') renderShoppingList();
+        
+        const status = document.getElementById('voiceStatus');
+        if (status) {
+            status.innerText = '✅ Komanda izvršena: Spisak';
+            status.style.color = '#4CAF50';
+        }
         
         return true;
     }
@@ -125,18 +151,33 @@ function voiceCommand(command) {
     // 4. DODAJ PROIZVOD (Add Product)
     if (checkAddCommand(cmd)) {
         console.log('➕ Otvaranje kategorija za unos');
-        setVoiceStatus('➕ Otvaram kategorije...', true);
-        forceHideAllScreens();
+        cleanup();
         
-        setTimeout(() => {
-            const mainScreen = document.getElementById('mainScreen');
-            if (mainScreen) {
-                mainScreen.style.display = 'block';
-                mainScreen.classList.add('active');
-            }
-            window.currentScreenState = 'categories';
-            if (typeof renderCategories === 'function') renderCategories();
-        }, 100);
+        document.querySelectorAll('.screen').forEach(s => {
+            s.style.display = 'none';
+            s.classList.remove('active');
+        });
+        
+        const voiceMenu = document.getElementById('voiceMenuScreen');
+        if (voiceMenu) {
+            voiceMenu.style.display = 'none';
+            voiceMenu.classList.remove('active');
+        }
+        
+        const mainScreen = document.getElementById('mainScreen');
+        if (mainScreen) {
+            mainScreen.style.display = 'flex';
+            mainScreen.classList.add('active');
+        }
+        
+        window.currentScreenState = 'categories';
+        if (typeof renderCategories === 'function') renderCategories();
+        
+        const status = document.getElementById('voiceStatus');
+        if (status) {
+            status.innerText = '✅ Komanda izvršena: Dodaj proizvod';
+            status.style.color = '#4CAF50';
+        }
         
         return true;
     }
@@ -144,13 +185,24 @@ function voiceCommand(command) {
     // 5. GLASOVNI IZBOR KATEGORIJA/DELOVA
     if (window.currentScreenState === 'categories' || window.currentScreenState === 'subcategories') {
         if (handleProductPartsVoice(cmd, lang)) {
-            setVoiceStatus(`✅ Dodato: ${cmd}`, true);
+            cleanup();
+            const status = document.getElementById('voiceStatus');
+            if (status) {
+                status.innerText = `✅ Dodato: ${cmd}`;
+                status.style.color = '#4CAF50';
+            }
             return true;
         }
     }
 
     // Ako komanda nije prepoznata
-    setVoiceStatus(`❌ Nije prepoznato: "${command}". Pokušajte ponovo.`, false);
+    const status = document.getElementById('voiceStatus');
+    if (status) {
+        status.innerText = `❌ Nije prepoznato: "${command}"`;
+        status.style.color = '#f44336';
+    }
+    
+    cleanup();
     return false;
 }
 
@@ -224,6 +276,24 @@ function handleProductPartsVoice(cmd, lang) {
     return false;
 }
 
+// POMOĆNA FUNKCIJA ZA POVRATAK
+function goBackFromVoice() {
+    console.log('◀ Povratak sa voice menija');
+    const voiceMenu = document.getElementById('voiceMenuScreen');
+    if (voiceMenu) {
+        voiceMenu.style.display = 'none';
+        voiceMenu.classList.remove('active');
+    }
+    
+    const choiceScreen = document.getElementById('choiceScreen');
+    if (choiceScreen) {
+        choiceScreen.style.display = 'flex';
+        choiceScreen.classList.add('active');
+    }
+}
+
 // Eksportovanje funkcije u globalni prostor
 window.voiceCommand = voiceCommand;
-console.log('✅ voiceCommands.js prilagođen HTML-u je spreman!');
+window.goBackFromVoice = goBackFromVoice;
+
+console.log('✅ voiceCommands.js je spreman!');
