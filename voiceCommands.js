@@ -220,11 +220,22 @@ if (checkAddCommand(cmd)) {
     if (window.currentScreenState === 'categories' || window.currentScreenState === 'subcategories') {
         if (handleProductPartsVoice(cmd, lang)) {
             cleanup();
+            
+            // DODATO: Osiguraj da se prikaže mainScreen i osveže kategorije/forma
+            const mainScreen = document.getElementById('mainScreen');
+            if (mainScreen) {
+                mainScreen.style.display = 'flex';
+                mainScreen.classList.add('active');
+            }
+
             const status = document.getElementById('voiceStatus');
             if (status) {
                 status.innerText = `✅ Dodato: ${cmd}`;
                 status.style.color = '#4CAF50';
             }
+            
+            forceHideVoiceMenu(); // Poziv vaše funkcije za sigurno zatvaranje menija
+
             document.dispatchEvent(new CustomEvent('voiceCommandProcessed', { 
                 detail: { success: true, command: cmd }
             }));
