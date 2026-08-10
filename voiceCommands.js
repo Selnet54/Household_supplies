@@ -23,16 +23,27 @@ function voiceCommand(command) {
     // 2. ZALIHE (Inventory)
     if (checkInventoryCommand(cmd)) {
         console.log('📦 Prelaz na zalihe');
-        // Sakrij glasovni meni (ekran 4) i prikaži zalihe
-        hideAllScreens();
+        
+        // 1. Prvo eksplicitno sakrijemo Ekran 4 (glasovni meni) preko njegovog tačnog ID-ja!
+        const voiceMenuScreen = document.getElementById('voiceMenuScreen'); // ili tačan ID tvog 4. ekrana
+        if (voiceMenuScreen) {
+            voiceMenuScreen.style.display = 'none';
+        }
+
+        // 2. Pozivamo i tvoju standardnu funkciju da sakrije sve ostalo
+        if (typeof hideAllScreens === 'function') {
+            hideAllScreens();
+        }
+
+        // 3. Otvaramo ekran sa zalihama
         const mainScreen = document.getElementById('mainScreen');
         if (mainScreen) mainScreen.style.display = 'block';
+        
         window.currentScreenState = 'inventory';
         if (typeof renderInventory === 'function') renderInventory();
         handleInventoryHeaderNavigation(cmd);
         return true;
     }
-
     // 3. SPISAK (Shopping List)
     if (checkShoppingCommand(cmd)) {
         console.log('🛒 Prelaz na spisak');
