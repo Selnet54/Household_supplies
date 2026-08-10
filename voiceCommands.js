@@ -379,3 +379,57 @@ window.goBackFromVoice = goBackFromVoice;
 
 console.log('✅ voiceCommands.js je spreman!');
 console.log('✅ voiceCommand dostupan:', typeof window.voiceCommand === 'function');
+// ============================================
+// DIREKTNO SAKRIVANJE VOICE MENU-A
+// ============================================
+function forceHideVoiceMenu() {
+    console.log('🔇 Prisilno sakrivanje voice menu-a');
+    
+    // Sakrij voiceMenuScreen
+    const voiceMenu = document.getElementById('voiceMenuScreen');
+    if (voiceMenu) {
+        voiceMenu.style.display = 'none';
+        voiceMenu.classList.remove('active');
+        voiceMenu.classList.remove('show');
+        console.log('✅ voiceMenuScreen sakriven');
+    }
+    
+    // Sakrij sve ekrane koji imaju .screen klasu
+    document.querySelectorAll('.screen').forEach(s => {
+        s.style.display = 'none';
+        s.classList.remove('active');
+    });
+    
+    // Prikaži mainScreen
+    const mainScreen = document.getElementById('mainScreen');
+    if (mainScreen) {
+        mainScreen.style.display = 'flex';
+        mainScreen.classList.add('active');
+        console.log('✅ mainScreen prikazan');
+    }
+}
+
+// Izvezi funkciju
+window.forceHideVoiceMenu = forceHideVoiceMenu;
+
+// Dodaj event listener za direktno sakrivanje
+document.addEventListener('voiceCommandProcessed', function(e) {
+    console.log('📢 voiceCommandProcessed događaj primljen:', e.detail);
+    if (e.detail && e.detail.success) {
+        // Prisilno sakrij voice menu
+        forceHideVoiceMenu();
+        
+        // Zaustavi recognition
+        if (typeof window.stopVoiceRecognition === 'function') {
+            window.stopVoiceRecognition();
+        }
+        if (typeof recognition !== 'undefined' && recognition) {
+            try {
+                recognition.stop();
+                recognition = null;
+            } catch(e) {}
+        }
+    }
+});
+
+console.log('✅ forceHideVoiceMenu dodat!');
