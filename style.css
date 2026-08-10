@@ -1,6 +1,5 @@
 /* ===== STILOVI ZA NOVE INFO, SUPPORT, ALERT I CONFIRM PROZORE ===== */
 
-/* Pozadina preko celog ekrana (overlay) */
 .support-overlay, #modernAlert, #modernConfirm {
     display: none;
     position: fixed;
@@ -19,29 +18,26 @@
     display: flex;
 }
 
-/* ===== KUTIJE - CRVENA POZADINA, ŽUTA SLOVA ===== */
 .support-box, .alert-box, .confirm-box {
-    background: #8B0000 !important;  /* Tamno crvena */
-    border: 3px solid #FFD700 !important;  /* Zlatni okvir */
+    background: #8B0000 !important;
+    border: 3px solid #FFD700 !important;
     border-radius: 20px !important;
     padding: 30px 25px !important;
     width: 90%;
     max-width: 450px;
-    color: #FFD700 !important;  /* Žuta slova */
+    color: #FFD700 !important;
     box-shadow: 0 10px 40px rgba(0,0,0,0.8) !important;
     text-align: left;
     max-height: 85vh;
     overflow-y: auto;
 }
 
-/* ===== NASLOVI - ŽUTI ===== */
 .support-box h2, .support-box h3, 
 .alert-title, .confirm-title {
     color: #FFD700 !important;
     margin-top: 0;
 }
 
-/* ===== SAV TEKST - ŽUT ===== */
 .support-box p, .support-box span, .support-box div,
 .alert-message, .confirm-message,
 .support-content p, .support-content div {
@@ -50,7 +46,6 @@
     line-height: 1.6;
 }
 
-/* ===== KONTAKT SEKCIJA ===== */
 .support-contact {
     background: rgba(255, 215, 0, 0.1);
     border-radius: 10px;
@@ -71,7 +66,6 @@
     margin-top: 15px;
 }
 
-/* ===== DUGMAD UNUTAR PROZORA ===== */
 .alert-btn, .confirm-yes, .confirm-no {
     width: 100%;
     padding: 12px;
@@ -83,13 +77,11 @@
     margin-top: 15px;
 }
 
-/* Zeleno dugme - Da / OK */
 .alert-btn, .confirm-yes {
     background: #2E7D32 !important;
     color: #FFD700 !important;
 }
 
-/* Crveno dugme - Ne / Odustani */
 .confirm-no {
     background: #B71C1C !important;
     color: #FFD700 !important;
@@ -117,7 +109,6 @@
     color: #fff !important;
 }
 
-/* ===== IKONE - OSTAVLJAMO BEZ BOJE ===== */
 .alert-icon, .confirm-icon {
     font-size: 48px;
     text-align: center;
@@ -125,13 +116,11 @@
     margin-bottom: 10px;
 }
 
-/* ===== HR LINIJA ===== */
 .support-box hr {
     border: 1px solid rgba(255, 215, 0, 0.3);
     margin: 15px 0;
 }
 
-/* ===== DODATNO ZA ALERT I CONFIRM IZ HTML-A ===== */
 #modernAlert .alert-box,
 #modernConfirm .confirm-box {
     background: #8B0000 !important;
@@ -148,7 +137,6 @@
     color: #FFD700 !important;
 }
 
-/* ===== DUGME UNUTAR SUPPORT BOX-A ===== */
 .support-box .btn-green {
     background: #2E7D32 !important;
     color: #FFD700 !important;
