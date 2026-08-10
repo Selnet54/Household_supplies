@@ -406,31 +406,42 @@ console.log('✅ voiceCommand dostupan:', typeof window.voiceCommand === 'functi
 // ============================================
 // DIREKTNO SAKRIVANJE VOICE MENU-A
 // ============================================
-function forceHideVoiceMenu() {
-    console.log('🔇 Prisilno sakrivanje voice menu-a');
+ffunction forceHideVoiceMenu() {
+    console.log('🔇 Prisilno sakrivanje voice menu-a i osvežavanje ekrana');
     
-    // Sakrij voiceMenuScreen
+    // 1. Sakrij voiceMenuScreen
     const voiceMenu = document.getElementById('voiceMenuScreen');
     if (voiceMenu) {
         voiceMenu.style.display = 'none';
         voiceMenu.classList.remove('active');
         voiceMenu.classList.remove('show');
-        console.log('✅ voiceMenuScreen sakriven');
     }
     
-    // Sakrij sve ekrane koji imaju .screen klasu
+    // 2. Sakrij sve ekrane
     document.querySelectorAll('.screen').forEach(s => {
         s.style.display = 'none';
         s.classList.remove('active');
     });
     
-    // Prikaži mainScreen
-    const mainScreen = document.getElementById('mainScreen');
-    if (mainScreen) {
-        mainScreen.style.display = 'flex';
-        mainScreen.classList.add('active');
-        console.log('✅ mainScreen prikazan');
-    }
+    // 3. Odloženo prikazivanje glavnog ekrana da bi DOM bio spreman
+    setTimeout(() => {
+        const mainScreen = document.getElementById('mainScreen');
+        if (mainScreen) {
+            mainScreen.style.display = 'flex';
+            mainScreen.classList.add('active');
+            console.log('✅ mainScreen uspešno prikazan');
+        }
+
+        // 4. Proveri trenutno stanje i pozovi odgovarajuću funkciju za renderovanje
+        const currentState = window.currentScreenState;
+        if (currentState === 'inventory' && typeof renderInventory === 'function') {
+            renderInventory();
+        } else if (currentState === 'shopping' && typeof renderShoppingList === 'function') {
+            renderShoppingList();
+        } else if (typeof renderCategories === 'function') {
+            renderCategories();
+        }
+    }, 50);
 }
 
 // Izvezi funkciju
