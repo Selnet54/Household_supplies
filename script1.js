@@ -1768,7 +1768,7 @@ function startVoiceRecognition() {
 
     recognition = new SpeechRecognition();
     recognition.lang = speechLangMap[currentLang] || 'en-US';
-    recognition.continuous = false;  // BITNO: NE SLUŠA KONTINUIRANO
+    recognition.continuous = false;
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
 
@@ -1788,44 +1788,34 @@ function startVoiceRecognition() {
     };
 
     recognition.onresult = function(event) {
-    const speechResult = event.results[0][0].transcript.trim();
-    console.log('🗣️ Prepoznato:', speechResult);
-    
-    // PRIKAŽI U STATUSU
-    const statusEl = document.getElementById('voiceStatus');
-    if (statusEl) {
-        statusEl.textContent = `🗣️ "${speechResult}"`;
-        statusEl.style.color = '#FFD700';
-    }
-    
-    // POZOVI processVoiceCommand
-    processVoiceCommand(speechResult);
-};
+        const speechResult = event.results[0][0].transcript.trim();
+        console.log('🗣️ Prepoznato:', speechResult);
         
-        // POZOVI voiceCommand IZ voiceCommands.js
-        if (typeof window.voiceCommand === 'function') {
-            const result = window.voiceCommand(speechResult);
-            console.log('✅ voiceCommand rezultat:', result);
-            
-            // Ako je komanda uspešna, zaustavi recognition
-            if (result) {
-                if (recognition) {
-                    try {
-                        recognition.stop();
-                        recognition = null;
-                        console.log('🛑 Recognition zaustavljen');
-                    } catch(e) {}
-                }
-                // Emituj događaj da je komanda obrađena
-                document.dispatchEvent(new CustomEvent('voiceCommandProcessed', { 
-                    detail: { success: true, command: speechResult }
-                }));
-            }
-        } else {
-            console.error('❌ voiceCommand nije definisan!');
-            // Fallback - koristi staru obradu
-            processVoiceCommandOld(speechResult);
+        // PRIKAŽI U STATUSU
+        const statusEl = document.getElementById('voiceStatus');
+        if (statusEl) {
+            statusEl.textContent = `🗣️ "${speechResult}"`;
+            statusEl.style.color = '#FFD700';
         }
+        
+        // POZOVI processVoiceCommand
+        processVoiceCommand(speechResult);
+        
+        // DIREKTNO SAKRIJ VOICE MENU NAKON KOMANDE
+        setTimeout(function() {
+            const voiceMenu = document.getElementById('voiceMenuScreen');
+            if (voiceMenu) {
+                voiceMenu.style.display = 'none';
+                voiceMenu.classList.remove('active');
+                console.log('🔇 Voice menu sakriven nakon komande');
+            }
+            // Prikaži mainScreen
+            const mainScreen = document.getElementById('mainScreen');
+            if (mainScreen) {
+                mainScreen.style.display = 'flex';
+                mainScreen.classList.add('active');
+            }
+        }, 300);
     };
 
     recognition.onerror = function(event) {
@@ -1842,7 +1832,6 @@ function startVoiceRecognition() {
 
     recognition.onend = function() {
         console.log('🎤 Glasovno prepoznavanje završeno.');
-        // Ne restartuj automatski - čekaj da korisnik klikne dugme
     };
 
     try {
@@ -1860,6 +1849,7 @@ function startVoiceRecognition() {
 
 // STARA PROCESNA FUNKCIJA (ZA FALLBACK)
 // Analiza izgovorenog teksta i usmeravanje na elemente app
+// Analiza izgovorenog teksta i usmeravanje na elemente app
 function processVoiceCommand(command) {
     console.log('🎤 processVoiceCommand prima:', command);
     
@@ -1874,50 +1864,53 @@ function processVoiceCommand(command) {
             if (typeof window.stopVoiceRecognition === 'function') {
                 window.stopVoiceRecognition();
             }
+            // Emituj događaj
+            document.dispatchEvent(new CustomEvent('voiceCommandProcessed', { 
+                detail: { success: true, command: command }
+            }));
         }
         return;
     } else {
         console.error('❌ window.voiceCommand nije definisan!');
-    }
-    
-    // FALLBACK - stara obrada ako voiceCommand ne postoji
-    const lang = currentLang;
-    const cmd = command.toLowerCase().trim();
-    
-    const inventoryKeywords = ['stanje', 'zalihe', 'inventory', 'stock', 'bestand', 'készlet', 'запаси', '库存', 'inventario'];
-    if (inventoryKeywords.some(k => cmd.includes(k))) {
-        renderInventory();
-        return;
-    }
-
-    const shoppingKeywords = ['spisak', 'kupovina', 'potrebe', 'shopping', 'einkaufsliste', 'bevásárlólista', 'список', '购物清单'];
-    if (shoppingKeywords.some(k => cmd.includes(k))) {
-        renderShoppingList();
-        return;
-    }
-
-    const categoryKeywords = ['kategorije', 'kategorija', 'categories', 'kategorien'];
-    if (categoryKeywords.some(k => cmd.includes(k))) {
-        showScreen('mainScreen');
-        renderCategories();
-        return;
-    }
-
-    const catList = getMainCategories();
-    let matchedCategory = null;
-    catList.forEach(cat => {
-        if (cmd.includes(cat.toLowerCase())) {
-            matchedCategory = cat;
+        
+        // FALLBACK - stara obrada
+        const cmd = command.toLowerCase().trim();
+        
+        const inventoryKeywords = ['stanje', 'zalihe', 'inventory', 'stock', 'bestand', 'készlet', 'запаси', '库存', 'inventario'];
+        if (inventoryKeywords.some(k => cmd.includes(k))) {
+            renderInventory();
+            return;
         }
-    });
 
-    if (matchedCategory) {
-        showScreen('mainScreen');
-        renderSubcategories(matchedCategory);
-        return;
+        const shoppingKeywords = ['spisak', 'kupovina', 'potrebe', 'shopping', 'einkaufsliste', 'bevásárlólista', 'список', '购物清单'];
+        if (shoppingKeywords.some(k => cmd.includes(k))) {
+            renderShoppingList();
+            return;
+        }
+
+        const categoryKeywords = ['kategorije', 'kategorija', 'categories', 'kategorien'];
+        if (categoryKeywords.some(k => cmd.includes(k))) {
+            showScreen('mainScreen');
+            renderCategories();
+            return;
+        }
+
+        const catList = getMainCategories();
+        let matchedCategory = null;
+        catList.forEach(cat => {
+            if (cmd.includes(cat.toLowerCase())) {
+                matchedCategory = cat;
+            }
+        });
+
+        if (matchedCategory) {
+            showScreen('mainScreen');
+            renderSubcategories(matchedCategory);
+            return;
+        }
+
+        showModernAlert('Nepoznata komanda', `Nije prepoznato: "${command}"`, '❓');
     }
-
-    showModernAlert('Nepoznata komanda', `Nije prepoznato: "${command}"`, '❓');
 }
 
 // Funkcija za zaustavljanje prepoznavanja
