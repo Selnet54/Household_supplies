@@ -75,64 +75,54 @@ function closeModernAlert() {
 }
 
 // ===== MODERNI CONFIRM (DODAJ OVO OVDE) =====
+// ===== ZAMENA ZA STARE ALERT I CONFIRM PROZORE =====
+
 let confirmCallback = null;
 
-function showModernConfirm(title, message, icon = '⚠️', onYes, onNo) {
-    // Proveri da li modernConfirm postoji u HTML-u
-    const confirmDiv = document.getElementById('modernConfirm');
-    if (!confirmDiv) {
-        // Ako nema, koristi običan confirm uz proveru postojanja funkcija
-        if (confirm(message)) {
-            if (typeof onYes === 'function') onYes();
-        } else {
-            if (typeof onNo === 'function') onNo();
-        }
-        return;
+// Moderni Alert
+function showModernAlert(title, message, icon = '📢') {
+    const alertEl = document.getElementById('modernAlert');
+    if (!alertEl) return alert(); // Fallback ako element ne postoji
+    
+    document.getElementById('alertTitle').innerText = title;
+    document.getElementById('alertMessage').innerText = message;
+    document.getElementById('alertIcon').innerText = icon;
+    
+    alertEl.style.display = 'flex';
+    alertEl.classList.add('active');
+}
+
+function closeModernAlert() {
+    const alertEl = document.getElementById('modernAlert');
+    if (alertEl) {
+        alertEl.style.display = 'none';
+        alertEl.classList.remove('active');
     }
-    
-    // Postavljanje elemenata sa bezbednom proverom postojanja DOM čvorova
-    const iconEl = document.getElementById('confirmIcon');
-    const titleEl = document.getElementById('confirmTitle');
-    const messageEl = document.getElementById('confirmMessage');
+}
 
-    if (iconEl) iconEl.textContent = icon;
-    if (titleEl) titleEl.textContent = title;
-    if (messageEl) messageEl.textContent = message;
-
-    confirmDiv.style.display = 'flex';
-    confirmDiv.classList.add('active');
+// Moderni Confirm
+function showModernConfirm(title, message, onYesCallback, onNoCallback, icon = '⚠️') {
+    const confirmEl = document.getElementById('modernConfirm');
+    if (!confirmEl) return confirm(message); // Fallback
     
-    // Čuvanje callback funkcija sa bezbednim fallback-om na praznu funkciju
+    document.getElementById('confirmTitle').innerText = title;
+    document.getElementById('confirmMessage').innerText = message;
+    document.getElementById('confirmIcon').innerText = icon;
+    
     confirmCallback = {
-        onYes: typeof onYes === 'function' ? onYes : function() {},
-        onNo: typeof onNo === 'function' ? onNo : function() {}
+        onYes: onYesCallback,
+        onNo: onNoCallback
     };
+    
+    confirmEl.style.display = 'flex';
+    confirmEl.classList.add('active');
 }
 
 function closeModernConfirm() {
-    const confirmDiv = document.getElementById('modernConfirm');
-    if (confirmDiv) {
-        confirmDiv.classList.remove('active');
-        confirmDiv.style.display = 'none';
-    }
-    confirmCallback = null;
-}
-
-// Poveži dugmad (ako postoje) - OVO DODAJ U DOMContentLoaded
-// ===== SUPPORT FUNKCIJE =====
-function openSupportDialog() {
-    const dialog = document.getElementById('supportDialog');
-    if (dialog) {
-        dialog.style.display = 'flex';
-        dialog.classList.add('active');
-    }
-}
-
-function closeSupportDialog() {
-    const dialog = document.getElementById('supportDialog');
-    if (dialog) {
-        dialog.style.display = 'none';
-        dialog.classList.remove('active');
+    const confirmEl = document.getElementById('modernConfirm');
+    if (confirmEl) {
+        confirmEl.style.display = 'none';
+        confirmEl.classList.remove('active');
     }
 }
 // ===== 1. JEZICI =====
