@@ -297,3 +297,60 @@ window.voiceCommand = voiceCommand;
 window.goBackFromVoice = goBackFromVoice;
 
 console.log('✅ voiceCommands.js je spreman!');
+// ============================================
+// DODATNO - SLUŠAJ DOGAĐAJ ZA ZAUSTAVLJANJE
+// ============================================
+
+// Slušaj događaj koji se emituje kada je komanda obrađena
+document.addEventListener('voiceCommandProcessed', function(e) {
+    console.log('📢 Događaj voiceCommandProcessed primljen:', e.detail);
+    if (e.detail && e.detail.success) {
+        // Zaustavi recognition ako postoji
+        if (typeof window.stopVoiceRecognition === 'function') {
+            console.log('🛑 Pozivam stopVoiceRecognition iz događaja');
+            window.stopVoiceRecognition();
+        }
+        // Takođe zaustavi ako je recognition direktno dostupan
+        if (typeof recognition !== 'undefined' && recognition) {
+            try {
+                recognition.stop();
+                recognition = null;
+                console.log('🛑 Recognition zaustavljen direktno');
+            } catch(e) {}
+        }
+    }
+});
+
+// Kada se klikne na bilo koje dugme u voice menu-u, zaustavi slušanje
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.voice-btn')) {
+        console.log('🖱️ Kliknuto na voice dugme - zaustavljam recognition');
+        if (typeof window.stopVoiceRecognition === 'function') {
+            window.stopVoiceRecognition();
+        }
+        if (typeof recognition !== 'undefined' && recognition) {
+            try {
+                recognition.stop();
+                recognition = null;
+            } catch(e) {}
+        }
+    }
+});
+
+// Isto i za dugme "Nazad" iz voice menija
+document.addEventListener('click', function(e) {
+    if (e.target.closest('#backFromVoiceBtn')) {
+        console.log('🖱️ Kliknuto na Nazad - zaustavljam recognition');
+        if (typeof window.stopVoiceRecognition === 'function') {
+            window.stopVoiceRecognition();
+        }
+        if (typeof recognition !== 'undefined' && recognition) {
+            try {
+                recognition.stop();
+                recognition = null;
+            } catch(e) {}
+        }
+    }
+});
+
+console.log('✅ voiceCommands.js dodatni event listeneri dodati!');
