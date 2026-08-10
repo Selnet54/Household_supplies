@@ -1788,15 +1788,19 @@ function startVoiceRecognition() {
     };
 
     recognition.onresult = function(event) {
-        const speechResult = event.results[0][0].transcript.toLowerCase().trim();
-        console.log('🗣️ Prepoznato:', speechResult);
-        
-        // PRIKAŽI U STATUSU
-        const statusEl = document.getElementById('voiceStatus');
-        if (statusEl) {
-            statusEl.textContent = `🗣️ "${speechResult}"`;
-            statusEl.style.color = '#FFD700';
-        }
+    const speechResult = event.results[0][0].transcript.trim();
+    console.log('🗣️ Prepoznato:', speechResult);
+    
+    // PRIKAŽI U STATUSU
+    const statusEl = document.getElementById('voiceStatus');
+    if (statusEl) {
+        statusEl.textContent = `🗣️ "${speechResult}"`;
+        statusEl.style.color = '#FFD700';
+    }
+    
+    // POZOVI processVoiceCommand
+    processVoiceCommand(speechResult);
+};
         
         // POZOVI voiceCommand IZ voiceCommands.js
         if (typeof window.voiceCommand === 'function') {
@@ -1855,51 +1859,64 @@ function startVoiceRecognition() {
 }
 
 // STARA PROCESNA FUNKCIJA (ZA FALLBACK)
-function processVoiceCommandOld(command) {
-    const lang = currentLang;
+// Analiza izgovorenog teksta i usmeravanje na elemente app
+function processVoiceCommand(command) {
+    console.log('🎤 processVoiceCommand prima:', command);
     
-    // 1. Komanda za Zalihe / Stanje
+    // POZOVI voiceCommand IZ voiceCommands.js
+    if (typeof window.voiceCommand === 'function') {
+        console.log('📞 Pozivam window.voiceCommand iz processVoiceCommand');
+        const result = window.voiceCommand(command);
+        console.log('✅ Rezultat voiceCommand:', result);
+        
+        // Ako je komanda uspešna, zaustavi recognition
+        if (result === true) {
+            if (typeof window.stopVoiceRecognition === 'function') {
+                window.stopVoiceRecognition();
+            }
+        }
+        return;
+    } else {
+        console.error('❌ window.voiceCommand nije definisan!');
+    }
+    
+    // FALLBACK - stara obrada ako voiceCommand ne postoji
+    const lang = currentLang;
+    const cmd = command.toLowerCase().trim();
+    
     const inventoryKeywords = ['stanje', 'zalihe', 'inventory', 'stock', 'bestand', 'készlet', 'запаси', '库存', 'inventario'];
-    if (inventoryKeywords.some(keyword => command.includes(keyword))) {
-        speakText(translations[lang]?.stanje || "Inventory");
+    if (inventoryKeywords.some(k => cmd.includes(k))) {
         renderInventory();
         return;
     }
 
-    // 2. Komanda za Spisak potreba
     const shoppingKeywords = ['spisak', 'kupovina', 'potrebe', 'shopping', 'einkaufsliste', 'bevásárlólista', 'список', '购物清单'];
-    if (shoppingKeywords.some(keyword => command.includes(keyword))) {
-        speakText(translations[lang]?.spisak || "Shopping List");
+    if (shoppingKeywords.some(k => cmd.includes(k))) {
         renderShoppingList();
         return;
     }
 
-    // 3. Komanda za Kategorije
     const categoryKeywords = ['kategorije', 'kategorija', 'categories', 'kategorien'];
-    if (categoryKeywords.some(keyword => command.includes(keyword))) {
-        speakText("Categories");
+    if (categoryKeywords.some(k => cmd.includes(k))) {
         showScreen('mainScreen');
         renderCategories();
         return;
     }
 
-    // 4. Provera glavnih kategorija
     const catList = getMainCategories();
     let matchedCategory = null;
     catList.forEach(cat => {
-        if (command.includes(cat.toLowerCase())) {
+        if (cmd.includes(cat.toLowerCase())) {
             matchedCategory = cat;
         }
     });
 
     if (matchedCategory) {
-        speakText(matchedCategory);
         showScreen('mainScreen');
         renderSubcategories(matchedCategory);
         return;
     }
 
-    speakText("Molim vas ponovite komandu.");
     showModernAlert('Nepoznata komanda', `Nije prepoznato: "${command}"`, '❓');
 }
 
