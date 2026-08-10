@@ -578,3 +578,23 @@ body {
         font-size: 16px;
     }
 }
+/* ===== INFO EKRANI (Crvena podloga, žuta slova) ===== */
+.info-container, .info-box {
+    background: #c62828 !important; /* Crvena pozadina */
+    color: #FFD700 !important;      /* Žuta slova */
+    border: 2px solid #FFD700;      /* Žuti okvir */
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+
+.info-container .title, .info-box .title,
+.info-container h1, .info-container h2, .info-container h3,
+.info-box h1, .info-box h2, .info-box h3 {
+    color: #FFD700 !important;      /* Žuti naslovi */
+}
+
+.info-container p, .info-box p, 
+.info-container span, .info-box span {
+    color: #ffffff !important;      /* Beli ili žuti tekst po želji, ovde je beli za čitljivost */
+}
