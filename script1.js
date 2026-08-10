@@ -1976,7 +1976,56 @@ function stopVoiceRecognition() {
         statusEl.style.color = '#aaa';
     }
 }
+function handleHeaderBack() {
+    // Proveri koji je trenutno aktivan ekran
+    const mainScreen = document.getElementById('mainScreen');
+    const choiceScreen = document.getElementById('choiceScreen');
+    const voiceMenuScreen = document.getElementById('voiceMenuScreen');
+    
+    // Ako smo na glavnom ekranu (mainScreen), dugme Nazad vraća na izbor jezika (choiceScreen)
+    if (mainScreen && mainScreen.classList.contains('active')) {
+        document.querySelectorAll('.screen').forEach(s => {
+            s.style.display = 'none';
+            s.classList.remove('active');
+        });
+        
+        if (choiceScreen) {
+            choiceScreen.style.display = 'flex';
+            choiceScreen.classList.add('active');
+        }
+        return;
+    }
+    
+    // Ako smo na nekom drugom ekranu, probaj standardni istorijski korak nazad ili idi na choiceScreen
+    if (window.history.length > 1 && typeof goBackFromVoice === 'function' && voiceMenuScreen && voiceMenuScreen.classList.contains('active')) {
+        goBackFromVoice();
+    } else {
+        // Podrazumevani fallback: vrati na ekran sa jezicima
+        document.querySelectorAll('.screen').forEach(s => {
+            s.style.display = 'none';
+            s.classList.remove('active');
+        });
+        
+        if (choiceScreen) {
+            choiceScreen.style.display = 'flex';
+            choiceScreen.classList.add('active');
+        } else {
+            // Ako ni choiceScreen ne postoji, idi na login
+            const login = document.getElementById('loginScreen');
+            if (login) {
+                login.style.display = 'flex';
+                login.classList.add('active');
+            }
+        }
+    }
+}
 
+// Poveži ovo sa dugmetom nazad u hederu (zamenite 'headerBackBtn' stvarnim ID-jem ili klasom vašeg dugmeta)
+document.addEventListener('click', function(e) {
+    if (e.target.closest('#headerBackBtn') || e.target.closest('.back-arrow') || e.target.closest('.header-back')) {
+        handleHeaderBack();
+    }
+});
 // Izvezi funkcije globalno
 window.startVoiceRecognition = startVoiceRecognition;
 window.stopVoiceRecognition = stopVoiceRecognition;
