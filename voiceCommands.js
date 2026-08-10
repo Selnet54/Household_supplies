@@ -76,132 +76,145 @@ function voiceCommand(command) {
     }
 
     // 2. ZALIHE (Inventory)
-    if (checkInventoryCommand(cmd)) {
-        console.log('📦 Prelaz na zalihe');
-        cleanup();
-        
-        // SAKRIVAJ SVE EKRANE
-        document.querySelectorAll('.screen').forEach(s => {
-            s.style.display = 'none';
-            s.classList.remove('active');
-        });
-        
-        // EKSPLICITNO SAKRIJ VOICE MENU
-        const voiceMenu = document.getElementById('voiceMenuScreen');
-        if (voiceMenu) {
-            voiceMenu.style.display = 'none';
-            voiceMenu.classList.remove('active');
-        }
-        
-        // PRIKAŽI MAIN SCREEN
-        const mainScreen = document.getElementById('mainScreen');
-        if (mainScreen) {
-            mainScreen.style.display = 'flex';
-            mainScreen.classList.add('active');
-            console.log('✅ mainScreen prikazan');
-        }
-        
-        // POSTAVI STANJE
-        window.currentScreenState = 'inventory';
-        
-        // RENDER INVENTORY
-        if (typeof renderInventory === 'function') {
-            renderInventory();
-            console.log('✅ renderInventory pozvan');
-        } else {
-            console.error('❌ renderInventory nije definisan!');
-        }
-        
-        // AŽURIRAJ STATUS
-        const status = document.getElementById('voiceStatus');
-        if (status) {
-            status.innerText = '✅ Komanda izvršena: Zalihe';
-            status.style.color = '#4CAF50';
-        }
-        
-        // EMITUJ DOGAĐAJ
-        document.dispatchEvent(new CustomEvent('voiceCommandProcessed', { 
-            detail: { success: true, command: 'inventory' }
-        }));
-        
-        return true;
+    // 2. ZALIHE (Inventory)
+if (checkInventoryCommand(cmd)) {
+    console.log('📦 Prelaz na zalihe');
+    cleanup();
+    
+    // SAKRIVAJ SVE EKRANE
+    document.querySelectorAll('.screen').forEach(s => {
+        s.style.display = 'none';
+        s.classList.remove('active');
+    });
+    
+    // EKSPLICITNO SAKRIJ VOICE MENU
+    const voiceMenu = document.getElementById('voiceMenuScreen');
+    if (voiceMenu) {
+        voiceMenu.style.display = 'none';
+        voiceMenu.classList.remove('active');
     }
     
-    // 3. SPISAK (Shopping List)
-    if (checkShoppingCommand(cmd)) {
-        console.log('🛒 Prelaz na spisak');
-        cleanup();
-        
-        document.querySelectorAll('.screen').forEach(s => {
-            s.style.display = 'none';
-            s.classList.remove('active');
-        });
-        
-        const voiceMenu = document.getElementById('voiceMenuScreen');
-        if (voiceMenu) {
-            voiceMenu.style.display = 'none';
-            voiceMenu.classList.remove('active');
-        }
-        
-        const mainScreen = document.getElementById('mainScreen');
-        if (mainScreen) {
-            mainScreen.style.display = 'flex';
-            mainScreen.classList.add('active');
-        }
-        
-        window.currentScreenState = 'shopping';
-        if (typeof renderShoppingList === 'function') renderShoppingList();
-        
-        const status = document.getElementById('voiceStatus');
-        if (status) {
-            status.innerText = '✅ Komanda izvršena: Spisak';
-            status.style.color = '#4CAF50';
-        }
-        
-        document.dispatchEvent(new CustomEvent('voiceCommandProcessed', { 
-            detail: { success: true, command: 'shopping' }
-        }));
-        
-        return true;
+    // PRIKAŽI MAIN SCREEN - OBAVEZNO!
+    const mainScreen = document.getElementById('mainScreen');
+    if (mainScreen) {
+        mainScreen.style.display = 'flex';
+        mainScreen.classList.add('active');
+        console.log('✅ mainScreen prikazan');
+    } else {
+        console.error('❌ mainScreen nije pronađen!');
     }
+    
+    // POSTAVI STANJE
+    window.currentScreenState = 'inventory';
+    
+    // RENDER INVENTORY - OBAVEZNO!
+    if (typeof renderInventory === 'function') {
+        renderInventory();
+        console.log('✅ renderInventory pozvan');
+    } else {
+        console.error('❌ renderInventory nije definisan!');
+    }
+    
+    // AŽURIRAJ STATUS
+    const status = document.getElementById('voiceStatus');
+    if (status) {
+        status.innerText = '✅ Komanda izvršena: Zalihe';
+        status.style.color = '#4CAF50';
+    }
+    
+    // EMITUJ DOGAĐAJ
+    document.dispatchEvent(new CustomEvent('voiceCommandProcessed', { 
+        detail: { success: true, command: 'inventory' }
+    }));
+    
+    return true;
+}
+    
+   // 3. SPISAK (Shopping List)
+if (checkShoppingCommand(cmd)) {
+    console.log('🛒 Prelaz na spisak');
+    cleanup();
+    
+    document.querySelectorAll('.screen').forEach(s => {
+        s.style.display = 'none';
+        s.classList.remove('active');
+    });
+    
+    const voiceMenu = document.getElementById('voiceMenuScreen');
+    if (voiceMenu) {
+        voiceMenu.style.display = 'none';
+        voiceMenu.classList.remove('active');
+    }
+    
+    // PRIKAŽI MAIN SCREEN
+    const mainScreen = document.getElementById('mainScreen');
+    if (mainScreen) {
+        mainScreen.style.display = 'flex';
+        mainScreen.classList.add('active');
+        console.log('✅ mainScreen prikazan');
+    }
+    
+    window.currentScreenState = 'shopping';
+    if (typeof renderShoppingList === 'function') {
+        renderShoppingList();
+        console.log('✅ renderShoppingList pozvan');
+    }
+    
+    const status = document.getElementById('voiceStatus');
+    if (status) {
+        status.innerText = '✅ Komanda izvršena: Spisak';
+        status.style.color = '#4CAF50';
+    }
+    
+    document.dispatchEvent(new CustomEvent('voiceCommandProcessed', { 
+        detail: { success: true, command: 'shopping' }
+    }));
+    
+    return true;
+}
 
-    // 4. DODAJ PROIZVOD (Add Product)
-    if (checkAddCommand(cmd)) {
-        console.log('➕ Otvaranje kategorija za unos');
-        cleanup();
-        
-        document.querySelectorAll('.screen').forEach(s => {
-            s.style.display = 'none';
-            s.classList.remove('active');
-        });
-        
-        const voiceMenu = document.getElementById('voiceMenuScreen');
-        if (voiceMenu) {
-            voiceMenu.style.display = 'none';
-            voiceMenu.classList.remove('active');
-        }
-        
-        const mainScreen = document.getElementById('mainScreen');
-        if (mainScreen) {
-            mainScreen.style.display = 'flex';
-            mainScreen.classList.add('active');
-        }
-        
-        window.currentScreenState = 'categories';
-        if (typeof renderCategories === 'function') renderCategories();
-        
-        const status = document.getElementById('voiceStatus');
-        if (status) {
-            status.innerText = '✅ Komanda izvršena: Dodaj proizvod';
-            status.style.color = '#4CAF50';
-        }
-        
-        document.dispatchEvent(new CustomEvent('voiceCommandProcessed', { 
-            detail: { success: true, command: 'add' }
-        }));
-        
-        return true;
+   // 4. DODAJ PROIZVOD (Add Product)
+if (checkAddCommand(cmd)) {
+    console.log('➕ Otvaranje kategorija za unos');
+    cleanup();
+    
+    document.querySelectorAll('.screen').forEach(s => {
+        s.style.display = 'none';
+        s.classList.remove('active');
+    });
+    
+    const voiceMenu = document.getElementById('voiceMenuScreen');
+    if (voiceMenu) {
+        voiceMenu.style.display = 'none';
+        voiceMenu.classList.remove('active');
     }
+    
+    // PRIKAŽI MAIN SCREEN
+    const mainScreen = document.getElementById('mainScreen');
+    if (mainScreen) {
+        mainScreen.style.display = 'flex';
+        mainScreen.classList.add('active');
+        console.log('✅ mainScreen prikazan');
+    }
+    
+    window.currentScreenState = 'categories';
+    if (typeof renderCategories === 'function') {
+        renderCategories();
+        console.log('✅ renderCategories pozvan');
+    }
+    
+    const status = document.getElementById('voiceStatus');
+    if (status) {
+        status.innerText = '✅ Komanda izvršena: Dodaj proizvod';
+        status.style.color = '#4CAF50';
+    }
+    
+    document.dispatchEvent(new CustomEvent('voiceCommandProcessed', { 
+        detail: { success: true, command: 'add' }
+    }));
+    
+    return true;
+}
 
     // 5. GLASOVNI IZBOR KATEGORIJA/DELOVA
     if (window.currentScreenState === 'categories' || window.currentScreenState === 'subcategories') {
