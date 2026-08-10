@@ -1788,35 +1788,37 @@ function startVoiceRecognition() {
     };
 
     recognition.onresult = function(event) {
-        const speechResult = event.results[0][0].transcript.trim();
-        console.log('🗣️ Prepoznato:', speechResult);
-        
-        // PRIKAŽI U STATUSU
-        const statusEl = document.getElementById('voiceStatus');
-        if (statusEl) {
-            statusEl.textContent = `🗣️ "${speechResult}"`;
-            statusEl.style.color = '#FFD700';
+    const speechResult = event.results[0][0].transcript.trim();
+    console.log('🗣️ Prepoznato:', speechResult);
+    
+    const statusEl = document.getElementById('voiceStatus');
+    if (statusEl) {
+        statusEl.textContent = `🗣️ "${speechResult}"`;
+        statusEl.style.color = '#FFD700';
+    }
+    
+    // POZOVI processVoiceCommand
+    processVoiceCommand(speechResult);
+    
+    // DIREKTNO SAKRIJ VOICE MENU I PRIKAŽI MAIN SCREEN
+    setTimeout(function() {
+        // Sakrij voice menu
+        const voiceMenu = document.getElementById('voiceMenuScreen');
+        if (voiceMenu) {
+            voiceMenu.style.display = 'none';
+            voiceMenu.classList.remove('active');
+            console.log('🔇 Voice menu sakriven nakon komande');
         }
         
-        // POZOVI processVoiceCommand
-        processVoiceCommand(speechResult);
-        
-        // DIREKTNO SAKRIJ VOICE MENU NAKON KOMANDE
-        setTimeout(function() {
-            const voiceMenu = document.getElementById('voiceMenuScreen');
-            if (voiceMenu) {
-                voiceMenu.style.display = 'none';
-                voiceMenu.classList.remove('active');
-                console.log('🔇 Voice menu sakriven nakon komande');
-            }
-            // Prikaži mainScreen
-            const mainScreen = document.getElementById('mainScreen');
-            if (mainScreen) {
-                mainScreen.style.display = 'flex';
-                mainScreen.classList.add('active');
-            }
-        }, 300);
-    };
+        // Prikaži mainScreen ako je potrebno
+        const mainScreen = document.getElementById('mainScreen');
+        if (mainScreen && mainScreen.style.display !== 'flex') {
+            mainScreen.style.display = 'flex';
+            mainScreen.classList.add('active');
+            console.log('✅ mainScreen prikazan iz recognition.onresult');
+        }
+    }, 300);
+};
 
     recognition.onerror = function(event) {
         console.error('⚠️ Greška u prepoznavanju glasa:', event.error);
