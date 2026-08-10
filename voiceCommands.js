@@ -33,8 +33,13 @@ function voiceCommand(command) {
             try {
                 window.recognition.stop();
                 window.recognition = null;
-                console.log('🛑 Recognition zaustavljen');
+                console.log('🛑 Recognition zaustavljen iz cleanup');
             } catch(e) {}
+        }
+        
+        // POZOVI stopVoiceRecognition AKO POSTOJI
+        if (typeof window.stopVoiceRecognition === 'function') {
+            window.stopVoiceRecognition();
         }
     }
 
@@ -43,20 +48,17 @@ function voiceCommand(command) {
         console.log('🚪 Izlaz iz aplikacije');
         cleanup();
         
-        // Sakrij voice menu
         const voiceMenu = document.getElementById('voiceMenuScreen');
         if (voiceMenu) {
             voiceMenu.style.display = 'none';
             voiceMenu.classList.remove('active');
         }
         
-        // Sakrij sve ekrane
         document.querySelectorAll('.screen').forEach(s => {
             s.style.display = 'none';
             s.classList.remove('active');
         });
         
-        // Prikaži login
         const login = document.getElementById('loginScreen');
         if (login) {
             login.style.display = 'flex';
@@ -64,6 +66,12 @@ function voiceCommand(command) {
         }
         
         if (typeof exitApp === 'function') exitApp();
+        
+        // Emituj događaj
+        document.dispatchEvent(new CustomEvent('voiceCommandProcessed', { 
+            detail: { success: true, command: 'exit' }
+        }));
+        
         return true;
     }
 
@@ -111,6 +119,11 @@ function voiceCommand(command) {
             status.style.color = '#4CAF50';
         }
         
+        // EMITUJ DOGAĐAJ
+        document.dispatchEvent(new CustomEvent('voiceCommandProcessed', { 
+            detail: { success: true, command: 'inventory' }
+        }));
+        
         return true;
     }
     
@@ -144,6 +157,10 @@ function voiceCommand(command) {
             status.innerText = '✅ Komanda izvršena: Spisak';
             status.style.color = '#4CAF50';
         }
+        
+        document.dispatchEvent(new CustomEvent('voiceCommandProcessed', { 
+            detail: { success: true, command: 'shopping' }
+        }));
         
         return true;
     }
@@ -179,6 +196,10 @@ function voiceCommand(command) {
             status.style.color = '#4CAF50';
         }
         
+        document.dispatchEvent(new CustomEvent('voiceCommandProcessed', { 
+            detail: { success: true, command: 'add' }
+        }));
+        
         return true;
     }
 
@@ -191,6 +212,9 @@ function voiceCommand(command) {
                 status.innerText = `✅ Dodato: ${cmd}`;
                 status.style.color = '#4CAF50';
             }
+            document.dispatchEvent(new CustomEvent('voiceCommandProcessed', { 
+                detail: { success: true, command: cmd }
+            }));
             return true;
         }
     }
@@ -203,6 +227,10 @@ function voiceCommand(command) {
     }
     
     cleanup();
+    document.dispatchEvent(new CustomEvent('voiceCommandProcessed', { 
+        detail: { success: false, command: command }
+    }));
+    
     return false;
 }
 
@@ -279,6 +307,12 @@ function handleProductPartsVoice(cmd, lang) {
 // POMOĆNA FUNKCIJA ZA POVRATAK
 function goBackFromVoice() {
     console.log('◀ Povratak sa voice menija');
+    
+    // Zaustavi recognition
+    if (typeof window.stopVoiceRecognition === 'function') {
+        window.stopVoiceRecognition();
+    }
+    
     const voiceMenu = document.getElementById('voiceMenuScreen');
     if (voiceMenu) {
         voiceMenu.style.display = 'none';
@@ -292,25 +326,16 @@ function goBackFromVoice() {
     }
 }
 
-// Eksportovanje funkcije u globalni prostor
-window.voiceCommand = voiceCommand;
-window.goBackFromVoice = goBackFromVoice;
-
-console.log('✅ voiceCommands.js je spreman!');
 // ============================================
 // DODATNO - SLUŠAJ DOGAĐAJ ZA ZAUSTAVLJANJE
 // ============================================
-
-// Slušaj događaj koji se emituje kada je komanda obrađena
 document.addEventListener('voiceCommandProcessed', function(e) {
     console.log('📢 Događaj voiceCommandProcessed primljen:', e.detail);
     if (e.detail && e.detail.success) {
-        // Zaustavi recognition ako postoji
         if (typeof window.stopVoiceRecognition === 'function') {
             console.log('🛑 Pozivam stopVoiceRecognition iz događaja');
             window.stopVoiceRecognition();
         }
-        // Takođe zaustavi ako je recognition direktno dostupan
         if (typeof recognition !== 'undefined' && recognition) {
             try {
                 recognition.stop();
@@ -321,7 +346,7 @@ document.addEventListener('voiceCommandProcessed', function(e) {
     }
 });
 
-// Kada se klikne na bilo koje dugme u voice menu-u, zaustavi slušanje
+// Kada se klikne na dugme u voice menu-u, zaustavi
 document.addEventListener('click', function(e) {
     if (e.target.closest('.voice-btn')) {
         console.log('🖱️ Kliknuto na voice dugme - zaustavljam recognition');
@@ -335,10 +360,6 @@ document.addEventListener('click', function(e) {
             } catch(e) {}
         }
     }
-});
-
-// Isto i za dugme "Nazad" iz voice menija
-document.addEventListener('click', function(e) {
     if (e.target.closest('#backFromVoiceBtn')) {
         console.log('🖱️ Kliknuto na Nazad - zaustavljam recognition');
         if (typeof window.stopVoiceRecognition === 'function') {
@@ -353,4 +374,8 @@ document.addEventListener('click', function(e) {
     }
 });
 
-console.log('✅ voiceCommands.js dodatni event listeneri dodati!');
+// Eksportovanje funkcije u globalni prostor
+window.voiceCommand = voiceCommand;
+window.goBackFromVoice = goBackFromVoice;
+
+console.log('✅ voiceCommands.js je spreman!');
