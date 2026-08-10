@@ -13,11 +13,24 @@ function voiceCommand(command) {
     const cmd = command.toLowerCase().trim();
     const lang = getCurrentLang();
 
+    // PRIKAŽI STATUS NA 4. EKRANU
+    function setVoiceStatus(text, isSuccess = true) {
+        const status = document.getElementById('voiceStatus');
+        if (status) {
+            status.innerText = text;
+            status.style.color = isSuccess ? '#4CAF50' : '#f44336';
+        }
+        // Zaustavi ponavljanje - emituj događaj
+        document.dispatchEvent(new CustomEvent('voiceCommandProcessed', { 
+            detail: { success: isSuccess, command: command }
+        }));
+    }
+
     // 1. IZLAZ / EXIT
     if (checkExitCommand(cmd)) {
         console.log('🚪 Izlaz iz aplikacije');
+        setVoiceStatus('✅ Izlazim iz aplikacije...', true);
         
-        // Prisilno gasimo 4. ekran
         const voiceMenu = document.getElementById('voiceMenuScreen');
         if (voiceMenu) voiceMenu.style.display = 'none';
 
@@ -28,19 +41,17 @@ function voiceCommand(command) {
     // 2. ZALIHE (Inventory)
     if (checkInventoryCommand(cmd)) {
         console.log('📦 Prelaz na zalihe');
+        setVoiceStatus('📦 Otvaram zalihe...', true);
         
-        // 1. Eksplicitno sakrijemo Ekran 4 (glasovni meni) preko njegovog tačnog ID-ja
         const voiceMenu = document.getElementById('voiceMenuScreen');
         if (voiceMenu) {
             voiceMenu.style.display = 'none';
         }
 
-        // 2. Sakrijemo i sve ostale ekrane preko opšte funkcije ako postoji
         if (typeof hideAllScreens === 'function') {
             hideAllScreens();
         }
 
-        // 3. Prikažemo glavni ekran za zalihe
         const mainScreen = document.getElementById('mainScreen');
         if (mainScreen) {
             mainScreen.style.display = 'block';
@@ -55,11 +66,12 @@ function voiceCommand(command) {
         handleInventoryHeaderNavigation(cmd);
         return true;
     }
+    
     // 3. SPISAK (Shopping List)
     if (checkShoppingCommand(cmd)) {
         console.log('🛒 Prelaz na spisak');
+        setVoiceStatus('🛒 Otvaram spisak...', true);
         
-        // Prisilno gasimo 4. ekran
         const voiceMenu = document.getElementById('voiceMenuScreen');
         if (voiceMenu) voiceMenu.style.display = 'none';
 
@@ -76,8 +88,8 @@ function voiceCommand(command) {
     // 4. DODAJ PROIZVOD (Add Product)
     if (checkAddCommand(cmd)) {
         console.log('➕ Otvaranje kategorija za unos');
+        setVoiceStatus('➕ Otvaram kategorije...', true);
         
-        // Prisilno gasimo 4. ekran
         const voiceMenu = document.getElementById('voiceMenuScreen');
         if (voiceMenu) voiceMenu.style.display = 'none';
 
@@ -94,16 +106,13 @@ function voiceCommand(command) {
     // 6. GLASOVNI IZBOR KATEGORIJA/DELOVA (ako smo na ekranu kategorija)
     if (window.currentScreenState === 'categories' || window.currentScreenState === 'subcategories') {
         if (handleProductPartsVoice(cmd, lang)) {
+            setVoiceStatus(`✅ Dodato: ${cmd}`, true);
             return true;
         }
     }
 
-    // Ako komanda nije prepoznata, prikaži status na Ekranu 4 ako postoji
-    const voiceStatus = document.getElementById('voiceStatus');
-    if (voiceStatus) {
-        voiceStatus.innerText = `❌ Nije prepoznato: "${command}"`;
-    }
-
+    // Ako komanda nije prepoznata
+    setVoiceStatus(`❌ Nije prepoznato: "${command}". Pokušajte ponovo.`, false);
     return false;
 }
 
