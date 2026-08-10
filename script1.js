@@ -1976,56 +1976,50 @@ function stopVoiceRecognition() {
         statusEl.style.color = '#aaa';
     }
 }
+// Pomoćna funkcija za sakrivanje svih ekrana
+function hideAllScreens() {
+    document.querySelectorAll('.screen').forEach(s => {
+        s.style.display = 'none';
+        s.classList.remove('active');
+    });
+}
+
+// Glavna funkcija za dugme Nazad
 function handleHeaderBack() {
-    // Proveri koji je trenutno aktivan ekran
-    const mainScreen = document.getElementById('mainScreen');
+    console.log('⬅ Kliknuto dugme Nazad');
+    
     const choiceScreen = document.getElementById('choiceScreen');
     const voiceMenuScreen = document.getElementById('voiceMenuScreen');
     
-    // Ako smo na glavnom ekranu (mainScreen), dugme Nazad vraća na izbor jezika (choiceScreen)
-    if (mainScreen && mainScreen.classList.contains('active')) {
-        document.querySelectorAll('.screen').forEach(s => {
-            s.style.display = 'none';
-            s.classList.remove('active');
-        });
-        
-        if (choiceScreen) {
-            choiceScreen.style.display = 'flex';
-            choiceScreen.classList.add('active');
-        }
+    // Ako je aktivan glasovni meni, vrati se preko njega
+    if (voiceMenuScreen && voiceMenuScreen.classList.contains('active') && typeof goBackFromVoice === 'function') {
+        goBackFromVoice();
         return;
     }
     
-    // Ako smo na nekom drugom ekranu, probaj standardni istorijski korak nazad ili idi na choiceScreen
-    if (window.history.length > 1 && typeof goBackFromVoice === 'function' && voiceMenuScreen && voiceMenuScreen.classList.contains('active')) {
-        goBackFromVoice();
+    // U svim ostalim slučajevima, vrati korisnika na ekran sa jezicima (choiceScreen)
+    hideAllScreens();
+    
+    if (choiceScreen) {
+        choiceScreen.style.display = 'flex';
+        choiceScreen.classList.add('active');
     } else {
-        // Podrazumevani fallback: vrati na ekran sa jezicima
-        document.querySelectorAll('.screen').forEach(s => {
-            s.style.display = 'none';
-            s.classList.remove('active');
-        });
-        
-        if (choiceScreen) {
-            choiceScreen.style.display = 'flex';
-            choiceScreen.classList.add('active');
-        } else {
-            // Ako ni choiceScreen ne postoji, idi na login
-            const login = document.getElementById('loginScreen');
-            if (login) {
-                login.style.display = 'flex';
-                login.classList.add('active');
-            }
+        // Krajnji fallback ako choiceScreen ne postoji
+        const login = document.getElementById('loginScreen');
+        if (login) {
+            login.style.display = 'flex';
+            login.classList.add('active');
         }
     }
 }
 
-// Poveži ovo sa dugmetom nazad u hederu (zamenite 'headerBackBtn' stvarnim ID-jem ili klasom vašeg dugmeta)
+// Sigurno slušanje klika na dugme nazad u hederu
 document.addEventListener('click', function(e) {
-    if (e.target.closest('#headerBackBtn') || e.target.closest('.back-arrow') || e.target.closest('.header-back')) {
+    if (e.target.closest('.btn-back') || e.target.closest('#headerBackBtn') || e.target.closest('.back-arrow') || e.target.closest('.header-back')) {
+        e.preventDefault();
         handleHeaderBack();
     }
-});
+}, true);
 // Izvezi funkcije globalno
 window.startVoiceRecognition = startVoiceRecognition;
 window.stopVoiceRecognition = stopVoiceRecognition;
