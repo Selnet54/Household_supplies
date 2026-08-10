@@ -799,7 +799,12 @@ function renderLanguages() {
     });
     console.log('✅ Jezici prikazani');
 }
+// ===== FUNKCIJA ZA DOBIJANJE TRENUTNOG JEZIKA =====
+function getCurrentLang() {
+    return window.currentLanguage || localStorage.getItem('appLanguage') || 'sr';
+}
 
+// ===== IZBOR JEZIKA =====
 function selectLanguage(langCode) {
     currentLang = langCode;
     
@@ -1530,7 +1535,55 @@ function triggerLogin() {
         showModernAlert(t('invalid_input'), t('please_enter_phone'), '📱');
     }
 }
-
+// ===== AŽURIRANJE JEZIKA HEDERA =====
+function updateHeaderLanguage() {
+    const lang = currentLang || 'en';
+    
+    // Ažuriraj tekst na dugmadima u headeru
+    const backText = document.getElementById('backText');
+    const invText = document.getElementById('invText');
+    const shopText = document.getElementById('shopText');
+    const exitText = document.getElementById('exitText');
+    
+    if (backText) backText.textContent = t('nazad');
+    if (invText) invText.textContent = t('stanje');
+    if (shopText) shopText.textContent = t('spisak');
+    if (exitText) exitText.textContent = t('odustani');
+    
+    // Ažuriraj i dugmad na 3. ekranu (izbor načina unosa)
+    const voiceTitleText = document.getElementById('voiceTitleText');
+    const voiceDescText = document.getElementById('voiceDescText');
+    const manualTitleText = document.getElementById('manualTitleText');
+    const manualDescText = document.getElementById('manualDescText');
+    const choiceTitleText = document.getElementById('choiceTitleText');
+    const exitChoiceBtn = document.getElementById('exitChoiceBtn');
+    
+    if (voiceTitleText) voiceTitleText.textContent = t('unos_podataka') || 'Voice Input';
+    if (voiceDescText) voiceDescText.textContent = 'Speak and I will enter';
+    if (manualTitleText) manualTitleText.textContent = t('unos_podataka') || 'Manual Input';
+    if (manualDescText) manualDescText.textContent = 'Type data manually';
+    if (choiceTitleText) choiceTitleText.textContent = t('unos_podataka') || 'How do you want to enter data?';
+    if (exitChoiceBtn) exitChoiceBtn.textContent = t('odustani') || 'EXIT';
+    
+    // Ažuriraj i 4. ekran (voice menu)
+    const invMenuText = document.getElementById('invMenuText');
+    const shopMenuText = document.getElementById('shopMenuText');
+    const addMenuText = document.getElementById('addMenuText');
+    const exitMenuText = document.getElementById('exitMenuText');
+    const voiceMenuTitleText = document.getElementById('voiceMenuTitleText');
+    const voiceMenuPromptText = document.getElementById('voiceMenuPromptText');
+    const backVoiceText = document.getElementById('backVoiceText');
+    
+    if (invMenuText) invMenuText.textContent = t('stanje') || 'Inventory';
+    if (shopMenuText) shopMenuText.textContent = t('spisak') || 'Shopping List';
+    if (addMenuText) addMenuText.textContent = t('unos_podataka') || 'Add Product';
+    if (exitMenuText) exitMenuText.textContent = t('odustani') || 'EXIT';
+    if (voiceMenuTitleText) voiceMenuTitleText.textContent = '🎤 Voice Control';
+    if (voiceMenuPromptText) voiceMenuPromptText.textContent = 'Say what you want to do:';
+    if (backVoiceText) backVoiceText.textContent = t('nazad') || '◀ Back';
+    
+    console.log('✅ Header i jezik ažurirani na:', lang);
+}
 // ===== GLAVNI DOGAĐAJI (Delegirani pristup) =====
 document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ DOM je spreman!');
@@ -1868,8 +1921,8 @@ function stopVoiceRecognition() {
 
 // Izvezi funkcije globalno
 window.startVoiceRecognition = startVoiceRecognition;
+window.stopVoiceRecognition = stopVoiceRecognition;
+window.getCurrentLang = getCurrentLang;
 
 console.log('✅ Voice recognition dodatak učitan!');
-// Izvezi stopVoiceRecognition globalno
-window.stopVoiceRecognition = stopVoiceRecognition;
-console.log('✅ stopVoiceRecognition izvezen globalno');
+console.log('✅ stopVoiceRecognition i getCurrentLang izvezeni globalno');
