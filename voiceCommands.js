@@ -16,6 +16,11 @@ function voiceCommand(command) {
     // 1. IZLAZ / EXIT
     if (checkExitCommand(cmd)) {
         console.log('🚪 Izlaz iz aplikacije');
+        
+        // Prisilno gasimo 4. ekran
+        const voiceMenu = document.getElementById('voiceMenuScreen');
+        if (voiceMenu) voiceMenu.style.display = 'none';
+
         if (typeof exitApp === 'function') exitApp();
         return true;
     }
@@ -24,50 +29,65 @@ function voiceCommand(command) {
     if (checkInventoryCommand(cmd)) {
         console.log('📦 Prelaz na zalihe');
         
-        // 1. Prvo eksplicitno sakrijemo Ekran 4 (glasovni meni) preko njegovog tačnog ID-ja!
-        const voiceMenuScreen = document.getElementById('voiceMenuScreen'); // ili tačan ID tvog 4. ekrana
-        if (voiceMenuScreen) {
-            voiceMenuScreen.style.display = 'none';
+        // 1. Eksplicitno sakrijemo Ekran 4 (glasovni meni) preko njegovog tačnog ID-ja
+        const voiceMenu = document.getElementById('voiceMenuScreen');
+        if (voiceMenu) {
+            voiceMenu.style.display = 'none';
         }
 
-        // 2. Pozivamo i tvoju standardnu funkciju da sakrije sve ostalo
+        // 2. Sakrijemo i sve ostale ekrane preko opšte funkcije ako postoji
         if (typeof hideAllScreens === 'function') {
             hideAllScreens();
         }
 
-        // 3. Otvaramo ekran sa zalihama
+        // 3. Prikažemo glavni ekran za zalihe
         const mainScreen = document.getElementById('mainScreen');
-        if (mainScreen) mainScreen.style.display = 'block';
-        
+        if (mainScreen) {
+            mainScreen.style.display = 'block';
+        }
+
         window.currentScreenState = 'inventory';
-        if (typeof renderInventory === 'function') renderInventory();
+        
+        if (typeof renderInventory === 'function') {
+            renderInventory();
+        }
+        
         handleInventoryHeaderNavigation(cmd);
         return true;
     }
     // 3. SPISAK (Shopping List)
     if (checkShoppingCommand(cmd)) {
         console.log('🛒 Prelaz na spisak');
-        hideAllScreens();
+        
+        // Prisilno gasimo 4. ekran
+        const voiceMenu = document.getElementById('voiceMenuScreen');
+        if (voiceMenu) voiceMenu.style.display = 'none';
+
+        if (typeof hideAllScreens === 'function') hideAllScreens();
+
         const mainScreen = document.getElementById('mainScreen');
         if (mainScreen) mainScreen.style.display = 'block';
+        
         window.currentScreenState = 'shopping';
         if (typeof renderShoppingList === 'function') renderShoppingList();
         return true;
     }
 
-    // 4. DODAJ PROIZVOD (Add Product -> Otvara kategorije/delove iz productParts.js)
+    // 4. DODAJ PROIZVOD (Add Product)
     if (checkAddCommand(cmd)) {
         console.log('➕ Otvaranje kategorija za unos');
-        hideAllScreens();
+        
+        // Prisilno gasimo 4. ekran
+        const voiceMenu = document.getElementById('voiceMenuScreen');
+        if (voiceMenu) voiceMenu.style.display = 'none';
+
+        if (typeof hideAllScreens === 'function') hideAllScreens();
+
         const mainScreen = document.getElementById('mainScreen');
         if (mainScreen) mainScreen.style.display = 'block';
+        
         window.currentScreenState = 'categories';
         if (typeof renderCategories === 'function') renderCategories();
-        return true;
-    }
-
-    // 5. DIREKTAN UNOS REČIMA U FORMU / ZALIHE
-    if (processDirectDataInput(cmd, lang)) {
         return true;
     }
 
