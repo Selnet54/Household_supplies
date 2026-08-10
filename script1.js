@@ -1690,7 +1690,7 @@ const speechLangMap = {
 // Glasovna sinteza (da aplikacija odgovori glasom)
 function speakText(text) {
     if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel(); // Prekini prethodni govor
+        window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = speechLangMap[currentLang] || 'en-US';
         utterance.rate = 1.0;
@@ -1709,69 +1709,119 @@ function startVoiceRecognition() {
 
     if (recognition) {
         try { recognition.stop(); } catch(e) {}
+        recognition = null;
     }
 
     recognition = new SpeechRecognition();
     recognition.lang = speechLangMap[currentLang] || 'en-US';
+    recognition.continuous = false;  // BITNO: NE SLUŠA KONTINUIRANO
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
 
-    const statusEl = document.getElementById('voiceStatusText');
-    const outputEl = document.getElementById('recognizedTextOutput');
-    const micIcon = document.getElementById('micIcon');
-
-    if (statusEl) statusEl.textContent = translations[currentLang]?.listening || "Slušam... Govorite komandu";
-    if (micIcon) micIcon.style.animation = "pulse 1.5s infinite";
+    const statusEl = document.getElementById('voiceStatus');
+    if (statusEl) {
+        statusEl.textContent = '🎤 Slušam... Govorite komandu';
+        statusEl.style.color = '#2196F3';
+    }
 
     recognition.onstart = function() {
         console.log('🎤 Glasovno prepoznavanje pokrenuto na jeziku:', recognition.lang);
+        const statusEl = document.getElementById('voiceStatus');
+        if (statusEl) {
+            statusEl.textContent = '🎤 Slušam...';
+            statusEl.style.color = '#2196F3';
+        }
     };
 
     recognition.onresult = function(event) {
         const speechResult = event.results[0][0].transcript.toLowerCase().trim();
         console.log('🗣️ Prepoznato:', speechResult);
-        if (outputEl) outputEl.textContent = `"${speechResult}"`;
         
-        // Obrada komandi na osnovu glasa
-        processVoiceCommand(speechResult);
+        // PRIKAŽI U STATUSU
+        const statusEl = document.getElementById('voiceStatus');
+        if (statusEl) {
+            statusEl.textContent = `🗣️ "${speechResult}"`;
+            statusEl.style.color = '#FFD700';
+        }
+        
+        // POZOVI voiceCommand IZ voiceCommands.js
+        if (typeof window.voiceCommand === 'function') {
+            const result = window.voiceCommand(speechResult);
+            console.log('✅ voiceCommand rezultat:', result);
+            
+            // Ako je komanda uspešna, zaustavi recognition
+            if (result) {
+                if (recognition) {
+                    try {
+                        recognition.stop();
+                        recognition = null;
+                        console.log('🛑 Recognition zaustavljen');
+                    } catch(e) {}
+                }
+                // Emituj događaj da je komanda obrađena
+                document.dispatchEvent(new CustomEvent('voiceCommandProcessed', { 
+                    detail: { success: true, command: speechResult }
+                }));
+            }
+        } else {
+            console.error('❌ voiceCommand nije definisan!');
+            // Fallback - koristi staru obradu
+            processVoiceCommandOld(speechResult);
+        }
     };
 
     recognition.onerror = function(event) {
         console.error('⚠️ Greška u prepoznavanju glasa:', event.error);
-        if (statusEl) statusEl.textContent = "Greška u prepoznavanju. Pokušajte ponovo.";
-        if (micIcon) micIcon.style.animation = "none";
+        const statusEl = document.getElementById('voiceStatus');
+        if (statusEl) {
+            statusEl.textContent = '❌ Greška u prepoznavanju. Pokušajte ponovo.';
+            statusEl.style.color = '#f44336';
+        }
+        if (event.error === 'not-allowed') {
+            showModernAlert('Greška', 'Dozvolite pristup mikrofonu!', '🎤');
+        }
     };
 
     recognition.onend = function() {
-        if (micIcon) micIcon.style.animation = "none";
         console.log('🎤 Glasovno prepoznavanje završeno.');
+        // Ne restartuj automatski - čekaj da korisnik klikne dugme
     };
 
-    recognition.start();
+    try {
+        recognition.start();
+        console.log('🎤 Slušam...');
+    } catch(e) {
+        console.error('❌ Greška pri startovanju:', e);
+        const statusEl = document.getElementById('voiceStatus');
+        if (statusEl) {
+            statusEl.textContent = '❌ Greška pri pokretanju mikrofona';
+            statusEl.style.color = '#f44336';
+        }
+    }
 }
 
-// Analiza izgovorenog teksta i usmeravanje na elemente app
-function processVoiceCommand(command) {
+// STARA PROCESNA FUNKCIJA (ZA FALLBACK)
+function processVoiceCommandOld(command) {
     const lang = currentLang;
     
     // 1. Komanda za Zalihe / Stanje
-    const inventoryKeywords = ['stanje', 'zalihe', 'inventory', 'stock', 'bestand', 'készlet', 'запаси', '库存', 'inventario', 'stock'];
+    const inventoryKeywords = ['stanje', 'zalihe', 'inventory', 'stock', 'bestand', 'készlet', 'запаси', '库存', 'inventario'];
     if (inventoryKeywords.some(keyword => command.includes(keyword))) {
         speakText(translations[lang]?.stanje || "Inventory");
         renderInventory();
         return;
     }
 
-    // 2. Komanda za Spisak potreba / Shopping list
-    const shoppingKeywords = ['spisak', 'kupovina', 'potrebe', 'shopping', 'einkaufsliste', 'bevásárlólista', 'список', '购物清单', 'lista de compras', 'liste de courses'];
+    // 2. Komanda za Spisak potreba
+    const shoppingKeywords = ['spisak', 'kupovina', 'potrebe', 'shopping', 'einkaufsliste', 'bevásárlólista', 'список', '购物清单'];
     if (shoppingKeywords.some(keyword => command.includes(keyword))) {
         speakText(translations[lang]?.spisak || "Shopping List");
         renderShoppingList();
         return;
     }
 
-    // 3. Komanda za Kategorije / Početak unosa
-    const categoryKeywords = ['kategorije', 'kategorija', 'categories', 'kategorien', 'kategóriák', 'категорії', 'категории', '类别', 'categorías', 'catégories'];
+    // 3. Komanda za Kategorije
+    const categoryKeywords = ['kategorije', 'kategorija', 'categories', 'kategorien'];
     if (categoryKeywords.some(keyword => command.includes(keyword))) {
         speakText("Categories");
         showScreen('mainScreen');
@@ -1779,7 +1829,7 @@ function processVoiceCommand(command) {
         return;
     }
 
-    // 4. Provera da li korisnik izgovara neku od glavnih kategorija direktno
+    // 4. Provera glavnih kategorija
     const catList = getMainCategories();
     let matchedCategory = null;
     catList.forEach(cat => {
@@ -1795,32 +1845,28 @@ function processVoiceCommand(command) {
         return;
     }
 
-    // Ako komanda nije prepoznata
     speakText("Molim vas ponovite komandu.");
     showModernAlert('Nepoznata komanda', `Nije prepoznato: "${command}"`, '❓');
-    setTimeout(() => {
-        startVoiceRecognition();
-    }, 2000);
 }
-// ============================================
-// AŽURIRANJE JEZIKA HEDERA I DUGMETA NAZAD
-// ============================================
-function updateHeaderLanguage() {
-    const lang = getCurrentLang();
-    
-    // 1. Naslov u hederu
-    const headerTitle = document.getElementById('headerTitle') || document.querySelector('.header-title');
-    if (headerTitle && typeof t === 'function') {
-        headerTitle.textContent = t('inventory_title') || headerTitle.textContent;
+
+// Funkcija za zaustavljanje prepoznavanja
+function stopVoiceRecognition() {
+    if (recognition) {
+        try {
+            recognition.stop();
+            recognition = null;
+            console.log('🛑 Recognition zaustavljen');
+        } catch(e) {}
     }
-    
-    // 2. Tekst na dugmetu "Nazad" u hederu
-    const backBtnText = document.getElementById('backBtnText') || document.querySelector('.back-btn span');
-    if (backBtnText && typeof t === 'function') {
-        backBtnText.textContent = t('back') || 'Nazad';
+    const statusEl = document.getElementById('voiceStatus');
+    if (statusEl) {
+        statusEl.textContent = '⏸️ Prepoznavanje zaustavljeno';
+        statusEl.style.color = '#aaa';
     }
 }
-// ============================================
-// KRAJ FAJLA
-// ============================================
-console.log('✅ Kraj fajla');
+
+// Izvezi funkcije globalno
+window.startVoiceRecognition = startVoiceRecognition;
+window.stopVoiceRecognition = stopVoiceRecognition;
+
+console.log('✅ Voice recognition dodatak učitan!');
