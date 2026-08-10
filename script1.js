@@ -1672,6 +1672,7 @@ function goBackFromVoice() {
 // ============================================
 
 let recognition = null;
+let isListening = false;
 
 // Mapiranje naših skraćenica jezika na standardne jezičke kodove za Web Speech API
 const speechLangMap = {
@@ -1867,6 +1868,8 @@ function stopVoiceRecognition() {
 
 // Izvezi funkcije globalno
 window.startVoiceRecognition = startVoiceRecognition;
-window.stopVoiceRecognition = stopVoiceRecognition;
 
 console.log('✅ Voice recognition dodatak učitan!');
+// Izvezi stopVoiceRecognition globalno
+window.stopVoiceRecognition = stopVoiceRecognition;
+console.log('✅ stopVoiceRecognition izvezen globalno');
