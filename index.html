@@ -3,553 +3,305 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🏠 Kućne zalihe</title>
-    
+    <title>Kućne zalihe</title>
     <style>
-        /* ===== RESET ===== */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-            background: #0a0a15;
-            color: #ffffff;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: Arial, sans-serif; 
+            background: #0a0a15; 
+            color: #fff; 
             min-height: 100vh;
-            overflow-x: hidden;
+            padding: 16px;
         }
+        .screen { display: none; min-height: 100vh; }
+        .screen.active { display: flex; flex-direction: column; }
         
-        /* ===== EKRANI ===== */
-        .screen {
-            display: none;
-            min-height: 100vh;
-            padding: 20px 16px 30px;
-            animation: fadeIn 0.3s ease;
-        }
-        .screen.active {
-            display: block;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        /* ===== LOGIN ===== */
         #loginScreen {
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            background: linear-gradient(145deg, #0a0a15, #1a1a2e);
-            padding: 30px;
         }
-        #loginScreen .logo {
-            font-size: 64px;
-            margin-bottom: 10px;
-        }
-        #loginScreen h1 {
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 30px;
-            background: linear-gradient(135deg, #4CAF50, #2196F3);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        #loginScreen input {
+        #loginScreen .login-box {
+            background: #1a1a2e;
+            padding: 40px;
+            border-radius: 20px;
             width: 100%;
-            max-width: 340px;
-            padding: 16px 20px;
-            font-size: 18px;
-            border: 2px solid #2a2a4a;
-            border-radius: 12px;
-            background: #141425;
-            color: #fff;
-            outline: none;
-            transition: border-color 0.3s;
-            margin-bottom: 15px;
+            max-width: 400px;
             text-align: center;
         }
-        #loginScreen input:focus {
-            border-color: #4CAF50;
+        #loginScreen h1 { font-size: 32px; margin-bottom: 10px; }
+        #loginScreen p { color: #888; margin-bottom: 20px; }
+        #loginScreen input {
+            width: 100%;
+            padding: 14px 18px;
+            font-size: 18px;
+            border: 2px solid #2a2a4a;
+            border-radius: 10px;
+            background: #12121f;
+            color: #fff;
+            margin-bottom: 15px;
         }
+        #loginScreen input:focus { border-color: #4CAF50; outline: none; }
         #loginScreen button {
             width: 100%;
-            max-width: 340px;
-            padding: 16px;
-            font-size: 20px;
-            font-weight: 600;
+            padding: 14px;
+            font-size: 18px;
             border: none;
-            border-radius: 12px;
-            background: linear-gradient(135deg, #4CAF50, #45a049);
+            border-radius: 10px;
+            background: #4CAF50;
             color: #fff;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        #loginScreen button:active {
-            transform: scale(0.97);
+            font-weight: 600;
         }
         
-        /* ===== GLAVNI EKRAN ===== */
-        #mainScreen {
-            background: #0a0a15;
-            padding: 0;
-        }
-        
-        /* Header */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 16px 20px;
-            background: #12121f;
-            border-bottom: 1px solid #1e1e3a;
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            padding: 12px 16px;
+            background: #1a1a2e;
+            border-radius: 12px;
+            margin-bottom: 16px;
         }
-        .header h1 {
-            font-size: 20px;
-            font-weight: 600;
-            background: linear-gradient(135deg, #4CAF50, #2196F3);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+        .header h1 { font-size: 20px; }
         .header button {
             padding: 8px 16px;
             border: none;
             border-radius: 8px;
             background: #e74c3c;
             color: #fff;
-            font-size: 14px;
             cursor: pointer;
-            transition: opacity 0.2s;
-        }
-        .header button:active {
-            opacity: 0.7;
         }
         
-        /* Tabovi */
         .tabs {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr 1fr;
-            gap: 4px;
-            padding: 10px 12px;
-            background: #0f0f1e;
-            border-bottom: 1px solid #1a1a32;
-            position: sticky;
-            top: 60px;
-            z-index: 99;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 16px;
         }
         .tabs button {
-            padding: 10px 6px;
+            padding: 12px 8px;
             border: none;
             border-radius: 10px;
-            background: transparent;
-            color: #666;
-            font-size: 13px;
-            font-weight: 500;
+            background: #1a1a2e;
+            color: #888;
             cursor: pointer;
-            transition: all 0.3s;
-            white-space: nowrap;
-        }
-        .tabs button.active {
-            background: #1a1a3a;
-            color: #4CAF50;
-        }
-        .tabs button:active {
-            transform: scale(0.95);
-        }
-        
-        /* Tab sadržaj */
-        .tab-content {
-            display: none;
-            padding: 16px 16px 30px;
-            animation: fadeIn 0.3s ease;
-        }
-        .tab-content.active {
-            display: block;
-        }
-        
-        /* ===== FORMULARI ===== */
-        .form-group {
-            margin: 12px 0;
-        }
-        .form-group label {
-            display: block;
             font-size: 14px;
             font-weight: 500;
-            color: #aaa;
-            margin-bottom: 6px;
         }
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
+        .tabs button.active {
+            background: #4CAF50;
+            color: #fff;
         }
         
-        input, select, textarea {
+        .tab-content { display: none; padding: 4px 0; }
+        .tab-content.active { display: block; }
+        
+        .form-group { margin: 12px 0; }
+        .form-group label { display: block; font-size: 14px; color: #aaa; margin-bottom: 4px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        
+        input, select {
             width: 100%;
-            padding: 14px 16px;
+            padding: 12px 14px;
             border: 2px solid #1e1e3a;
-            border-radius: 12px;
+            border-radius: 10px;
             background: #12121f;
             color: #fff;
             font-size: 16px;
-            outline: none;
-            transition: border-color 0.3s;
         }
-        input:focus, select:focus, textarea:focus {
-            border-color: #4CAF50;
-        }
-        select option {
-            background: #12121f;
-            color: #fff;
-        }
+        input:focus, select:focus { border-color: #4CAF50; outline: none; }
         
-        /* ===== DUGMAD ===== */
         .btn {
-            padding: 14px 20px;
+            padding: 14px;
             border: none;
-            border-radius: 12px;
+            border-radius: 10px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
-            text-align: center;
             width: 100%;
+            transition: opacity 0.2s;
         }
-        .btn:active {
-            transform: scale(0.97);
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, #4CAF50, #45a049);
-            color: #fff;
-        }
-        .btn-secondary {
-            background: linear-gradient(135deg, #2196F3, #1976D2);
-            color: #fff;
-        }
-        .btn-danger {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-            color: #fff;
-        }
-        .btn-warning {
-            background: linear-gradient(135deg, #ff9800, #f57c00);
-            color: #fff;
-        }
-        .btn-purple {
-            background: linear-gradient(135deg, #9C27B0, #7B1FA2);
-            color: #fff;
-        }
-        .btn-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin: 10px 0;
-        }
-        .btn-row-3 {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 8px;
-            margin: 10px 0;
-        }
-        .btn-full {
-            grid-column: 1 / -1;
-        }
+        .btn:active { opacity: 0.7; }
+        .btn-primary { background: #4CAF50; color: #fff; }
+        .btn-secondary { background: #2196F3; color: #fff; }
+        .btn-danger { background: #e74c3c; color: #fff; }
         
-        /* ===== STATUS ===== */
-        .status-box {
+        .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0; }
+        
+        #voiceStatus {
             padding: 14px;
-            border-radius: 12px;
-            background: #12121f;
-            border: 1px solid #1e1e3a;
+            border-radius: 10px;
+            background: #1a1a2e;
+            border: 1px solid #2a2a4a;
             margin: 12px 0;
             text-align: center;
-            font-size: 15px;
+            color: #FFD700;
             min-height: 50px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
-        .status-box.success {
-            border-color: #4CAF50;
-            color: #4CAF50;
-        }
-        .status-box.warning {
-            border-color: #ff9800;
-            color: #ff9800;
-        }
-        .status-box.error {
-            border-color: #e74c3c;
-            color: #e74c3c;
-        }
-        .status-box.info {
-            border-color: #2196F3;
-            color: #2196F3;
-        }
         
-        /* ===== TABELA ZALIHA ===== */
-        #inventoryTable {
-            margin-top: 12px;
-        }
+        #inventoryTable { margin-top: 10px; }
         .table-row {
             display: grid;
-            grid-template-columns: 50px 1fr 60px 60px 70px 70px;
+            grid-template-columns: 1fr 2fr 1fr 1fr 1fr;
             gap: 4px;
             padding: 10px 12px;
-            background: #12121f;
-            border-radius: 10px;
-            margin-bottom: 6px;
-            align-items: center;
+            background: #1a1a2e;
+            border-radius: 8px;
+            margin-bottom: 4px;
             font-size: 13px;
-            border: 1px solid #1a1a32;
+            align-items: center;
         }
-        .table-row.header-row {
-            background: #1a1a3a;
+        .header-row {
+            background: #2a2a4a;
             font-weight: 600;
             color: #888;
-            font-size: 11px;
-            text-transform: uppercase;
-            border: none;
         }
-        .cell {
-            padding: 4px;
-            word-break: break-word;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .cell:first-child {
-            text-align: center;
-        }
-        .cell-actions {
-            display: flex;
-            gap: 4px;
-        }
-        .cell-actions button {
-            padding: 4px 8px;
+        .cell { padding: 4px; word-break: break-word; }
+        .cell button {
+            padding: 4px 10px;
             border: none;
             border-radius: 6px;
-            font-size: 12px;
-            cursor: pointer;
-            background: #2a2a4a;
-            color: #fff;
-        }
-        .cell-actions button.delete {
             background: #e74c3c;
+            color: #fff;
+            cursor: pointer;
+            font-size: 12px;
         }
         
         @media (max-width: 600px) {
-            .table-row {
-                grid-template-columns: 30px 1fr 40px 40px 50px 50px;
-                font-size: 11px;
-                padding: 8px 8px;
-            }
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-            .btn-row {
-                grid-template-columns: 1fr;
-            }
-            .btn-row-3 {
-                grid-template-columns: 1fr 1fr;
-            }
-            .tabs {
-                grid-template-columns: 1fr 1fr 1fr 1fr;
-                font-size: 11px;
-                padding: 6px 4px;
-            }
-            .tabs button {
-                font-size: 11px;
-                padding: 8px 4px;
-            }
-        }
-        
-        /* ===== SKROL ===== */
-        ::-webkit-scrollbar {
-            width: 4px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #0a0a15;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #2a2a4a;
-            border-radius: 4px;
-        }
-        
-        /* ===== VOICE STATUS NA EKRANU ===== */
-        #voiceStatus {
-            padding: 14px;
-            border-radius: 12px;
-            background: #12121f;
-            border: 1px solid #1e1e3a;
-            margin: 12px 0;
-            text-align: center;
-            font-size: 15px;
-            min-height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #FFD700;
+            body { padding: 10px; }
+            .form-row { grid-template-columns: 1fr; }
+            .btn-row { grid-template-columns: 1fr; }
+            .tabs { grid-template-columns: 1fr 1fr 1fr; }
+            .tabs button { font-size: 12px; padding: 10px 4px; }
+            .table-row { grid-template-columns: 1fr 2fr 1fr 1fr; font-size: 11px; }
+            #loginScreen .login-box { padding: 20px; }
         }
     </style>
 </head>
 <body>
 
-    <!-- ============================================ -->
-    <!-- LOGIN EKRAN -->
-    <!-- ============================================ -->
-    <div id="loginScreen" class="screen active">
-        <div class="logo">🏠</div>
-        <h1>Kućne zalihe</h1>
-        <input type="text" id="phoneInput" placeholder="Unesite broj telefona" value="0612702101">
+<!-- LOGIN EKRAN -->
+<div id="loginScreen" class="screen active">
+    <div class="login-box">
+        <h1>🏠 Kućne zalihe</h1>
+        <p>Unesite broj telefona za prijavu</p>
+        <input type="text" id="phoneInput" placeholder="Broj telefona" value="0612702101">
         <button onclick="triggerLogin()">🔐 Prijava</button>
     </div>
+</div>
 
-    <!-- ============================================ -->
-    <!-- GLAVNI EKRAN -->
-    <!-- ============================================ -->
-    <div id="mainScreen" class="screen">
+<!-- GLAVNI EKRAN -->
+<div id="mainScreen" class="screen">
+    <div class="header">
+        <h1>🏠 Kućne zalihe</h1>
+        <button onclick="logout()">🚪 Izlaz</button>
+    </div>
+    
+    <div class="tabs">
+        <button class="tab active" data-tab="dataEntry">📝 Unos</button>
+        <button class="tab" data-tab="inventory">📦 Zalihe</button>
+        <button class="tab" data-tab="voice">🎤 Glas</button>
+    </div>
+    
+    <!-- TAB: UNOS -->
+    <div id="dataEntry" class="tab-content active">
+        <h2 style="margin-bottom:16px; font-size:20px;">📝 Unos proizvoda</h2>
         
-        <!-- HEADER -->
-        <div class="header">
-            <h1>🏠 Kućne zalihe</h1>
-            <button onclick="logout()">🚪 Izlaz</button>
+        <div id="voiceStatus">🎤 Reci "UNOS" za glasovni unos</div>
+        
+        <div class="form-group">
+            <label>Naziv proizvoda *</label>
+            <input id="productInput" type="text" placeholder="npr. Gril pile">
         </div>
         
-        <!-- TABOVI -->
-        <div class="tabs">
-            <button class="tab active" data-tab="dataEntry">📝 Unos</button>
-            <button class="tab" data-tab="inventory">📦 Zalihe</button>
-            <button class="tab" data-tab="shopping">🛒 Spisak</button>
-            <button class="tab" data-tab="voice">🎤 Glas</button>
-        </div>
-        
-        <!-- ========================================== -->
-        <!-- TAB 1: UNOS PODATAKA -->
-        <!-- ========================================== -->
-        <div id="dataEntry" class="tab-content active">
-            <h2 style="margin-bottom:16px; font-size:20px;">📝 Unos proizvoda</h2>
-            
-            <div id="voiceStatus" class="status-box info">
-                🎤 Reci "UNOS" za glasovni unos, ili "Gril pile 2 kile 7 meseci zamrzivač"
-            </div>
-            
+        <div class="form-row">
             <div class="form-group">
-                <label>Naziv proizvoda *</label>
-                <input id="productInput" type="text" placeholder="npr. Gril pile, Mleko, Jaja...">
+                <label>Količina</label>
+                <input id="quantityInput" type="number" value="1" step="0.1">
             </div>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Količina</label>
-                    <input id="quantityInput" type="number" value="1" step="0.1">
-                </div>
-                <div class="form-group">
-                    <label>Jedinica</label>
-                    <select id="unitSelect">
-                        <option value="kg">kg</option>
-                        <option value="g">g</option>
-                        <option value="kom">kom</option>
-                        <option value="l">l</option>
-                        <option value="ml">ml</option>
-                    </select>
-                </div>
-            </div>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Pakovanje</label>
-                    <input id="pieceInput" type="text" placeholder="npr. 1 komad, 6 pakovanje">
-                </div>
-                <div class="form-group">
-                    <label>Rok (meseci)</label>
-                    <input id="shelfLifeInput" type="number" value="12">
-                </div>
-            </div>
-            
             <div class="form-group">
-                <label>Skladište</label>
-                <select id="storageSelect">
-                    <option value="Ostava">Ostava</option>
-                    <option value="Frižider">Frižider</option>
-                    <option value="Zamrzivač 1">Zamrzivač 1</option>
-                    <option value="Zamrzivač 2">Zamrzivač 2</option>
-                    <option value="Zamrzivač 3">Zamrzivač 3</option>
+                <label>Jedinica</label>
+                <select id="unitSelect">
+                    <option value="kg">kg</option>
+                    <option value="g">g</option>
+                    <option value="kom">kom</option>
+                    <option value="l">l</option>
+                    <option value="ml">ml</option>
                 </select>
             </div>
-            
+        </div>
+        
+        <div class="form-row">
             <div class="form-group">
-                <label>Opis (dodatno)</label>
-                <input id="descriptionInput" type="text" placeholder="Dodatni opis...">
+                <label>Pakovanje</label>
+                <input id="pieceInput" type="text" placeholder="npr. 1 komad">
             </div>
-            
-            <div class="btn-row">
-                <button class="btn btn-primary" onclick="saveProduct()">💾 Sačuvaj</button>
-                <button class="btn btn-secondary" onclick="toggleListening()">🎤 Glasovni unos</button>
-            </div>
-            <div class="btn-row">
-                <button class="btn btn-warning" onclick="window.direktanUnos('Gril pile 2 kile 7 meseci zamrzivač')">🍗 Test: Gril pile</button>
-                <button class="btn btn-purple" onclick="window.direktanUnos('Mleko 1 litar frižider')">🥛 Test: Mleko</button>
+            <div class="form-group">
+                <label>Rok (meseci)</label>
+                <input id="shelfLifeInput" type="number" value="12">
             </div>
         </div>
         
-        <!-- ========================================== -->
-        <!-- TAB 2: ZALIHE -->
-        <!-- ========================================== -->
-        <div id="inventory" class="tab-content">
-            <h2 style="margin-bottom:16px; font-size:20px;">📦 Zalihe</h2>
-            <div id="inventoryTable"></div>
+        <div class="form-group">
+            <label>Skladište</label>
+            <select id="storageSelect">
+                <option value="Ostava">Ostava</option>
+                <option value="Frižider">Frižider</option>
+                <option value="Zamrzivač 1">Zamrzivač 1</option>
+                <option value="Zamrzivač 2">Zamrzivač 2</option>
+                <option value="Zamrzivač 3">Zamrzivač 3</option>
+            </select>
         </div>
         
-        <!-- ========================================== -->
-        <!-- TAB 3: SPISAK ZA KUPOVINU -->
-        <!-- ========================================== -->
-        <div id="shopping" class="tab-content">
-            <h2 style="margin-bottom:16px; font-size:20px;">🛒 Spisak za kupovinu</h2>
-            <div id="shoppingList"></div>
+        <div class="form-group">
+            <label>Opis</label>
+            <input id="descriptionInput" type="text" placeholder="Dodatni opis">
         </div>
         
-        <!-- ========================================== -->
-        <!-- TAB 4: GLASOVNA KONTROLA -->
-        <!-- ========================================== -->
-        <div id="voice" class="tab-content">
-            <h2 style="margin-bottom:16px; font-size:20px;">🎤 Glasovna kontrola</h2>
-            
-            <div id="voiceStatus2" class="status-box info">
-                🎤 Reci "UNOS" za otvaranje unosa, "ZALIHE" za pregled
-            </div>
-            
-            <div class="btn-row-3">
-                <button class="btn btn-primary" onclick="startSimpleListening()">▶️ Počni</button>
-                <button class="btn btn-warning" onclick="toggleListening()">🔄 Prebaci</button>
-                <button class="btn btn-danger" onclick="stopSimpleListening()">⏹ Stop</button>
-            </div>
-            
-            <div style="margin-top:20px; padding:16px; background:#12121f; border-radius:12px; border:1px solid #1a1a32;">
-                <h3 style="margin-bottom:10px; font-size:16px;">📋 Komande</h3>
-                <div style="font-size:14px; color:#aaa; line-height:2;">
-                    <div>🗣️ <b style="color:#4CAF50;">"UNOS"</b> → otvori tab za unos</div>
-                    <div>🗣️ <b style="color:#4CAF50;">"Gril pile 2 kile 7 meseci zamrzivač"</b> → popuni polja</div>
-                    <div>🗣️ <b style="color:#4CAF50;">"PLUS"</b> → sačuvaj proizvod</div>
-                    <div>🗣️ <b style="color:#4CAF50;">"OK"</b> → završi unos</div>
-                    <div>🗣️ <b style="color:#4CAF50;">"ZALIHE"</b> → pregled zaliha</div>
-                    <div>🗣️ <b style="color:#4CAF50;">"SPISAK"</b> → spisak za kupovinu</div>
-                </div>
-            </div>
+        <div class="btn-row">
+            <button class="btn btn-primary" onclick="saveProduct()">💾 Sačuvaj</button>
+            <button class="btn btn-secondary" onclick="startSimpleListening()">🎤 Glasovni unos</button>
         </div>
-        
     </div>
+    
+    <!-- TAB: ZALIHE -->
+    <div id="inventory" class="tab-content">
+        <h2 style="margin-bottom:16px; font-size:20px;">📦 Zalihe</h2>
+        <div id="inventoryTable"></div>
+    </div>
+    
+    <!-- TAB: GLAS -->
+    <div id="voice" class="tab-content">
+        <h2 style="margin-bottom:16px; font-size:20px;">🎤 Glasovna kontrola</h2>
+        
+        <div id="voiceStatus2" style="padding:14px; border-radius:10px; background:#1a1a2e; border:1px solid #2a2a4a; margin:12px 0; text-align:center; color:#FFD700;">
+            🎤 Reci "UNOS" za unos, "ZALIHE" za pregled
+        </div>
+        
+        <div class="btn-row">
+            <button class="btn btn-primary" onclick="startSimpleListening()">▶️ Počni slušanje</button>
+            <button class="btn btn-danger" onclick="stopSimpleListening()">⏹ Zaustavi</button>
+        </div>
+        
+        <div style="margin-top:20px; padding:16px; background:#1a1a2e; border-radius:10px; border:1px solid #2a2a4a;">
+            <h3 style="margin-bottom:10px; font-size:16px;">📋 Komande:</h3>
+            <div style="font-size:14px; color:#aaa; line-height:2;">
+                <div>🗣️ <b style="color:#4CAF50;">"UNOS"</b> → otvori unos</div>
+                <div>🗣️ <b style="color:#4CAF50;">"Gril pile 2 kile 7 meseci zamrzivač"</b> → popuni polja</div>
+                <div>🗣️ <b style="color:#4CAF50;">"PLUS"</b> → sačuvaj</div>
+                <div>🗣️ <b style="color:#4CAF50;">"OK"</b> → završi</div>
+                <div>🗣️ <b style="color:#4CAF50;">"ZALIHE"</b> → pregled</div>
+            </div>
+        </div>
+    </div>
+</div>
 
-    <!-- ============================================ -->
-    <!-- SKRIPTE -->
-    <!-- ============================================ -->
-    <script src="script1.js"></script>
-    <script src="voiceCommands.js"></script>
+<script src="script1.js"></script>
+<script src="voiceCommands.js"></script>
 </body>
 </html>
