@@ -210,13 +210,11 @@ function voiceCommand(command) {
         }
     }
 
-    // ===== DODAJ OVO: AUTOMATSKI UNOS NA ZALIHAMA =====
+    // ===== AUTOMATSKI UNOS NA ZALIHAMA =====
     const currentState = window.currentScreenState || '';
     const isOnInventory = currentState === 'inventory';
     
-    // Ako smo na zalihama, automatski unos (bez "dodaj")
     if (isOnInventory) {
-        // Proveri da li komanda sadrži broj i jedinicu (izgleda kao unos)
         const hasQuantity = /\d+\s*(kg|g|kom|l|ml|pak|kutija|kile|kilograma)/i.test(command);
         const hasPlus = command.toLowerCase().includes('plus');
         
@@ -228,22 +226,29 @@ function voiceCommand(command) {
             }
             const result = voiceAddProduct(cleanCommand);
             cleanup();
-            // Ne sakrivaj voice menu, ostani na zalihama
             return result;
         }
     }
 
     // ===== PROVERI DA LI JE KOMANDA ZA PRELAZAK =====
+    let handled = false;
+
     // ZALIHE (Inventory)
     const invKeywords = ['zalihe', 'zaliha', 'stanje', 'inventory', 'inv', 'stock', 'keszlet', 'készlet', 'bestand', 'запасы', '库存', 'inventario'];
     if (invKeywords.some(k => cleanText.includes(k))) {
         console.log('📦 Prelaz na zalihe');
+        handled = true;
         cleanup();
         window.currentScreenState = 'inventory';
         forceHideVoiceMenu();
         setTimeout(function() {
             if (typeof renderInventory === 'function') renderInventory();
         }, 100);
+        const status = document.getElementById('voiceStatus');
+        if (status) {
+            status.innerText = '✅ Prelaz na zalihe';
+            status.style.color = '#4CAF50';
+        }
         return true;
     }
 
@@ -251,12 +256,37 @@ function voiceCommand(command) {
     const shopKeywords = ['spisak', 'lista', 'shopping', 'shop', 'list', 'bevásárlólista', 'einkaufsliste', 'список', '购物清单'];
     if (shopKeywords.some(k => cleanText.includes(k))) {
         console.log('🛒 Prelaz na spisak');
+        handled = true;
         cleanup();
         window.currentScreenState = 'shopping';
         forceHideVoiceMenu();
         setTimeout(function() {
             if (typeof renderShoppingList === 'function') renderShoppingList();
         }, 100);
+        const status = document.getElementById('voiceStatus');
+        if (status) {
+            status.innerText = '✅ Prelaz na spisak';
+            status.style.color = '#4CAF50';
+        }
+        return true;
+    }
+
+    // KATEGORIJE (otvara kategorije za unos)
+    const categoryKeywords = ['kategorije', 'kategorija', 'categories', 'kategorien', 'unos', 'podaci', 'data'];
+    if (categoryKeywords.some(k => cleanText.includes(k))) {
+        console.log('📂 Otvaranje kategorija');
+        handled = true;
+        cleanup();
+        window.currentScreenState = 'categories';
+        forceHideVoiceMenu();
+        setTimeout(function() {
+            if (typeof renderCategories === 'function') renderCategories();
+        }, 100);
+        const status = document.getElementById('voiceStatus');
+        if (status) {
+            status.innerText = '✅ Otvaranje kategorija';
+            status.style.color = '#4CAF50';
+        }
         return true;
     }
 
@@ -285,6 +315,7 @@ function voiceCommand(command) {
     
     if (isAddCommand && cleanTextForAdd.trim().length > 2) {
         console.log('📝 Prepoznat unos:', cleanTextForAdd.trim());
+        handled = true;
         const result = voiceAddProduct(cleanTextForAdd.trim());
         cleanup();
         forceHideVoiceMenu();
@@ -295,6 +326,7 @@ function voiceCommand(command) {
     const exitKeywords = ['izlaz', 'zatvori', 'exit', 'quit', 'close', 'kilépés', 'beenden', 'выход', '退出', 'salir'];
     if (exitKeywords.some(k => cleanText.includes(k))) {
         console.log('🚪 Izlaz iz aplikacije');
+        handled = true;
         cleanup();
         forceHideVoiceMenu();
         document.querySelectorAll('.screen').forEach(s => {
@@ -310,28 +342,21 @@ function voiceCommand(command) {
         return true;
     }
 
-    // KATEGORIJE (otvara kategorije za unos)
-    const categoryKeywords = ['kategorije', 'kategorija', 'categories', 'kategorien'];
-    if (categoryKeywords.some(k => cleanText.includes(k))) {
-        console.log('📂 Otvaranje kategorija');
-        cleanup();
-        window.currentScreenState = 'categories';
-        forceHideVoiceMenu();
-        setTimeout(function() {
-            if (typeof renderCategories === 'function') renderCategories();
-        }, 100);
-        return true;
-    }
-
-    // Ako komanda nije prepoznata
-    const status = document.getElementById('voiceStatus');
-    if (status) {
-        status.innerText = `❌ Nije prepoznato: "${command}"`;
-        status.style.color = '#f44336';
+    // ===== Ako komanda nije prepoznata, ALI ne prikazuj grešku ako je već obrađena =====
+    if (!handled) {
+        const status = document.getElementById('voiceStatus');
+        if (status) {
+            status.innerText = `❌ Nije prepoznato: "${command}"`;
+            status.style.color = '#f44336';
+        }
+        // Pokaži modern alert SAMO ako nije otvorio ekran
+        if (typeof showModernAlert === 'function') {
+            showModernAlert('Nepoznata komanda', `Nije prepoznato: "${command}"`, '❓');
+        }
     }
     
     cleanup();
-    return false;
+    return handled;
 }
 
     // 1. IZLAZ / EXIT
