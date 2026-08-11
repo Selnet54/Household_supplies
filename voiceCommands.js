@@ -21,48 +21,82 @@ function cleanCmd(cmd) {
 // ============================================
 
 // ===== PARSIRANJE GLASOVNOG UNOSA =====
+// ===== PARSIRANJE GLASOVNOG UNOSA =====
 function parseVoiceInput(text) {
     console.log('🔍 Parsiranje glasovnog unosa:', text);
     
     const result = {
         product: '',
-        piece: '1',
+        piece: '',
         quantity: 1,
-        unit: 'kom',
+        unit: 'kg',
         shelfLife: 12
     };
     
-    // 1. Pronađi količinu (broj + jedinica)
-    const unitPattern = /(\d+\.?\d*)\s*(kg|g|kom|l|ml|pak|kutija)/i;
-    const quantityMatch = text.match(unitPattern);
-    if (quantityMatch) {
-        result.quantity = parseFloat(quantityMatch[1]);
-        result.unit = quantityMatch[2].toLowerCase();
-        text = text.replace(quantityMatch[0], '');
-    }
+    let cleanText = text;
     
-    // 2. Pronađi rok trajanja (broj + meseci/mes)
-    const shelfPattern = /(\d+)\s*(meseci|mes|mesec|m|months|month)/i;
-    const shelfMatch = text.match(shelfPattern);
-    if (shelfMatch) {
-        result.shelfLife = parseInt(shelfMatch[1]);
-        text = text.replace(shelfMatch[0], '');
-    }
-    
-    // 3. Pronađi komad (broj + komad/kom)
+    // 1. Pronađi KOMAD (broj + komad/kom)
+    // Primer: "1 komad", "2 kom", "3 pieces"
     const piecePattern = /(\d+)\s*(komad|kom|pcs|piece)/i;
-    const pieceMatch = text.match(piecePattern);
+    const pieceMatch = cleanText.match(piecePattern);
     if (pieceMatch) {
         result.piece = pieceMatch[0].trim();
-        text = text.replace(pieceMatch[0], '');
+        cleanText = cleanText.replace(pieceMatch[0], '');
     }
     
-    // 4. Očisti tekst i sačuvaj kao naziv proizvoda
-    result.product = text.replace(/\s+/g, ' ').trim();
+    // 2. Pronađi KOLIČINU (broj + jedinica)
+    // Podržava: kg, g, kom, l, ml, pak, kutija, kile, kilograma
+    const unitPattern = /(\d+\.?\d*)\s*(kg|g|kom|l|ml|pak|kutija|kile|kilograma|kilogram)/i;
+    const quantityMatch = cleanText.match(unitPattern);
+    if (quantityMatch) {
+        let unit = quantityMatch[2].toLowerCase();
+        // Normalizuj jedinicu
+        if (unit === 'kile' || unit === 'kilograma' || unit === 'kilogram') {
+            unit = 'kg';
+        }
+        result.quantity = parseFloat(quantityMatch[1]);
+        result.unit = unit;
+        cleanText = cleanText.replace(quantityMatch[0], '');
+    }
+    
+    // 3. Pronađi ROK TRAJANJA (broj + meseci/mes)
+    const shelfPattern = /(\d+)\s*(meseci|mes|mesec|m|months|month)/i;
+    const shelfMatch = cleanText.match(shelfPattern);
+    if (shelfMatch) {
+        result.shelfLife = parseInt(shelfMatch[1]);
+        cleanText = cleanText.replace(shelfMatch[0], '');
+    }
+    
+    // 4. Pronađi još jedan komad (ako nije pronađen u prvom koraku)
+    if (!result.piece) {
+        const piecePattern2 = /(\d+)\s*(komad|kom|pcs|piece)/i;
+        const pieceMatch2 = cleanText.match(piecePattern2);
+        if (pieceMatch2) {
+            result.piece = pieceMatch2[0].trim();
+            cleanText = cleanText.replace(pieceMatch2[0], '');
+        }
+    }
+    
+    // 5. Očisti tekst i sačuvaj kao naziv proizvoda
+    // Ukloni višak razmaka i zareze
+    result.product = cleanText
+        .replace(/\s*,\s*/g, ' ')  // zameni zareze sa razmakom
+        .replace(/\s+/g, ' ')       // ukloni višestruke razmake
+        .trim();
     
     // Ako nema količine, ostaje 1
     if (result.quantity === 0) {
         result.quantity = 1;
+    }
+    
+    // Ako nema komada, podrazumevani
+    if (!result.piece) {
+        result.piece = '1';
+    }
+    
+    // Ako nema jedinice, podrazumevana
+    if (!result.unit) {
+        result.unit = 'kom';
     }
     
     console.log('✅ Parsirani podaci:', result);
