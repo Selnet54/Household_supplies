@@ -373,23 +373,20 @@ if (clean.includes('unos') || clean.includes('novi') || clean.includes('data') |
         return;
     }
     
-    // AKO SMO NA UNOSU - PARSIRAJ PROIZVOD
-    if (currentState === 'dataEntry') {
-        // Proveri da li ima broj (količinu)
-        const hasNumber = /\d+/.test(text);
-        if (hasNumber && text.length > 3) {
-            console.log('📝 Unos proizvoda:', text);
-            const parsed = simpleParse(text);
-            fillFields(parsed);
-            
-            const status = document.getElementById('voiceStatus');
-            if (status) {
-                status.innerText = `📦 ${parsed.product} (${parsed.quantity} ${parsed.unit})`;
-                status.style.color = '#4CAF50';
-            }
-            return;
-        }
+    // AKO SMO NA UNOSU - DOMAĆICA UNOS
+if (currentState === 'dataEntry') {
+    // Ako je rečeno "plus" ili "ok" - preskoči
+    if (clean === 'plus' || clean === 'ok' || clean === 'okej') {
+        return;
     }
+    
+    // Sve ostalo što kaže - pokušaj da parsiraš kao proizvod
+    if (text.length > 2) {
+        console.log('🏠 Domaćica unos:', text);
+        domacicaUnos(text);
+        return;
+    }
+}
     
     // Ako nije prepoznato
     console.log('❌ Nije prepoznato:', text);
@@ -490,4 +487,176 @@ function forceOpenEntry() {
 window.forceOpenEntry = forceOpenEntry;
 
 console.log('💡 Upišite forceOpenEntry() u konzolu za ručno otvaranje unosa');
+// ============================================
+// DOMAĆICA SA CEGERIMA - JEDNOSTAVAN UNOS
+// ============================================
+
+// Ovo se poziva kad god nešto kažete
+function domacicaUnos(text) {
+    console.log('🏠 Domaćica kaže:', text);
+    
+    // Prvo nađi sva polja na postojećem ekranu
+    const polja = {
+        naziv: document.getElementById('productInput') || document.querySelector('[name="productName"]') || document.querySelector('[placeholder*="naziv"]') || document.querySelector('[placeholder*="Name"]'),
+        kolicina: document.getElementById('quantityInput') || document.querySelector('[name="quantity"]'),
+        jedinica: document.getElementById('unitSelect') || document.querySelector('[name="unit"]'),
+        rok: document.getElementById('shelfLifeInput') || document.querySelector('[name="shelfLife"]'),
+        skladiste: document.getElementById('storageSelect') || document.querySelector('[name="storage"]'),
+        pakovanje: document.getElementById('pieceInput') || document.querySelector('[name="piece"]')
+    };
+    
+    console.log('🔍 Pronađena polja:', polja);
+    
+    // Ako nema polja, otvori ekran za unos
+    if (!polja.naziv) {
+        console.log('📱 Otvaram ekran za unos...');
+        // Pokušaj da otvoriš tab za unos
+        const tab = document.querySelector('[data-tab="dataEntry"]') || 
+                   document.querySelector('.tab[data-tab="dataEntry"]') ||
+                   document.querySelector('button:contains("Unos")');
+        if (tab) tab.click();
+        
+        // Pokušaj da prikažeš ekran
+        const screen = document.getElementById('dataEntryScreen') || 
+                      document.getElementById('addProductScreen');
+        if (screen) {
+            screen.style.display = 'block';
+            screen.classList.add('active');
+        }
+        
+        setTimeout(() => {
+            domacicaUnos(text);
+        }, 500);
+        return;
+    }
+    
+    // Parsiraj ono što je rekla
+    const parsed = domacicaParser(text);
+    
+    // Popuni polja
+    if (polja.naziv && parsed.naziv) {
+        polja.naziv.value = parsed.naziv;
+        polja.naziv.dispatchEvent(new Event('input', { bubbles: true }));
+        console.log('✅ Naziv:', parsed.naziv);
+    }
+    
+    if (polja.kolicina && parsed.kolicina) {
+        polja.kolicina.value = parsed.kolicina;
+        console.log('✅ Količina:', parsed.kolicina);
+    }
+    
+    if (polja.jedinica && parsed.jedinica) {
+        for (let opt of polja.jedinica.options) {
+            if (opt.value === parsed.jedinica || opt.text.toLowerCase().includes(parsed.jedinica)) {
+                polja.jedinica.value = opt.value;
+                break;
+            }
+        }
+        console.log('✅ Jedinica:', parsed.jedinica);
+    }
+    
+    if (polja.rok && parsed.rok) {
+        polja.rok.value = parsed.rok;
+        polja.rok.dispatchEvent(new Event('input', { bubbles: true }));
+        console.log('✅ Rok:', parsed.rok);
+    }
+    
+    if (polja.skladiste && parsed.skladiste) {
+        for (let opt of polja.skladiste.options) {
+            if (opt.value.includes(parsed.skladiste) || opt.text.includes(parsed.skladiste)) {
+                polja.skladiste.value = opt.value;
+                break;
+            }
+        }
+        console.log('✅ Skladište:', parsed.skladiste);
+    }
+    
+    if (polja.pakovanje && parsed.pakovanje) {
+        polja.pakovanje.value = parsed.pakovanje;
+        console.log('✅ Pakovanje:', parsed.pakovanje);
+    }
+    
+    // Ažuriraj datum
+    if (typeof updateExpiryDate === 'function') {
+        updateExpiryDate();
+    }
+    
+    // Pokaži status
+    const status = document.getElementById('voiceStatus') || document.querySelector('.status');
+    if (status) {
+        status.innerText = `✅ ${parsed.naziv} (${parsed.kolicina} ${parsed.jedinica})`;
+        status.style.color = '#4CAF50';
+    }
+    
+    console.log('🎉 Popunjeno! Reci "plus" za čuvanje');
+}
+
+// Parser za domaćicu
+function domacicaParser(text) {
+    console.log('🧠 Parsiram:', text);
+    
+    let result = {
+        naziv: text,
+        kolicina: 1,
+        jedinica: 'kom',
+        rok: 12,
+        skladiste: 'Ostava',
+        pakovanje: '1'
+    };
+    
+    let clean = text.toLowerCase();
+    
+    // Skladište
+    if (clean.includes('zamrzivač') || clean.includes('zamrzivac') || clean.includes('freezer')) {
+        result.skladiste = 'Zamrzivač 1';
+    } else if (clean.includes('frižider') || clean.includes('frizider')) {
+        result.skladiste = 'Frižider';
+    } else if (clean.includes('ostava')) {
+        result.skladiste = 'Ostava';
+    }
+    
+    // Količina i jedinica
+    const kgMatch = text.match(/(\d+)\s*(kg|kile|kilograma)/i);
+    if (kgMatch) {
+        result.kolicina = parseInt(kgMatch[1]);
+        result.jedinica = 'kg';
+    }
+    
+    const komMatch = text.match(/(\d+)\s*(kom|komad|pcs)/i);
+    if (komMatch && !kgMatch) {
+        result.kolicina = parseInt(komMatch[1]);
+        result.jedinica = 'kom';
+        result.pakovanje = komMatch[1] + ' komad';
+    }
+    
+    // Rok
+    const mesMatch = text.match(/(\d+)\s*(meseci|mesec|mes|m|month)/i);
+    if (mesMatch) {
+        result.rok = parseInt(mesMatch[1]);
+    }
+    
+    // Ime proizvoda - ukloni sve brojeve i jedinice
+    let ime = text;
+    ime = ime.replace(/\d+\s*(kg|kile|kilograma|kom|komad|pcs|meseci|mesec|mes|m)/gi, '');
+    ime = ime.replace(/zamrzivač|zamrzivac|freezer|frižider|frizider|ostava|pantry/gi, '');
+    ime = ime.replace(/[0-9]/g, '');
+    ime = ime.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, '');
+    ime = ime.trim();
+    
+    // Popravi uobičajene greške
+    ime = ime.replace(/gripile/gi, 'Gril pile');
+    ime = ime.replace(/pilece/gi, 'Pileće');
+    ime = ime.replace(/meso/gi, 'Meso');
+    
+    if (ime) {
+        result.naziv = ime;
+    }
+    
+    console.log('✅ Parsirano:', result);
+    return result;
+}
+
+// Izvezi
+window.domacicaUnos = domacicaUnos;
+window.domacicaParser = domacicaParser;
 
