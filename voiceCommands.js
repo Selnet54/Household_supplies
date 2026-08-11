@@ -1,5 +1,5 @@
 // ============================================
-// VOICE COMMANDS - KOMPLETNO ISPRAVLJENA VERZIJA
+// VOICE COMMANDS - KOMPLETNO ISPRAVLJENA VERZIJA SA UNOSOM
 // ============================================
 console.log('🎤 voiceCommands.js je učitan!');
 
@@ -16,7 +16,198 @@ function cleanCmd(cmd) {
     return cmd.toLowerCase().trim().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, "");
 }
 
-// Glavna funkcija za obradu glasovnih komandi
+// ============================================
+// GLASOVNI UNOS PROIZVODA
+// ============================================
+
+// ===== PARSIRANJE GLASOVNOG UNOSA =====
+function parseVoiceInput(text) {
+    console.log('🔍 Parsiranje glasovnog unosa:', text);
+    
+    const result = {
+        product: '',
+        piece: '1',
+        quantity: 1,
+        unit: 'kom',
+        shelfLife: 12
+    };
+    
+    // 1. Pronađi količinu (broj + jedinica)
+    const unitPattern = /(\d+\.?\d*)\s*(kg|g|kom|l|ml|pak|kutija)/i;
+    const quantityMatch = text.match(unitPattern);
+    if (quantityMatch) {
+        result.quantity = parseFloat(quantityMatch[1]);
+        result.unit = quantityMatch[2].toLowerCase();
+        text = text.replace(quantityMatch[0], '');
+    }
+    
+    // 2. Pronađi rok trajanja (broj + meseci/mes)
+    const shelfPattern = /(\d+)\s*(meseci|mes|mesec|m|months|month)/i;
+    const shelfMatch = text.match(shelfPattern);
+    if (shelfMatch) {
+        result.shelfLife = parseInt(shelfMatch[1]);
+        text = text.replace(shelfMatch[0], '');
+    }
+    
+    // 3. Pronađi komad (broj + komad/kom)
+    const piecePattern = /(\d+)\s*(komad|kom|pcs|piece)/i;
+    const pieceMatch = text.match(piecePattern);
+    if (pieceMatch) {
+        result.piece = pieceMatch[0].trim();
+        text = text.replace(pieceMatch[0], '');
+    }
+    
+    // 4. Očisti tekst i sačuvaj kao naziv proizvoda
+    result.product = text.replace(/\s+/g, ' ').trim();
+    
+    // Ako nema količine, ostaje 1
+    if (result.quantity === 0) {
+        result.quantity = 1;
+    }
+    
+    console.log('✅ Parsirani podaci:', result);
+    return result;
+}
+
+// ===== PRONALAŽENJE KATEGORIJE =====
+function findCategoryForProduct(productName) {
+    console.log('🔍 Tražim kategoriju za:', productName);
+    
+    // Pokušaj da pronađeš kroz postojeće funkcije
+    let catList = [];
+    try {
+        if (typeof getMainCategories === 'function') {
+            catList = getMainCategories();
+        }
+    } catch(e) {
+        console.warn('⚠️ getMainCategories nije dostupan');
+    }
+    
+    if (catList.length === 0) {
+        return { category: 'Ostalo', subcategory: 'Ostalo', productPart: '' };
+    }
+    
+    const productLower = productName.toLowerCase();
+    
+    for (let cat of catList) {
+        let subs = [];
+        try {
+            if (typeof getSubcategories === 'function') {
+                subs = getSubcategories(cat);
+            }
+        } catch(e) {}
+        
+        for (let sub of subs) {
+            // Proveri podkategoriju
+            if (productLower.includes(sub.toLowerCase()) || sub.toLowerCase().includes(productLower)) {
+                console.log('✅ Pronađena podkategorija:', sub);
+                return { category: cat, subcategory: sub, productPart: '' };
+            }
+            
+            // Proveri delove proizvoda
+            let parts = [];
+            try {
+                if (typeof getProductParts === 'function') {
+                    parts = getProductParts(sub);
+                }
+            } catch(e) {}
+            
+            if (parts && parts.length > 0) {
+                for (let part of parts) {
+                    if (productLower.includes(part.toLowerCase()) || part.toLowerCase().includes(productLower)) {
+                        console.log('✅ Pronađen deo:', part);
+                        return { category: cat, subcategory: sub, productPart: part };
+                    }
+                }
+            }
+        }
+    }
+    
+    // Ako nije pronađeno, koristi "Ostalo"
+    console.log('⚠️ Kategorija nije pronađena, koristim "Ostalo"');
+    return { category: 'Ostalo', subcategory: 'Ostalo', productPart: '' };
+}
+
+// ===== GLAVNA FUNKCIJA ZA GLASOVNI UNOS =====
+function voiceAddProduct(text) {
+    console.log('🎤 Glasovni unos proizvoda:', text);
+    
+    // Parsiraj unos
+    const parsed = parseVoiceInput(text);
+    
+    if (!parsed.product || parsed.product.length < 2) {
+        if (typeof showModernAlert === 'function') {
+            showModernAlert('Greška', 'Nisam prepoznao naziv proizvoda. Pokušajte: "Dodaj gril pile 2 kg 7 meseci"', '❌');
+        }
+        return false;
+    }
+    
+    // Pronađi kategoriju
+    const categoryInfo = findCategoryForProduct(parsed.product);
+    
+    // Kreiraj podatke za proizvod (ISTI FORMAT KAO RUČNI UNOS)
+    const today = new Date().toISOString().split('T')[0];
+    
+    const productData = {
+        id: Date.now(),
+        product_name: parsed.product,
+        description: '(glasovni unos)',
+        piece: parsed.piece || '1',
+        quantity: parsed.quantity,
+        unit: parsed.unit || 'kom',
+        entry_date: today,
+        shelf_life_months: parsed.shelfLife || 12,
+        storage_location: 'Ostava',
+        category: categoryInfo.category,
+        subcategory: categoryInfo.subcategory,
+        product_part: categoryInfo.productPart,
+        voice_input: true
+    };
+    
+    // Sačuvaj u localStorage
+    let zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
+    zalihe.push(productData);
+    localStorage.setItem('zalihe', JSON.stringify(zalihe));
+    
+    // Pokaži uspešnu poruku
+    const msg = `${parsed.product} (${parsed.quantity} ${parsed.unit}, rok: ${parsed.shelfLife} meseci)`;
+    if (typeof showModernAlert === 'function') {
+        showModernAlert('✅ Uspešno dodato', msg, '✅');
+    }
+    
+    // Osveži prikaz zaliha
+    setTimeout(function() {
+        const mainScreen = document.getElementById('mainScreen');
+        if (mainScreen) {
+            mainScreen.style.display = 'flex';
+            mainScreen.classList.add('active');
+        }
+        if (typeof renderInventory === 'function') {
+            renderInventory();
+        }
+        console.log('📦 Zalihe osvežene nakon glasovnog unosa');
+    }, 500);
+    
+    return true;
+}
+
+// ===== KOMANDE ZA UNOS =====
+const voiceAddKeywords = {
+    sr: ['dodaj', 'unesi', 'novi', 'proizvod', 'dodavanje', 'ubaci', 'stavi'],
+    en: ['add', 'new', 'create', 'insert', 'put'],
+    de: ['hinzufügen', 'neu', 'erstellen', 'einfügen'],
+    hu: ['hozzáad', 'új', 'létrehoz', 'beilleszt'],
+    uk: ['додати', 'новий', 'створити', 'вставити'],
+    ru: ['добавить', 'новый', 'создать', 'вставить'],
+    zh: ['添加', '新', '创建', '插入'],
+    es: ['agregar', 'nuevo', 'crear', 'insertar'],
+    pt: ['adicionar', 'novo', 'criar', 'inserir'],
+    fr: ['ajouter', 'nouveau', 'créer', 'insérer']
+};
+
+// ============================================
+// GLAVNA FUNKCIJA ZA OBRADU GLASOVNIH KOMANDI
+// ============================================
 function voiceCommand(command) {
     console.log('🎤 Primljena komanda:', command);
     
@@ -45,6 +236,29 @@ function voiceCommand(command) {
         if (typeof window.stopVoiceRecognition === 'function') {
             window.stopVoiceRecognition();
         }
+    }
+
+    // ===== PROVERI DA LI JE UNOS =====
+    const addKeywords = voiceAddKeywords[lang] || voiceAddKeywords.sr;
+    let isAddCommand = false;
+    let cleanTextForAdd = command;
+    
+    for (let kw of addKeywords) {
+        if (cleanText.includes(kw)) {
+            isAddCommand = true;
+            const regex = new RegExp(kw, 'gi');
+            cleanTextForAdd = cleanTextForAdd.replace(regex, '');
+            break;
+        }
+    }
+    
+    // Ako je komanda za unos i ima tekst nakon komande
+    if (isAddCommand && cleanTextForAdd.trim().length > 2) {
+        console.log('📝 Prepoznat unos:', cleanTextForAdd.trim());
+        const result = voiceAddProduct(cleanTextForAdd.trim());
+        cleanup();
+        forceHideVoiceMenu();
+        return result;
     }
 
     // 1. IZLAZ / EXIT
@@ -118,7 +332,7 @@ function voiceCommand(command) {
         return true;
     }
 
-    // 4. DODAJ PROIZVOD (Add Product)
+    // 4. DODAJ PROIZVOD (Add Product) - otvara kategorije
     if (checkAddCommand(cleanText)) {
         console.log('➕ Otvaranje kategorija za unos');
         cleanup();
@@ -309,6 +523,9 @@ function forceHideVoiceMenu() {
 window.voiceCommand = voiceCommand;
 window.goBackFromVoice = goBackFromVoice;
 window.forceHideVoiceMenu = forceHideVoiceMenu;
+window.voiceAddProduct = voiceAddProduct;
+window.parseVoiceInput = parseVoiceInput;
+window.findCategoryForProduct = findCategoryForProduct;
 
 // EVENT LISTENERI
 document.addEventListener('voiceCommandProcessed', function(e) {
@@ -343,3 +560,5 @@ document.addEventListener('click', function(e) {
 });
 
 console.log('✅ voiceCommands.js je uspešno inicijalizovan i spreman!');
+console.log('✅ Glasovni unos proizvoda aktiviran!');
+console.log('📝 Reci: "Dodaj gril pile 2 kg 7 meseci" za unos proizvoda');
