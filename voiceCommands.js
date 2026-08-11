@@ -3,6 +3,19 @@
 // ============================================
 console.log('🎤 voiceCommands.js je učitan!');
 
+// ============================================
+// RESETOVANJE ZAGLAVLJENE KOMANDE
+// ============================================
+function resetVoiceProcessing() {
+    console.log('🔄 Resetovanje voiceCommandProcessing');
+    window.voiceCommandProcessing = false;
+    if (window.recognition) {
+        try {
+            window.recognition.stop();
+        } catch(e) {}
+    }
+}
+window.resetVoiceProcessing = resetVoiceProcessing;
 window.voiceCommandProcessing = false;
 
 function getCurrentLang() {
