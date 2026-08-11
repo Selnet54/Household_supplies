@@ -351,18 +351,19 @@ function voiceCommand(command) {
         }
     }
 
-    // ===== KOMANDE ZA PRELAZAK =====
+ 
     // ===== KOMANDE ZA PRELAZAK =====
 let handled = false;
 
-// "unos" → otvara ekran za unos podataka (prošireno da hvata i "uno", "un", itd.)
 const entryKeywords = ['unos', 'podaci', 'data', 'entry', 'unos podataka', 'novi unos', 'uno', 'un'];
 if (entryKeywords.some(k => cleanText === k || cleanText.includes(k))) {
-    console.log('📝 Otvaranje ekrana za unos podataka');
+    console.log('📝 Otvaranje ekrana za unos podataka i zadržavanje/prilagođavanje zvučnog menija');
     handled = true;
-    cleanup();
+    
+    // 1. Postavi stanje ekrana na unos
     window.currentScreenState = 'dataEntry';
-    forceHideVoiceMenu();
+    
+    // 2. Otvori formu za unos na ekranu
     setTimeout(function() {
         if (typeof renderDataEntry === 'function') {
             renderDataEntry('');
@@ -373,6 +374,22 @@ if (entryKeywords.some(k => cleanText === k || cleanText.includes(k))) {
             status.style.color = '#FFD700';
         }
     }, 100);
+    
+    // UMESTO forceHideVoiceMenu() - ovde ostavljamo zvučni meni vidljivim 
+    // ili pokrećemo ponovo slušanje za diktiranje stavki ako je to potrebno:
+    const voiceMenu = document.getElementById('voiceMenuScreen');
+    if (voiceMenu) {
+        voiceMenu.style.display = 'flex';
+        voiceMenu.classList.add('active');
+    }
+    
+    // Ako želite da se prepoznavanje glasa odmah nastavi za unos stavki:
+    if (typeof window.startVoiceRecognition === 'function') {
+        setTimeout(() => {
+            window.startVoiceRecognition();
+        }, 500);
+    }
+    
     return true;
 }
     const invKeywords = ['zalihe', 'zaliha', 'stanje', 'inventory', 'inv', 'stock'];
