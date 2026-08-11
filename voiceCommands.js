@@ -271,25 +271,24 @@ function voiceCommand(command) {
         return true;
     }
 
-    // KATEGORIJE (otvara kategorije za unos)
-    const categoryKeywords = ['kategorije', 'kategorija', 'categories', 'kategorien', 'unos', 'podaci', 'data'];
-    if (categoryKeywords.some(k => cleanText.includes(k))) {
-        console.log('📂 Otvaranje kategorija');
-        handled = true;
-        cleanup();
-        window.currentScreenState = 'categories';
-        forceHideVoiceMenu();
-        setTimeout(function() {
-            if (typeof renderCategories === 'function') renderCategories();
-        }, 100);
-        const status = document.getElementById('voiceStatus');
-        if (status) {
-            status.innerText = '✅ Otvaranje kategorija';
-            status.style.color = '#4CAF50';
-        }
-        return true;
+// KATEGORIJE (otvara kategorije za unos)
+const categoryKeywords = ['kategorije', 'kategorija', 'categories', 'kategorien', 'unos', 'podaci', 'data'];
+if (categoryKeywords.some(k => cleanText.includes(k))) {
+    console.log('📂 Otvaranje kategorija');
+    handled = true;
+    cleanup();
+    window.currentScreenState = 'categories';
+    forceHideVoiceMenu();
+    setTimeout(function() {
+        if (typeof renderCategories === 'function') renderCategories();
+    }, 100);
+    const status = document.getElementById('voiceStatus');
+    if (status) {
+        status.innerText = '✅ Otvaranje kategorija';
+        status.style.color = '#4CAF50';
     }
-
+    return true;
+}
     // ===== PROVERI DA LI JE UNOS SA "DODAJ" =====
     const addKeywords = {
         sr: ['dodaj', 'unesi', 'novi', 'proizvod', 'dodavanje', 'ubaci', 'stavi', 'doda', 'dodat', 'dodati', 'plus'],
