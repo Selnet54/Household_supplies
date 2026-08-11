@@ -48,20 +48,20 @@ function parseVoiceInput(text) {
     
     // 1. Pronađi mesto skladištenja
     const storageMap = {
-    'zamrzivač1': 'Zamrzivač 1',
-    'zamrzivač2': 'Zamrzivač 2',
-    'zamrzivač3': 'Zamrzivač 3',
-    'zamrzivač': 'Zamrzivač 1',
-    'frižider': 'Frižider',
-    'frizider': 'Frižider',
-    'ostava': 'Ostava',
-    'freezer1': 'Freezer 1',
-    'freezer2': 'Freezer 2',
-    'freezer3': 'Freezer 3',
-    'freezer': 'Freezer 1',
-    'refrigerator': 'Refrigerator',
-    'pantry': 'Pantry'
-};
+        'zamrzivač1': 'Zamrzivač 1',
+        'zamrzivač2': 'Zamrzivač 2',
+        'zamrzivač3': 'Zamrzivač 3',
+        'zamrzivač': 'Zamrzivač 1',
+        'frižider': 'Frižider',
+        'frizider': 'Frižider',
+        'ostava': 'Ostava',
+        'freezer1': 'Freezer 1',
+        'freezer2': 'Freezer 2',
+        'freezer3': 'Freezer 3',
+        'freezer': 'Freezer 1',
+        'refrigerator': 'Refrigerator',
+        'pantry': 'Pantry'
+    };
     
     for (let [key, value] of Object.entries(storageMap)) {
         if (cleanText.toLowerCase().includes(key)) {
@@ -139,7 +139,6 @@ function fillDataEntryFields(parsed) {
         shelfLifeInput.dispatchEvent(new Event('input', { bubbles: true }));
     }
     if (storageSelect && parsed.storage) {
-        // Pokušaj da pronađeš opciju
         for (let option of storageSelect.options) {
             if (option.value === parsed.storage || option.text.includes(parsed.storage)) {
                 storageSelect.value = option.value;
@@ -156,7 +155,6 @@ function fillDataEntryFields(parsed) {
         }
     }
     
-    // Ažuriraj prikaz roka
     if (typeof updateExpiryDate === 'function') {
         updateExpiryDate();
     }
@@ -173,7 +171,6 @@ function saveAndReset() {
         saveProduct();
     }
     
-    // Resetuj polja (osim productName)
     setTimeout(function() {
         const pieceInput = document.getElementById('pieceInput');
         const quantityInput = document.getElementById('quantityInput');
@@ -212,12 +209,10 @@ let justSavedProducts = [];
 function finishDataEntry() {
     console.log('✅ Završetak unosa');
     
-    // Sačuvaj trenutni proizvod ako postoji
     if (typeof saveProduct === 'function') {
         saveProduct();
     }
     
-    // Otvori zalihe
     setTimeout(function() {
         window.currentScreenState = 'inventory';
         forceHideVoiceMenu();
@@ -226,7 +221,6 @@ function finishDataEntry() {
             renderInventory();
         }
         
-        // Označi nove proizvode (svetlo plavom)
         setTimeout(function() {
             highlightNewProducts();
         }, 200);
@@ -242,21 +236,18 @@ function finishDataEntry() {
 function highlightNewProducts() {
     console.log('🔵 Označavam nove proizvode');
     
-    // Pronađi sve redove u tabeli zaliha
     const rows = document.querySelectorAll('#inventoryTable .table-row:not(.header-row)');
     const zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
-    const recentProducts = zalihe.slice(-5); // Poslednjih 5 proizvoda
+    const recentProducts = zalihe.slice(-5);
     
     rows.forEach(row => {
         const cells = row.querySelectorAll('.cell');
         if (cells.length > 1) {
             const productName = cells[1]?.textContent || '';
-            // Proveri da li je u poslednjim dodatim
             const isNew = recentProducts.some(p => p.product_name === productName);
             if (isNew) {
-                row.style.background = '#BBDEFB'; // Svetlo plava
+                row.style.background = '#BBDEFB';
                 row.style.transition = 'background 0.5s';
-                // Nakon 5 sekundi vrati boju
                 setTimeout(function() {
                     row.style.background = '';
                 }, 5000);
@@ -297,7 +288,6 @@ function voiceCommand(command) {
 
     // ===== KOMANDE ZA EKRAN "UNOS PODATAKA" =====
     if (currentState === 'dataEntry') {
-        // "end" → izlaz
         if (cleanText.includes('end')) {
             console.log('🚪 Izlaz iz aplikacije');
             cleanup();
@@ -305,7 +295,6 @@ function voiceCommand(command) {
             return true;
         }
         
-        // "ok" → završi unos, otvori zalihe
         if (cleanText.includes('ok')) {
             console.log('✅ OK - završetak unosa');
             cleanup();
@@ -313,7 +302,6 @@ function voiceCommand(command) {
             return true;
         }
         
-        // "plus" → sačuvaj i resetuj
         if (cleanText.includes('plus')) {
             console.log('💾 Plus - čuvanje i resetovanje');
             cleanup();
@@ -321,7 +309,6 @@ function voiceCommand(command) {
             return true;
         }
         
-        // Proveri da li ima broj i jedinicu (unos podataka)
         const hasQuantity = /\d+\s*(kg|g|kom|l|ml|pak|kutija|kile|kilograma)/i.test(command);
         if (hasQuantity) {
             console.log('📝 Popunjavam polja sa:', command);
@@ -336,7 +323,6 @@ function voiceCommand(command) {
             return true;
         }
         
-        // Ako nije ništa od gore, samo reci da nije prepoznato
         const status = document.getElementById('voiceStatus');
         if (status) {
             status.innerText = `❌ Nije prepoznato: "${command}"`;
@@ -368,27 +354,26 @@ function voiceCommand(command) {
     // ===== KOMANDE ZA PRELAZAK =====
     let handled = false;
 
-// "unos" → otvara ekran za unos podataka
-const entryKeywords = ['unos', 'podaci', 'data', 'entry', 'unos podataka', 'novi unos'];
-if (entryKeywords.some(k => cleanText.includes(k))) {
-    console.log('📝 Otvaranje ekrana za unos podataka');
-    handled = true;
-    cleanup();
-    window.currentScreenState = 'dataEntry';
-    forceHideVoiceMenu();
-    setTimeout(function() {
-        if (typeof renderDataEntry === 'function') {
-            renderDataEntry('');
-        }
-        const status = document.getElementById('voiceStatus');
-        if (status) {
-            status.innerText = '📝 Govorite podatke za unos. "plus" za čuvanje, "OK" za kraj';
-            status.style.color = '#FFD700';
-        }
-    }, 100);
-    return true;
-}
-    // ZALIHE
+    const entryKeywords = ['unos', 'podaci', 'data', 'entry', 'unos podataka', 'novi unos'];
+    if (entryKeywords.some(k => cleanText.includes(k))) {
+        console.log('📝 Otvaranje ekrana za unos podataka');
+        handled = true;
+        cleanup();
+        window.currentScreenState = 'dataEntry';
+        forceHideVoiceMenu();
+        setTimeout(function() {
+            if (typeof renderDataEntry === 'function') {
+                renderDataEntry('');
+            }
+            const status = document.getElementById('voiceStatus');
+            if (status) {
+                status.innerText = '📝 Govorite podatke za unos. "plus" za čuvanje, "OK" za kraj';
+                status.style.color = '#FFD700';
+            }
+        }, 100);
+        return true;
+    }
+
     const invKeywords = ['zalihe', 'zaliha', 'stanje', 'inventory', 'inv', 'stock'];
     if (invKeywords.some(k => cleanText.includes(k))) {
         console.log('📦 Prelaz na zalihe');
@@ -407,7 +392,6 @@ if (entryKeywords.some(k => cleanText.includes(k))) {
         return true;
     }
 
-    // SPISAK
     const shopKeywords = ['spisak', 'lista', 'shopping', 'shop', 'list'];
     if (shopKeywords.some(k => cleanText.includes(k))) {
         console.log('🛒 Prelaz na spisak');
@@ -426,7 +410,6 @@ if (entryKeywords.some(k => cleanText.includes(k))) {
         return true;
     }
 
-    // IZLAZ
     const exitKeywords = ['izlaz', 'zatvori', 'exit', 'quit', 'close', 'end'];
     if (exitKeywords.some(k => cleanText.includes(k))) {
         console.log('🚪 Izlaz iz aplikacije');
@@ -478,14 +461,12 @@ if (entryKeywords.some(k => cleanText.includes(k))) {
         return result;
     }
 
-    // ===== Ako nije prepoznato =====
     if (!handled) {
         const status = document.getElementById('voiceStatus');
         if (status) {
             status.innerText = `❌ Nije prepoznato: "${command}"`;
             status.style.color = '#f44336';
         }
-        // NE prikazujemo popup za nepoznate komande (samo status)
     }
     
     cleanup();
@@ -533,9 +514,11 @@ function goBackFromVoice() {
         choiceScreen.classList.add('active');
     }
 }
+
 // ============================================
 // GLAVNA FUNKCIJA ZA GLASOVNI UNOS
 // ============================================
+
 function voiceAddProduct(text) {
     console.log('🎤 Glasovni unos proizvoda:', text);
     const parsed = parseVoiceInput(text);
