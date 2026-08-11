@@ -210,14 +210,64 @@ function voiceCommand(command) {
         }
     }
 
-    // ===== PROVERI DA LI JE UNOS =====
+    // ===== DODAJ OVO: AUTOMATSKI UNOS NA ZALIHAMA =====
+    const currentState = window.currentScreenState || '';
+    const isOnInventory = currentState === 'inventory';
+    
+    // Ako smo na zalihama, automatski unos (bez "dodaj")
+    if (isOnInventory) {
+        // Proveri da li komanda sadrži broj i jedinicu (izgleda kao unos)
+        const hasQuantity = /\d+\s*(kg|g|kom|l|ml|pak|kutija|kile|kilograma)/i.test(command);
+        const hasPlus = command.toLowerCase().includes('plus');
+        
+        if (hasPlus || hasQuantity) {
+            console.log('📝 Automatski unos na zalihama:', command);
+            let cleanCommand = command.replace(/plus/gi, '').trim();
+            if (cleanCommand.length < 2) {
+                cleanCommand = command;
+            }
+            const result = voiceAddProduct(cleanCommand);
+            cleanup();
+            // Ne sakrivaj voice menu, ostani na zalihama
+            return result;
+        }
+    }
+
+    // ===== PROVERI DA LI JE KOMANDA ZA PRELAZAK =====
+    // ZALIHE (Inventory)
+    const invKeywords = ['zalihe', 'zaliha', 'stanje', 'inventory', 'inv', 'stock', 'keszlet', 'készlet', 'bestand', 'запасы', '库存', 'inventario'];
+    if (invKeywords.some(k => cleanText.includes(k))) {
+        console.log('📦 Prelaz na zalihe');
+        cleanup();
+        window.currentScreenState = 'inventory';
+        forceHideVoiceMenu();
+        setTimeout(function() {
+            if (typeof renderInventory === 'function') renderInventory();
+        }, 100);
+        return true;
+    }
+
+    // SPISAK (Shopping List)
+    const shopKeywords = ['spisak', 'lista', 'shopping', 'shop', 'list', 'bevásárlólista', 'einkaufsliste', 'список', '购物清单'];
+    if (shopKeywords.some(k => cleanText.includes(k))) {
+        console.log('🛒 Prelaz na spisak');
+        cleanup();
+        window.currentScreenState = 'shopping';
+        forceHideVoiceMenu();
+        setTimeout(function() {
+            if (typeof renderShoppingList === 'function') renderShoppingList();
+        }, 100);
+        return true;
+    }
+
+    // ===== PROVERI DA LI JE UNOS SA "DODAJ" =====
     const addKeywords = {
-        sr: ['dodaj', 'unesi', 'novi', 'proizvod', 'dodavanje', 'ubaci', 'stavi'],
-        en: ['add', 'new', 'create', 'insert', 'put'],
-        de: ['hinzufügen', 'neu', 'erstellen', 'einfügen'],
-        hu: ['hozzáad', 'új', 'létrehoz', 'beilleszt'],
-        uk: ['додати', 'новий', 'створити', 'вставити'],
-        ru: ['добавить', 'новый', 'создать', 'вставить']
+        sr: ['dodaj', 'unesi', 'novi', 'proizvod', 'dodavanje', 'ubaci', 'stavi', 'doda', 'dodat', 'dodati', 'plus'],
+        en: ['add', 'new', 'create', 'insert', 'put', 'plus'],
+        de: ['hinzufügen', 'neu', 'erstellen', 'einfügen', 'plus'],
+        hu: ['hozzáad', 'új', 'létrehoz', 'beilleszt', 'plusz'],
+        uk: ['додати', 'новий', 'створити', 'вставити', 'плюс'],
+        ru: ['добавить', 'новый', 'создать', 'вставить', 'плюс']
     };
     
     const keywords = addKeywords[lang] || addKeywords.sr;
@@ -240,6 +290,49 @@ function voiceCommand(command) {
         forceHideVoiceMenu();
         return result;
     }
+
+    // IZLAZ / EXIT
+    const exitKeywords = ['izlaz', 'zatvori', 'exit', 'quit', 'close', 'kilépés', 'beenden', 'выход', '退出', 'salir'];
+    if (exitKeywords.some(k => cleanText.includes(k))) {
+        console.log('🚪 Izlaz iz aplikacije');
+        cleanup();
+        forceHideVoiceMenu();
+        document.querySelectorAll('.screen').forEach(s => {
+            s.style.display = 'none';
+            s.classList.remove('active');
+        });
+        const login = document.getElementById('loginScreen');
+        if (login) {
+            login.style.display = 'flex';
+            login.classList.add('active');
+        }
+        if (typeof exitApp === 'function') exitApp();
+        return true;
+    }
+
+    // KATEGORIJE (otvara kategorije za unos)
+    const categoryKeywords = ['kategorije', 'kategorija', 'categories', 'kategorien'];
+    if (categoryKeywords.some(k => cleanText.includes(k))) {
+        console.log('📂 Otvaranje kategorija');
+        cleanup();
+        window.currentScreenState = 'categories';
+        forceHideVoiceMenu();
+        setTimeout(function() {
+            if (typeof renderCategories === 'function') renderCategories();
+        }, 100);
+        return true;
+    }
+
+    // Ako komanda nije prepoznata
+    const status = document.getElementById('voiceStatus');
+    if (status) {
+        status.innerText = `❌ Nije prepoznato: "${command}"`;
+        status.style.color = '#f44336';
+    }
+    
+    cleanup();
+    return false;
+}
 
     // 1. IZLAZ / EXIT
     const exitKeywords = ['izlaz', 'zatvori', 'exit', 'quit', 'close', 'kilépés', 'beenden', 'выход', '退出', 'salir'];
