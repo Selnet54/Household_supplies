@@ -339,36 +339,36 @@
 </div>
 
 <!-- ===== EKRAN 4: ZVUČNI UNOS - GLAVNI MENI ===== -->
-<div id="voiceMenuScreen" class="screen" style="display:none;">
-    <div class="voice-menu-container">
-        <div class="voice-menu-box">
-            <div id="voiceMenuTitleText" style="font-size:20px; color:#FFD700; margin-bottom:5px;">🎤 Voice Control</div>
-            <div id="voiceMenuPromptText" style="font-size:16px; color:#aaa; margin-bottom:25px;">Say what you want to do:</div>
-            <div class="voice-grid">
-                <button class="voice-btn" onclick="voiceCommand('inventory')">
-                    <div style="font-size:40px;">📦</div>
-                    <div id="invMenuText" style="font-size:20px; font-weight:bold;">Inventory</div>
-                </button>
-                <button class="voice-btn" onclick="voiceCommand('shopping')">
-                    <div style="font-size:40px;">🛒</div>
-                    <div id="shopMenuText" style="font-size:20px; font-weight:bold;">Shopping List</div>
-                </button>
-                <button class="voice-btn" onclick="voiceCommand('add')">
-                    <div style="font-size:40px;">➕</div>
-                    <div id="addMenuText" style="font-size:20px; font-weight:bold;">Add Product</div>
-                </button>
-                <button class="voice-btn voice-btn-exit" onclick="voiceCommand('exit')">
-                    <div style="font-size:40px;">🚪</div>
-                    <div id="exitMenuText" style="font-size:20px; font-weight:bold;">EXIT</div>
-                </button>
-            </div>
-            <div id="voiceStatus" style="margin-top:20px; padding:15px; background:rgba(255,255,255,0.1); border-radius:12px; color:#aaa; font-size:16px;">
-                🎤 Say commands
-            </div>
-            <button id="backFromVoiceBtn" class="btn btn-orange" style="margin-top:15px;" onclick="goBackFromVoice()">
-                <span id="backVoiceText">◀ Back</span>
-            </button>
-        </div>
+<div id="voiceMenuScreen" style="display:none; position:fixed; bottom:0; left:0; right:0; background:#1a1a2e; padding:20px; z-index:9999; border-radius:20px 20px 0 0;">
+    <div style="text-align:center; color:white; font-size:18px; margin-bottom:10px;">
+        🎤 GLASOVNI UNOS
+    </div>
+    
+    <!-- Status -->
+    <div id="voiceStatus" style="color:#FFD700; text-align:center; padding:10px; font-size:14px; background:#16213e; border-radius:10px; margin-bottom:10px;">
+        🎤 Reci "UNOS" za početak
+    </div>
+    
+    <!-- Dugmad -->
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-top:10px;">
+        <button onclick="window.startSimpleListening()" style="background:#4CAF50; color:white; padding:12px; border:none; border-radius:10px; font-size:16px;">
+            ▶️ Slušaj
+        </button>
+        <button onclick="window.toggleListening()" style="background:#ff9800; color:white; padding:12px; border:none; border-radius:10px; font-size:16px;">
+            🔄 Prebaci
+        </button>
+        <button onclick="window.stopSimpleListening()" style="background:#f44336; color:white; padding:12px; border:none; border-radius:10px; font-size:16px;">
+            ⏹ Stop
+        </button>
+    </div>
+    
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
+        <button onclick="window.saveCurrentProduct()" style="background:#2196F3; color:white; padding:12px; border:none; border-radius:10px; font-size:16px;">
+            💾 Plus (sačuvaj)
+        </button>
+        <button onclick="window.finishAndGoBack()" style="background:#9C27B0; color:white; padding:12px; border:none; border-radius:10px; font-size:16px;">
+            ✅ OK (završi)
+        </button>
     </div>
 </div>
 
