@@ -1774,7 +1774,21 @@ document.addEventListener('DOMContentLoaded', function() {
         updateInterfaceLanguage();
     }
 
-    // ===== ENTER TASTER NA PHONE INPUT =====
+    // ===== DIREKTNO BACK DUGME =====
+    const backBtn = document.getElementById('backBtn');
+    if (backBtn) {
+        backBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation(); // Spreči duplo okidanje
+            console.log('⬅ Direktan klik na Back dugme');
+            handleBackAction();
+        });
+        console.log('✅ Back dugme direktno povezano');
+    } else {
+        console.warn('⚠️ Back dugme nije pronađeno!');
+    }
+
+    // ===== ENTER TASTER =====
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Enter') {
             const activeElement = document.activeElement;
@@ -1816,7 +1830,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     console.log('✅ Svi događaji uspešno inicijalizovani!');
 });
-
 // ===== 2. DELEGIRANI KLIKOVI - SVI U JEDNOM =====
 document.addEventListener('click', function(e) {
     const target = e.target;
@@ -1842,7 +1855,8 @@ document.addEventListener('click', function(e) {
         target.closest('.btn-back') || target.closest('#headerBackBtn') ||
         target.closest('.back-arrow') || target.closest('.header-back')) {
         e.preventDefault();
-        handleHeaderBack();
+        console.log('⬅ Kliknuto dugme Nazad/Odustani');
+        handleBackAction();
     }
 
     // ===== INVENTORY DUGME =====
@@ -1865,7 +1879,7 @@ document.addEventListener('click', function(e) {
         target.id === 'closeSupportBtn2' || target.closest('#closeSupportBtn2')) {
         closeSupportDialog();
     }
-}, true); // true = faza hvatanja (capture phase)
+}, true);
 
 // ============================================
 // GLOBALNE FUNKCIJE ZA VOICE ADDON
