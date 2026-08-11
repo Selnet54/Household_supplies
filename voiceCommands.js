@@ -304,26 +304,56 @@ function processSimpleCommand(text) {
     }
     
     // UNOS - otvori ekran
-    if (clean.includes('unos') || clean.includes('novi') || clean.includes('data') || clean === 'un') {
-        console.log('📝 Otvaram unos');
-        window.currentScreenState = 'dataEntry';
-        
-        if (typeof renderDataEntry === 'function') {
-            renderDataEntry('');
+// UNOS - otvori ekran
+if (clean.includes('unos') || clean.includes('novi') || clean.includes('data') || clean === 'un') {
+    console.log('📝 Otvaram unos');
+    window.currentScreenState = 'dataEntry';
+    
+    // 🔥 DIREKTNO PRIKAŽI EKRAN ZA UNOS
+    // Sakrij sve ekrane
+    document.querySelectorAll('.screen').forEach(s => {
+        s.style.display = 'none';
+        s.classList.remove('active');
+    });
+    
+    // Pokaži ekran za unos
+    const dataEntryScreen = document.getElementById('dataEntryScreen');
+    if (dataEntryScreen) {
+        dataEntryScreen.style.display = 'block';
+        dataEntryScreen.classList.add('active');
+        console.log('✅ DataEntryScreen prikazan');
+    } else {
+        console.error('❌ dataEntryScreen nije pronađen!');
+        // Pokušaj sa drugim ID-om
+        const altScreen = document.getElementById('addProductScreen');
+        if (altScreen) {
+            altScreen.style.display = 'block';
+            altScreen.classList.add('active');
+            console.log('✅ addProductScreen prikazan');
         }
-        
-        // Pokreni slušanje
-        setTimeout(() => {
-            startSimpleListening();
-        }, 300);
-        
-        const status = document.getElementById('voiceStatus');
-        if (status) {
-            status.innerText = '🎤 Govorite proizvod...';
-            status.style.color = '#FFD700';
-        }
-        return;
     }
+    
+    // Pokušaj da pozoveš renderDataEntry ako postoji
+    if (typeof renderDataEntry === 'function') {
+        renderDataEntry('');
+    } else if (typeof showDataEntry === 'function') {
+        showDataEntry('');
+    } else if (typeof openDataEntry === 'function') {
+        openDataEntry('');
+    }
+    
+    // Pokreni slušanje
+    setTimeout(() => {
+        startSimpleListening();
+    }, 500);
+    
+    const status = document.getElementById('voiceStatus');
+    if (status) {
+        status.innerText = '🎤 Govorite proizvod...';
+        status.style.color = '#FFD700';
+    }
+    return;
+}
     
     // ZALIHE
     if (clean.includes('zalihe') || clean.includes('stanje') || clean.includes('inventory')) {
@@ -403,3 +433,61 @@ console.log('🎤 Reci "UNOS" za otvaranje ekrana za unos');
 console.log('🎤 Reci "Gril pile 1 komad 2 kile 7 meseci" za unos');
 console.log('🎤 Reci "PLUS" za čuvanje');
 console.log('🎤 Reci "OK" za završetak');
+// ============================================
+// FORSIRANO OTVARANJE UNOSA - RUČNO
+// ============================================
+function forceOpenEntry() {
+    console.log('💪 FORSIRANO otvaranje unosa');
+    
+    // 1. Sakrij sve ekrane
+    document.querySelectorAll('.screen').forEach(s => {
+        s.style.display = 'none';
+        s.classList.remove('active');
+    });
+    
+    // 2. Pokušaj da nađeš ekran za unos
+    let entryScreen = document.getElementById('dataEntryScreen');
+    if (!entryScreen) {
+        entryScreen = document.getElementById('addProductScreen');
+    }
+    if (!entryScreen) {
+        entryScreen = document.getElementById('entryScreen');
+    }
+    if (!entryScreen) {
+        entryScreen = document.getElementById('productEntryScreen');
+    }
+    
+    if (entryScreen) {
+        entryScreen.style.display = 'block';
+        entryScreen.classList.add('active');
+        console.log('✅ Ekran za unos prikazan');
+        
+        // Fokusiraj polje za naziv
+        setTimeout(() => {
+            const productInput = document.getElementById('productInput');
+            if (productInput) {
+                productInput.focus();
+                console.log('✅ Fokus na productInput');
+            }
+        }, 200);
+    } else {
+        console.error('❌ Nema ekrana za unos!');
+        alert('Ekran za unos nije pronađen! Proverite HTML.');
+    }
+    
+    // 3. Pokušaj render funkcije
+    if (typeof renderDataEntry === 'function') {
+        renderDataEntry('');
+    }
+    
+    // 4. Pokreni slušanje
+    setTimeout(() => {
+        startSimpleListening();
+    }, 300);
+}
+
+// Izvezi globalno
+window.forceOpenEntry = forceOpenEntry;
+
+console.log('💡 Upišite forceOpenEntry() u konzolu za ručno otvaranje unosa');
+
