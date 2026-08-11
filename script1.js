@@ -47,11 +47,7 @@ function exitApp() {
         poruka = translations[currentLang]?.exit_poruka || "Thanks for using this app! 👋";
     }
     
-    if (typeof showModernAlert === 'function') {
-        showModernAlert('👋 Izlaz', poruka, '👋');
-        return;
-    }
-    
+    // DIREKTNO PRIKAŽI ZAHVALNI EKRAN - BEZ POPUP PROZORA
     document.body.innerHTML = '';
     document.body.style.background = '#1a237e';
     document.body.style.margin = '0';
@@ -78,65 +74,28 @@ function exitApp() {
 
 // ===== MODERNI ALERT I CONFIRM - DINAMIČKI KREIRANI =====
 
-// ===== ALERT =====
-function showModernAlert(title, message, icon = '📢') {
-    console.log('🔔 Alert:', title, message);
+function exitApp() {
+    console.log("🚪 Exit dugme kliknuto!");
     
-    closeModernAlert();
+    const loginScreen = document.getElementById('loginScreen');
+    const languageScreen = document.getElementById('languageScreen');
     
-    const overlay = document.createElement('div');
-    overlay.id = 'modernAlertDynamic';
-    overlay.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.7);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 99999;
-        backdrop-filter: blur(5px);
-        animation: fadeIn 0.3s ease;
-    `;
+    const isLoginVisible = loginScreen && window.getComputedStyle(loginScreen).display === 'flex';
+    const isLanguageVisible = languageScreen && window.getComputedStyle(languageScreen).display === 'flex';
     
-    const box = document.createElement('div');
-    box.style.cssText = `
-        background: #8B0000;
-        border: 3px solid #FFD700;
-        border-radius: 24px;
-        padding: 40px;
-        max-width: 400px;
-        width: 90%;
-        text-align: center;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-        color: #FFD700;
-    `;
+    let poruka;
+    if (isLoginVisible || isLanguageVisible) {
+        poruka = "Thanks for using this app! 👋";
+    } else {
+        poruka = translations[currentLang]?.exit_poruka || "Thanks for using this app! 👋";
+    }
     
-    box.innerHTML = `
-        <div style="font-size:64px; margin-bottom:15px;">${icon || '📢'}</div>
-        <h2 style="color:#FFD700; margin-bottom:10px; font-size:28px; margin:0 0 10px 0;">${title || 'Obaveštenje'}</h2>
-        <p style="font-size:18px; color:#FFD700; margin-bottom:25px;">${message || 'Poruka'}</p>
-        <button onclick="closeModernAlert()" style="
-            background: #2E7D32;
-            color: #FFD700;
-            border: none;
-            padding: 12px 40px;
-            border-radius: 12px;
-            font-size: 18px;
-            cursor: pointer;
-            font-weight: bold;
-        ">OK</button>
-    `;
+    if (typeof showModernAlert === 'function') {
+        showModernAlert('👋 Izlaz', poruka, '👋');  // <--- OVO UKLANJAŠ
+        return;
+    }
     
-    overlay.appendChild(box);
-    document.body.appendChild(overlay);
-    
-    // ===== AUTOMATSKO ZATVARANJE NAKON 2 SEKUNDE =====
-    setTimeout(function() {
-        closeModernAlert();
-    }, 2000);
+    // ... ostatak koda ...
 }
 
 function closeModernAlert() {
