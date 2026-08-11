@@ -5,15 +5,11 @@ console.log('✅ Script.js je učitan!');
 
 // ===== SPREČI NEŽELJENA PREUSMERAVANJA =====
 (function() {
-    // Sačuvaj originalne funkcije
     const originalOpen = window.open;
-    const originalLocation = window.location;
     
-    // Presretni window.open
     window.open = function(url, name, specs) {
         if (url && (url.includes('github') || url.includes('GitHub') || url.includes('http'))) {
             console.warn('🚫 Blokirano otvaranje:', url);
-            // Pokušaj da prikažeš alert
             if (typeof showModernAlert === 'function') {
                 showModernAlert('Blokirano', 'Otvaranje linka je blokirano!', '🛑');
             } else {
@@ -23,30 +19,6 @@ console.log('✅ Script.js je učitan!');
         }
         return originalOpen.call(this, url, name, specs);
     };
-    
-    // Presretni location.href
-    try {
-        Object.defineProperty(window.location, 'href', {
-            set: function(url) {
-                if (url && (url.includes('github') || url.includes('GitHub') || url.includes('http'))) {
-                    console.warn('🚫 Blokirano preusmeravanje na:', url);
-                    if (typeof showModernAlert === 'function') {
-                        showModernAlert('Blokirano', 'Preusmeravanje je blokirano!', '🛑');
-                    } else {
-                        alert('Preusmeravanje je blokirano!');
-                    }
-                    return;
-                }
-                window.location.assign(url);
-            },
-            get: function() {
-                return window.location.href;
-            },
-            configurable: true
-        });
-    } catch(e) {
-        console.warn('⚠️ Nije moguće presresti location.href:', e);
-    }
     
     console.log('✅ Zaštita od preusmeravanja aktivirana!');
 })();
@@ -62,7 +34,6 @@ let currentScreenState = 'languages';
 function exitApp() {
     console.log("🚪 Exit dugme kliknuto!");
     
-    // Umesto da brišeš ceo HTML, prikaži lepu poruku
     const loginScreen = document.getElementById('loginScreen');
     const languageScreen = document.getElementById('languageScreen');
     
@@ -76,23 +47,10 @@ function exitApp() {
         poruka = translations[currentLang]?.exit_poruka || "Thanks for using this app! 👋";
     }
     
-    // Koristi modern alert umesto brisanja HTML-a
     if (typeof showModernAlert === 'function') {
         showModernAlert('👋 Izlaz', poruka, '👋');
-    } else {
-        // Fallback ako showModernAlert nije definisan
-        document.body.innerHTML = `
-            <div style="text-align: center; color: #FFD700; background: #1a237e; min-height: 100vh; display: flex; justify-content: center; align-items: center; flex-direction: column; padding: 20px;">
-                <div style="font-size: 80px; margin-bottom: 20px;">👋</div>
-                <div style="font-size: 32px; font-weight: bold;">${poruka}</div>
-                <div style="font-size: 16px; color: #888; margin-top: 30px;">© Supplies App</div>
-                <button onclick="location.reload()" style="margin-top:30px; padding:12px 30px; background:#FFD700; color:#1a237e; border:none; border-radius:8px; font-size:18px; cursor:pointer; font-weight:bold;">
-                    🔄 Restart App
-                </button>
-            </div>
-        `;
+        return;
     }
-}
     
     document.body.innerHTML = '';
     document.body.style.background = '#1a237e';
@@ -124,10 +82,8 @@ function exitApp() {
 function showModernAlert(title, message, icon = '📢') {
     console.log('🔔 Alert:', title, message);
     
-    // Zatvori postojeći
     closeModernAlert();
     
-    // Kreiraj overlay
     const overlay = document.createElement('div');
     overlay.id = 'modernAlertDynamic';
     overlay.style.cssText = `
@@ -145,7 +101,6 @@ function showModernAlert(title, message, icon = '📢') {
         animation: fadeIn 0.3s ease;
     `;
     
-    // Kreiraj box
     const box = document.createElement('div');
     box.style.cssText = `
         background: #8B0000;
@@ -180,11 +135,9 @@ function showModernAlert(title, message, icon = '📢') {
 }
 
 function closeModernAlert() {
-    // Obriši dinamički kreirani
     const dynamic = document.getElementById('modernAlertDynamic');
     if (dynamic) dynamic.remove();
     
-    // Zatvori i stari ako postoji
     const old = document.getElementById('modernAlert');
     if (old) {
         old.style.display = 'none';
@@ -198,16 +151,13 @@ let confirmCallback = null;
 function showModernConfirm(title, message, onYesCallback, onNoCallback, icon = '⚠️') {
     console.log('⚠️ Confirm:', title, message);
     
-    // Zatvori postojeći
     closeModernConfirm();
     
-    // Sačuvaj callback-ove
     confirmCallback = {
         onYes: onYesCallback || function() { closeModernConfirm(); },
         onNo: onNoCallback || function() { closeModernConfirm(); }
     };
     
-    // Kreiraj overlay
     const overlay = document.createElement('div');
     overlay.id = 'modernConfirmDynamic';
     overlay.style.cssText = `
@@ -225,7 +175,6 @@ function showModernConfirm(title, message, onYesCallback, onNoCallback, icon = '
         animation: fadeIn 0.3s ease;
     `;
     
-    // Kreiraj box
     const box = document.createElement('div');
     box.style.cssText = `
         background: #8B0000;
@@ -288,11 +237,9 @@ function handleConfirmNo() {
 }
 
 function closeModernConfirm() {
-    // Obriši dinamički kreirani
     const dynamic = document.getElementById('modernConfirmDynamic');
     if (dynamic) dynamic.remove();
     
-    // Zatvori i stari ako postoji
     const old = document.getElementById('modernConfirm');
     if (old) {
         old.style.display = 'none';
@@ -300,7 +247,7 @@ function closeModernConfirm() {
     }
 }
 
-// Dodaj CSS za animaciju (ako već ne postoji)
+// Dodaj CSS za animaciju
 (function addAnimationStyle() {
     if (!document.getElementById('alertAnimations')) {
         const style = document.createElement('style');
@@ -314,6 +261,7 @@ function closeModernConfirm() {
         document.head.appendChild(style);
     }
 })();
+
 // ===== 1. JEZICI =====
 const languages = {
     sr: { name: 'Srpski', flag: '/Household_supplies/icons/jezici/srpski.png' },
