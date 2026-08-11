@@ -2051,6 +2051,12 @@ function startVoiceRecognition() {
         processVoiceCommand(speechResult);
         
         setTimeout(function() {
+            // PROVERA: Ako smo na ekranu za unos podataka, NE zatvaramo zvučni meni i NE vraćamo mainScreen!
+            if (window.currentScreenState === 'dataEntry') {
+                console.log('📝 Ostavljam zvučni meni otvorenim za unos podataka');
+                return;
+            }
+
             const voiceMenu = document.getElementById('voiceMenuScreen');
             if (voiceMenu) {
                 voiceMenu.style.display = 'none';
