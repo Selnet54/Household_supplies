@@ -74,6 +74,16 @@ function exitApp() {
 
 // ===== MODERNI ALERT I CONFIRM - DINAMIČKI KREIRANI =====
 
+function closeModernAlert() {
+    const dynamic = document.getElementById('modernAlertDynamic');
+    if (dynamic) dynamic.remove();
+    
+    const old = document.getElementById('modernAlert');
+    if (old) {
+        old.style.display = 'none';
+        old.classList.remove('active');
+    }
+}// ===== 0. EXIT FUNKCIJA =====
 function exitApp() {
     console.log("🚪 Exit dugme kliknuto!");
     
@@ -90,12 +100,94 @@ function exitApp() {
         poruka = translations[currentLang]?.exit_poruka || "Thanks for using this app! 👋";
     }
     
-    if (typeof showModernAlert === 'function') {
-        showModernAlert('👋 Izlaz', poruka, '👋');  // <--- OVO UKLANJAŠ
-        return;
-    }
+    // DIREKTNO PRIKAŽI ZAHVALNI EKRAN - BEZ POPUP PROZORA
+    document.body.innerHTML = '';
+    document.body.style.background = '#1a237e';
+    document.body.style.margin = '0';
+    document.body.style.padding = '0';
+    document.body.style.width = '100%';
+    document.body.style.height = '100vh';
+    document.body.style.display = 'flex';
+    document.body.style.justifyContent = 'center';
+    document.body.style.alignItems = 'center';
+    document.body.style.flexDirection = 'column';
+    document.body.style.fontFamily = 'Arial, sans-serif';
     
-    // ... ostatak koda ...
+    document.body.innerHTML = `
+        <div style="text-align: center; color: #FFD700;">
+            <div style="font-size: 80px; margin-bottom: 20px;">👋</div>
+            <div style="font-size: 32px; font-weight: bold;">${poruka}</div>
+            <div style="font-size: 16px; color: #888; margin-top: 30px;">© Supplies App</div>
+            <button onclick="location.reload()" style="margin-top:30px; padding:12px 30px; background:#FFD700; color:#1a237e; border:none; border-radius:8px; font-size:18px; cursor:pointer; font-weight:bold;">
+                🔄 Restart App
+            </button>
+        </div>
+    `;
+}
+
+// ===== MODERNI ALERT - DINAMIČKI KREIRAN =====
+function showModernAlert(title, message, icon = '📢') {
+    console.log('🔔 Alert:', title, message);
+    
+    // Ukloni postojeći alert
+    const existing = document.getElementById('modernAlertDynamic');
+    if (existing) existing.remove();
+    
+    const overlay = document.createElement('div');
+    overlay.id = 'modernAlertDynamic';
+    overlay.style.cssText = `
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        background: rgba(0,0,0,0.7) !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        z-index: 999999 !important;
+        backdrop-filter: blur(5px) !important;
+        animation: fadeIn 0.3s ease !important;
+    `;
+    
+    const box = document.createElement('div');
+    box.style.cssText = `
+        background: #8B0000 !important;
+        border: 3px solid #FFD700 !important;
+        border-radius: 14px !important;
+        padding: 15px 20px !important;
+        max-width: 300px !important;
+        width: 70% !important;
+        text-align: center !important;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.5) !important;
+        color: #FFD700 !important;
+        position: relative !important;
+        z-index: 9999999 !important;
+    `;
+    
+    box.innerHTML = `
+        <div style="font-size:32px; margin-bottom:5px;">${icon || '📢'}</div>
+        <h2 style="color:#FFD700; margin-bottom:5px; font-size:17px; margin:0 0 5px 0; font-weight:bold;">${title || 'Obaveštenje'}</h2>
+        <p style="font-size:13px; color:#FFD700; margin-bottom:10px; line-height:1.3;">${message || 'Poruka'}</p>
+        <button onclick="closeModernAlert()" style="
+            background: #2E7D32 !important;
+            color: #FFD700 !important;
+            border: none !important;
+            padding: 5px 20px !important;
+            border-radius: 8px !important;
+            font-size: 13px !important;
+            cursor: pointer !important;
+            font-weight: bold !important;
+        ">OK</button>
+    `;
+    
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+    
+    // Automatsko zatvaranje nakon 2 sekunde
+    setTimeout(function() {
+        closeModernAlert();
+    }, 2000);
 }
 
 function closeModernAlert() {
@@ -125,59 +217,61 @@ function showModernConfirm(title, message, onYesCallback, onNoCallback, icon = '
     const overlay = document.createElement('div');
     overlay.id = 'modernConfirmDynamic';
     overlay.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.7);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 99999;
-        backdrop-filter: blur(5px);
-        animation: fadeIn 0.3s ease;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        background: rgba(0,0,0,0.7) !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        z-index: 999999 !important;
+        backdrop-filter: blur(5px) !important;
+        animation: fadeIn 0.3s ease !important;
     `;
     
     const box = document.createElement('div');
     box.style.cssText = `
-        background: #8B0000;
-        border: 3px solid #FFD700;
-        border-radius: 24px;
-        padding: 40px;
-        max-width: 400px;
-        width: 90%;
-        text-align: center;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-        color: #FFD700;
+        background: #8B0000 !important;
+        border: 3px solid #FFD700 !important;
+        border-radius: 14px !important;
+        padding: 15px 20px !important;
+        max-width: 300px !important;
+        width: 70% !important;
+        text-align: center !important;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.5) !important;
+        color: #FFD700 !important;
+        position: relative !important;
+        z-index: 9999999 !important;
     `;
     
     box.innerHTML = `
-        <div style="font-size:64px; margin-bottom:15px;">${icon || '⚠️'}</div>
-        <h2 style="color:#FFD700; margin-bottom:10px; font-size:28px; margin:0 0 10px 0;">${title || 'Potvrda'}</h2>
-        <p style="font-size:18px; color:#FFD700; margin-bottom:25px;">${message || 'Da li ste sigurni?'}</p>
-        <div style="display:flex; gap:10px;">
+        <div style="font-size:32px; margin-bottom:5px;">${icon || '⚠️'}</div>
+        <h2 style="color:#FFD700; margin-bottom:5px; font-size:17px; margin:0 0 5px 0; font-weight:bold;">${title || 'Potvrda'}</h2>
+        <p style="font-size:13px; color:#FFD700; margin-bottom:10px; line-height:1.3;">${message || 'Da li ste sigurni?'}</p>
+        <div style="display:flex; gap:8px;">
             <button onclick="handleConfirmYes()" style="
                 flex: 1;
-                background: #2E7D32;
-                color: #FFD700;
-                border: none;
-                padding: 12px;
-                border-radius: 12px;
-                font-size: 18px;
-                cursor: pointer;
-                font-weight: bold;
+                background: #2E7D32 !important;
+                color: #FFD700 !important;
+                border: none !important;
+                padding: 5px 12px !important;
+                border-radius: 8px !important;
+                font-size: 13px !important;
+                cursor: pointer !important;
+                font-weight: bold !important;
             ">✅ Da</button>
             <button onclick="handleConfirmNo()" style="
                 flex: 1;
-                background: #B71C1C;
-                color: #FFD700;
-                border: none;
-                padding: 12px;
-                border-radius: 12px;
-                font-size: 18px;
-                cursor: pointer;
-                font-weight: bold;
+                background: #B71C1C !important;
+                color: #FFD700 !important;
+                border: none !important;
+                padding: 5px 12px !important;
+                border-radius: 8px !important;
+                font-size: 13px !important;
+                cursor: pointer !important;
+                font-weight: bold !important;
             ">✖ Ne</button>
         </div>
     `;
@@ -225,7 +319,6 @@ function closeModernConfirm() {
         document.head.appendChild(style);
     }
 })();
-
 // ===== 1. JEZICI =====
 const languages = {
     sr: { name: 'Srpski', flag: '/Household_supplies/icons/jezici/srpski.png' },
