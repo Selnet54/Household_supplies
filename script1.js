@@ -132,6 +132,11 @@ function showModernAlert(title, message, icon = '📢') {
     
     overlay.appendChild(box);
     document.body.appendChild(overlay);
+    
+    // ===== AUTOMATSKO ZATVARANJE NAKON 2 SEKUNDE =====
+    setTimeout(function() {
+        closeModernAlert();
+    }, 2000);
 }
 
 function closeModernAlert() {
@@ -1688,14 +1693,12 @@ function handleBackAction() {
     }
 }
 
-// ============================================
-// GLOBALNA FUNKCIJA ZA LOGIN
-// ============================================
+// ===== TRIGGER LOGIN =====
 function triggerLogin() {
     console.log("🔐 triggerLogin pozvan!");
     const phoneInput = document.getElementById('phoneInput');
     if (!phoneInput) {
-        showModernAlert(t('error'), 'Phone input not found!', '❌');
+        showModernAlert('Greška', 'Polje za telefon nije pronađeno!', '❌');
         return;
     }
     const phone = phoneInput.value.trim();
@@ -1705,7 +1708,7 @@ function triggerLogin() {
         showScreen('languageScreen');
         renderLanguages();
     } else {
-        showModernAlert(t('invalid_input'), t('please_enter_phone'), '📱');
+        showModernAlert('Greška', 'Unesite validan broj telefona (9+ cifara)!', '📱');
     }
 }
 // ===== AŽURIRANJE JEZIKA HEDERA =====
@@ -1757,61 +1760,21 @@ function updateHeaderLanguage() {
     
     console.log('✅ Header i jezik ažurirani na:', lang);
 }
-// ===== GLAVNI DOGAĐAJI (Delegirani pristup) =====
+// ============================================
+// GLAVNI DOGAĐAJI - SVI U JEDNOM
+// ============================================
+
+// ===== 1. DOMContentLoaded - inicijalizacija =====
 document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ DOM je spreman!');
 
-    // ODMAH OVDE UBACUJEMO POZIVE ZA JEZIK I HEDER:
+    // Ažuriranje jezika
     updateHeaderLanguage();
     if (typeof updateInterfaceLanguage === 'function') {
         updateInterfaceLanguage();
     }
 
-    // Slušamo sve klikove na nivou celog dokumenta
-    document.addEventListener('click', function(e) {
-        // ===== LOGIN DUGME (ENTER) =====
-        if (e.target && (e.target.id === 'loginBtn' || e.target.closest('#loginBtn'))) {
-            e.preventDefault();
-            console.log('🖱️ Klik na ENTER dugme');
-            triggerLogin();
-        }
-
-        // ===== EXIT DUGMAD =====
-        if (e.target && (e.target.id === 'exitLoginBtn' || e.target.closest('#exitLoginBtn') ||
-                         e.target.id === 'exitLangBtn'  || e.target.closest('#exitLangBtn')  ||
-                         e.target.id === 'exitMainBtn'  || e.target.closest('#exitMainBtn'))) {
-            console.log('🚪 Exit dugme kliknuto putem delegiranja');
-            exitApp();
-        }
-
-        // ===== BACK DUGME =====
-        if (e.target && (e.target.id === 'backBtn' || e.target.closest('#backBtn'))) {
-            handleBackAction();
-        }
-
-        // ===== INVENTORY DUGME =====
-        if (e.target && (e.target.id === 'inventoryBtn' || e.target.closest('#inventoryBtn'))) {
-            console.log('📦 Inventory klik');
-            renderInventory();
-        }
-
-        // ===== SHOPPING DUGME =====
-        if (e.target && (e.target.id === 'shoppingBtn' || e.target.closest('#shoppingBtn'))) {
-            console.log('🛒 Shopping klik');
-            renderShoppingList();
-        }
-
-        // ===== SUPPORT DUGMAD =====
-        if (e.target && (e.target.id === 'supportBtn' || e.target.closest('#supportBtn'))) {
-            openSupportDialog();
-        }
-        if (e.target && (e.target.id === 'closeSupportBtn' || e.target.closest('#closeSupportBtn') ||
-                         e.target.id === 'closeSupportBtn2' || e.target.closest('#closeSupportBtn2'))) {
-            closeSupportDialog();
-        }
-    });
-
-    // ===== ENTER TASTER NA INPUT POLJU =====
+    // ===== ENTER TASTER NA PHONE INPUT =====
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Enter') {
             const activeElement = document.activeElement;
@@ -1823,11 +1786,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         if (e.key === 'Escape') {
             closeSupportDialog();
-            closeModernConfirm(); // DODATO - zatvara i Confirm na ESC
+            closeModernConfirm();
         }
     });
 
-       // ===== CONFIRM DUGMAD =====
+    // ===== CONFIRM DUGMAD =====
     const yesBtn = document.getElementById('confirmYesBtn');
     const noBtn = document.getElementById('confirmNoBtn');
     
@@ -1851,8 +1814,58 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('✅ Confirm No dugme povezano');
     }
 
-    console.log('✅ Svi događaji uspešno povezani preko delegiranja!');
+    console.log('✅ Svi događaji uspešno inicijalizovani!');
 });
+
+// ===== 2. DELEGIRANI KLIKOVI - SVI U JEDNOM =====
+document.addEventListener('click', function(e) {
+    const target = e.target;
+    
+    // ===== LOGIN DUGME =====
+    if (target.id === 'loginBtn' || target.closest('#loginBtn')) {
+        e.preventDefault();
+        console.log('🖱️ Klik na ENTER dugme');
+        triggerLogin();
+    }
+
+    // ===== EXIT DUGMAD =====
+    if (target.id === 'exitLoginBtn' || target.closest('#exitLoginBtn') ||
+        target.id === 'exitLangBtn'  || target.closest('#exitLangBtn')  ||
+        target.id === 'exitMainBtn'  || target.closest('#exitMainBtn') ||
+        target.id === 'exitChoiceBtn' || target.closest('#exitChoiceBtn')) {
+        console.log('🚪 Exit dugme kliknuto');
+        exitApp();
+    }
+
+    // ===== BACK DUGME =====
+    if (target.id === 'backBtn' || target.closest('#backBtn') ||
+        target.closest('.btn-back') || target.closest('#headerBackBtn') ||
+        target.closest('.back-arrow') || target.closest('.header-back')) {
+        e.preventDefault();
+        handleHeaderBack();
+    }
+
+    // ===== INVENTORY DUGME =====
+    if (target.id === 'inventoryBtn' || target.closest('#inventoryBtn')) {
+        console.log('📦 Inventory klik');
+        renderInventory();
+    }
+
+    // ===== SHOPPING DUGME =====
+    if (target.id === 'shoppingBtn' || target.closest('#shoppingBtn')) {
+        console.log('🛒 Shopping klik');
+        renderShoppingList();
+    }
+
+    // ===== SUPPORT DUGMAD =====
+    if (target.id === 'supportBtn' || target.closest('#supportBtn')) {
+        openSupportDialog();
+    }
+    if (target.id === 'closeSupportBtn' || target.closest('#closeSupportBtn') ||
+        target.id === 'closeSupportBtn2' || target.closest('#closeSupportBtn2')) {
+        closeSupportDialog();
+    }
+}, true); // true = faza hvatanja (capture phase)
 
 // ============================================
 // GLOBALNE FUNKCIJE ZA VOICE ADDON
@@ -1867,6 +1880,7 @@ window.t = t;
 window.currentLang = currentLang;
 
 console.log('✅ Originalne funkcije izvezene!');
+
 // ============================================
 // FUNKCIJE ZA 3. EKRAN (IZBOR NAČINA UNOSA)
 // ============================================
@@ -1893,6 +1907,7 @@ function goBackFromVoice() {
     }
     showScreen('choiceScreen');
 }
+
 // ============================================
 // GLASOVNA KONTROLA I MAPIRANJE JEZIKA (VOICE ADDON)
 // ============================================
@@ -1900,7 +1915,6 @@ function goBackFromVoice() {
 let recognition = null;
 let isListening = false;
 
-// Mapiranje naših skraćenica jezika na standardne jezičke kodove za Web Speech API
 const speechLangMap = {
     sr: 'sr-RS',
     en: 'en-US',
@@ -1914,7 +1928,6 @@ const speechLangMap = {
     fr: 'fr-FR'
 };
 
-// Glasovna sinteza (da aplikacija odgovori glasom)
 function speakText(text) {
     if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
@@ -1925,7 +1938,6 @@ function speakText(text) {
     }
 }
 
-// Glavna funkcija za pokretanje prepoznavanja glasa
 function startVoiceRecognition() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     
@@ -1961,37 +1973,32 @@ function startVoiceRecognition() {
     };
 
     recognition.onresult = function(event) {
-    const speechResult = event.results[0][0].transcript.trim();
-    console.log('🗣️ Prepoznato:', speechResult);
-    
-    const statusEl = document.getElementById('voiceStatus');
-    if (statusEl) {
-        statusEl.textContent = `🗣️ "${speechResult}"`;
-        statusEl.style.color = '#FFD700';
-    }
-    
-    // POZOVI processVoiceCommand
-    processVoiceCommand(speechResult);
-    
-    // DIREKTNO SAKRIJ VOICE MENU I PRIKAŽI MAIN SCREEN
-    setTimeout(function() {
-        // Sakrij voice menu
-        const voiceMenu = document.getElementById('voiceMenuScreen');
-        if (voiceMenu) {
-            voiceMenu.style.display = 'none';
-            voiceMenu.classList.remove('active');
-            console.log('🔇 Voice menu sakriven nakon komande');
+        const speechResult = event.results[0][0].transcript.trim();
+        console.log('🗣️ Prepoznato:', speechResult);
+        
+        const statusEl = document.getElementById('voiceStatus');
+        if (statusEl) {
+            statusEl.textContent = `🗣️ "${speechResult}"`;
+            statusEl.style.color = '#FFD700';
         }
         
-        // Prikaži mainScreen ako je potrebno
-        const mainScreen = document.getElementById('mainScreen');
-        if (mainScreen && mainScreen.style.display !== 'flex') {
-            mainScreen.style.display = 'flex';
-            mainScreen.classList.add('active');
-            console.log('✅ mainScreen prikazan iz recognition.onresult');
-        }
-    }, 300);
-};
+        processVoiceCommand(speechResult);
+        
+        setTimeout(function() {
+            const voiceMenu = document.getElementById('voiceMenuScreen');
+            if (voiceMenu) {
+                voiceMenu.style.display = 'none';
+                voiceMenu.classList.remove('active');
+                console.log('🔇 Voice menu sakriven nakon komande');
+            }
+            const mainScreen = document.getElementById('mainScreen');
+            if (mainScreen && mainScreen.style.display !== 'flex') {
+                mainScreen.style.display = 'flex';
+                mainScreen.classList.add('active');
+                console.log('✅ mainScreen prikazan iz recognition.onresult');
+            }
+        }, 300);
+    };
 
     recognition.onerror = function(event) {
         console.error('⚠️ Greška u prepoznavanju glasa:', event.error);
@@ -2022,24 +2029,18 @@ function startVoiceRecognition() {
     }
 }
 
-// STARA PROCESNA FUNKCIJA (ZA FALLBACK)
-// Analiza izgovorenog teksta i usmeravanje na elemente app
-// Analiza izgovorenog teksta i usmeravanje na elemente app
 function processVoiceCommand(command) {
     console.log('🎤 processVoiceCommand prima:', command);
     
-    // POZOVI voiceCommand IZ voiceCommands.js
     if (typeof window.voiceCommand === 'function') {
         console.log('📞 Pozivam window.voiceCommand iz processVoiceCommand');
         const result = window.voiceCommand(command);
         console.log('✅ Rezultat voiceCommand:', result);
         
-        // Ako je komanda uspešna, zaustavi recognition
         if (result === true) {
             if (typeof window.stopVoiceRecognition === 'function') {
                 window.stopVoiceRecognition();
             }
-            // Emituj događaj
             document.dispatchEvent(new CustomEvent('voiceCommandProcessed', { 
                 detail: { success: true, command: command }
             }));
@@ -2048,7 +2049,6 @@ function processVoiceCommand(command) {
     } else {
         console.error('❌ window.voiceCommand nije definisan!');
         
-        // FALLBACK - stara obrada
         const cmd = command.toLowerCase().trim();
         
         const inventoryKeywords = ['stanje', 'zalihe', 'inventory', 'stock', 'bestand', 'készlet', 'запаси', '库存', 'inventario'];
@@ -2088,7 +2088,6 @@ function processVoiceCommand(command) {
     }
 }
 
-// Funkcija za zaustavljanje prepoznavanja
 function stopVoiceRecognition() {
     if (recognition) {
         try {
@@ -2103,7 +2102,7 @@ function stopVoiceRecognition() {
         statusEl.style.color = '#aaa';
     }
 }
-// Pomoćna funkcija za sakrivanje svih ekrana
+
 function hideAllScreens() {
     document.querySelectorAll('.screen').forEach(s => {
         s.style.display = 'none';
@@ -2111,27 +2110,23 @@ function hideAllScreens() {
     });
 }
 
-// Glavna funkcija za dugme Nazad
 function handleHeaderBack() {
     console.log('⬅ Kliknuto dugme Nazad');
     
     const choiceScreen = document.getElementById('choiceScreen');
     const voiceMenuScreen = document.getElementById('voiceMenuScreen');
     
-    // Ako je aktivan glasovni meni, vrati se preko njega
     if (voiceMenuScreen && voiceMenuScreen.classList.contains('active') && typeof goBackFromVoice === 'function') {
         goBackFromVoice();
         return;
     }
     
-    // U svim ostalim slučajevima, vrati korisnika na ekran sa jezicima (choiceScreen)
     hideAllScreens();
     
     if (choiceScreen) {
         choiceScreen.style.display = 'flex';
         choiceScreen.classList.add('active');
     } else {
-        // Krajnji fallback ako choiceScreen ne postoji
         const login = document.getElementById('loginScreen');
         if (login) {
             login.style.display = 'flex';
@@ -2140,13 +2135,6 @@ function handleHeaderBack() {
     }
 }
 
-// Sigurno slušanje klika na dugme nazad u hederu
-document.addEventListener('click', function(e) {
-    if (e.target.closest('.btn-back') || e.target.closest('#headerBackBtn') || e.target.closest('.back-arrow') || e.target.closest('.header-back')) {
-        e.preventDefault();
-        handleHeaderBack();
-    }
-}, true);
 // Izvezi funkcije globalno
 window.startVoiceRecognition = startVoiceRecognition;
 window.stopVoiceRecognition = stopVoiceRecognition;
