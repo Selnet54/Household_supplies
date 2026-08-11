@@ -352,28 +352,29 @@ function voiceCommand(command) {
     }
 
     // ===== KOMANDE ZA PRELAZAK =====
-    let handled = false;
+    // ===== KOMANDE ZA PRELAZAK =====
+let handled = false;
 
-    const entryKeywords = ['unos', 'podaci', 'data', 'entry', 'unos podataka', 'novi unos'];
-    if (entryKeywords.some(k => cleanText.includes(k))) {
-        console.log('📝 Otvaranje ekrana za unos podataka');
-        handled = true;
-        cleanup();
-        window.currentScreenState = 'dataEntry';
-        forceHideVoiceMenu();
-        setTimeout(function() {
-            if (typeof renderDataEntry === 'function') {
-                renderDataEntry('');
-            }
-            const status = document.getElementById('voiceStatus');
-            if (status) {
-                status.innerText = '📝 Govorite podatke za unos. "plus" za čuvanje, "OK" za kraj';
-                status.style.color = '#FFD700';
-            }
-        }, 100);
-        return true;
-    }
-
+// "unos" → otvara ekran za unos podataka (prošireno da hvata i "uno", "un", itd.)
+const entryKeywords = ['unos', 'podaci', 'data', 'entry', 'unos podataka', 'novi unos', 'uno', 'un'];
+if (entryKeywords.some(k => cleanText === k || cleanText.includes(k))) {
+    console.log('📝 Otvaranje ekrana za unos podataka');
+    handled = true;
+    cleanup();
+    window.currentScreenState = 'dataEntry';
+    forceHideVoiceMenu();
+    setTimeout(function() {
+        if (typeof renderDataEntry === 'function') {
+            renderDataEntry('');
+        }
+        const status = document.getElementById('voiceStatus');
+        if (status) {
+            status.innerText = '📝 Govorite podatke za unos. "plus" za čuvanje, "OK" za kraj';
+            status.style.color = '#FFD700';
+        }
+    }, 100);
+    return true;
+}
     const invKeywords = ['zalihe', 'zaliha', 'stanje', 'inventory', 'inv', 'stock'];
     if (invKeywords.some(k => cleanText.includes(k))) {
         console.log('📦 Prelaz na zalihe');
