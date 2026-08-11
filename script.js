@@ -31,6 +31,7 @@ function exitApp() {
         poruka = translations[currentLang]?.exit_poruka || "Thanks for using this app! 👋";
     }
     
+    // DIREKTNO PRIKAŽI ZAHVALNI EKRAN - BEZ POPUP PROZORA
     document.body.innerHTML = '';
     document.body.style.background = '#1a237e';
     document.body.style.margin = '0';
@@ -54,6 +55,201 @@ function exitApp() {
         </div>
     `;
 }
+
+// ===== MODERNI ALERT - DINAMIČKI KREIRAN =====
+function showModernAlert(title, message, icon = '📢') {
+    console.log('🔔 Alert:', title, message);
+    
+    // Ukloni postojeći alert
+    const existing = document.getElementById('modernAlertDynamic');
+    if (existing) existing.remove();
+    
+    const overlay = document.createElement('div');
+    overlay.id = 'modernAlertDynamic';
+    overlay.style.cssText = `
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        background: rgba(0,0,0,0.7) !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        z-index: 999999 !important;
+        backdrop-filter: blur(5px) !important;
+        animation: fadeIn 0.3s ease !important;
+    `;
+    
+    const box = document.createElement('div');
+    box.style.cssText = `
+        background: #8B0000 !important;
+        border: 3px solid #FFD700 !important;
+        border-radius: 14px !important;
+        padding: 15px 20px !important;
+        max-width: 300px !important;
+        width: 70% !important;
+        text-align: center !important;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.5) !important;
+        color: #FFD700 !important;
+        position: relative !important;
+        z-index: 9999999 !important;
+    `;
+    
+    box.innerHTML = `
+        <div style="font-size:32px; margin-bottom:5px;">${icon || '📢'}</div>
+        <h2 style="color:#FFD700; margin-bottom:5px; font-size:17px; margin:0 0 5px 0; font-weight:bold;">${title || 'Obaveštenje'}</h2>
+        <p style="font-size:13px; color:#FFD700; margin-bottom:10px; line-height:1.3;">${message || 'Poruka'}</p>
+        <button onclick="closeModernAlert()" style="
+            background: #2E7D32 !important;
+            color: #FFD700 !important;
+            border: none !important;
+            padding: 5px 20px !important;
+            border-radius: 8px !important;
+            font-size: 13px !important;
+            cursor: pointer !important;
+            font-weight: bold !important;
+        ">OK</button>
+    `;
+    
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+    
+    // Automatsko zatvaranje nakon 2 sekunde
+    setTimeout(function() {
+        closeModernAlert();
+    }, 2000);
+}
+
+function closeModernAlert() {
+    const dynamic = document.getElementById('modernAlertDynamic');
+    if (dynamic) dynamic.remove();
+    
+    const old = document.getElementById('modernAlert');
+    if (old) {
+        old.style.display = 'none';
+        old.classList.remove('active');
+    }
+}
+
+// ===== CONFIRM =====
+let confirmCallback = null;
+
+function showModernConfirm(title, message, onYesCallback, onNoCallback, icon = '⚠️') {
+    console.log('⚠️ Confirm:', title, message);
+    
+    closeModernConfirm();
+    
+    confirmCallback = {
+        onYes: onYesCallback || function() { closeModernConfirm(); },
+        onNo: onNoCallback || function() { closeModernConfirm(); }
+    };
+    
+    const overlay = document.createElement('div');
+    overlay.id = 'modernConfirmDynamic';
+    overlay.style.cssText = `
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        background: rgba(0,0,0,0.7) !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        z-index: 999999 !important;
+        backdrop-filter: blur(5px) !important;
+        animation: fadeIn 0.3s ease !important;
+    `;
+    
+    const box = document.createElement('div');
+    box.style.cssText = `
+        background: #8B0000 !important;
+        border: 3px solid #FFD700 !important;
+        border-radius: 14px !important;
+        padding: 15px 20px !important;
+        max-width: 300px !important;
+        width: 70% !important;
+        text-align: center !important;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.5) !important;
+        color: #FFD700 !important;
+        position: relative !important;
+        z-index: 9999999 !important;
+    `;
+    
+    box.innerHTML = `
+        <div style="font-size:32px; margin-bottom:5px;">${icon || '⚠️'}</div>
+        <h2 style="color:#FFD700; margin-bottom:5px; font-size:17px; margin:0 0 5px 0; font-weight:bold;">${title || 'Potvrda'}</h2>
+        <p style="font-size:13px; color:#FFD700; margin-bottom:10px; line-height:1.3;">${message || 'Da li ste sigurni?'}</p>
+        <div style="display:flex; gap:8px;">
+            <button onclick="handleConfirmYes()" style="
+                flex: 1;
+                background: #2E7D32 !important;
+                color: #FFD700 !important;
+                border: none !important;
+                padding: 5px 12px !important;
+                border-radius: 8px !important;
+                font-size: 13px !important;
+                cursor: pointer !important;
+                font-weight: bold !important;
+            ">✅ Da</button>
+            <button onclick="handleConfirmNo()" style="
+                flex: 1;
+                background: #B71C1C !important;
+                color: #FFD700 !important;
+                border: none !important;
+                padding: 5px 12px !important;
+                border-radius: 8px !important;
+                font-size: 13px !important;
+                cursor: pointer !important;
+                font-weight: bold !important;
+            ">✖ Ne</button>
+        </div>
+    `;
+    
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+}
+
+function handleConfirmYes() {
+    if (confirmCallback && confirmCallback.onYes) {
+        confirmCallback.onYes();
+    }
+    closeModernConfirm();
+}
+
+function handleConfirmNo() {
+    if (confirmCallback && confirmCallback.onNo) {
+        confirmCallback.onNo();
+    }
+    closeModernConfirm();
+}
+
+function closeModernConfirm() {
+    const dynamic = document.getElementById('modernConfirmDynamic');
+    if (dynamic) dynamic.remove();
+    
+    const old = document.getElementById('modernConfirm');
+    if (old) {
+        old.style.display = 'none';
+        old.classList.remove('active');
+    }
+}
+
+// Dodaj CSS za animaciju
+(function addAnimationStyle() {
+    if (!document.getElementById('alertAnimations')) {
+        const style = document.createElement('style');
+        style.id = 'alertAnimations';
+        style.textContent = `
+            @keyframes fadeIn {
+                from { opacity: 0; transform: scale(0.9); }
+                to { opacity: 1; transform: scale(1); }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+})();
 
 // ===== MODERNI ALERT =====
 function showModernAlert(title, message, icon = '📢') {
