@@ -353,42 +353,94 @@ function voiceCommand(command) {
 
  
     // ===== KOMANDE ZA PRELAZAK =====
+// ===== KOMANDE ZA PRELAZAK =====
 let handled = false;
 
 const entryKeywords = ['unos', 'podaci', 'data', 'entry', 'unos podataka', 'novi unos', 'uno', 'un'];
 if (entryKeywords.some(k => cleanText === k || cleanText.includes(k))) {
-    console.log('📝 Otvaranje ekrana za unos podataka i zadržavanje/prilagođavanje zvučnog menija');
+    console.log('📝 Otvaranje ekrana za unos podataka');
     handled = true;
     
     // 1. Postavi stanje ekrana na unos
     window.currentScreenState = 'dataEntry';
     
-    // 2. Otvori formu za unos na ekranu
+    // 2. Otvori formu za unos
     setTimeout(function() {
         if (typeof renderDataEntry === 'function') {
             renderDataEntry('');
         }
         const status = document.getElementById('voiceStatus');
         if (status) {
-            status.innerText = '📝 Govorite podatke za unos. "plus" za čuvanje, "OK" za kraj';
+            status.innerText = '🎤 Govorite podatke za unos. "plus" za čuvanje, "OK" za kraj';
             status.style.color = '#FFD700';
         }
+        
+        // 🔥 POKRENI KONTINUIRANO SLUŠANJE
+        setTimeout(function() {
+            console.log('🎤 Pokrećem kontinuirano slušanje za unos...');
+            
+            // Prvo zaustavi postojeće prepoznavanje
+            if (window.recognition) {
+                try {
+                    window.recognition.stop();
+                } catch(e) {}
+                window.recognition = null;
+            }
+            
+            // Pokreni novo prepoznavanje sa continuous: true
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (SpeechRecognition) {
+                const recognition = new SpeechRecognition();
+                recognition.lang = getCurrentLang() || 'sr-RS';
+                recognition.continuous = true;  // 🔥 OVO JE KLJUČNO!
+                recognition.interimResults = false;
+                recognition.maxAlternatives = 1;
+                
+                recognition.onresult = function(event) {
+                    const last = event.results.length - 1;
+                    const transcript = event.results[last][0].transcript;
+                    console.log('🗣️ Prepoznato (kontinuirano):', transcript);
+                    
+                    // Procesiraj komandu
+                    if (typeof window.voiceCommand === 'function') {
+                        window.voiceCommand(transcript);
+                    }
+                };
+                
+                recognition.onerror = function(event) {
+                    console.log('⚠️ Greška prepoznavanja:', event.error);
+                    if (event.error === 'not-allowed') {
+                        console.error('❌ Nema dozvole za mikrofon');
+                    }
+                };
+                
+                recognition.onend = function() {
+                    console.log('🔄 Prepoznavanje završeno');
+                    // Ako je i dalje dataEntry, restartuj
+                    if (window.currentScreenState === 'dataEntry') {
+                        setTimeout(() => {
+                            try {
+                                recognition.start();
+                                console.log('🔄 Restartovanje slušanja...');
+                            } catch(e) {
+                                console.log('⚠️ Greška pri restartu:', e);
+                            }
+                        }, 200);
+                    }
+                };
+                
+                try {
+                    recognition.start();
+                    window.recognition = recognition;
+                    console.log('✅ Kontinuirano slušanje aktivirano');
+                } catch(e) {
+                    console.log('⚠️ Greška pri startovanju:', e);
+                }
+            } else {
+                console.error('❌ Speech Recognition nije podržan');
+            }
+        }, 300);
     }, 100);
-    
-    // UMESTO forceHideVoiceMenu() - ovde ostavljamo zvučni meni vidljivim 
-    // ili pokrećemo ponovo slušanje za diktiranje stavki ako je to potrebno:
-    const voiceMenu = document.getElementById('voiceMenuScreen');
-    if (voiceMenu) {
-        voiceMenu.style.display = 'flex';
-        voiceMenu.classList.add('active');
-    }
-    
-    // Ako želite da se prepoznavanje glasa odmah nastavi za unos stavki:
-    if (typeof window.startVoiceRecognition === 'function') {
-        setTimeout(() => {
-            window.startVoiceRecognition();
-        }, 500);
-    }
     
     return true;
 }
