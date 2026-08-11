@@ -533,6 +533,43 @@ function goBackFromVoice() {
         choiceScreen.classList.add('active');
     }
 }
+// ============================================
+// GLAVNA FUNKCIJA ZA GLASOVNI UNOS
+// ============================================
+function voiceAddProduct(text) {
+    console.log('🎤 Glasovni unos proizvoda:', text);
+    const parsed = parseVoiceInput(text);
+    if (!parsed.product || parsed.product.length < 2) {
+        if (typeof showModernAlert === 'function') {
+            showModernAlert('Greška', 'Nisam prepoznao naziv proizvoda.', '❌');
+        }
+        return false;
+    }
+    const today = new Date().toISOString().split('T')[0];
+    const productData = {
+        id: Date.now(),
+        product_name: parsed.product,
+        description: '(glasovni unos)',
+        piece: parsed.piece || '1',
+        quantity: parsed.quantity,
+        unit: parsed.unit || 'kom',
+        entry_date: today,
+        shelf_life_months: parsed.shelfLife || 12,
+        storage_location: parsed.storage || 'Ostava',
+        voice_input: true
+    };
+    let zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
+    zalihe.push(productData);
+    localStorage.setItem('zalihe', JSON.stringify(zalihe));
+    const msg = `${parsed.product} (${parsed.piece || '1'}, ${parsed.quantity} ${parsed.unit}, rok: ${parsed.shelfLife} meseci)`;
+    if (typeof showModernAlert === 'function') {
+        showModernAlert('✅ Uspešno dodato', msg, '✅');
+    }
+    if (typeof renderInventory === 'function') {
+        setTimeout(function() { renderInventory(); }, 300);
+    }
+    return true;
+}
 
 // ============================================
 // IZVOZ
