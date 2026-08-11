@@ -48,12 +48,20 @@ function parseVoiceInput(text) {
     
     // 1. Pronađi mesto skladištenja
     const storageMap = {
-        'zamrzivač1': 'Zamrzivač 1', 'zamrzivač 2': 'Zamrzivač 2', 'zamrzivač3': 'Zamrzivač 3',
-        'frižider': 'Frižider', 'frizider': 'Frižider',
-        'ostava': 'Ostava',
-        'freezer1': 'Freezer 1', 'freezer2': 'Freezer 2', 'freezer3': 'Freezer 3',
-        'refrigerator': 'Refrigerator', 'pantry': 'Pantry'
-    };
+    'zamrzivač1': 'Zamrzivač 1',
+    'zamrzivač2': 'Zamrzivač 2',
+    'zamrzivač3': 'Zamrzivač 3',
+    'zamrzivač': 'Zamrzivač 1',
+    'frižider': 'Frižider',
+    'frizider': 'Frižider',
+    'ostava': 'Ostava',
+    'freezer1': 'Freezer 1',
+    'freezer2': 'Freezer 2',
+    'freezer3': 'Freezer 3',
+    'freezer': 'Freezer 1',
+    'refrigerator': 'Refrigerator',
+    'pantry': 'Pantry'
+};
     
     for (let [key, value] of Object.entries(storageMap)) {
         if (cleanText.toLowerCase().includes(key)) {
@@ -360,27 +368,26 @@ function voiceCommand(command) {
     // ===== KOMANDE ZA PRELAZAK =====
     let handled = false;
 
-    // "unos" → otvara ekran za unos podataka
-    const entryKeywords = ['unos', 'podaci', 'data', 'entry'];
-    if (entryKeywords.some(k => cleanText.includes(k))) {
-        console.log('📝 Otvaranje ekrana za unos podataka');
-        handled = true;
-        cleanup();
-        window.currentScreenState = 'dataEntry';
-        forceHideVoiceMenu();
-        setTimeout(function() {
-            if (typeof renderDataEntry === 'function') {
-                renderDataEntry('');
-            }
-            const status = document.getElementById('voiceStatus');
-            if (status) {
-                status.innerText = '📝 Govorite podatke za unos. "plus" za čuvanje, "OK" za kraj';
-                status.style.color = '#FFD700';
-            }
-        }, 100);
-        return true;
-    }
-
+// "unos" → otvara ekran za unos podataka
+const entryKeywords = ['unos', 'podaci', 'data', 'entry', 'unos podataka', 'novi unos'];
+if (entryKeywords.some(k => cleanText.includes(k))) {
+    console.log('📝 Otvaranje ekrana za unos podataka');
+    handled = true;
+    cleanup();
+    window.currentScreenState = 'dataEntry';
+    forceHideVoiceMenu();
+    setTimeout(function() {
+        if (typeof renderDataEntry === 'function') {
+            renderDataEntry('');
+        }
+        const status = document.getElementById('voiceStatus');
+        if (status) {
+            status.innerText = '📝 Govorite podatke za unos. "plus" za čuvanje, "OK" za kraj';
+            status.style.color = '#FFD700';
+        }
+    }, 100);
+    return true;
+}
     // ZALIHE
     const invKeywords = ['zalihe', 'zaliha', 'stanje', 'inventory', 'inv', 'stock'];
     if (invKeywords.some(k => cleanText.includes(k))) {
