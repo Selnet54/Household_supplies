@@ -2658,4 +2658,59 @@ window.openVoiceDataEntry = openVoiceDataEntry;
 window.startVoiceDataEntry = startVoiceDataEntry;
 window.stopVoiceDataEntry = stopVoiceDataEntry;
 console.log('✅ Sistem za glasovni unos podataka uspešno učitan i spreman!');
+// ============================================
+// ISPRAVKA ZA VRAĆANJE UNAZAD I IZLAZ IZ PETLJE
+// ============================================
+
+window.goBackFromVoice = function() {
+    console.log('🔙 Bezbedan povratak iz glasovnog menija...');
+    
+    // 1. Obavezno ugasi mikrofon ako radi
+    if (typeof stopVoiceDataEntry === 'function') {
+        stopVoiceDataEntry();
+    }
+    if (typeof stopVoiceRecognition === 'function') {
+        stopVoiceRecognition();
+    }
+
+    // 2. Sakrij sve ekrane
+    if (typeof hideAllScreens === 'function') {
+        hideAllScreens();
+    } else {
+        document.querySelectorAll('.screen').forEach(s => {
+            s.style.display = 'none';
+            s.classList.remove('active');
+        });
+    }
+
+    // 3. Vrati korisnika na ekran za izbor načina unosa (choiceScreen) umesto na kategorije
+    const choiceScreen = document.getElementById('choiceScreen');
+    if (choiceScreen) {
+        choiceScreen.style.display = 'flex';
+        choiceScreen.classList.add('active');
+    } else {
+        // Ako choiceScreen ne postoji, vrati ga na login ili glavni ekran
+        const mainScreen = document.getElementById('mainScreen');
+        if (mainScreen) {
+            mainScreen.style.display = 'flex';
+            mainScreen.classList.add('active');
+            if (typeof renderCategories === 'function') renderCategories();
+        }
+    }
+};
+
+// Osiguravamo da i dugme "Nazad" u header-u koristi ovu logiku kad smo u glasovnom režimu
+const originalHeaderBack = window.handleHeaderBack;
+window.handleHeaderBack = function() {
+    const voiceMenuScreen = document.getElementById('voiceMenuScreen');
+    if (voiceMenuScreen && voiceMenuScreen.classList.contains('active')) {
+        window.goBackFromVoice();
+        return;
+    }
+    
+    // Ako postoji originalna funkcija za nazad, pozovi je za ostale ekrane
+    if (typeof originalHeaderBack === 'function') {
+        originalHeaderBack();
+    }
+};
 // KRAJ FAJLA
