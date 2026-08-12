@@ -1596,4 +1596,34 @@ renderDataEntry = function(productName) {
 };
 
 console.log('✅ Patch za renderDataEntry primenjen!');
+
+// ============================================
+// PATCH ZA ENTER TASTER
+// ============================================
+
+// ===== ENTER TASTER ZA SVA POLJA =====
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+        const active = document.activeElement;
+        if (!active) return;
+        
+        const dataEntryFields = ['productName', 'productPiece', 'productQuantity', 'productExpiry', 'productDescription', 'productDate'];
+        
+        if (dataEntryFields.includes(active.id)) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('⌨️ Enter na polju:', active.id);
+            
+            const mainContent = document.getElementById('mainContent');
+            if (mainContent && mainContent.innerHTML.includes('productName')) {
+                if (typeof saveProduct === 'function') {
+                    saveProduct();
+                }
+            }
+        }
+    }
+}, true);
+
+console.log('✅ Enter patch primenjen!');
+
 // KRAJ FAJLA
