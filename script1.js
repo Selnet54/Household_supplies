@@ -1637,3 +1637,84 @@ document.addEventListener('keydown', function(e) {
 }, true); // true = capture phase
 
 console.log('✅ Jedinstveni Enter handler primenjen!');
+// ============================================
+// FIX ZA openVoiceDataEntry - KOMPATIBILNOST
+// ============================================
+
+// Ovo rešava grešku "openVoiceDataEntry is not defined"
+window.openVoiceDataEntry = function() {
+    console.log('📝 openVoiceDataEntry pozvan - otvaram unos');
+    // Prvo zatvori sve ekrane
+    document.querySelectorAll('.screen').forEach(s => {
+        s.style.display = 'none';
+        s.classList.remove('active');
+    });
+    
+    // Prikaži mainScreen
+    const mainScreen = document.getElementById('mainScreen');
+    if (mainScreen) {
+        mainScreen.style.display = 'flex';
+        mainScreen.classList.add('active');
+    }
+    
+    // Otvori data entry
+    if (typeof renderDataEntry === 'function') {
+        renderDataEntry('');
+    }
+    
+    // Pokreni voice nakon što se ekran učita
+    setTimeout(function() {
+        if (typeof startVoiceDataEntry === 'function') {
+            startVoiceDataEntry();
+        }
+    }, 500);
+};
+
+console.log('✅ openVoiceDataEntry fix primenjen!');
+
+// ============================================
+// DODATNI FIX ZA ENTER - JAKA VERZIJA
+// ============================================
+
+// Ovo je najjači mogući Enter handler - radi uvek
+(function() {
+    // Sačuvaj originalne event listenere
+    const originalAddEventListener = document.addEventListener;
+    
+    // Dodaj naš handler na sam početak
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            const active = document.activeElement;
+            if (!active) return;
+            
+            // LOGIN
+            if (active.id === 'phoneInput') {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                console.log('📱 Login Enter (fix)');
+                if (typeof triggerLogin === 'function') {
+                    triggerLogin();
+                }
+                return false;
+            }
+            
+            // DATA ENTRY
+            const dataEntryFields = ['productName', 'productPiece', 'productQuantity', 'productExpiry', 'productDescription', 'productDate'];
+            if (dataEntryFields.includes(active.id)) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                console.log('📝 Data Entry Enter (fix) na:', active.id);
+                if (typeof saveProduct === 'function') {
+                    saveProduct();
+                }
+                return false;
+            }
+        }
+    }, true); // capture phase - najjači mogući nivo
+    
+    console.log('✅ Jaki Enter fix primenjen!');
+})();
+
+// KRAJ FAJLA
