@@ -2404,7 +2404,10 @@ function processVoiceDataEntry(text) {
     }
 
     if (text.includes('plus') || text.includes('sačuvaj')) {
-        executeRealSave();
+        parseAndFillVoiceFields(text.replace('plus', '').replace('sačuvaj', '').trim());
+        setTimeout(() => {
+            executeRealSave();
+        }, 200);
         return;
     }
 
@@ -2412,19 +2415,35 @@ function processVoiceDataEntry(text) {
 }
 
 function parseAndFillVoiceFields(text) {
-    const parts = text.split(',').map(p => p.trim());
-    if (parts.length > 0 && parts[0]) {
-        setFieldValueAndHighlight('productName', parts[0]);
-    }
-
-    const qtyMatch = text.match(/(\d+[\.,]?\d*)\s*( kilograma| kilu| kila| kg| grama| g| litra| l| komada| kom)/);
+    let cleanText = text.toLowerCase().trim();
+    
+    // 1. Količina (npr. "2 kg", "500 grama", "1 litra", "3 komada")
+    const qtyMatch = cleanText.match(/(\d+[\.,]?\d*)\s*(kilograma|kilu|kila|kg|grama|g|litra|l|komada|kom)/);
     if (qtyMatch) {
         setFieldValueAndHighlight('productQuantity', qtyMatch[1]);
+        cleanText = cleanText.replace(qtyMatch[0], '');
     }
     
-    const expiryMatch = text.match(/(\d+)\s*(mesec|meseca|meseci)/);
+    // 2. Rok (npr. "7 meseci", "3 meseca")
+    const expiryMatch = cleanText.match(/(\d+)\s*(mesec|meseca|meseci)/);
     if (expiryMatch) {
         setFieldValueAndHighlight('productExpiry', expiryMatch[1]);
+        cleanText = cleanText.replace(expiryMatch[0], '');
+    }
+
+    // 3. Lokacija (opciono uklanjanje reči)
+    const locations = ['zamrzivač', 'zamrzivaču', 'frizider', 'frizideru', 'ostava', 'ostavi'];
+    locations.forEach(loc => {
+        if (cleanText.includes(loc)) {
+            cleanText = cleanText.replace(loc, '').trim();
+        }
+    });
+
+    // 4. Sve što je preostalo ide direktno u naziv proizvoda
+    const finalName = cleanText.replace(/plus|sačuvaj|end|kraj/g, '').trim();
+    if (finalName.length > 0) {
+        const formattedName = finalName.charAt(0).toUpperCase() + finalName.slice(1);
+        setFieldValueAndHighlight('productName', formattedName);
     }
 }
 
