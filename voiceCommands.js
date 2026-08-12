@@ -268,6 +268,10 @@ function highlightNewProducts() {
 // GLAVNA VOICE COMMAND FUNKCIJA
 // ============================================
 
+// ============================================
+// GLAVNA VOICE COMMAND FUNKCIJA
+// ============================================
+
 function voiceCommand(command) {
     console.log('🎤 Primljena komanda:', command);
     
@@ -311,7 +315,6 @@ function voiceCommand(command) {
             if (typeof finishDataEntry === 'function') {
                 finishDataEntry();
             } else {
-                // Fallback - sačuvaj i prikaži zalihe
                 if (typeof saveProduct === 'function') saveProduct();
                 setTimeout(function() {
                     if (typeof renderInventory === 'function') renderInventory();
@@ -327,7 +330,6 @@ function voiceCommand(command) {
             if (typeof saveAndReset === 'function') {
                 saveAndReset();
             } else {
-                // Fallback - sačuvaj i resetuj polja
                 if (typeof saveProduct === 'function') saveProduct();
                 setTimeout(function() {
                     const pieceInput = document.getElementById('pieceInput');
@@ -342,7 +344,7 @@ function voiceCommand(command) {
             return true;
         }
         
-        // PARSIRANJE GLASOVNOG UNOSA - ako sadrži količinu
+        // PARSIRANJE GLASOVNOG UNOSA
         const hasQuantity = /\d+\s*(kg|g|kom|l|ml|pak|kutija|kile|kilograma)/i.test(command);
         if (hasQuantity) {
             console.log('📝 Popunjavam polja sa:', command);
@@ -360,7 +362,6 @@ function voiceCommand(command) {
             return true;
         }
         
-        // Ako nije prepoznato
         const status = document.getElementById('voiceStatus');
         if (status) {
             status.innerText = `❌ Nije prepoznato: "${command}"`;
@@ -391,12 +392,9 @@ function voiceCommand(command) {
     }
 
     // ===== KOMANDE ZA PRELAZAK =====
-    let handled = false;
-
     const entryKeywords = ['unos', 'podaci', 'data', 'entry', 'unos podataka', 'novi unos'];
     if (entryKeywords.some(k => cleanText.includes(k))) {
         console.log('📝 Otvaranje ekrana za unos podataka');
-        handled = true;
         cleanup();
         window.currentScreenState = 'dataEntry';
         forceHideVoiceMenu();
@@ -416,7 +414,6 @@ function voiceCommand(command) {
     const invKeywords = ['zalihe', 'zaliha', 'stanje', 'inventory', 'inv', 'stock'];
     if (invKeywords.some(k => cleanText.includes(k))) {
         console.log('📦 Prelaz na zalihe');
-        handled = true;
         cleanup();
         window.currentScreenState = 'inventory';
         forceHideVoiceMenu();
@@ -434,7 +431,6 @@ function voiceCommand(command) {
     const shopKeywords = ['spisak', 'lista', 'shopping', 'shop', 'list'];
     if (shopKeywords.some(k => cleanText.includes(k))) {
         console.log('🛒 Prelaz na spisak');
-        handled = true;
         cleanup();
         window.currentScreenState = 'shopping';
         forceHideVoiceMenu();
@@ -452,7 +448,6 @@ function voiceCommand(command) {
     const exitKeywords = ['izlaz', 'zatvori', 'exit', 'quit', 'close', 'end'];
     if (exitKeywords.some(k => cleanText.includes(k))) {
         console.log('🚪 Izlaz iz aplikacije');
-        handled = true;
         cleanup();
         forceHideVoiceMenu();
         document.querySelectorAll('.screen').forEach(s => {
@@ -493,27 +488,21 @@ function voiceCommand(command) {
     
     if (isAddCommand && cleanTextForAdd.trim().length > 2) {
         console.log('📝 Prepoznat unos:', cleanTextForAdd.trim());
-        handled = true;
         const result = voiceAddProduct(cleanTextForAdd.trim());
         cleanup();
         forceHideVoiceMenu();
         return result;
     }
 
-    if (!handled) {
-        const status = document.getElementById('voiceStatus');
-        if (status) {
-            status.innerText = `❌ Nije prepoznato: "${command}"`;
-            status.style.color = '#f44336';
-        }
+    // Ako ništa nije prepoznato
+    const status = document.getElementById('voiceStatus');
+    if (status) {
+        status.innerText = `❌ Nije prepoznato: "${command}"`;
+        status.style.color = '#f44336';
     }
     
     cleanup();
-    return handled;
-}
-
-    // ===== OSTALE KOMANDE (INVENTORY, SHOPPING, ETC) =====
-    // ... ostatak postojećeg koda ...
+    return false;
 }
 
     // ===== AUTOMATSKI UNOS NA ZALIHAMA =====
