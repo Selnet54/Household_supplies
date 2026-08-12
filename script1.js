@@ -29,7 +29,19 @@ let currentCategory = '';
 let currentSubcategory = '';
 let currentProductPart = '';
 let currentScreenState = 'languages';
-let fromChoiceScreen = false; // <--- DODAJTE OVU LINIJU
+let fromChoiceScreen = false;
+
+// ===== GLASOVNI UNOS PODATAKA =====
+let voiceDataEntry = {
+    product: '',
+    piece: '',
+    quantity: '',
+    unit: '',
+    shelfLife: '',
+    storage: '',
+    isRecording: false,
+    tempProduct: {} // Za privremeno čuvanje podataka
+};
 
 // ===== 0. EXIT FUNKCIJA =====
 function exitApp() {
@@ -1162,7 +1174,6 @@ function renderProductParts(subcategory) {
 
 function renderDataEntry(productName) {
     // Automatska detekcija odakle smo došli
-    // Ako nemamo kategoriju, subkategoriju i productName je prazan -> došli smo sa choiceScreen-a
     if (!currentCategory && !currentSubcategory && !productName) {
         fromChoiceScreen = true;
     } else {
@@ -1177,6 +1188,18 @@ function renderDataEntry(productName) {
     const today = new Date().toISOString().split('T')[0];
     content.innerHTML = `
         <div class="title">${t('unos_podataka')}</div>
+        
+        <!-- DUGME ZA GLASOVNI UNOS -->
+        <div style="text-align:center; margin-bottom:15px; padding:10px; background:#f5f5f5; border-radius:8px;">
+            <button onclick="startVoiceDataEntry()" style="background:#4CAF50; color:white; border:none; padding:12px 30px; border-radius:8px; font-size:18px; cursor:pointer; font-weight:bold;">
+                🎤 Glasovni unos
+            </button>
+            <span id="voiceStatusData" style="margin-left:15px; font-size:14px; color:#666; font-weight:bold;">⏸️</span>
+            <div style="margin-top:8px; font-size:12px; color:#888;">
+                Reci: "plus" za novi unos, "end" za kraj
+            </div>
+        </div>
+        
         <div class="row"><label>${t('naziv_proizvoda')}</label><input type="text" id="productInput" value="${productName || ''}"></div>
         <div class="row"><label>${t('opis')}</label><input type="text" id="descriptionInput"></div>
         <div class="row">
@@ -1237,7 +1260,20 @@ function renderDataEntry(productName) {
     document.getElementById('productInput')?.focus();
     updateExpiryDate();
     prikaziSveUnose();
+    
+    // Resetuj glasovne podatke
+    voiceDataEntry = {
+        product: '',
+        piece: '',
+        quantity: '',
+        unit: '',
+        shelfLife: '',
+        storage: '',
+        isRecording: false,
+        tempProduct: {}
+    };
 }
+
 function prikaziSveUnose() {
     const container = document.getElementById('entriesContainer');
     if (!container) return;
@@ -1275,7 +1311,6 @@ function prikaziSveUnose() {
         container.appendChild(row);
     });
 }
-
 function updateExpiryDate() {
     const dateInput = document.getElementById('dateInput');
     const shelfLifeInput = document.getElementById('shelfLifeInput');
@@ -2253,3 +2288,41 @@ window.getCurrentLang = getCurrentLang;
 
 console.log('✅ Voice recognition dodatak učitan!');
 console.log('✅ stopVoiceRecognition i getCurrentLang izvezeni globalno');
+
+// ============================================
+// OVDE DODAJTE NOVE FUNKCIJE ZA GLASOVNI UNOS PODATAKA
+// ============================================
+
+let voiceDataRecognition = null;
+let isVoiceDataListening = false;
+
+function startVoiceDataEntry() {
+    // ... ceo kod (dajem skraćeno, ali vi dodajte ceo)
+}
+
+function stopVoiceDataEntry() {
+    // ... ceo kod
+}
+
+function processVoiceDataEntry(text) {
+    // ... ceo kod
+}
+
+function saveVoiceProduct() {
+    // ... ceo kod
+}
+
+function highlightField(element) {
+    // ... ceo kod
+}
+
+// ============================================
+// ZATIM DOLAZI renderDataEntry() FUNKCIJA
+// ============================================
+
+function renderDataEntry(productName) {
+    // OVDE DOLAZI VAŠA renderDataEntry FUNKCIJA SA DUGMETOM ZA GLASOVNI UNOS
+    // (koju ste već izmenili)
+}
+
+// KRAJ FAJLA
