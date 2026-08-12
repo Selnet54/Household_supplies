@@ -260,6 +260,10 @@ function highlightNewProducts() {
 // GLAVNA VOICE COMMAND FUNKCIJA
 // ============================================
 
+// ============================================
+// GLAVNA VOICE COMMAND FUNKCIJA - DODATNI DEO ZA DATA ENTRY
+// ============================================
+
 function voiceCommand(command) {
     console.log('🎤 Primljena komanda:', command);
     
@@ -288,6 +292,7 @@ function voiceCommand(command) {
 
     // ===== KOMANDE ZA EKRAN "UNOS PODATAKA" =====
     if (currentState === 'dataEntry') {
+        // KOMANDA "END" - izlaz
         if (cleanText.includes('end')) {
             console.log('🚪 Izlaz iz aplikacije');
             cleanup();
@@ -295,42 +300,76 @@ function voiceCommand(command) {
             return true;
         }
         
+        // KOMANDA "OK" - završetak unosa
         if (cleanText.includes('ok')) {
             console.log('✅ OK - završetak unosa');
             cleanup();
-            finishDataEntry();
-            return true;
-        }
-        
-        if (cleanText.includes('plus')) {
-            console.log('💾 Plus - čuvanje i resetovanje');
-            cleanup();
-            saveAndReset();
-            return true;
-        }
-        
-        const hasQuantity = /\d+\s*(kg|g|kom|l|ml|pak|kutija|kile|kilograma)/i.test(command);
-        if (hasQuantity) {
-            console.log('📝 Popunjavam polja sa:', command);
-            const parsed = parseVoiceInput(command);
-            fillDataEntryFields(parsed);
-            cleanup();
-            const status = document.getElementById('voiceStatus');
-            if (status) {
-                status.innerText = `📝 ${parsed.product} (${parsed.quantity} ${parsed.unit})`;
-                status.style.color = '#FFD700';
+            if (typeof finishDataEntry === 'function') {
+                finishDataEntry();
+            } else {
+                // Fallback - sačuvaj i prikaži zalihe
+                if (typeof saveProduct === 'function') saveProduct();
+                setTimeout(function() {
+                    if (typeof renderInventory === 'function') renderInventory();
+                }, 300);
             }
             return true;
         }
         
+        // KOMANDA "PLUS" - čuvanje i resetovanje
+        if (cleanText.includes('plus')) {
+            console.log('💾 Plus - čuvanje i resetovanje');
+            cleanup();
+            if (typeof saveAndReset === 'function') {
+                saveAndReset();
+            } else {
+                // Fallback - sačuvaj i resetuj polja
+                if (typeof saveProduct === 'function') saveProduct();
+                setTimeout(function() {
+                    const pieceInput = document.getElementById('pieceInput');
+                    const quantityInput = document.getElementById('quantityInput');
+                    const shelfLifeInput = document.getElementById('shelfLifeInput');
+                    if (pieceInput) pieceInput.value = '';
+                    if (quantityInput) quantityInput.value = '';
+                    if (shelfLifeInput) shelfLifeInput.value = '';
+                    if (typeof updateExpiryDate === 'function') updateExpiryDate();
+                }, 100);
+            }
+            return true;
+        }
+        
+        // PARSIRANJE GLASOVNOG UNOSA - ako sadrži količinu
+        const hasQuantity = /\d+\s*(kg|g|kom|l|ml|pak|kutija|kile|kilograma)/i.test(command);
+        if (hasQuantity) {
+            console.log('📝 Popunjavam polja sa:', command);
+            const parsed = parseVoiceInput(command);
+            if (typeof fillDataEntryFields === 'function') {
+                fillDataEntryFields(parsed);
+            }
+            cleanup();
+            const status = document.getElementById('voiceStatus');
+            if (status) {
+                status.innerText = `📝 ${parsed.product} (${parsed.quantity} ${parsed.unit})`;
+                status.style.color = '#4CAF50';
+                status.style.background = '#1a4a1a';
+            }
+            return true;
+        }
+        
+        // Ako nije prepoznato
         const status = document.getElementById('voiceStatus');
         if (status) {
             status.innerText = `❌ Nije prepoznato: "${command}"`;
             status.style.color = '#f44336';
+            status.style.background = '#3d1a1a';
         }
         cleanup();
         return false;
     }
+
+    // ===== OSTALE KOMANDE (INVENTORY, SHOPPING, ETC) =====
+    // ... ostatak postojećeg koda ...
+}
 
     // ===== AUTOMATSKI UNOS NA ZALIHAMA =====
     const isOnInventory = currentState === 'inventory';
