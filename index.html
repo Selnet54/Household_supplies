@@ -11,6 +11,49 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
+    <!-- ===== HITNI FIX - DEFINISANJE VOICE FUNKCIJA PRE SVEGA ===== -->
+    <script>
+        // Ove funkcije moraju da postoje PRE nego što se bilo koji skript učita
+        window.openVoiceDataEntry = function() {
+            console.log('📝 openVoiceDataEntry (definisan u HTML-u)');
+            try {
+                if (typeof renderDataEntry === 'function') {
+                    renderDataEntry('');
+                } else {
+                    console.log('⏳ renderDataEntry još nije definisan, čekam...');
+                    setTimeout(function() {
+                        if (typeof renderDataEntry === 'function') {
+                            renderDataEntry('');
+                        }
+                    }, 500);
+                }
+            } catch(e) {
+                console.error('❌ Greška u openVoiceDataEntry:', e);
+            }
+        };
+        
+        window.startVoiceDataEntry = function() {
+            console.log('🎤 startVoiceDataEntry (definisan u HTML-u)');
+            if (typeof window.startVoiceDataEntryFromVoice === 'function') {
+                window.startVoiceDataEntryFromVoice();
+            }
+        };
+        
+        window.stopVoiceDataEntry = function() {
+            console.log('🛑 stopVoiceDataEntry (definisan u HTML-u)');
+            if (typeof window.stopVoiceDataEntryFromVoice === 'function') {
+                window.stopVoiceDataEntryFromVoice();
+            }
+        };
+        
+        // Lokalne varijable za kompatibilnost
+        var openVoiceDataEntry = window.openVoiceDataEntry;
+        var startVoiceDataEntry = window.startVoiceDataEntry;
+        var stopVoiceDataEntry = window.stopVoiceDataEntry;
+        
+        console.log('✅ Voice funkcije definisane u HTML-u pre svih skriptova!');
+    </script>
+
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; background: #1a237e; color: #333; min-height: 100vh; }
