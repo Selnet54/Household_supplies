@@ -1543,9 +1543,6 @@ window.handleHeaderBack = function() {
     }
 };
 
-window.openVoiceDataEntry = openVoiceDataEntry;
-window.startVoiceDataEntry = startVoiceDataEntry;
-window.stopVoiceDataEntry = stopVoiceDataEntry;
 // ===== GLOBALNI ENTER ZA SVA POLJA U DATA ENTRY =====
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Enter') {
@@ -1664,5 +1661,125 @@ window.openVoiceDataEntry = function() {
 };
 
 console.log('✅ openVoiceDataEntry fix primenjen!');
+// ============================================
+// FIX ZA openVoiceDataEntry - NAJJAČI MOGUĆI
+// ============================================
+
+// Definiši funkciju pre nego što se pozove
+window.openVoiceDataEntry = function() {
+    console.log('📝 openVoiceDataEntry pozvan');
+    
+    // Zatvori sve ekrane
+    document.querySelectorAll('.screen').forEach(s => {
+        s.style.display = 'none';
+        s.classList.remove('active');
+    });
+    
+    // Otvori mainScreen
+    const mainScreen = document.getElementById('mainScreen');
+    if (mainScreen) {
+        mainScreen.style.display = 'flex';
+        mainScreen.classList.add('active');
+    }
+    
+    // Otvori data entry
+    if (typeof renderDataEntry === 'function') {
+        renderDataEntry('');
+    }
+    
+    // Pokreni voice nakon 500ms
+    setTimeout(function() {
+        if (typeof startVoiceDataEntry === 'function') {
+            startVoiceDataEntry();
+        } else {
+            console.warn('⚠️ startVoiceDataEntry nije definisan');
+        }
+    }, 500);
+};
+
+// Dupla zaštita - ako već postoji, nemoj da ga zameniš
+if (typeof window.openVoiceDataEntry !== 'function') {
+    window.openVoiceDataEntry = function() {
+        console.log('📝 openVoiceDataEntry (fallback)');
+        if (typeof renderDataEntry === 'function') {
+            renderDataEntry('');
+        }
+    };
+}
+// ============================================
+// RANO DEFINISANJE - PRE SVEGA
+// ============================================
+
+window.openVoiceDataEntry = function() {
+    console.log('📝 openVoiceDataEntry (rano definisan)');
+    document.querySelectorAll('.screen').forEach(s => {
+        s.style.display = 'none';
+        s.classList.remove('active');
+    });
+    const mainScreen = document.getElementById('mainScreen');
+    if (mainScreen) {
+        mainScreen.style.display = 'flex';
+        mainScreen.classList.add('active');
+    }
+    if (typeof renderDataEntry === 'function') {
+        renderDataEntry('');
+    }
+    setTimeout(function() {
+        if (typeof startVoiceDataEntry === 'function') {
+            startVoiceDataEntry();
+        }
+    }, 500);
+};
+
+window.startVoiceDataEntry = function() {
+    console.log('🎤 startVoiceDataEntry (rano definisan)');
+    if (typeof startVoiceDataEntry === 'function') {
+        startVoiceDataEntry();
+    }
+};
+
+window.stopVoiceDataEntry = function() {
+    console.log('🛑 stopVoiceDataEntry (rano definisan)');
+    if (typeof stopVoiceDataEntry === 'function') {
+        stopVoiceDataEntry();
+    }
+};
+
+console.log('✅ Rane definicije funkcija postavljene!');
+
+// ============================================
+// FIX ZA openVoiceDataEntry - NAJJAČI MOGUĆI
+// ============================================
+
+console.log('✅ openVoiceDataEntry definisan!');
+
+// ============================================
+// DIREKTAN ENTER ZA LOGIN - NAJJEDNOSTAVNIJI
+// ============================================
+
+document.addEventListener('DOMContentLoaded', function() {
+    const phoneInput = document.getElementById('phoneInput');
+    if (phoneInput) {
+        const newInput = phoneInput.cloneNode(true);
+        phoneInput.parentNode.replaceChild(newInput, phoneInput);
+        
+        newInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('📱 Enter na login polju (direktno)');
+                if (typeof triggerLogin === 'function') {
+                    triggerLogin();
+                } else {
+                    console.error('❌ triggerLogin nije definisan');
+                }
+                return false;
+            }
+        });
+        console.log('✅ Direktan Enter vezan za login polje');
+    }
+});
+
+console.log('✅ SVI FIX-EVI PRIMENJENI!');
 
 // KRAJ FAJLA
