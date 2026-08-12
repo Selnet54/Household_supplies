@@ -2004,6 +2004,7 @@ window.currentLang = currentLang;
 console.log('✅ Originalne funkcije izvezene!');
 
 // ============================================
+// ============================================
 // FUNKCIJE ZA 3. EKRAN (IZBOR NAČINA UNOSA)
 // ============================================
 
@@ -2267,6 +2268,358 @@ function handleHeaderBack() {
 window.startVoiceRecognition = startVoiceRecognition;
 window.stopVoiceRecognition = stopVoiceRecognition;
 window.getCurrentLang = getCurrentLang;
+window.goBackFromVoice = goBackFromVoice;
+window.handleHeaderBack = handleHeaderBack;
 
 console.log('✅ Voice recognition dodatak učitan!');
 console.log('✅ stopVoiceRecognition i getCurrentLang izvezeni globalno');
+
+// ============================================
+// FUNKCIJE ZA JEZIK - DODAJ NA KRAJ script1.js
+// ============================================
+
+// ⭐ PRVO DODAJ OVU FUNKCIJU ⭐
+function updateUITexts(lang) {
+    console.log('🔄 Ažuriram UI tekstove za:', lang);
+    
+    const texts = {
+        'sr': {
+            'loginTitle': 'Login',
+            'phonePlaceholder': 'Unesite broj telefona',
+            'loginBtn': 'ULAZ',
+            'supportBtn': '📧 Podrška',
+            'exitBtn': '✖ IZLAZ',
+            'langTitle': 'Izaberite jezik',
+            'voiceTitle': 'Glasovni unos',
+            'voiceDesc': 'Govorite i ja ću uneti',
+            'manualTitle': 'Ručni unos',
+            'manualDesc': 'Unesite podatke ručno',
+            'inventory': 'Zalihe',
+            'shopping': 'Spisak',
+            'back': 'Nazad',
+            'exit': 'Izlaz',
+            'addProduct': 'Dodaj proizvod',
+            'voiceControl': '🎤 Glasovna kontrola',
+            'backVoice': '◀ Nazad'
+        },
+        'en': {
+            'loginTitle': 'Login',
+            'phonePlaceholder': 'Enter phone number',
+            'loginBtn': 'ENTER',
+            'supportBtn': '📧 Support',
+            'exitBtn': '✖ EXIT',
+            'langTitle': 'Choose Language',
+            'voiceTitle': 'Voice Input',
+            'voiceDesc': 'Speak and I will enter',
+            'manualTitle': 'Manual Input',
+            'manualDesc': 'Type data manually',
+            'inventory': 'Inventory',
+            'shopping': 'Shopping',
+            'back': 'Back',
+            'exit': 'Exit',
+            'addProduct': 'Add Product',
+            'voiceControl': '🎤 Voice Control',
+            'backVoice': '◀ Back'
+        },
+        'de': {
+            'loginTitle': 'Anmelden',
+            'phonePlaceholder': 'Telefonnummer eingeben',
+            'loginBtn': 'EINGABE',
+            'supportBtn': '📧 Unterstützung',
+            'exitBtn': '✖ AUSGANG',
+            'langTitle': 'Sprache auswählen',
+            'voiceTitle': 'Spracheingabe',
+            'voiceDesc': 'Sprechen und ich werde eintragen',
+            'manualTitle': 'Manuelle Eingabe',
+            'manualDesc': 'Daten manuell eingeben',
+            'inventory': 'Inventar',
+            'shopping': 'Einkaufsliste',
+            'back': 'Zurück',
+            'exit': 'Ausgang',
+            'addProduct': 'Produkt hinzufügen',
+            'voiceControl': '🎤 Sprachsteuerung',
+            'backVoice': '◀ Zurück'
+        },
+        'hu': {
+            'loginTitle': 'Bejelentkezés',
+            'phonePlaceholder': 'Adja meg telefonszámát',
+            'loginBtn': 'BELÉPÉS',
+            'supportBtn': '📧 Támogatás',
+            'exitBtn': '✖ KILÉPÉS',
+            'langTitle': 'Nyelv választása',
+            'voiceTitle': 'Hangbemenet',
+            'voiceDesc': 'Beszélj, és én beírom',
+            'manualTitle': 'Kézi bevitel',
+            'manualDesc': 'Adatok kézi bevitele',
+            'inventory': 'Készlet',
+            'shopping': 'Bevásárlólista',
+            'back': 'Vissza',
+            'exit': 'Kilépés',
+            'addProduct': 'Termék hozzáadása',
+            'voiceControl': '🎤 Hangvezérlés',
+            'backVoice': '◀ Vissza'
+        },
+        'uk': {
+            'loginTitle': 'Вхід',
+            'phonePlaceholder': 'Введіть номер телефону',
+            'loginBtn': 'ВХІД',
+            'supportBtn': '📧 Підтримка',
+            'exitBtn': '✖ ВИХІД',
+            'langTitle': 'Оберіть мову',
+            'voiceTitle': 'Голосове введення',
+            'voiceDesc': 'Говоріть, і я введу',
+            'manualTitle': 'Ручне введення',
+            'manualDesc': 'Введіть дані вручну',
+            'inventory': 'Запаси',
+            'shopping': 'Список',
+            'back': 'Назад',
+            'exit': 'Вихід',
+            'addProduct': 'Додати товар',
+            'voiceControl': '🎤 Голосове керування',
+            'backVoice': '◀ Назад'
+        },
+        'ru': {
+            'loginTitle': 'Вход',
+            'phonePlaceholder': 'Введите номер телефона',
+            'loginBtn': 'ВХОД',
+            'supportBtn': '📧 Поддержка',
+            'exitBtn': '✖ ВЫХОД',
+            'langTitle': 'Выберите язык',
+            'voiceTitle': 'Голосовой ввод',
+            'voiceDesc': 'Говорите, и я введу',
+            'manualTitle': 'Ручной ввод',
+            'manualDesc': 'Введите данные вручную',
+            'inventory': 'Запасы',
+            'shopping': 'Список',
+            'back': 'Назад',
+            'exit': 'Выход',
+            'addProduct': 'Добавить товар',
+            'voiceControl': '🎤 Голосовое управление',
+            'backVoice': '◀ Назад'
+        }
+    };
+    
+    const t = texts[lang] || texts['sr'];
+    
+    // Ažuriraj sve elemente
+    try {
+        // Login ekran
+        const loginTitle = document.querySelector('#loginScreen h2');
+        if (loginTitle) loginTitle.textContent = t.loginTitle;
+        
+        const phoneInput = document.getElementById('phoneInput');
+        if (phoneInput) phoneInput.placeholder = t.phonePlaceholder;
+        
+        const loginBtn = document.getElementById('loginBtn');
+        if (loginBtn) loginBtn.textContent = t.loginBtn;
+        
+        const supportBtn = document.getElementById('supportBtn');
+        if (supportBtn) supportBtn.textContent = t.supportBtn;
+        
+        const exitLoginBtn = document.getElementById('exitLoginBtn');
+        if (exitLoginBtn) exitLoginBtn.textContent = t.exitBtn;
+        
+        // Language ekran
+        const langTitle = document.getElementById('langTitle');
+        if (langTitle) langTitle.textContent = t.langTitle;
+        
+        // Choice ekran
+        const voiceTitleText = document.getElementById('voiceTitleText');
+        if (voiceTitleText) voiceTitleText.textContent = t.voiceTitle;
+        
+        const voiceDescText = document.getElementById('voiceDescText');
+        if (voiceDescText) voiceDescText.textContent = t.voiceDesc;
+        
+        const manualTitleText = document.getElementById('manualTitleText');
+        if (manualTitleText) manualTitleText.textContent = t.manualTitle;
+        
+        const manualDescText = document.getElementById('manualDescText');
+        if (manualDescText) manualDescText.textContent = t.manualDesc;
+        
+        // Main ekran - header
+        const invText = document.getElementById('invText');
+        if (invText) invText.textContent = t.inventory;
+        
+        const shopText = document.getElementById('shopText');
+        if (shopText) shopText.textContent = t.shopping;
+        
+        const backText = document.getElementById('backText');
+        if (backText) backText.textContent = t.back;
+        
+        const exitText = document.getElementById('exitText');
+        if (exitText) exitText.textContent = t.exit;
+        
+        // Voice menu
+        const invMenuText = document.getElementById('invMenuText');
+        if (invMenuText) invMenuText.textContent = t.inventory;
+        
+        const shopMenuText = document.getElementById('shopMenuText');
+        if (shopMenuText) shopMenuText.textContent = t.shopping;
+        
+        const addMenuText = document.getElementById('addMenuText');
+        if (addMenuText) addMenuText.textContent = t.addProduct;
+        
+        const exitMenuText = document.getElementById('exitMenuText');
+        if (exitMenuText) exitMenuText.textContent = t.exit;
+        
+        const backVoiceText = document.getElementById('backVoiceText');
+        if (backVoiceText) backVoiceText.textContent = t.backVoice;
+        
+        const voiceMenuTitleText = document.getElementById('voiceMenuTitleText');
+        if (voiceMenuTitleText) voiceMenuTitleText.textContent = t.voiceControl;
+        
+        console.log('✅ UI tekstovi ažurirani za:', lang);
+    } catch(e) {
+        console.error('❌ Greška pri ažuriranju UI tekstova:', e);
+    }
+}
+
+// ============================================
+// FUNKCIJE ZA JEZIK - SAMO JEDNOM!
+// ============================================
+
+// Menjanje jezika
+function changeLanguage(lang) {
+    console.log('🌍 Menjam jezik na:', lang);
+    
+    // Sačuvaj izbor
+    localStorage.setItem('appLanguage', lang);
+    window.currentLanguage = lang;
+    
+    // Ažuriraj dugme
+    const flagMap = {
+        'sr': '🇷🇸',
+        'en': '🇬🇧',
+        'de': '🇩🇪',
+        'hu': '🇭🇺',
+        'uk': '🇺🇦',
+        'ru': '🇷🇺'
+    };
+    const labelMap = {
+        'sr': 'SR',
+        'en': 'EN',
+        'de': 'DE',
+        'hu': 'HU',
+        'uk': 'UK',
+        'ru': 'RU'
+    };
+    
+    const flagElement = document.getElementById('currentLanguageFlag');
+    const labelElement = document.getElementById('currentLanguageLabel');
+    if (flagElement) flagElement.textContent = flagMap[lang] || '🇷🇸';
+    if (labelElement) labelElement.textContent = labelMap[lang] || 'SR';
+    
+    // Sakrij meni
+    const menu = document.getElementById('languageMenu');
+    if (menu) menu.style.display = 'none';
+    
+    // Obavesti aplikaciju o promeni jezika
+    if (typeof updateUITexts === 'function') {
+        updateUITexts(lang);
+    }
+    
+    // Ponovo prikaži trenutni ekran sa novim jezikom
+    const currentScreen = window.currentScreenState || 'inventory';
+    setTimeout(() => {
+        switch(currentScreen) {
+            case 'inventory':
+                if (typeof renderInventory === 'function') renderInventory();
+                break;
+            case 'dataEntry':
+                if (typeof renderDataEntry === 'function') renderDataEntry('');
+                break;
+            case 'shopping':
+                if (typeof renderShoppingList === 'function') renderShoppingList();
+                break;
+            default:
+                if (typeof renderInventory === 'function') renderInventory();
+                break;
+        }
+    }, 100);
+    
+    // Prikaži potvrdu
+    if (typeof showModernAlert === 'function') {
+        const messages = {
+            'sr': 'Jezik promenjen na srpski',
+            'en': 'Language changed to English',
+            'de': 'Sprache auf Deutsch geändert',
+            'hu': 'Nyelv magyarra változtatva',
+            'uk': 'Мову змінено на українську',
+            'ru': 'Язык изменён на русский'
+        };
+        showModernAlert('✅', messages[lang] || 'Jezik promenjen', '🌍');
+    }
+}
+
+// Toggle meni za jezik
+function toggleLanguageMenu(event) {
+    if (event) {
+        event.stopPropagation();
+    }
+    const menu = document.getElementById('languageMenu');
+    if (menu) {
+        if (menu.style.display === 'none' || menu.style.display === '') {
+            menu.style.display = 'block';
+        } else {
+            menu.style.display = 'none';
+        }
+    }
+}
+
+// Zatvori meni kada se klikne van
+document.addEventListener('click', function(event) {
+    const selector = document.querySelector('.language-selector');
+    const menu = document.getElementById('languageMenu');
+    if (selector && menu && !selector.contains(event.target)) {
+        menu.style.display = 'none';
+    }
+});
+
+// Inicijalizacija jezika
+function initLanguage() {
+    const savedLang = localStorage.getItem('appLanguage') || 'sr';
+    window.currentLanguage = savedLang;
+    
+    // Ažuriraj dugme
+    const flagMap = {
+        'sr': '🇷🇸',
+        'en': '🇬🇧',
+        'de': '🇩🇪',
+        'hu': '🇭🇺',
+        'uk': '🇺🇦',
+        'ru': '🇷🇺'
+    };
+    const labelMap = {
+        'sr': 'SR',
+        'en': 'EN',
+        'de': 'DE',
+        'hu': 'HU',
+        'uk': 'UK',
+        'ru': 'RU'
+    };
+    
+    const flagElement = document.getElementById('currentLanguageFlag');
+    const labelElement = document.getElementById('currentLanguageLabel');
+    if (flagElement) flagElement.textContent = flagMap[savedLang] || '🇷🇸';
+    if (labelElement) labelElement.textContent = labelMap[savedLang] || 'SR';
+    
+    console.log('🌍 Jezik inicijalizovan:', savedLang);
+    
+    // Primeni tekstove
+    if (typeof updateUITexts === 'function') {
+        setTimeout(() => updateUITexts(savedLang), 100);
+    }
+}
+
+// Pokreni inicijalizaciju kada se stranica učita
+document.addEventListener('DOMContentLoaded', function() {
+    initLanguage();
+});
+
+// Izvezi sve funkcije globalno
+window.updateUITexts = updateUITexts;
+window.changeLanguage = changeLanguage;
+window.toggleLanguageMenu = toggleLanguageMenu;
+window.initLanguage = initLanguage;
+
+console.log('✅ Sve funkcije za jezik su izvezene globalno!');
