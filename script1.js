@@ -29,6 +29,7 @@ let currentCategory = '';
 let currentSubcategory = '';
 let currentProductPart = '';
 let currentScreenState = 'languages';
+let fromChoiceScreen = false; // <--- DODAJTE OVU LINIJU
 
 // ===== 0. EXIT FUNKCIJA =====
 function exitApp() {
@@ -1160,10 +1161,19 @@ function renderProductParts(subcategory) {
 }
 
 function renderDataEntry(productName) {
+    // Automatska detekcija odakle smo došli
+    // Ako nemamo kategoriju, subkategoriju i productName je prazan -> došli smo sa choiceScreen-a
+    if (!currentCategory && !currentSubcategory && !productName) {
+        fromChoiceScreen = true;
+    } else {
+        fromChoiceScreen = false;
+    }
+    
     currentScreenState = 'dataEntry';
     currentProductPart = productName;
     const content = document.getElementById('mainContent');
     if (!content) return;
+    
     const today = new Date().toISOString().split('T')[0];
     content.innerHTML = `
         <div class="title">${t('unos_podataka')}</div>
@@ -1720,13 +1730,40 @@ function obrisiSaSpiska(index) {
 // ===== GLAVNA FUNKCIJA ZA NAZAD / ODUSTANI =====
 function handleBackAction() {
     console.log('⬅️ Trenutni ekran stanje:', currentScreenState);
+    console.log('📌 currentCategory:', currentCategory);
+    console.log('📌 currentSubcategory:', currentSubcategory);
+    console.log('📌 currentProductPart:', currentProductPart);
+    console.log('📌 fromChoiceScreen:', fromChoiceScreen);
+    
     if (currentScreenState === 'dataEntry') {
+        // Ako smo došli direktno sa choiceScreen-a (klik na "Unos podataka")
+        if (fromChoiceScreen) {
+            // Vrati se na choiceScreen
+            showScreen('choiceScreen');
+            fromChoiceScreen = false; // Resetuj flag
+            if (typeof updateHeaderLanguage === 'function') {
+                updateHeaderLanguage();
+            }
+            if (typeof updateInterfaceLanguage === 'function') {
+                updateInterfaceLanguage();
+            }
+            return;
+        }
+        
+        // Inače, vrati se na prethodni ekran
         if (currentSubcategory) {
             renderProductParts(currentSubcategory);
         } else if (currentCategory) {
             renderSubcategories(currentCategory);
         } else {
-            renderCategories();
+            // Ako nema kategorije, vrati se na choiceScreen
+            showScreen('choiceScreen');
+            if (typeof updateHeaderLanguage === 'function') {
+                updateHeaderLanguage();
+            }
+            if (typeof updateInterfaceLanguage === 'function') {
+                updateInterfaceLanguage();
+            }
         }
     } else if (currentScreenState === 'productParts') {
         if (currentCategory) {
@@ -1737,14 +1774,22 @@ function handleBackAction() {
     } else if (currentScreenState === 'subcategories') {
         renderCategories();
     } else if (currentScreenState === 'categories') {
-        showScreen('languageScreen');
-        renderLanguages();
+        showScreen('choiceScreen');
+        if (typeof updateHeaderLanguage === 'function') {
+            updateHeaderLanguage();
+        }
+        if (typeof updateInterfaceLanguage === 'function') {
+            updateInterfaceLanguage();
+        }
+    } else if (currentScreenState === 'shopping' || currentScreenState === 'inventory') {
+        // Sa shopping ili inventory ekrana vrati se na kategorije
+        showScreen('mainScreen');
+        renderCategories();
     } else {
         showScreen('mainScreen');
         renderCategories();
     }
 }
-
 // ===== TRIGGER LOGIN =====
 function triggerLogin() {
     console.log("🔐 triggerLogin pozvan!");
