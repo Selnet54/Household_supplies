@@ -1034,7 +1034,63 @@ function renderCategories() {
     html += `</div>`;
     content.innerHTML = html;
 }
+// ============================================
+// FUNKCIJE ZA GLASOVNI UNOS NA DATA ENTRY EKRANU
+// ============================================
 
+function openVoiceDataEntry() {
+    console.log('🎤 Otvaranje ekrana za glasovni unos podataka');
+    
+    // Sakrij voice menu
+    const voiceMenu = document.getElementById('voiceMenuScreen');
+    if (voiceMenu) {
+        voiceMenu.style.display = 'none';
+        voiceMenu.classList.remove('active');
+    }
+    
+    // Prikaži mainScreen
+    const mainScreen = document.getElementById('mainScreen');
+    if (mainScreen) {
+        mainScreen.style.display = 'flex';
+        mainScreen.classList.add('active');
+    }
+    
+    // Postavi stanje
+    currentScreenState = 'dataEntry';
+    currentProductPart = '';
+    currentSubcategory = '';
+    currentCategory = '';
+    
+    // Prikaži ekran za unos podataka sa voice statusom
+    renderDataEntryWithVoice('');
+    
+    // Pokreni glasovno prepoznavanje nakon što se ekran prikaže
+    setTimeout(function() {
+        startVoiceRecognitionForDataEntry();
+    }, 500);
+}
+
+function renderDataEntryWithVoice(productName) {
+    // ... kod za renderovanje sa voice statusom ...
+}
+
+function startVoiceRecognitionForDataEntry() {
+    // ... kod za glasovno prepoznavanje ...
+}
+
+function goBackToVoiceMenu() {
+    // ... kod za povratak ...
+}
+
+// ===== FUNKCIJA ZA DOBIJANJE TRENUTNOG JEZIKA =====
+function getCurrentLang() {
+    return window.currentLanguage || localStorage.getItem('appLanguage') || 'sr';
+}
+
+// ===== IZBOR JEZIKA =====
+function selectLanguage(langCode) {
+    // ... postojeći kod ...
+}
 function renderSubcategories(category) {
     currentScreenState = 'subcategories';
     currentCategory = category;
