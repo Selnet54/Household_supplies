@@ -2296,36 +2296,8 @@ window.getCurrentLang = getCurrentLang;
 console.log('✅ Voice recognition dodatak učitan!');
 console.log('✅ stopVoiceRecognition i getCurrentLang izvezeni globalno');
 
-// ============================================
-// ISPRAVLJENI MODUL ZA GLASOVNI UNOS I NAVIGACIJU
-// ============================================
-
-if (typeof window.voiceDataRecognition === 'undefined') {
-    window.voiceDataRecognition = null;
-}
-
-function openVoiceDataEntry() {
-    if (typeof showScreen === 'function') {
-        showScreen('mainScreen');
-    }
-    
-    if (typeof renderDataEntry === 'function') {
-        renderDataEntry();
-    }
-    
-    let statusEl = document.getElementById('voiceLiveStatus');
-    const formContainer = document.getElementById('productForm') || document.getElementById('mainContent');
-    
-    if (formContainer && !statusEl) {
-        const liveDiv = document.createElement('div');
-        liveDiv.id = 'voiceLiveStatus';
-        liveDiv.style.cssText = 'padding: 12px; margin: 10px 0; background: #e8f5e9; color: #2e7d32; border: 2px dashed #4caf50; border-radius: 8px; font-size: 18px; font-weight: bold; text-align: center;';
-        liveDiv.innerHTML = '🎤 Spremno za glasovni unos... Govorite.';
-        formContainer.prepend(liveDiv);
-    }
-    
-    startVoiceDataEntry();
-}
+// Globalni sakupljač reči dok korisnik govori u cugu
+let voiceBuffer = "";
 
 function startVoiceDataEntry() {
     if (typeof stopVoiceRecognition === 'function') {
@@ -2359,12 +2331,14 @@ function startVoiceDataEntry() {
         const currentText = finalTranscript || interimTranscript;
         
         if (statusEl) {
-            statusEl.innerHTML = `🗣️ Čujem: "<b>${currentText}</b>"`;
+            statusEl.innerHTML = `🗣️ Slušam: "<b>${voiceBuffer} ${currentText}</b>"`;
         }
 
+        // Kada dobijemo finalni deo rečenice, dodajemo ga u naš zajednički buffer
         if (finalTranscript) {
-            console.log("🎤 Konačan prepoznat unos: " + finalTranscript);
-            processVoiceDataEntry(finalTranscript.toLowerCase().trim());
+            voiceBuffer += " " + finalTranscript;
+            console.log("🎤 Trenutni sakupljeni tekst: " + voiceBuffer);
+            processVoiceDataEntry(voiceBuffer.toLowerCase().trim());
         }
     };
 
@@ -2374,16 +2348,89 @@ function startVoiceDataEntry() {
         }
     };
 
+    // Automatski restartuj mikrofon ako se u pauzi sam zaustavi
     window.voiceDataRecognition.onend = function() {
-        if (statusEl) {
-            statusEl.innerHTML = '⏸️ Mikrofon je pauziran.';
+        if (statusEl && window.voiceDataRecognition) {
+            statusEl.innerHTML = '🔄 Mikrofon se osvežava... Govorite i dalje.';
+            try {
+                setTimeout(() => {
+                    if (window.voiceDataRecognition) {
+                        window.voiceDataRecognition.start();
+                    }
+                }, 300);
+            } catch(e) {}
         }
     };
 
     try {
+        voiceBuffer = ""; // Resetujemo buffer na početku
         window.voiceDataRecognition.start();
+        console.log("🎤 Glasovni unos uspešno startovan.");
     } catch (e) {
         console.log("Već pokrenuto");
+    }
+}
+
+function processVoiceDataEntry(text) {
+    // 1. Ako detektujemo kraj
+    if (text.includes('end') || text.includes('kraj')) {
+        stopVoiceDataEntry();
+        voiceBuffer = "";
+        
+        const statusEl = document.getElementById('voiceLiveStatus');
+        if (statusEl) statusEl.remove();
+
+        if (typeof renderInventory === 'function') {
+            renderInventory();
+        }
+        return;
+    }
+
+    // 2. Ako detektujemo čuvanje (plus / sačuvaj)
+    if (text.includes('plus') || text.includes('sačuvaj')) {
+        parseAndFillVoiceFields(text);
+        
+        setTimeout(() => {
+            executeRealSaveAndContinue();
+            voiceBuffer = ""; // Čistimo buffer za sledeći proizvod
+        }, 200);
+        return;
+    }
+
+    // Samo popunjavamo polja dok korisnik priča, ali ne čuvamo dok ne kaže plus
+    parseAndFillVoiceFields(text);
+}
+
+function parseAndFillVoiceFields(text) {
+    let cleanText = text.toLowerCase().trim();
+    
+    // 1. Količina
+    const qtyMatch = cleanText.match(/(\d+[\.,]?\d*)\s*(kilograma|kilu|kila|kg|grama|g|litra|l|komada|kom)/);
+    if (qtyMatch) {
+        setFieldValueAndHighlight('productQuantity', qtyMatch[1]);
+        cleanText = cleanText.replace(qtyMatch[0], '');
+    }
+    
+    // 2. Rok
+    const expiryMatch = cleanText.match(/(\d+)\s*(mesec|meseca|meseci)/);
+    if (expiryMatch) {
+        setFieldValueAndHighlight('productExpiry', expiryMatch[1]);
+        cleanText = cleanText.replace(expiryMatch[0], '');
+    }
+
+    // 3. Lokacije
+    const locations = ['zamrzivač', 'zamrzivaču', 'frizider', 'frizideru', 'ostava', 'ostavi'];
+    locations.forEach(loc => {
+        if (cleanText.includes(loc)) {
+            cleanText = cleanText.replace(loc, '').trim();
+        }
+    });
+
+    // 4. Naziv proizvoda (sklanjamo kontrolne reči)
+    const finalName = cleanText.replace(/plus|sačuvaj|end|kraj|unos/g, '').trim();
+    if (finalName.length > 0) {
+        const formattedName = finalName.charAt(0).toUpperCase() + finalName.slice(1);
+        setFieldValueAndHighlight('productName', formattedName);
     }
 }
 
