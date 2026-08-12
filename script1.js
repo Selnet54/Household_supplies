@@ -2275,10 +2275,10 @@ console.log('✅ Voice recognition dodatak učitan!');
 console.log('✅ stopVoiceRecognition i getCurrentLang izvezeni globalno');
 
 // ============================================
-// FUNKCIJE ZA JEZIK - DODAJ NA KRAJ script1.js
+// FUNKCIJE ZA JEZIK - KORISTI POSTOJEĆI EKRAN 2
 // ============================================
 
-// ⭐ PRVO DODAJ OVU FUNKCIJU ⭐
+// ⭐ OVO MENJA UI TEKSTOVE NA SVIH EKRANIMA ⭐
 function updateUITexts(lang) {
     console.log('🔄 Ažuriram UI tekstove za:', lang);
     
@@ -2300,7 +2300,10 @@ function updateUITexts(lang) {
             'exit': 'Izlaz',
             'addProduct': 'Dodaj proizvod',
             'voiceControl': '🎤 Glasovna kontrola',
-            'backVoice': '◀ Nazad'
+            'backVoice': '◀ Nazad',
+            'choiceTitle': 'Kako želite da unesete podatke?',
+            'voiceMenuPrompt': 'Izaberite akciju:',
+            'voiceStatusText': '🎤 Izaberite opciju iznad ili izgovorite komandu'
         },
         'en': {
             'loginTitle': 'Login',
@@ -2314,12 +2317,15 @@ function updateUITexts(lang) {
             'manualTitle': 'Manual Input',
             'manualDesc': 'Type data manually',
             'inventory': 'Inventory',
-            'shopping': 'Shopping',
+            'shopping': 'Shopping List',
             'back': 'Back',
             'exit': 'Exit',
             'addProduct': 'Add Product',
             'voiceControl': '🎤 Voice Control',
-            'backVoice': '◀ Back'
+            'backVoice': '◀ Back',
+            'choiceTitle': 'How do you want to enter data?',
+            'voiceMenuPrompt': 'Choose an action:',
+            'voiceStatusText': '🎤 Choose an option above or say a command'
         },
         'de': {
             'loginTitle': 'Anmelden',
@@ -2338,7 +2344,10 @@ function updateUITexts(lang) {
             'exit': 'Ausgang',
             'addProduct': 'Produkt hinzufügen',
             'voiceControl': '🎤 Sprachsteuerung',
-            'backVoice': '◀ Zurück'
+            'backVoice': '◀ Zurück',
+            'choiceTitle': 'Wie möchten Sie Daten eingeben?',
+            'voiceMenuPrompt': 'Wählen Sie eine Aktion:',
+            'voiceStatusText': '🎤 Wählen Sie eine Option oben oder sagen Sie einen Befehl'
         },
         'hu': {
             'loginTitle': 'Bejelentkezés',
@@ -2357,7 +2366,10 @@ function updateUITexts(lang) {
             'exit': 'Kilépés',
             'addProduct': 'Termék hozzáadása',
             'voiceControl': '🎤 Hangvezérlés',
-            'backVoice': '◀ Vissza'
+            'backVoice': '◀ Vissza',
+            'choiceTitle': 'Hogyan szeretné bevinni az adatokat?',
+            'voiceMenuPrompt': 'Válasszon egy műveletet:',
+            'voiceStatusText': '🎤 Válasszon egy lehetőséget fent, vagy mondjon parancsot'
         },
         'uk': {
             'loginTitle': 'Вхід',
@@ -2376,7 +2388,10 @@ function updateUITexts(lang) {
             'exit': 'Вихід',
             'addProduct': 'Додати товар',
             'voiceControl': '🎤 Голосове керування',
-            'backVoice': '◀ Назад'
+            'backVoice': '◀ Назад',
+            'choiceTitle': 'Як ви хочете ввести дані?',
+            'voiceMenuPrompt': 'Виберіть дію:',
+            'voiceStatusText': '🎤 Виберіть опцію вище або скажіть команду'
         },
         'ru': {
             'loginTitle': 'Вход',
@@ -2395,13 +2410,15 @@ function updateUITexts(lang) {
             'exit': 'Выход',
             'addProduct': 'Добавить товар',
             'voiceControl': '🎤 Голосовое управление',
-            'backVoice': '◀ Назад'
+            'backVoice': '◀ Назад',
+            'choiceTitle': 'Как вы хотите ввести данные?',
+            'voiceMenuPrompt': 'Выберите действие:',
+            'voiceStatusText': '🎤 Выберите опцию выше или скажите команду'
         }
     };
     
     const t = texts[lang] || texts['sr'];
     
-    // Ažuriraj sve elemente
     try {
         // Login ekran
         const loginTitle = document.querySelector('#loginScreen h2');
@@ -2424,6 +2441,9 @@ function updateUITexts(lang) {
         if (langTitle) langTitle.textContent = t.langTitle;
         
         // Choice ekran
+        const choiceTitleText = document.getElementById('choiceTitleText');
+        if (choiceTitleText) choiceTitleText.textContent = t.choiceTitle;
+        
         const voiceTitleText = document.getElementById('voiceTitleText');
         if (voiceTitleText) voiceTitleText.textContent = t.voiceTitle;
         
@@ -2450,6 +2470,12 @@ function updateUITexts(lang) {
         if (exitText) exitText.textContent = t.exit;
         
         // Voice menu
+        const voiceMenuTitleText = document.getElementById('voiceMenuTitleText');
+        if (voiceMenuTitleText) voiceMenuTitleText.textContent = t.voiceControl;
+        
+        const voiceMenuPromptText = document.getElementById('voiceMenuPromptText');
+        if (voiceMenuPromptText) voiceMenuPromptText.textContent = t.voiceMenuPrompt;
+        
         const invMenuText = document.getElementById('invMenuText');
         if (invMenuText) invMenuText.textContent = t.inventory;
         
@@ -2465,8 +2491,9 @@ function updateUITexts(lang) {
         const backVoiceText = document.getElementById('backVoiceText');
         if (backVoiceText) backVoiceText.textContent = t.backVoice;
         
-        const voiceMenuTitleText = document.getElementById('voiceMenuTitleText');
-        if (voiceMenuTitleText) voiceMenuTitleText.textContent = t.voiceControl;
+        // Voice status
+        const voiceStatus = document.getElementById('voiceStatus');
+        if (voiceStatus) voiceStatus.textContent = t.voiceStatusText;
         
         console.log('✅ UI tekstovi ažurirani za:', lang);
     } catch(e) {
@@ -2475,67 +2502,34 @@ function updateUITexts(lang) {
 }
 
 // ============================================
-// FUNKCIJE ZA JEZIK - SAMO JEDNOM!
+// IZBOR JEZIKA - POVEZANO SA EKRANOM 2
 // ============================================
 
-// Menjanje jezika
+// ⭐ OVO SE POZIVA KAD KLIKNEŠ NA ZASTAVU NA EKRANU 2 ⭐
 function changeLanguage(lang) {
     console.log('🌍 Menjam jezik na:', lang);
     
     // Sačuvaj izbor
     localStorage.setItem('appLanguage', lang);
+    currentLang = lang;
     window.currentLanguage = lang;
     
-    // Ažuriraj dugme
-    const flagMap = {
-        'sr': '🇷🇸',
-        'en': '🇬🇧',
-        'de': '🇩🇪',
-        'hu': '🇭🇺',
-        'uk': '🇺🇦',
-        'ru': '🇷🇺'
-    };
-    const labelMap = {
-        'sr': 'SR',
-        'en': 'EN',
-        'de': 'DE',
-        'hu': 'HU',
-        'uk': 'UK',
-        'ru': 'RU'
-    };
+    // Ažuriraj UI tekstove
+    updateUITexts(lang);
     
-    const flagElement = document.getElementById('currentLanguageFlag');
-    const labelElement = document.getElementById('currentLanguageLabel');
-    if (flagElement) flagElement.textContent = flagMap[lang] || '🇷🇸';
-    if (labelElement) labelElement.textContent = labelMap[lang] || 'SR';
+    // Ažuriraj header
+    updateHeaderLanguage();
     
-    // Sakrij meni
-    const menu = document.getElementById('languageMenu');
-    if (menu) menu.style.display = 'none';
-    
-    // Obavesti aplikaciju o promeni jezika
-    if (typeof updateUITexts === 'function') {
-        updateUITexts(lang);
+    // Ažuriraj interfejs (3. i 4. ekran)
+    if (typeof updateInterfaceLanguage === 'function') {
+        updateInterfaceLanguage();
     }
     
-    // Ponovo prikaži trenutni ekran sa novim jezikom
-    const currentScreen = window.currentScreenState || 'inventory';
+    // Pređi na choiceScreen (ekran 3)
     setTimeout(() => {
-        switch(currentScreen) {
-            case 'inventory':
-                if (typeof renderInventory === 'function') renderInventory();
-                break;
-            case 'dataEntry':
-                if (typeof renderDataEntry === 'function') renderDataEntry('');
-                break;
-            case 'shopping':
-                if (typeof renderShoppingList === 'function') renderShoppingList();
-                break;
-            default:
-                if (typeof renderInventory === 'function') renderInventory();
-                break;
-        }
-    }, 100);
+        showScreen('choiceScreen');
+        console.log('✅ Prelaz na choiceScreen sa jezikom:', lang);
+    }, 300);
     
     // Prikaži potvrdu
     if (typeof showModernAlert === 'function') {
@@ -2551,75 +2545,55 @@ function changeLanguage(lang) {
     }
 }
 
-// Toggle meni za jezik
-function toggleLanguageMenu(event) {
-    if (event) {
-        event.stopPropagation();
-    }
-    const menu = document.getElementById('languageMenu');
-    if (menu) {
-        if (menu.style.display === 'none' || menu.style.display === '') {
-            menu.style.display = 'block';
-        } else {
-            menu.style.display = 'none';
-        }
-    }
-}
+// ============================================
+// INICIJALIZACIJA JEZIKA
+// ============================================
 
-// Zatvori meni kada se klikne van
-document.addEventListener('click', function(event) {
-    const selector = document.querySelector('.language-selector');
-    const menu = document.getElementById('languageMenu');
-    if (selector && menu && !selector.contains(event.target)) {
-        menu.style.display = 'none';
-    }
-});
-
-// Inicijalizacija jezika
 function initLanguage() {
     const savedLang = localStorage.getItem('appLanguage') || 'sr';
+    currentLang = savedLang;
     window.currentLanguage = savedLang;
-    
-    // Ažuriraj dugme
-    const flagMap = {
-        'sr': '🇷🇸',
-        'en': '🇬🇧',
-        'de': '🇩🇪',
-        'hu': '🇭🇺',
-        'uk': '🇺🇦',
-        'ru': '🇷🇺'
-    };
-    const labelMap = {
-        'sr': 'SR',
-        'en': 'EN',
-        'de': 'DE',
-        'hu': 'HU',
-        'uk': 'UK',
-        'ru': 'RU'
-    };
-    
-    const flagElement = document.getElementById('currentLanguageFlag');
-    const labelElement = document.getElementById('currentLanguageLabel');
-    if (flagElement) flagElement.textContent = flagMap[savedLang] || '🇷🇸';
-    if (labelElement) labelElement.textContent = labelMap[savedLang] || 'SR';
     
     console.log('🌍 Jezik inicijalizovan:', savedLang);
     
-    // Primeni tekstove
-    if (typeof updateUITexts === 'function') {
-        setTimeout(() => updateUITexts(savedLang), 100);
-    }
+    // Prvo prikaži jezike na ekranu 2
+    renderLanguages();
+    
+    // Onda primeni tekstove
+    setTimeout(() => {
+        updateUITexts(savedLang);
+        updateHeaderLanguage();
+        if (typeof updateInterfaceLanguage === 'function') {
+            updateInterfaceLanguage();
+        }
+    }, 100);
 }
 
-// Pokreni inicijalizaciju kada se stranica učita
+// ============================================
+// POKRENI INICIJALIZACIJU
+// ============================================
+
+// Kada se DOM učita
 document.addEventListener('DOMContentLoaded', function() {
+    // Inicijalizuj jezik
     initLanguage();
+    
+    // Proveri da li je languageScreen prikazan
+    const langScreen = document.getElementById('languageScreen');
+    if (langScreen && langScreen.style.display !== 'flex') {
+        showScreen('languageScreen');
+        renderLanguages();
+    }
 });
 
-// Izvezi sve funkcije globalno
+// ============================================
+// IZVEZI GLOBALNO
+// ============================================
+
 window.updateUITexts = updateUITexts;
 window.changeLanguage = changeLanguage;
-window.toggleLanguageMenu = toggleLanguageMenu;
 window.initLanguage = initLanguage;
+window.renderLanguages = renderLanguages;
 
 console.log('✅ Sve funkcije za jezik su izvezene globalno!');
+console.log('🌍 Trenutni jezik:', currentLang);
