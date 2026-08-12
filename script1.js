@@ -2459,14 +2459,16 @@ function saveVoiceProduct() {
 window.startVoiceDataEntry = startVoiceDataEntry;
 window.stopVoiceDataEntry = stopVoiceDataEntry;
 
-// Primer kako izgleda dugme u HTML-u sa ispravnim pozivom:
-// <button onclick="startVoiceDataEntry()">🎤 Pokreni unos</button>
 // ============================================
-// ISPRAVLJENI DODATAK ZA GLASOVNI UNOS PODATAKA
+// FINALNI MODUL ZA GLASOVNI UNOS PODATAKA
 // ============================================
 
-let voiceDataRecognition = null;
-let isVoiceDataListening = false;
+if (typeof window.voiceDataRecognition === 'undefined') {
+    window.voiceDataRecognition = null;
+}
+if (typeof window.isVoiceDataListening === 'undefined') {
+    window.isVoiceDataListening = false;
+}
 
 function openVoiceDataEntry() {
     if (typeof showScreen === 'function') {
@@ -2475,33 +2477,12 @@ function openVoiceDataEntry() {
     
     if (typeof renderDataEntry === 'function') {
         renderDataEntry();
-    } else {
-        const container = document.getElementById('mainContent');
-        if (container) {
-            container.innerHTML = `
-                <div style="text-align: center; padding: 20px;">
-                    <h2 class="title">Glasovni unos proizvoda</h2>
-                    <div style="margin: 20px 0;">
-                        <button type="button" onclick="startVoiceDataEntry()" style="padding: 20px 40px; font-size: 24px; background: #4CAF50; color: white; border: none; border-radius: 15px; cursor: pointer; font-weight: bold;">
-                            🎤 Uključi mikrofon
-                        </button>
-                        <button type="button" onclick="stopVoiceDataEntry()" style="padding: 20px 40px; font-size: 24px; background: #f44336; color: white; border: none; border-radius: 15px; cursor: pointer; font-weight: bold; margin-left: 10px;">
-                            ⏹️ Isključi
-                        </button>
-                    </div>
-                    <div id="voiceStatus" style="font-size: 20px; color: #555; margin: 15px 0; font-weight: bold;">
-                        ⏸️ Mikrofon je isključen
-                    </div>
-                </div>
-            `;
-        }
     }
     
     startVoiceDataEntry();
 }
 
 function startVoiceDataEntry() {
-    // Sprečavamo sudar sa glavnim voice sistemom ako je aktivan
     if (typeof stopVoiceRecognition === 'function') {
         stopVoiceRecognition();
     }
@@ -2511,10 +2492,10 @@ function startVoiceDataEntry() {
     }
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    voiceDataRecognition = new SpeechRecognition();
-    voiceDataRecognition.lang = 'sr-RS';
-    voiceDataRecognition.continuous = true;
-    voiceDataRecognition.interimResults = false;
+    window.voiceDataRecognition = new SpeechRecognition();
+    window.voiceDataRecognition.lang = 'sr-RS';
+    window.voiceDataRecognition.continuous = true;
+    window.voiceDataRecognition.interimResults = false;
 
     const statusEl = document.getElementById('voiceStatus');
     if (statusEl) {
@@ -2522,20 +2503,20 @@ function startVoiceDataEntry() {
         statusEl.style.color = '#28a745';
     }
 
-    voiceDataRecognition.onresult = function(event) {
+    window.voiceDataRecognition.onresult = function(event) {
         const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
         console.log("🎤 Prepoznat glasovni unos: " + transcript);
         processVoiceDataEntry(transcript);
     };
 
-    voiceDataRecognition.onerror = function(event) {
+    window.voiceDataRecognition.onerror = function(event) {
         if (event.error !== 'aborted') {
             console.error("Greška u prepoznavanju glasa: ", event.error);
         }
     };
 
-    voiceDataRecognition.onend = function() {
-        isVoiceDataListening = false;
+    window.voiceDataRecognition.onend = function() {
+        window.isVoiceDataListening = false;
         if (statusEl) {
             statusEl.textContent = '⏸️ Mikrofon je isključen';
             statusEl.style.color = '#aaa';
@@ -2543,21 +2524,21 @@ function startVoiceDataEntry() {
     };
 
     try {
-        voiceDataRecognition.start();
-        isVoiceDataListening = true;
+        window.voiceDataRecognition.start();
+        window.isVoiceDataListening = true;
     } catch (e) {
         console.log("Već pokrenuto");
     }
 }
 
 function stopVoiceDataEntry() {
-    if (voiceDataRecognition) {
+    if (window.voiceDataRecognition) {
         try {
-            voiceDataRecognition.stop();
+            window.voiceDataRecognition.stop();
         } catch(e) {}
-        voiceDataRecognition = null;
+        window.voiceDataRecognition = null;
     }
-    isVoiceDataListening = false;
+    window.isVoiceDataListening = false;
 }
 
 function processVoiceDataEntry(text) {
@@ -2604,15 +2585,12 @@ function setFieldValueAndHighlight(elementId, value) {
     }
 }
 
-// Povezivanje na tvoju pravu funkciju za čuvanje iz glavnog koda
 function saveVoiceProductFixed() {
-    // Ovde automatski tražimo tvoje postojeće funkcije za čuvanje u aplikaciji
     if (typeof saveProduct === 'function') {
         saveProduct();
     } else if (typeof handleSaveProduct === 'function') {
         handleSaveProduct();
     } else {
-        // Simuliramo klik na dugme za čuvanje ako postoji u DOM-u
         const saveBtn = document.querySelector('#saveProductBtn, button[type="submit"], .save-btn');
         if (saveBtn) saveBtn.click();
     }
@@ -2624,63 +2602,10 @@ function saveVoiceProductFixed() {
     }, 300);
 }
 
+// Globalno izvezi funkcije da uvek budu dostupne preko ENTER-a ili dugmadi
 window.openVoiceDataEntry = openVoiceDataEntry;
 window.startVoiceDataEntry = startVoiceDataEntry;
 window.stopVoiceDataEntry = stopVoiceDataEntry;
-console.log('✅ Sistem za glasovni unos podataka uspešno učitan i spreman!');
-// ============================================
-// ISPRAVKA ZA VRAĆANJE UNAZAD I IZLAZ IZ PETLJE
-// ============================================
 
-window.goBackFromVoice = function() {
-    console.log('🔙 Bezbedan povratak iz glasovnog menija...');
-    
-    // 1. Obavezno ugasi mikrofon ako radi
-    if (typeof stopVoiceDataEntry === 'function') {
-        stopVoiceDataEntry();
-    }
-    if (typeof stopVoiceRecognition === 'function') {
-        stopVoiceRecognition();
-    }
-
-    // 2. Sakrij sve ekrane
-    if (typeof hideAllScreens === 'function') {
-        hideAllScreens();
-    } else {
-        document.querySelectorAll('.screen').forEach(s => {
-            s.style.display = 'none';
-            s.classList.remove('active');
-        });
-    }
-
-    // 3. Vrati korisnika na ekran za izbor načina unosa (choiceScreen) umesto na kategorije
-    const choiceScreen = document.getElementById('choiceScreen');
-    if (choiceScreen) {
-        choiceScreen.style.display = 'flex';
-        choiceScreen.classList.add('active');
-    } else {
-        // Ako choiceScreen ne postoji, vrati ga na login ili glavni ekran
-        const mainScreen = document.getElementById('mainScreen');
-        if (mainScreen) {
-            mainScreen.style.display = 'flex';
-            mainScreen.classList.add('active');
-            if (typeof renderCategories === 'function') renderCategories();
-        }
-    }
-};
-
-// Osiguravamo da i dugme "Nazad" u header-u koristi ovu logiku kad smo u glasovnom režimu
-const originalHeaderBack = window.handleHeaderBack;
-window.handleHeaderBack = function() {
-    const voiceMenuScreen = document.getElementById('voiceMenuScreen');
-    if (voiceMenuScreen && voiceMenuScreen.classList.contains('active')) {
-        window.goBackFromVoice();
-        return;
-    }
-    
-    // Ako postoji originalna funkcija za nazad, pozovi je za ostale ekrane
-    if (typeof originalHeaderBack === 'function') {
-        originalHeaderBack();
-    }
-};
+console.log('✅ Finalni modul za glasovni unos uspešno učitan bez konflikta!');
 // KRAJ FAJLA
