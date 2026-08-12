@@ -1354,9 +1354,8 @@ function parseAndFillVoiceFields(text) {
     const qtyPatterns = [
         /(\d+[\.,]?\d*)\s*(kilograma|kilu|kila|kg)/,
         /(\d+[\.,]?\d*)\s*(grama|g)/,
-        /(\d+[\.,]?\d*)\s*(litra|l)/,
+       /(\d+[\.,]?\d*)\s*(litra|l)/,
         /(\d+[\.,]?\d*)\s*(mililitara|ml)/,
-        /(\d+)\s*(komada|komad|kom)/
     ];
     
     for (const pattern of qtyPatterns) {
@@ -1405,7 +1404,30 @@ function parseAndFillVoiceFields(text) {
         'ostava': 'ostava',
         'ostavi': 'ostava'
     };
-    
+    for (const [key, value] of Object.entries(storageMap)) {
+    if (cleanText.includes(key)) {
+        const storageSelect = document.getElementById('productStorage');
+
+        if (storageSelect) {
+            for (const option of storageSelect.options) {
+                if (option.value.toLowerCase().includes(value.toLowerCase())) {
+                    storageSelect.value = option.value;
+                    break;
+                }
+            }
+        }
+
+        cleanText = cleanText.replace(key, '');
+        break;
+    }
+}
+    // 4. Prvi preostali broj = broj komada
+    const firstNumberMatch = cleanText.match(/\b(\d+)\b/);
+
+    if (firstNumberMatch) {
+        setFieldValueAndHighlight('productPiece', firstNumberMatch[1]);
+        cleanText = cleanText.replace(firstNumberMatch[0], '');
+    }
     for (const [key, value] of Object.entries(storageMap)) {
         if (cleanText.includes(key)) {
             const storageSelect = document.getElementById('productStorage');
@@ -1421,13 +1443,6 @@ function parseAndFillVoiceFields(text) {
             cleanText = cleanText.replace(key, '');
             break;
         }
-    }
-    
-    // 4. Komad (ako je rečeno)
-    const pieceMatch = cleanText.match(/(\d+)\s*(komad|komada|kom)/);
-    if (pieceMatch) {
-        setFieldValueAndHighlight('productPiece', pieceMatch[1]);
-        cleanText = cleanText.replace(pieceMatch[0], '');
     }
     
     // 5. Naziv proizvoda - sve što ostane
