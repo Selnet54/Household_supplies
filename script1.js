@@ -2482,19 +2482,23 @@ function executeRealSave() {
 window.goBackFromVoice = function() {
     stopVoiceDataEntry();
     
-    if (typeof hideAllScreens === 'function') {
-        hideAllScreens();
-    } else {
-        document.querySelectorAll('.screen').forEach(s => {
-            s.style.display = 'none';
-            s.classList.remove('active');
-        });
+    // Obavezno resetujemo flag za izbor unosa da ne buni ostatak aplikacije
+    if (typeof fromChoiceScreen !== 'undefined') {
+        fromChoiceScreen = false;
     }
+    
+    // Sakrij SVE ekrane
+    document.querySelectorAll('.screen').forEach(s => {
+        s.style.display = 'none';
+        s.classList.remove('active');
+    });
 
+    // Prisilno prikaži choiceScreen
     const choiceScreen = document.getElementById('choiceScreen');
     if (choiceScreen) {
         choiceScreen.style.display = 'flex';
         choiceScreen.classList.add('active');
+        console.log("🔒 Uspešno vraćeno na choiceScreen!");
     } else {
         const voiceMenuScreen = document.getElementById('voiceMenuScreen');
         if (voiceMenuScreen) {
@@ -2506,6 +2510,7 @@ window.goBackFromVoice = function() {
 
 const originalHeaderBackRef = window.handleHeaderBack;
 window.handleHeaderBack = function() {
+    // Ako je mainScreen aktivan a došli smo iz glasovnog unosa, uvek idi na goBackFromVoice
     const mainScreen = document.getElementById('mainScreen');
     if (mainScreen && mainScreen.classList.contains('active')) {
         window.goBackFromVoice();
