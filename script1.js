@@ -2,7 +2,111 @@
 // PUNI SCRIPT ZA APLIKACIJU - HIJERARHIJSKI NAZAD
 // ============================================
 console.log('✅ Script.js je učitan!');
+// ============================================
+// PUNI SCRIPT ZA APLIKACIJU - HIJERARHIJSKI NAZAD
+// ============================================
+console.log('✅ Script.js je učitan!');
 
+// ============================================
+// PRVA LINIJA - DEFINISANJE VOICE FUNKCIJA
+// ============================================
+
+// Ovo mora da postoji PRE svega ostalog!
+if (typeof window.openVoiceDataEntry === 'undefined') {
+    window.openVoiceDataEntry = function() {
+        console.log('📝 openVoiceDataEntry (prva definicija)');
+        try {
+            document.querySelectorAll('.screen').forEach(s => {
+                s.style.display = 'none';
+                s.classList.remove('active');
+            });
+            const mainScreen = document.getElementById('mainScreen');
+            if (mainScreen) {
+                mainScreen.style.display = 'flex';
+                mainScreen.classList.add('active');
+            }
+            if (typeof renderDataEntry === 'function') {
+                renderDataEntry('');
+            }
+            setTimeout(function() {
+                if (typeof startVoiceDataEntry === 'function') {
+                    startVoiceDataEntry();
+                }
+            }, 500);
+        } catch(e) {
+            console.error('❌ Greška u openVoiceDataEntry:', e);
+        }
+    };
+}
+
+if (typeof window.startVoiceDataEntry === 'undefined') {
+    window.startVoiceDataEntry = function() {
+        console.log('🎤 startVoiceDataEntry (prva definicija)');
+        if (typeof window.startVoiceDataEntryFromVoice === 'function') {
+            window.startVoiceDataEntryFromVoice();
+        }
+    };
+}
+
+if (typeof window.stopVoiceDataEntry === 'undefined') {
+    window.stopVoiceDataEntry = function() {
+        console.log('🛑 stopVoiceDataEntry (prva definicija)');
+        if (typeof window.stopVoiceDataEntryFromVoice === 'function') {
+            window.stopVoiceDataEntryFromVoice();
+        }
+    };
+}
+// ===== LOKALNE FUNKCIJE ZA KOMPATIBILNOST =====
+function openVoiceDataEntry() {
+    console.log('📝 openVoiceDataEntry (lokalna)');
+    // Ako window verzija postoji, pozovi nju
+    if (typeof window.openVoiceDataEntry === 'function') {
+        return window.openVoiceDataEntry();
+    }
+    // Inače, uradi nešto korisno
+    console.log('📝 openVoiceDataEntry - fallback akcija');
+    try {
+        document.querySelectorAll('.screen').forEach(s => {
+            s.style.display = 'none';
+            s.classList.remove('active');
+        });
+        const mainScreen = document.getElementById('mainScreen');
+        if (mainScreen) {
+            mainScreen.style.display = 'flex';
+            mainScreen.classList.add('active');
+        }
+        if (typeof renderDataEntry === 'function') {
+            renderDataEntry('');
+        }
+    } catch(e) {
+        console.error('❌ Greška u openVoiceDataEntry:', e);
+    }
+}
+
+function startVoiceDataEntry() {
+    console.log('🎤 startVoiceDataEntry (lokalna)');
+    if (typeof window.startVoiceDataEntry === 'function') {
+        return window.startVoiceDataEntry();
+    }
+    console.log('🎤 startVoiceDataEntry - fallback');
+    // Pokušaj da pokreneš voice iz voiceCommands
+    if (typeof window.startVoiceDataEntryFromVoice === 'function') {
+        window.startVoiceDataEntryFromVoice();
+    }
+}
+
+function stopVoiceDataEntry() {
+    console.log('🛑 stopVoiceDataEntry (lokalna)');
+    if (typeof window.stopVoiceDataEntry === 'function') {
+        return window.stopVoiceDataEntry();
+    }
+    console.log('🛑 stopVoiceDataEntry - fallback');
+    if (typeof window.stopVoiceDataEntryFromVoice === 'function') {
+        window.stopVoiceDataEntryFromVoice();
+    }
+}
+
+console.log('✅ Lokalne voice funkcije definisane sa fallback-om!');
 // ===== SPREČI NEŽELJENA PREUSMERAVANJA =====
 (function() {
     const originalOpen = window.open;
@@ -1781,5 +1885,106 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 console.log('✅ SVI FIX-EVI PRIMENJENI!');
+// ============================================
+// KRAJNJA ZAŠTITA - PROVERA DA SVE POSTOJI
+// ============================================
+
+console.log('🔍 Krajnja provera voice funkcija:');
+console.log('  typeof openVoiceDataEntry (lokalna):', typeof openVoiceDataEntry);
+console.log('  typeof window.openVoiceDataEntry:', typeof window.openVoiceDataEntry);
+console.log('  typeof startVoiceDataEntry (lokalna):', typeof startVoiceDataEntry);
+console.log('  typeof window.startVoiceDataEntry:', typeof window.startVoiceDataEntry);
+console.log('  typeof stopVoiceDataEntry (lokalna):', typeof stopVoiceDataEntry);
+console.log('  typeof window.stopVoiceDataEntry:', typeof window.stopVoiceDataEntry);
+
+// Ako nešto nedostaje, definiši
+if (typeof openVoiceDataEntry === 'undefined') {
+    console.error('❌ openVoiceDataEntry nedostaje, definišem...');
+    openVoiceDataEntry = function() {
+        console.log('📝 openVoiceDataEntry (krajnji fallback)');
+        if (typeof renderDataEntry === 'function') {
+            renderDataEntry('');
+        }
+    };
+}
+
+if (typeof startVoiceDataEntry === 'undefined') {
+    console.error('❌ startVoiceDataEntry nedostaje, definišem...');
+    startVoiceDataEntry = function() {
+        console.log('🎤 startVoiceDataEntry (krajnji fallback)');
+    };
+}
+
+if (typeof stopVoiceDataEntry === 'undefined') {
+    console.error('❌ stopVoiceDataEntry nedostaje, definišem...');
+    stopVoiceDataEntry = function() {
+        console.log('🛑 stopVoiceDataEntry (krajnji fallback)');
+    };
+}
+
+// Dupla zaštita za window
+if (typeof window.openVoiceDataEntry === 'undefined') {
+    window.openVoiceDataEntry = openVoiceDataEntry;
+}
+if (typeof window.startVoiceDataEntry === 'undefined') {
+    window.startVoiceDataEntry = startVoiceDataEntry;
+}
+if (typeof window.stopVoiceDataEntry === 'undefined') {
+    window.stopVoiceDataEntry = stopVoiceDataEntry;
+}
+
+console.log('✅ KRAJNJA ZAŠTITA - sve funkcije postoje!');
+
+// ============================================
+// DIREKTAN ENTER ZA LOGIN
+// ============================================
+
+// Ovo rešava Enter na login ekranu
+(function() {
+    function setupLoginEnter() {
+        const phoneInput = document.getElementById('phoneInput');
+        if (!phoneInput) {
+            setTimeout(setupLoginEnter, 100);
+            return;
+        }
+        
+        console.log('📱 Vezujem Enter za login polje...');
+        
+        // Ukloni stare event listenere
+        const newInput = phoneInput.cloneNode(true);
+        phoneInput.parentNode.replaceChild(newInput, phoneInput);
+        
+        // Dodaj novi
+        newInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                console.log('📱 Enter na login polju!');
+                
+                if (typeof triggerLogin === 'function') {
+                    triggerLogin();
+                } else {
+                    console.error('❌ triggerLogin nije definisan');
+                    // Pokušaj preko dugmeta
+                    const loginBtn = document.getElementById('loginBtn');
+                    if (loginBtn) loginBtn.click();
+                }
+                return false;
+            }
+        });
+        
+        console.log('✅ Enter vezan za login polje!');
+    }
+    
+    // Pokreni kad je DOM spreman
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', setupLoginEnter);
+    } else {
+        setupLoginEnter();
+    }
+})();
+
+console.log('✅ Login Enter patch primenjen!');
 
 // KRAJ FAJLA
