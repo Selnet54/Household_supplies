@@ -1173,18 +1173,23 @@ function renderProductParts(subcategory) {
 }
 
 function renderDataEntry(productName) {
-    // Automatska detekcija odakle smo došli
-    if (!currentCategory && !currentSubcategory && !productName) {
+    // EKSPLICITNO PROVERI DA LI SMO DOŠLI SA CHOICESCREEN-A
+    // Ako nemamo kategoriju, subkategoriju i productName je prazan ili "Ostalo"
+    if (!currentCategory && !currentSubcategory && (!productName || productName === '')) {
         fromChoiceScreen = true;
     } else {
         fromChoiceScreen = false;
     }
     
+    console.log('🔍 renderDataEntry - fromChoiceScreen:', fromChoiceScreen);
+    console.log('🔍 currentCategory:', currentCategory);
+    console.log('🔍 currentSubcategory:', currentSubcategory);
+    console.log('🔍 productName:', productName);
+    
     currentScreenState = 'dataEntry';
     currentProductPart = productName;
     const content = document.getElementById('mainContent');
     if (!content) return;
-    
     const today = new Date().toISOString().split('T')[0];
     content.innerHTML = `
         <div class="title">${t('unos_podataka')}</div>
@@ -2033,6 +2038,7 @@ console.log('✅ Originalne funkcije izvezene!');
 
 function selectVoiceMode() {
     console.log('🎤 Izabran zvučni unos');
+    fromChoiceScreen = true; // <--- OBAVEZNO!
     showScreen('voiceMenuScreen');
     setTimeout(function() {
         startVoiceRecognition();
@@ -2041,6 +2047,7 @@ function selectVoiceMode() {
 
 function selectManualMode() {
     console.log('✍️ Izabran ručni unos');
+    fromChoiceScreen = true; // <--- OBAVEZNO!
     showScreen('mainScreen');
     renderCategories();
 }
