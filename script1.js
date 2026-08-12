@@ -1567,4 +1567,33 @@ document.addEventListener('keydown', function(e) {
         }
     }
 });
+// ===== PATCH ZA RENDER DATA ENTRY - DODAJ VOICE STATUS =====
+const originalRenderDataEntry2 = renderDataEntry;
+renderDataEntry = function(productName) {
+    originalRenderDataEntry2(productName);
+    
+    // Dodaj voice status ako ne postoji
+    setTimeout(() => {
+        const statusEl = document.getElementById('voiceLiveStatus');
+        if (!statusEl) {
+            const container = document.querySelector('.row:first-child')?.parentElement;
+            if (container) {
+                const voiceDiv = document.createElement('div');
+                voiceDiv.style.cssText = 'text-align:center; margin-bottom:15px; padding:10px; background:#f5f5f5; border-radius:8px;';
+                voiceDiv.innerHTML = `
+                    <button onclick="startVoiceDataEntry()" style="background:#4CAF50; color:white; border:none; padding:12px 30px; border-radius:8px; font-size:18px; cursor:pointer; font-weight:bold;">
+                        🎤 Glasovni unos
+                    </button>
+                    <span id="voiceLiveStatus" style="margin-left:15px; font-size:14px; color:#666; font-weight:bold;">⏸️</span>
+                    <div style="margin-top:8px; font-size:12px; color:#888;">
+                        Reci: "start" za početak, "plus" za čuvanje, "end" za kraj
+                    </div>
+                `;
+                container.prepend(voiceDiv);
+            }
+        }
+    }, 100);
+};
+
+console.log('✅ Patch za renderDataEntry primenjen!');
 // KRAJ FAJLA
