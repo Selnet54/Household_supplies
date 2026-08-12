@@ -1598,32 +1598,42 @@ renderDataEntry = function(productName) {
 console.log('✅ Patch za renderDataEntry primenjen!');
 
 // ============================================
-// PATCH ZA ENTER TASTER
+// SVI ENTER DOGAĐAJI - JEDINSTVENI
 // ============================================
 
-// ===== ENTER TASTER ZA SVA POLJA =====
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Enter') {
         const active = document.activeElement;
         if (!active) return;
         
-        const dataEntryFields = ['productName', 'productPiece', 'productQuantity', 'productExpiry', 'productDescription', 'productDate'];
+        console.log('⌨️ Enter na elementu:', active.id || active.tagName);
         
+        // 1. LOGIN
+        if (active.id === 'phoneInput') {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('📱 Login Enter');
+            if (typeof triggerLogin === 'function') {
+                triggerLogin();
+            }
+            return;
+        }
+        
+        // 2. DATA ENTRY POLJA
+        const dataEntryFields = ['productName', 'productPiece', 'productQuantity', 'productExpiry', 'productDescription', 'productDate'];
         if (dataEntryFields.includes(active.id)) {
             e.preventDefault();
             e.stopPropagation();
-            console.log('⌨️ Enter na polju:', active.id);
-            
+            console.log('📝 Data Entry Enter na:', active.id);
             const mainContent = document.getElementById('mainContent');
             if (mainContent && mainContent.innerHTML.includes('productName')) {
                 if (typeof saveProduct === 'function') {
                     saveProduct();
                 }
             }
+            return;
         }
     }
-}, true);
+}, true); // true = capture phase
 
-console.log('✅ Enter patch primenjen!');
-
-// KRAJ FAJLA
+console.log('✅ Jedinstveni Enter handler primenjen!');
