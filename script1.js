@@ -2397,16 +2397,27 @@ function stopVoiceDataEntry() {
 }
 
 function processVoiceDataEntry(text) {
+    // 1. Ako kaže END ili KRAJ -> Vodi te direktno na Zalihe
     if (text.includes('end') || text.includes('kraj')) {
         stopVoiceDataEntry();
-        window.goBackFromVoice();
+        
+        const statusEl = document.getElementById('voiceLiveStatus');
+        if (statusEl) statusEl.remove();
+
+        if (typeof renderInventory === 'function') {
+            renderInventory();
+            console.log("📦 Prebačeno na zalihe preko glasovne komande end/kraj.");
+        } else {
+            window.goBackFromVoice();
+        }
         return;
     }
 
+    // 2. Ako kaže PLUS ili SAČUVAJ -> Čuva proizvod i ostaje u formi za sledeći unos
     if (text.includes('plus') || text.includes('sačuvaj')) {
         parseAndFillVoiceFields(text.replace('plus', '').replace('sačuvaj', '').trim());
         setTimeout(() => {
-            executeRealSave();
+            executeRealSaveAndContinue();
         }, 200);
         return;
     }
@@ -2417,21 +2428,21 @@ function processVoiceDataEntry(text) {
 function parseAndFillVoiceFields(text) {
     let cleanText = text.toLowerCase().trim();
     
-    // 1. Količina (npr. "2 kg", "500 grama", "1 litra", "3 komada")
+    // 1. Količina
     const qtyMatch = cleanText.match(/(\d+[\.,]?\d*)\s*(kilograma|kilu|kila|kg|grama|g|litra|l|komada|kom)/);
     if (qtyMatch) {
         setFieldValueAndHighlight('productQuantity', qtyMatch[1]);
         cleanText = cleanText.replace(qtyMatch[0], '');
     }
     
-    // 2. Rok (npr. "7 meseci", "3 meseca")
+    // 2. Rok
     const expiryMatch = cleanText.match(/(\d+)\s*(mesec|meseca|meseci)/);
     if (expiryMatch) {
         setFieldValueAndHighlight('productExpiry', expiryMatch[1]);
         cleanText = cleanText.replace(expiryMatch[0], '');
     }
 
-    // 3. Lokacija (opciono uklanjanje reči)
+    // 3. Lokacija
     const locations = ['zamrzivač', 'zamrzivaču', 'frizider', 'frizideru', 'ostava', 'ostavi'];
     locations.forEach(loc => {
         if (cleanText.includes(loc)) {
@@ -2439,7 +2450,7 @@ function parseAndFillVoiceFields(text) {
         }
     });
 
-    // 4. Sve što je preostalo ide direktno u naziv proizvoda
+    // 4. Naziv proizvoda
     const finalName = cleanText.replace(/plus|sačuvaj|end|kraj/g, '').trim();
     if (finalName.length > 0) {
         const formattedName = finalName.charAt(0).toUpperCase() + finalName.slice(1);
@@ -2456,7 +2467,8 @@ function setFieldValueAndHighlight(elementId, value) {
     }
 }
 
-function executeRealSave() {
+// Čuvanje sa ostankom u formi za unos sledećeg artikla
+function executeRealSaveAndContinue() {
     if (typeof saveProduct === 'function') {
         saveProduct();
     } else if (typeof handleSaveProduct === 'function') {
@@ -2473,32 +2485,38 @@ function executeRealSave() {
     setTimeout(() => {
         const form = document.getElementById('productForm');
         if (form) form.reset();
+        
         if (typeof showModernAlert === 'function') {
-            showModernAlert('Uspeh', 'Proizvod je uspešno sačuvan!', '📦');
+            showModernAlert('Uspeh', 'Proizvod je sačuvan! Unesite sledeći.', '📦');
+        }
+        
+        const statusEl = document.getElementById('voiceLiveStatus');
+        if (statusEl) {
+            statusEl.innerHTML = '🎤 Spremno za sledeći proizvod... Govorite.';
         }
     }, 300);
 }
 
+// Rezervni povratak na ekran izbora (ako se klikne dugme Nazad)
 window.goBackFromVoice = function() {
     stopVoiceDataEntry();
     
-    // Obavezno resetujemo flag za izbor unosa da ne buni ostatak aplikacije
+    const statusEl = document.getElementById('voiceLiveStatus');
+    if (statusEl) statusEl.remove();
+    
     if (typeof fromChoiceScreen !== 'undefined') {
         fromChoiceScreen = false;
     }
     
-    // Sakrij SVE ekrane
     document.querySelectorAll('.screen').forEach(s => {
         s.style.display = 'none';
         s.classList.remove('active');
     });
 
-    // Prisilno prikaži choiceScreen
     const choiceScreen = document.getElementById('choiceScreen');
     if (choiceScreen) {
         choiceScreen.style.display = 'flex';
         choiceScreen.classList.add('active');
-        console.log("🔒 Uspešno vraćeno na choiceScreen!");
     } else {
         const voiceMenuScreen = document.getElementById('voiceMenuScreen');
         if (voiceMenuScreen) {
