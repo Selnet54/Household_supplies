@@ -1531,4 +1531,25 @@ window.handleHeaderBack = function() {
 window.openVoiceDataEntry = openVoiceDataEntry;
 window.startVoiceDataEntry = startVoiceDataEntry;
 window.stopVoiceDataEntry = stopVoiceDataEntry;
+// ===== GLOBALNI ENTER ZA SVA POLJA U DATA ENTRY =====
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+        const activeElement = document.activeElement;
+        if (!activeElement) return;
+        
+        // Proveri da li je aktivno polje na data entry ekranu
+        const dataEntryFields = ['productName', 'productPiece', 'productQuantity', 'productExpiry', 'productDescription', 'productDate'];
+        
+        if (dataEntryFields.includes(activeElement.id)) {
+            e.preventDefault();
+            console.log('⌨️ Enter pritisnut na polju:', activeElement.id);
+            
+            // Proveri da li smo na data entry ekranu
+            const mainContent = document.getElementById('mainContent');
+            if (mainContent && mainContent.innerHTML.includes('productName')) {
+                saveProduct();
+            }
+        }
+    }
+});
 // KRAJ FAJLA
