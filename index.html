@@ -302,7 +302,7 @@
             <div class="logo-text">SUPPLIES</div>
             <div style="font-size:18px;color:#aaa;margin-bottom:15px;">Home inventory management</div>
             <h2>Login</h2>
-            <input type="tel" id="phoneInput" placeholder="Enter phone number" maxlength="15">
+            <input type="tel" id="phoneInput" placeholder="Enter phone number" maxlength="15" onkeydown="if(event.key==='Enter'){event.preventDefault(); document.getElementById('loginBtn').click();}">
             <button id="loginBtn" class="btn btn-green">ENTER</button>
             <button id="supportBtn" class="btn btn-orange" onclick="document.getElementById('supportDialog').style.display='flex'; document.getElementById('supportDialog').classList.add('active');">📧 Support</button>
             <div class="login-limits">
