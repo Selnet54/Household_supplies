@@ -1372,13 +1372,15 @@ recognition.onresult = function(event) {
     if (text.toLowerCase().includes('unos') || text.toLowerCase().includes('start')) {
         console.log('📱 Otvaram ekran za unos kroz renderDataEntry...');
         
-        // 1. Sakrij glasovni meni da se ne vraća na njega
-        const voiceMenu = document.getElementById('voiceMenuScreen');
-        if (voiceMenu) voiceMenu.style.display = 'none';
-        
-        // 2. Otvori formu za unos
+        // 1. Pozovi funkciju za iscrtavanje forme
         if (typeof renderDataEntry === 'function') {
             renderDataEntry('');
+        }
+        
+        // 2. Eksplicitno prikaži ekran preko vašeg sistema ako postoji ID, npr. 'dataEntryScreen' ili 'mainContent'
+        if (typeof showScreen === 'function') {
+            // Ako koristite showScreen, prosledite ID ekrana, npr:
+            // showScreen('dataEntryScreen');
         }
         
         // 3. Zaustavi prepoznavanje da ne ide u petlju
