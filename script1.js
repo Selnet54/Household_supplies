@@ -1368,24 +1368,27 @@ recognition.onresult = function(event) {
     console.log('🎤 Prepoznato (finalno):', text);
     status.innerHTML = `🗣️ You said: "${text}"`;
     
-    // ⭐ AKO KAŽE "UNOS" ILI "START", OTVORI FORMU ZA UNOS PODATAKA
+   // ⭐ AKO KAŽE "UNOS" ILI "START", OTVORI FORMU ZA UNOS PODATAKA
     if (text.toLowerCase().includes('unos') || text.toLowerCase().includes('start')) {
         console.log('📱 Otvaram ekran za unos kroz renderDataEntry...');
         
-        // 1. Pozovi funkciju za iscrtavanje forme
+        // 1. Prvo obavezno zaustavi mikrofon da ne ide u petlju i ne prepoznaje dalje
+        if (recognition) {
+            try { 
+                recognition.stop(); 
+            } catch(e) {}
+            recognition = null;
+        }
+        window._isMicrophoneActive = false;
+        
+        // 2. Prikaži odgovarajući ekran (npr. 'mainScreen' ili ekran gde se forma renderuje)
+        if (typeof showScreen === 'function') {
+            showScreen('mainScreen'); // ili ID ekrana koji sadrži formu/kategorije
+        }
+        
+        // 3. Pozovi funkciju za iscrtavanje forme za unos proizvoda
         if (typeof renderDataEntry === 'function') {
             renderDataEntry('');
-        }
-        
-        // 2. Eksplicitno prikaži ekran preko vašeg sistema ako postoji ID, npr. 'dataEntryScreen' ili 'mainContent'
-        if (typeof showScreen === 'function') {
-            // Ako koristite showScreen, prosledite ID ekrana, npr:
-            // showScreen('dataEntryScreen');
-        }
-        
-        // 3. Zaustavi prepoznavanje da ne ide u petlju
-        if (typeof recognition !== 'undefined' && recognition) {
-            try { recognition.stop(); } catch(e) {}
         }
         
         return;
