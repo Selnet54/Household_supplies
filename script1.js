@@ -1364,23 +1364,27 @@ function startVoiceRecognition() {
             return;
         }
         
-        const text = result[0].transcript.trim();
-        console.log('🎤 Prepoznato (finalno):', text);
-        status.innerHTML = `🗣️ You said: "${text}"`;
-        
-        // ⭐ POZOVI voiceCommand SAMO ZA FINALNE REZULTATE
-        voiceCommand(text);
-    };
+       const text = result[0].transcript.trim();
+    console.log('🎤 Prepoznato (finalno):', text);
+    status.innerHTML = `🗣️ You said: "${text}"`;
     
-    recognition.onerror = function(event) {
-        console.warn('⚠️ Speech error:', event.error);
-        if (event.error === 'not-allowed') {
-            status.innerHTML = '❌ Please allow microphone access';
-        } else {
-            status.innerHTML = `❌ Error: ${event.error}`;
-        }
-        status.style.color = '#f44336';
-    };
+    // ⭐ BEZBEDAN POZIV KOMANDE DA NE PUCA APLIKACIJU
+    if (typeof voiceCommand === 'function') {
+        voiceCommand(text);
+    } else {
+        console.warn('⚠️ Funkcija voiceCommand nije definisana, proverite voiceCommands.js');
+    }
+};
+
+recognition.onerror = function(event) {
+    console.warn('⚠️ Speech error:', event.error);
+    if (event.error === 'not-allowed') {
+        status.innerHTML = '❌ Please allow microphone access';
+    } else {
+        status.innerHTML = `❌ Error: ${event.error}`;
+    }
+    status.style.color = '#f44336';
+};
 recognition.onend = function() {
         window._isMicrophoneActive = false; // Resetujemo zastavicu da može ponovo da se upali
         console.log('🎤 Mikrofon zaustavljen');
