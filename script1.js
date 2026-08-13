@@ -275,7 +275,7 @@ function closeModernAlert() {
 }
 
 // ===== MODERNI CONFIRM (DODAJ OVO OVDE) =====
-let confirmCallback = null;
+window.confirmCallback = window.confirmCallback || null;
 
 function showModernConfirm(title, message, icon = '⚠️', onYes, onNo) {
     // Proveri da li modernConfirm postoji u HTML-u
@@ -283,13 +283,12 @@ function showModernConfirm(title, message, icon = '⚠️', onYes, onNo) {
     if (!confirmDiv) {
         // Ako nema, koristi običan confirm
         if (confirm(message)) {
-            onYes();
+            if (onYes) onYes();
         } else {
-            onNo();
+            if (onNo) onNo();
         }
         return;
     }
-    
     document.getElementById('confirmIcon').textContent = icon;
     document.getElementById('confirmTitle').textContent = title;
     document.getElementById('confirmMessage').textContent = message;
