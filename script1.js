@@ -1358,7 +1358,7 @@ recognition.onresult = function(event) {
     const last = event.results.length - 1;
     const result = event.results[last];
     
-    // ⭐ IGNORIŠI INTERIM REZULTATE (još uvek govori)
+   // ⭐ IGNORIŠI INTERIM REZULTATE (još uvek govori)
     if (!result.isFinal) {
         console.log('⏳ Još uvek govori... (interim)');
         return;
@@ -1368,7 +1368,16 @@ recognition.onresult = function(event) {
     console.log('🎤 Prepoznato (finalno):', text);
     status.innerHTML = `🗣️ You said: "${text}"`;
     
-    // ⭐ KORISTIMO PRAVE FUNKCIJE IZ voiceCommands.js
+    // ⭐ AKO KAŽE "UNOS" ILI "START", OTVORI FORMU ZA UNOS PODATAKA
+    if (text.toLowerCase().includes('unos') || text.toLowerCase().includes('start')) {
+        console.log('📱 Otvaram ekran za unos kroz renderDataEntry...');
+        if (typeof renderDataEntry === 'function') {
+            renderDataEntry('');
+        }
+        return;
+    }
+    
+    // ⭐ KORISTIMO PRAVE FUNKCIJE IZ voiceCommands.js ZA OSTALE KOMANDE
     if (typeof parseVoiceInput === 'function' && typeof fillDataEntryFields === 'function') {
         const parsed = parseVoiceInput(text);
         fillDataEntryFields(parsed);
