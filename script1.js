@@ -1371,9 +1371,21 @@ recognition.onresult = function(event) {
     // ⭐ AKO KAŽE "UNOS" ILI "START", OTVORI FORMU ZA UNOS PODATAKA
     if (text.toLowerCase().includes('unos') || text.toLowerCase().includes('start')) {
         console.log('📱 Otvaram ekran za unos kroz renderDataEntry...');
+        
+        // 1. Sakrij glasovni meni da se ne vraća na njega
+        const voiceMenu = document.getElementById('voiceMenuScreen');
+        if (voiceMenu) voiceMenu.style.display = 'none';
+        
+        // 2. Otvori formu za unos
         if (typeof renderDataEntry === 'function') {
             renderDataEntry('');
         }
+        
+        // 3. Zaustavi prepoznavanje da ne ide u petlju
+        if (typeof recognition !== 'undefined' && recognition) {
+            try { recognition.stop(); } catch(e) {}
+        }
+        
         return;
     }
     
