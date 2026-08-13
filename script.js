@@ -2,69 +2,13 @@
 // PUNI SCRIPT ZA APLIKACIJU - HIJERARHIJSKI NAZAD
 // ============================================
 console.log('✅ Script.js je učitan!');
-// ============================================
-// PUNI SCRIPT ZA APLIKACIJU - HIJERARHIJSKI NAZAD
-// ============================================
-console.log('✅ Script.js je učitan!');
 
 // ============================================
-// PRVA LINIJA - DEFINISANJE VOICE FUNKCIJA
+// DEFINISANJE VOICE FUNKCIJA (Globalno i bezbedno)
 // ============================================
 
-// Ovo mora da postoji PRE svega ostalog!
-if (typeof window.openVoiceDataEntry === 'undefined') {
-    window.openVoiceDataEntry = function() {
-        console.log('📝 openVoiceDataEntry (prva definicija)');
-        try {
-            document.querySelectorAll('.screen').forEach(s => {
-                s.style.display = 'none';
-                s.classList.remove('active');
-            });
-            const mainScreen = document.getElementById('mainScreen');
-            if (mainScreen) {
-                mainScreen.style.display = 'flex';
-                mainScreen.classList.add('active');
-            }
-            if (typeof renderDataEntry === 'function') {
-                renderDataEntry('');
-            }
-            setTimeout(function() {
-                if (typeof startVoiceDataEntry === 'function') {
-                    startVoiceDataEntry();
-                }
-            }, 500);
-        } catch(e) {
-            console.error('❌ Greška u openVoiceDataEntry:', e);
-        }
-    };
-}
-
-if (typeof window.startVoiceDataEntry === 'undefined') {
-    window.startVoiceDataEntry = function() {
-        console.log('🎤 startVoiceDataEntry (prva definicija)');
-        if (typeof window.startVoiceDataEntryFromVoice === 'function') {
-            window.startVoiceDataEntryFromVoice();
-        }
-    };
-}
-
-if (typeof window.stopVoiceDataEntry === 'undefined') {
-    window.stopVoiceDataEntry = function() {
-        console.log('🛑 stopVoiceDataEntry (prva definicija)');
-        if (typeof window.stopVoiceDataEntryFromVoice === 'function') {
-            window.stopVoiceDataEntryFromVoice();
-        }
-    };
-}
-// ===== LOKALNE FUNKCIJE ZA KOMPATIBILNOST =====
-function openVoiceDataEntry() {
-    console.log('📝 openVoiceDataEntry (lokalna)');
-    // Ako window verzija postoji, pozovi nju
-    if (typeof window.openVoiceDataEntry === 'function') {
-        return window.openVoiceDataEntry();
-    }
-    // Inače, uradi nešto korisno
-    console.log('📝 openVoiceDataEntry - fallback akcija');
+window.openVoiceDataEntry = function() {
+    console.log('📝 openVoiceDataEntry pokrenuta');
     try {
         document.querySelectorAll('.screen').forEach(s => {
             s.style.display = 'none';
@@ -78,36 +22,35 @@ function openVoiceDataEntry() {
         if (typeof renderDataEntry === 'function') {
             renderDataEntry('');
         }
+        setTimeout(function() {
+            if (typeof startVoiceDataEntryFromVoice === 'function') {
+                startVoiceDataEntryFromVoice();
+            }
+        }, 500);
     } catch(e) {
         console.error('❌ Greška u openVoiceDataEntry:', e);
     }
-}
+};
 
-function startVoiceDataEntry() {
-    console.log('🎤 startVoiceDataEntry (lokalna)');
-    if (typeof window.startVoiceDataEntry === 'function') {
-        return window.startVoiceDataEntry();
-    }
-    console.log('🎤 startVoiceDataEntry - fallback');
-    // Pokušaj da pokreneš voice iz voiceCommands
+window.startVoiceDataEntry = function() {
+    console.log('🎤 startVoiceDataEntry pokrenuta');
     if (typeof window.startVoiceDataEntryFromVoice === 'function') {
         window.startVoiceDataEntryFromVoice();
     }
-}
+};
 
-function stopVoiceDataEntry() {
-    console.log('🛑 stopVoiceDataEntry (lokalna)');
-    if (typeof window.stopVoiceDataEntry === 'function') {
-        return window.stopVoiceDataEntry();
-    }
-    console.log('🛑 stopVoiceDataEntry - fallback');
+window.stopVoiceDataEntry = function() {
+    console.log('🛑 stopVoiceDataEntry pokrenuta');
     if (typeof window.stopVoiceDataEntryFromVoice === 'function') {
         window.stopVoiceDataEntryFromVoice();
     }
-}
+};
 
-console.log('✅ Lokalne voice funkcije definisane sa fallback-om!');
-// ===== SPREČI NEŽELJENA PREUSMERAVANJA =====
+console.log('✅ Voice funkcije uspešno definisane!');
+
+// ============================================
+// SPREČI NEŽELJENA PREUSMERAVANJA
+// ============================================
 (function() {
     const originalOpen = window.open;
     
