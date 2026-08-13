@@ -1260,18 +1260,11 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('✅ Login dugme povezano');
     }
 
-    // ENTER TASTER
-    const phoneInput = document.getElementById('phoneInput');
-    if (phoneInput) {
-        phoneInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                console.log('⌨️ Enter taster pritisnut');
-                triggerLogin();
-            }
-        });
-        console.log('✅ Enter taster povezan');
-    }
+    // ENTER TASTER - UKLONJEN! (sada radi iz HTML-a)
+    // phoneInput ENTER handler je obrisan
+
+    console.log('✅ Svi događaji uspešno inicijalizovani!');
+});
 
     // EXIT DUGME
     const exitBtn = document.getElementById('exitLoginBtn');
@@ -2076,3 +2069,80 @@ function renderSubcategoryGroup(category, groupName) {
 // KRAJ FAJLA
 // ============================================
 console.log('✅ Kraj fajla');
+// ============================================
+// DODATNA ZAŠTITA ZA ENTER - DIREKTNO NA ELEMENT
+// ============================================
+
+(function() {
+    console.log('🔧 Dodajem dodatnu zaštitu za Enter...');
+    
+    function attachEnterProtection() {
+        const input = document.getElementById('phoneInput');
+        if (!input) {
+            setTimeout(attachEnterProtection, 200);
+            return;
+        }
+        
+        // Dodaj još jedan listener (neće smetati, samo će pomoći)
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('📱 ENTER (dodatna zaštita)');
+                
+                // Pokušaj sve opcije
+                if (typeof triggerLogin === 'function') {
+                    triggerLogin();
+                } else {
+                    const btn = document.getElementById('loginBtn');
+                    if (btn) btn.click();
+                }
+                return false;
+            }
+        }, true); // true = capture phase - najveći prioritet
+        
+        console.log('✅ Dodatna Enter zaštita aktivirana!');
+    }
+    
+    // Pokreni odmah ili sačekaj DOM
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', attachEnterProtection);
+    } else {
+        attachEnterProtection();
+    }
+})();
+
+// ============================================
+// FALLBACK ZA VOICE COMMANDS - AKO NEDOSTAJE
+// ============================================
+
+if (typeof voiceCommand === 'undefined') {
+    window.voiceCommand = function(command) {
+        console.log('🎤 voiceCommand (fallback):', command);
+        const cmd = command.toLowerCase().trim();
+        
+        if (cmd.includes('zalihe') || cmd.includes('inventory') || cmd.includes('stanje')) {
+            if (typeof renderInventory === 'function') renderInventory();
+            return;
+        }
+        if (cmd.includes('spisak') || cmd.includes('shopping') || cmd.includes('lista')) {
+            if (typeof renderShoppingList === 'function') renderShoppingList();
+            return;
+        }
+        if (cmd.includes('unos') || cmd.includes('data') || cmd.includes('dodaj')) {
+            if (typeof renderDataEntry === 'function') renderDataEntry('');
+            return;
+        }
+        if (cmd.includes('exit') || cmd.includes('izlaz') || cmd.includes('kraj')) {
+            if (typeof exitApp === 'function') exitApp();
+            return;
+        }
+        if (typeof showModernAlert === 'function') {
+            showModernAlert('Nije prepoznato', `Komanda: "${command}"`, '❓');
+        }
+    };
+    console.log('✅ voiceCommand fallback definisan!');
+}
+
+console.log('✅ SVE FUNKCIJE SPREMNE!');
+// KRAJ FAJLA - STVARNO KRAJ
