@@ -217,6 +217,16 @@ function startVoiceDataEntry() {
             statusEl.style.color = '#FFD700';
         }
         
+        // ⭐ AKO KAŽE "UNOS" ILI "START", OTVORI EKRAN ZA UNOS
+        if (fullText.includes('unos')) {
+            console.log('📱 Otvaram ekran za unos kroz renderDataEntry...');
+            if (typeof renderDataEntry === 'function') {
+                renderDataEntry('');
+            }
+            stopVoiceDataEntry();
+            return;
+        }
+        
         // PLUS - čuvanje
         if (fullText.includes('plus')) {
             console.log('💾 PLUS - čuvanje proizvoda');
@@ -296,7 +306,6 @@ function startVoiceDataEntry() {
             }
         }
     };
-    
     voiceRecognitionInstance.onerror = function(event) {
         console.error('❌ Greška mikrofona:', event.error);
         if (statusEl) {
