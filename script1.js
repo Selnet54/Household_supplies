@@ -1351,28 +1351,33 @@ function startVoiceRecognition() {
         status.style.color = '#4FC3F7';
     };
     
-    // ⭐ OVO JE POPRAVLJENI onresult - IGNORIŠE "k" dok govoriš
-    recognition.onresult = function(event) {
-        console.log('📝 Rezultati:', event.results);
-        
-        const last = event.results.length - 1;
-        const result = event.results[last];
-        
-        // ⭐ IGNORIŠI INTERIM REZULTATE (još uvek govori)
-        if (!result.isFinal) {
-            console.log('⏳ Još uvek govori... (interim)');
-            return;
-        }
-        
-       const text = result[0].transcript.trim();
+   // ⭐ OVO JE POPRAVLJENI onresult - IGNORIŠE "k" dok govoriš
+recognition.onresult = function(event) {
+    console.log('📝 Rezultati:', event.results);
+    
+    const last = event.results.length - 1;
+    const result = event.results[last];
+    
+    // ⭐ IGNORIŠI INTERIM REZULTATE (još uvek govori)
+    if (!result.isFinal) {
+        console.log('⏳ Još uvek govori... (interim)');
+        return;
+    }
+    
+    const text = result[0].transcript.trim();
     console.log('🎤 Prepoznato (finalno):', text);
     status.innerHTML = `🗣️ You said: "${text}"`;
     
-    // ⭐ BEZBEDAN POZIV KOMANDE DA NE PUCA APLIKACIJU
-    if (typeof voiceCommand === 'function') {
-        voiceCommand(text);
+    // ⭐ KORISTIMO PRAVE FUNKCIJE IZ voiceCommands.js
+    if (typeof parseVoiceInput === 'function' && typeof fillDataEntryFields === 'function') {
+        const parsed = parseVoiceInput(text);
+        fillDataEntryFields(parsed);
+        
+        if (text.toLowerCase().includes('plus') && typeof saveProduct === 'function') {
+            saveProduct();
+        }
     } else {
-        console.warn('⚠️ Funkcija voiceCommand nije definisana, proverite voiceCommands.js');
+        console.warn('⚠️ Funkcije iz voiceCommands.js nisu dostupne.');
     }
 };
 
