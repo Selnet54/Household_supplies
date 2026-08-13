@@ -189,59 +189,6 @@ function exitApp() {
     `;
 }
 
-// ===== MODERNI ALERT I CONFIRM - DINAMIČKI KREIRANI =====
-
-function closeModernAlert() {
-    const dynamic = document.getElementById('modernAlertDynamic');
-    if (dynamic) dynamic.remove();
-    
-    const old = document.getElementById('modernAlert');
-    if (old) {
-        old.style.display = 'none';
-        old.classList.remove('active');
-    }
-}// ===== 0. EXIT FUNKCIJA =====
-function exitApp() {
-    console.log("🚪 Exit dugme kliknuto!");
-    
-    const loginScreen = document.getElementById('loginScreen');
-    const languageScreen = document.getElementById('languageScreen');
-    
-    const isLoginVisible = loginScreen && window.getComputedStyle(loginScreen).display === 'flex';
-    const isLanguageVisible = languageScreen && window.getComputedStyle(languageScreen).display === 'flex';
-    
-    let poruka;
-    if (isLoginVisible || isLanguageVisible) {
-        poruka = "Thanks for using this app! 👋";
-    } else {
-        poruka = translations[currentLang]?.exit_poruka || "Thanks for using this app! 👋";
-    }
-    
-    // DIREKTNO PRIKAŽI ZAHVALNI EKRAN - BEZ POPUP PROZORA
-    document.body.innerHTML = '';
-    document.body.style.background = '#1a237e';
-    document.body.style.margin = '0';
-    document.body.style.padding = '0';
-    document.body.style.width = '100%';
-    document.body.style.height = '100vh';
-    document.body.style.display = 'flex';
-    document.body.style.justifyContent = 'center';
-    document.body.style.alignItems = 'center';
-    document.body.style.flexDirection = 'column';
-    document.body.style.fontFamily = 'Arial, sans-serif';
-    
-    document.body.innerHTML = `
-        <div style="text-align: center; color: #FFD700;">
-            <div style="font-size: 80px; margin-bottom: 20px;">👋</div>
-            <div style="font-size: 32px; font-weight: bold;">${poruka}</div>
-            <div style="font-size: 16px; color: #888; margin-top: 30px;">© Supplies App</div>
-            <button onclick="location.reload()" style="margin-top:30px; padding:12px 30px; background:#FFD700; color:#1a237e; border:none; border-radius:8px; font-size:18px; cursor:pointer; font-weight:bold;">
-                🔄 Restart App
-            </button>
-        </div>
-    `;
-}
-
 // ===== MODERNI ALERT - DINAMIČKI KREIRAN =====
 function showModernAlert(title, message, icon = '📢') {
     console.log('🔔 Alert:', title, message);
@@ -317,19 +264,36 @@ function closeModernAlert() {
         old.classList.remove('active');
     }
 }
-
+window.closeModernAlert = closeModernAlert;
 // ===== CONFIRM =====
-let confirmCallback = null;
+// Umesto običnog leta koji pravi problem, smestamo ga bezbedno na window
+window.confirmCallback = window.confirmCallback || null;
 
 function showModernConfirm(title, message, onYesCallback, onNoCallback, icon = '⚠️') {
     console.log('⚠️ Confirm:', title, message);
     
     closeModernConfirm();
     
-    confirmCallback = {
+    window.confirmCallback = {
         onYes: onYesCallback || function() { closeModernConfirm(); },
         onNo: onNoCallback || function() { closeModernConfirm(); }
     };
+    // ... ostatak vaše funkcije za prikaz confirm prozora ...
+}
+
+function handleConfirmYes() {
+    if (window.confirmCallback && window.confirmCallback.onYes) {
+        window.confirmCallback.onYes();
+    }
+    closeModernConfirm();
+}
+
+function handleConfirmNo() {
+    if (window.confirmCallback && window.confirmCallback.onNo) {
+        window.confirmCallback.onNo();
+    }
+    closeModernConfirm();
+}
     
     const overlay = document.createElement('div');
     overlay.id = 'modernConfirmDynamic';
