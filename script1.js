@@ -1381,17 +1381,27 @@ function startVoiceRecognition() {
         }
         status.style.color = '#f44336';
     };
-    
-    recognition.onend = function() {
+recognition.onend = function() {
+        window._isMicrophoneActive = false; // Resetujemo zastavicu da može ponovo da se upali
         console.log('🎤 Mikrofon zaustavljen');
         status.innerHTML = '🎤 Click the button to speak again';
         status.style.color = '#aaa';
     };
     
+    // Sprečavamo ulazak u beskonačnu petlju
+    if (window._isMicrophoneActive) {
+        console.warn('⚠️ Mikrofon je već pokrenut, preskačem ponovno paljenje.');
+        return;
+    }
+
+    window._isMicrophoneActive = true;
+
     try {
+        console.trace('🔍 DA VIDIMO KO ME POZIVA U PETLJU:');
         recognition.start();
         console.log('✅ Mikrofon startovan');
     } catch(e) {
+        window._isMicrophoneActive = false;
         console.error('❌ Greška:', e);
         status.innerHTML = '❌ Failed to start microphone';
     }
