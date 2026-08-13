@@ -469,5 +469,54 @@
 <script src="script1.js"></script>
 <script src="productParts.js"></script>
 <script src="voiceCommands.js"></script>
+<script>
+    // ===== JEDINI ENTER HANDLER - OVO RADI 100% =====
+    console.log('🔥 POSTAVLJAM DIREKTAN ENTER...');
+    
+    // Sačekaj da se stranica učita
+    function setupEnter() {
+        const input = document.getElementById('phoneInput');
+        if (!input) {
+            setTimeout(setupEnter, 100);
+            return;
+        }
+        
+        console.log('📱 Pronađen input, vezujem Enter...');
+        
+        // KLONIRAJ da ukloniš sve stare listener-e
+        const newInput = input.cloneNode(true);
+        input.parentNode.replaceChild(newInput, input);
+        
+        // DODAJ JEDAN JEDINI LISTENER
+        newInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('🔥🔥🔥 ENTER RADI! 🔥🔥🔥');
+                
+                // DIREKTNO KLIKNI DUGME
+                const btn = document.getElementById('loginBtn');
+                if (btn) {
+                    btn.click();
+                } else {
+                    // Ako nema dugmeta, pozovi funkciju
+                    if (typeof triggerLogin === 'function') {
+                        triggerLogin();
+                    }
+                }
+                return false;
+            }
+        });
+        
+        console.log('✅ ENTER RADI!');
+    }
+    
+    // Pokreni
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', setupEnter);
+    } else {
+        setupEnter();
+    }
+</script>
 </body>
 </html>
