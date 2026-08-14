@@ -1913,7 +1913,7 @@ function showScreen(screenId) {
     updateHeaderTexts();
 }
 // ============================================
-// RENDER DATA ENTRY - PUNI UNOS PODATAKA
+// RENDER DATA ENTRY - PUNI UNOS PODATAKA (Čistiji format)
 // ============================================
 function renderDataEntry(productPart) {
     currentScreenState = 'dataEntry';
@@ -1935,89 +1935,88 @@ function renderDataEntry(productPart) {
     
     const unitOptions = ['kg', 'g', 'kom', 'l', 'ml', 'pak', 'kutija'];
     
-    let html = `<div class="title">${t('unos_podataka') || 'Unos podataka'}</div>`;
-    html += `<div style="background:white;padding:25px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1);max-width:700px;margin:0 auto;">`;
-    
-    // Kategorija (samo prikaz)
-    html += `<div class="row">`;
-    html += `<label>${t('glavne_kategorije') || 'Kategorija'}</label>`;
-    html += `<div style="flex:1;padding:16px;background:#f0f0f0;border-radius:12px;font-size:22px;font-weight:bold;color:#1a237e;">${currentCategory || 'N/A'}</div>`;
-    html += `</div>`;
-    
-    // Podkategorija (samo prikaz)
-    html += `<div class="row">`;
-    html += `<label>${t('podkategorije') || 'Podkategorija'}</label>`;
-    html += `<div style="flex:1;padding:16px;background:#f0f0f0;border-radius:12px;font-size:22px;font-weight:bold;color:#1a237e;">${currentSubcategory || 'N/A'}</div>`;
-    html += `</div>`;
-    
-    // Deo proizvoda (samo prikaz)
-    if (currentProductPart) {
-        html += `<div class="row">`;
-        html += `<label>${t('delovi_proizvoda') || 'Deo'}</label>`;
-        html += `<div style="flex:1;padding:16px;background:#f0f0f0;border-radius:12px;font-size:22px;font-weight:bold;color:#1a237e;">${currentProductPart}</div>`;
-        html += `</div>`;
-    }
-    
-    // Naziv proizvoda
-    html += `<div class="row">`;
-    html += `<label>${t('naziv_proizvoda') || 'Proizvod'}</label>`;
-    html += `<input type="text" id="productName" placeholder="${t('naziv_proizvoda') || 'Naziv proizvoda'}" style="flex:1;padding:16px;border:2px solid #ddd;border-radius:12px;font-size:22px;">`;
-    html += `</div>`;
-    
-    // Opis
-    html += `<div class="row">`;
-    html += `<label>${t('opis') || 'Opis'}</label>`;
-    html += `<input type="text" id="productDescription" placeholder="${t('opis') || 'Opis proizvoda'}" style="flex:1;padding:16px;border:2px solid #ddd;border-radius:12px;font-size:22px;">`;
-    html += `</div>`;
-    
-    // Količina i jedinica mere
-    html += `<div class="row">`;
-    html += `<label>${t('kolicina') || 'Količina'}</label>`;
-    html += `<div class="inline-group">`;
-    html += `<input type="number" id="productQuantity" placeholder="0" min="0" step="0.1" style="flex:2;padding:16px;border:2px solid #ddd;border-radius:12px;font-size:22px;">`;
-    html += `<select id="productUnit" style="flex:1;padding:16px;border:2px solid #ddd;border-radius:12px;font-size:22px;">`;
+    // Generisanje opcija za jedinice mere petljom
+    let unitOptionsHtml = '';
     unitOptions.forEach(unit => {
-        html += `<option value="${unit}">${t(unit) || unit}</option>`;
+        unitOptionsHtml += `<option value="${unit}">${t(unit) || unit}</option>`;
     });
-    html += `</select>`;
-    html += `</div>`;
-    html += `</div>`;
-    
-    // Rok trajanja
-    html += `<div class="row">`;
-    html += `<label>${t('rok_trajanja') || 'Rok (meseci)'}</label>`;
-    html += `<input type="number" id="productShelfLife" placeholder="12" min="0" style="flex:1;padding:16px;border:2px solid #ddd;border-radius:12px;font-size:22px;">`;
-    html += `</div>`;
-    
-    // Automatski rok
-    html += `<div class="row">`;
-    html += `<label>${t('automatski_rok') || 'Rok ističe'}</label>`;
-    html += `<div id="expiryDisplay" style="flex:1;padding:16px;background:#f0f0f0;border-radius:12px;font-size:22px;font-weight:bold;color:#1a237e;text-align:center;">-</div>`;
-    html += `</div>`;
-    
-    // Mesto skladištenja
-    html += `<div class="row">`;
-    html += `<label>${t('mesto_skladistenja') || 'Skladište'}</label>`;
-    html += `<select id="productStorage" style="flex:1;padding:16px;border:2px solid #ddd;border-radius:12px;font-size:22px;">`;
+
+    // Generisanje opcija za skladište petljom
+    let storageOptionsHtml = '';
     storageOptions.forEach(place => {
-        html += `<option value="${place}">${place}</option>`;
+        storageOptionsHtml += `<option value="${place}">${place}</option>`;
     });
-    html += `</select>`;
-    html += `</div>`;
     
-    // Datum unosa
-    html += `<div class="row">`;
-    html += `<label>${t('datum_unosa') || 'Datum unosa'}</label>`;
-    html += `<div style="flex:1;padding:16px;background:#f0f0f0;border-radius:12px;font-size:22px;font-weight:bold;color:#1a237e;">${new Date().toISOString().split('T')[0]}</div>`;
-    html += `</div>`;
+    let html = `
+        <div class="title">${t('unos_podataka') || 'Unos podataka'}</div>
+        <div style="background:white;padding:25px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1);max-width:700px;margin:0 auto;">
+            
+            <div class="row">
+                <label>${t('glavne_kategorije') || 'Kategorija'}</label>
+                <div style="flex:1;padding:16px;background:#f0f0f0;border-radius:12px;font-size:22px;font-weight:bold;color:#1a237e;">${currentCategory || 'N/A'}</div>
+            </div>
+            
+            <div class="row">
+                <label>${t('podkategorije') || 'Podkategorija'}</label>
+                <div style="flex:1;padding:16px;background:#f0f0f0;border-radius:12px;font-size:22px;font-weight:bold;color:#1a237e;">${currentSubcategory || 'N/A'}</div>
+            </div>
+            
+            ${currentProductPart ? `
+            <div class="row">
+                <label>${t('delovi_proizvoda') || 'Deo'}</label>
+                <div style="flex:1;padding:16px;background:#f0f0f0;border-radius:12px;font-size:22px;font-weight:bold;color:#1a237e;">${currentProductPart}</div>
+            </div>` : ''}
+            
+            <div class="row">
+                <label>${t('naziv_proizvoda') || 'Proizvod'}</label>
+                <input type="text" id="productName" placeholder="${t('naziv_proizvoda') || 'Naziv proizvoda'}" style="flex:1;padding:16px;border:2px solid #ddd;border-radius:12px;font-size:22px;">
+            </div>
+            
+            <div class="row">
+                <label>${t('opis') || 'Opis'}</label>
+                <input type="text" id="productDescription" placeholder="${t('opis') || 'Opis proizvoda'}" style="flex:1;padding:16px;border:2px solid #ddd;border-radius:12px;font-size:22px;">
+            </div>
+            
+            <div class="row">
+                <label>${t('kolicina') || 'Količina'}</label>
+                <div class="inline-group">
+                    <input type="number" id="productQuantity" placeholder="0" min="0" step="0.1" style="flex:2;padding:16px;border:2px solid #ddd;border-radius:12px;font-size:22px;">
+                    <select id="productUnit" style="flex:1;padding:16px;border:2px solid #ddd;border-radius:12px;font-size:22px;">
+                        ${unitOptionsHtml}
+                    </select>
+                </div>
+            </div>
+            
+            <div class="row">
+                <label>${t('rok_trajanja') || 'Rok (meseci)'}</label>
+                <input type="number" id="productShelfLife" placeholder="12" min="0" style="flex:1;padding:16px;border:2px solid #ddd;border-radius:12px;font-size:22px;">
+            </div>
+            
+            <div class="row">
+                <label>${t('automatski_rok') || 'Rok ističe'}</label>
+                <div id="expiryDisplay" style="flex:1;padding:16px;background:#f0f0f0;border-radius:12px;font-size:22px;font-weight:bold;color:#1a237e;text-align:center;">-</div>
+            </div>
+            
+            <div class="row">
+                <label>${t('mesto_skladistenja') || 'Skladište'}</label>
+                <select id="productStorage" style="flex:1;padding:16px;border:2px solid #ddd;border-radius:12px;font-size:22px;">
+                    ${storageOptionsHtml}
+                </select>
+            </div>
+            
+            <div class="row">
+                <label>${t('datum_unosa') || 'Datum unosa'}</label>
+                <div style="flex:1;padding:16px;background:#f0f0f0;border-radius:12px;font-size:22px;font-weight:bold;color:#1a237e;">${new Date().toISOString().split('T')[0]}</div>
+            </div>
+            
+            <div class="btn-group">
+                <button onclick="saveProduct()" class="btn-save">✅ ${t('unesi') || 'Unesi'}</button>
+                <button onclick="goBack()" class="btn-cancel">✖ ${t('odustani') || 'Odustani'}</button>
+            </div>
+            
+        </div>
+    `;
     
-    // Dugmad
-    html += `<div class="btn-group">`;
-    html += `<button onclick="saveProduct()" class="btn-save">✅ ${t('unesi') || 'Unesi'}</button>`;
-    html += `<button onclick="goBack()" class="btn-cancel">✖ ${t('odustani') || 'Odustani'}</button>`;
-    html += `</div>`;
-    
-    html += `</div>`;
     content.innerHTML = html;
     
     // ⭐ AUTO-IZRAČUNAVANJE ROKA
