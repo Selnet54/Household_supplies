@@ -1408,28 +1408,57 @@ function startVoiceRecognition() {
         }
     };
 
-    recognition.onerror = function(event) {
-        status.innerHTML = `❌ Error: ${event.error}`;
-        status.style.color = '#f44336';
-    };
+    recognition.onresult = function(event) {
+    const last = event.results.length - 1;
+    const result = event.results[last];
+    
+    if (!result.isFinal) return;
+    
+    const text = result[0].transcript.trim();
+    const textLower = text.toLowerCase();
+    
+    console.log('🗣️ PREPOZNATO GLASOM:', textLower);
 
-    recognition.onend = function() {
-        window._isMicrophoneActive = false;
-        status.innerHTML = '🎤 Click the button to speak again';
-        status.style.color = '#aaa';
-    };
-
-    window._isMicrophoneActive = true;
-
-    try {
-        recognition.start();
-        console.log('✅ Mikrofon startovan');
-    } catch(e) {
-        window._isMicrophoneActive = false;
-        console.error('❌ Greška:', e);
-        status.innerHTML = '❌ Failed to start microphone';
+    const status = document.getElementById('voiceStatus');
+    if (status) {
+        status.innerHTML = `🗣️ You said: "${text}"`;
     }
-}
+    
+    function stopMicAndReset() {
+        if (recognition) {
+            try { recognition.stop(); } catch(e) {}
+            recognition = null;
+        }
+        window._isMicrophoneActive = false;
+    }
+
+    // 1. UNOS / START -> Otvara glavni ekran za unos
+    if (textLower.includes('unos') || textLower.includes('start')) {
+        console.log('📱 Otvaram unos...');
+        stopMicAndReset();
+        if (typeof showScreen === 'function') showScreen('mainScreen');
+        if (typeof renderDataEntry === 'function') renderDataEntry('');
+        return;
+    }
+    
+    // 2. ZALIHE / STANJE -> Otvara inventar
+    if (textLower.includes('zalihe') || textLower.includes('stanje')) {
+        console.log('📦 Otvaram zalihe...');
+        stopMicAndReset();
+        if (typeof showScreen === 'function') showScreen('inventoryScreen'); // Proveri tačan naziv ekrana za zalihe
+        if (typeof renderInventory === 'function') renderInventory();
+        return;
+    }
+    
+    // 3. SPISAK -> Otvara šoping spisak
+    if (textLower.includes('spisak')) {
+        console.log('🛒 Otvaram spisak...');
+        stopMicAndReset();
+        if (typeof showScreen === 'function') showScreen('shoppingScreen'); // Proveri tačan naziv ekrana za spisak
+        if (typeof renderShoppingList === 'function') renderShoppingList();
+        return;
+    }
+};
 // ============================================
 // RENDER INVENTORY - ZALIHE
 // ============================================
