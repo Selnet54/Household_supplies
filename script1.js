@@ -1365,6 +1365,10 @@ function startVoiceRecognition() {
         
         const text = result[0].transcript.trim();
         const textLower = text.toLowerCase();
+        
+        // ⭐ DODAJ OVO DA VIDIMO TAČNO U KONZOLI ŠTA JE PREPOZNATO:
+        console.log('🗣️ PREPOZNATO GLASOM:', textLower);
+
         status.innerHTML = `🗣️ You said: "${text}"`;
         
         function stopMicAndReset() {
