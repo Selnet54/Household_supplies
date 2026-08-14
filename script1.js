@@ -1307,8 +1307,8 @@ function triggerLogin() {
     }
 }
 
-/// ============================================
-// START VOICE RECOGNITION (POPRAVLJENO)
+// ============================================
+// START VOICE RECOGNITION (ISPRAVLJENO)
 // ============================================
 let recognition = null;
 
@@ -1318,6 +1318,12 @@ function startVoiceRecognition() {
     const status = document.getElementById('voiceStatus');
     if (!status) {
         console.error('❌ voiceStatus element not found');
+        return;
+    }
+    
+    // Sprečavamo ulazak u beskonačnu petlju (SADA JE PRAVILNO UNUTAR FUNKCIJE)
+    if (window._isMicrophoneActive) {
+        console.warn('⚠️ Mikrofon je već pokrenut, preskačem ponovno paljenje.');
         return;
     }
     
@@ -1343,7 +1349,7 @@ function startVoiceRecognition() {
     
     recognition.lang = langMap[currentLang] || 'en-US';
     recognition.continuous = false;
-    recognition.interimResults = true;  // ⭐ VAŽNO: prima privremene rezultate
+    recognition.interimResults = true;
     
     recognition.onstart = function() {
         console.log('🎤 Mikrofon aktivan na:', recognition.lang);
@@ -1351,115 +1357,74 @@ function startVoiceRecognition() {
         status.style.color = '#4FC3F7';
     };
     
-   // ⭐ OVO JE POPRAVLJENI onresult - IGNORIŠE "k" dok govoriš
-recognition.onresult = function(event) {
-    console.log('📝 Rezultati:', event.results);
-    
-    const last = event.results.length - 1;
-    const result = event.results[last];
-    
-    // ⭐ IGNORIŠI INTERIM REZULTATE (još uvek govori)
-    if (!result.isFinal) {
-        console.log('⏳ Još uvek govori... (interim)');
-        return;
-    }
-    
-    const text = result[0].transcript.trim();
-    const textLower = text.toLowerCase();
-    console.log('🎤 Prepoznato (finalno):', text);
-    status.innerHTML = `🗣️ You said: "${text}"`;
-    
-    // Funkcija za bezbedno zaustavljanje mikrofona
-    function stopMicAndReset() {
-        if (recognition) {
-            try { recognition.stop(); } catch(e) {}
-            recognition = null;
+    recognition.onresult = function(event) {
+        const last = event.results.length - 1;
+        const result = event.results[last];
+        
+        if (!result.isFinal) return;
+        
+        const text = result[0].transcript.trim();
+        const textLower = text.toLowerCase();
+        status.innerHTML = `🗣️ You said: "${text}"`;
+        
+        function stopMicAndReset() {
+            if (recognition) {
+                try { recognition.stop(); } catch(e) {}
+                recognition = null;
+            }
+            window._isMicrophoneActive = false;
         }
-        window._isMicrophoneActive = false;
-    }
 
-    // ⭐ 1. AKO KAŽE "UNOS" ILI "START", OTVORI FORMU ZA UNOS PODATAKA
-    if (textLower.includes('unos') || textLower.includes('start')) {
-        console.log('📱 Otvaram ekran za unos kroz renderDataEntry...');
-        stopMicAndReset();
+        if (textLower.includes('unos') || textLower.includes('start')) {
+            stopMicAndReset();
+            if (typeof showScreen === 'function') showScreen('mainScreen');
+            if (typeof renderDataEntry === 'function') renderDataEntry('');
+            return;
+        }
         
-        if (typeof showScreen === 'function') {
-            showScreen('mainScreen');
+        if (textLower.includes('zalihe') || textLower.includes('stanje')) {
+            stopMicAndReset();
+            if (typeof renderInventory === 'function') renderInventory();
+            return;
         }
-        if (typeof renderDataEntry === 'function') {
-            renderDataEntry('');
-        }
-        return;
-    }
-    
-    // ⭐ 2. AKO KAŽE "ZALIHE" ILI "STANJE", OTVORI EKRAN ZALIHA
-    if (textLower.includes('zalihe') || textLower.includes('stanje')) {
-        console.log('📦 Otvaram zalihe kroz renderInventory...');
-        stopMicAndReset();
         
-        if (typeof renderInventory === 'function') {
-            renderInventory();
+        if (textLower.includes('spisak')) {
+            stopMicAndReset();
+            if (typeof renderShoppingList === 'function') renderShoppingList();
+            return;
         }
-        return;
-    }
-    
-    // ⭐ 3. AKO KAŽE "SPISAK", OTVORI EKRAN SHOPPING LISTE
-    if (textLower.includes('spisak')) {
-        console.log('🛒 Otvaram spisak kroz renderShoppingList...');
-        stopMicAndReset();
         
-        if (typeof renderShoppingList === 'function') {
-            renderShoppingList();
+        if (typeof parseVoiceInput === 'function' && typeof fillDataEntryFields === 'function') {
+            const parsed = parseVoiceInput(text);
+            fillDataEntryFields(parsed);
+            
+            if (textLower.includes('plus') && typeof saveProduct === 'function') {
+                saveProduct();
+            }
         }
-        return;
-    }
-    
-    // ⭐ 4. KORISTIMO PRAVE FUNKCIJE IZ voiceCommands.js ZA OSTALE KOMANDE
-    if (typeof parseVoiceInput === 'function' && typeof fillDataEntryFields === 'function') {
-        const parsed = parseVoiceInput(text);
-        fillDataEntryFields(parsed);
-        
-        if (textLower.includes('plus') && typeof saveProduct === 'function') {
-            saveProduct();
-        }
-    } else {
-        console.warn('⚠️ Funkcije iz voiceCommands.js nisu dostupne.');
-    }
-};
+    };
 
-recognition.onerror = function(event) {
-    console.warn('⚠️ Speech error:', event.error);
-    if (event.error === 'not-allowed') {
-        status.innerHTML = '❌ Please allow microphone access';
-    } else {
+    recognition.onerror = function(event) {
         status.innerHTML = `❌ Error: ${event.error}`;
+        status.style.color = '#f44336';
+    };
+
+    recognition.onend = function() {
+        window._isMicrophoneActive = false;
+        status.innerHTML = '🎤 Click the button to speak again';
+        status.style.color = '#aaa';
+    };
+
+    window._isMicrophoneActive = true;
+
+    try {
+        recognition.start();
+        console.log('✅ Mikrofon startovan');
+    } catch(e) {
+        window._isMicrophoneActive = false;
+        console.error('❌ Greška:', e);
+        status.innerHTML = '❌ Failed to start microphone';
     }
-    status.style.color = '#f44336';
-};
-
-recognition.onend = function() {
-    window._isMicrophoneActive = false; // Resetujemo zastavicu da može ponovo da se upali
-    console.log('🎤 Mikrofon zaustavljen');
-    status.innerHTML = '🎤 Click the button to speak again';
-    status.style.color = '#aaa';
-};
-
-// Sprečavamo ulazak u beskonačnu petlju
-if (window._isMicrophoneActive) {
-    console.warn('⚠️ Mikrofon je već pokrenut, preskačem ponovno paljenje.');
-    return;
-}
-
-window._isMicrophoneActive = true;
-
-try {
-    console.trace('🔍 DA VIDIMO KO ME POZIVA U PETLJU:');
-    recognition.start();
-    console.log('✅ Mikrofon startovan');
-} catch(e) {
-    window._isMicrophoneActive = false;
-    console.error('❌ Greška:', e);
-    status.innerHTML = '❌ Failed to start microphone';
 }
 // ============================================
 // RENDER INVENTORY - ZALIHE
