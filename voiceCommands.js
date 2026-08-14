@@ -197,7 +197,7 @@ function startVoiceDataEntry() {
         statusEl.style.borderRadius = '8px';
     }
     
-   voiceRecognitionInstance.onresult = function(event) {
+  voiceRecognitionInstance.onresult = function(event) {
         let interimTranscript = '';
         let finalTranscript = '';
         
@@ -217,7 +217,7 @@ function startVoiceDataEntry() {
             statusEl.style.color = '#FFD700';
         }
         
-        // ⭐ OVDJE DODAJEMO PROVERU ZA UNOS
+        // ⭐ OVDE DODAJEMO PROVERU ZA UNOS
         if (fullText.includes('unos')) {
             console.log('📱 Pokrećem renderDataEntry ekran...');
             if (typeof renderDataEntry === 'function') {
@@ -231,7 +231,6 @@ function startVoiceDataEntry() {
         
         // PLUS - čuvanje
         if (fullText.includes('plus')) {
-            // ... ostatak vašeg koda ...
             console.log('💾 PLUS - čuvanje proizvoda');
             if (!isProcessing) {
                 isProcessing = true;
