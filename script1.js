@@ -1358,48 +1358,68 @@ recognition.onresult = function(event) {
     const last = event.results.length - 1;
     const result = event.results[last];
     
-   // ⭐ IGNORIŠI INTERIM REZULTATE (još uvek govori)
+    // ⭐ IGNORIŠI INTERIM REZULTATE (još uvek govori)
     if (!result.isFinal) {
         console.log('⏳ Još uvek govori... (interim)');
         return;
     }
     
     const text = result[0].transcript.trim();
+    const textLower = text.toLowerCase();
     console.log('🎤 Prepoznato (finalno):', text);
     status.innerHTML = `🗣️ You said: "${text}"`;
     
-   // ⭐ AKO KAŽE "UNOS" ILI "START", OTVORI FORMU ZA UNOS PODATAKA
-    if (text.toLowerCase().includes('unos') || text.toLowerCase().includes('start')) {
-        console.log('📱 Otvaram ekran za unos kroz renderDataEntry...');
-        
-        // 1. Prvo obavezno zaustavi mikrofon da ne ide u petlju i ne prepoznaje dalje
+    // Funkcija za bezbedno zaustavljanje mikrofona
+    function stopMicAndReset() {
         if (recognition) {
-            try { 
-                recognition.stop(); 
-            } catch(e) {}
+            try { recognition.stop(); } catch(e) {}
             recognition = null;
         }
         window._isMicrophoneActive = false;
+    }
+
+    // ⭐ 1. AKO KAŽE "UNOS" ILI "START", OTVORI FORMU ZA UNOS PODATAKA
+    if (textLower.includes('unos') || textLower.includes('start')) {
+        console.log('📱 Otvaram ekran za unos kroz renderDataEntry...');
+        stopMicAndReset();
         
-        // 2. Prikaži odgovarajući ekran (npr. 'mainScreen' ili ekran gde se forma renderuje)
         if (typeof showScreen === 'function') {
-            showScreen('mainScreen'); // ili ID ekrana koji sadrži formu/kategorije
+            showScreen('mainScreen');
         }
-        
-        // 3. Pozovi funkciju za iscrtavanje forme za unos proizvoda
         if (typeof renderDataEntry === 'function') {
             renderDataEntry('');
         }
-        
         return;
     }
     
-    // ⭐ KORISTIMO PRAVE FUNKCIJE IZ voiceCommands.js ZA OSTALE KOMANDE
+    // ⭐ 2. AKO KAŽE "ZALIHE" ILI "STANJE", OTVORI EKRAN ZALIHA
+    if (textLower.includes('zalihe') || textLower.includes('stanje')) {
+        console.log('📦 Otvaram zalihe kroz renderInventory...');
+        stopMicAndReset();
+        
+        if (typeof renderInventory === 'function') {
+            renderInventory();
+        }
+        return;
+    }
+    
+    // ⭐ 3. AKO KAŽE "SPISAK", OTVORI EKRAN SHOPPING LISTE
+    if (textLower.includes('spisak')) {
+        console.log('🛒 Otvaram spisak kroz renderShoppingList...');
+        stopMicAndReset();
+        
+        if (typeof renderShoppingList === 'function') {
+            renderShoppingList();
+        }
+        return;
+    }
+    
+    // ⭐ 4. KORISTIMO PRAVE FUNKCIJE IZ voiceCommands.js ZA OSTALE KOMANDE
     if (typeof parseVoiceInput === 'function' && typeof fillDataEntryFields === 'function') {
         const parsed = parseVoiceInput(text);
         fillDataEntryFields(parsed);
         
-        if (text.toLowerCase().includes('plus') && typeof saveProduct === 'function') {
+        if (textLower.includes('plus') && typeof saveProduct === 'function') {
             saveProduct();
         }
     } else {
@@ -1416,32 +1436,31 @@ recognition.onerror = function(event) {
     }
     status.style.color = '#f44336';
 };
+
 recognition.onend = function() {
-        window._isMicrophoneActive = false; // Resetujemo zastavicu da može ponovo da se upali
-        console.log('🎤 Mikrofon zaustavljen');
-        status.innerHTML = '🎤 Click the button to speak again';
-        status.style.color = '#aaa';
-    };
-    
-    // Sprečavamo ulazak u beskonačnu petlju
-    if (window._isMicrophoneActive) {
-        console.warn('⚠️ Mikrofon je već pokrenut, preskačem ponovno paljenje.');
-        return;
-    }
+    window._isMicrophoneActive = false; // Resetujemo zastavicu da može ponovo da se upali
+    console.log('🎤 Mikrofon zaustavljen');
+    status.innerHTML = '🎤 Click the button to speak again';
+    status.style.color = '#aaa';
+};
 
-    window._isMicrophoneActive = true;
-
-    try {
-        console.trace('🔍 DA VIDIMO KO ME POZIVA U PETLJU:');
-        recognition.start();
-        console.log('✅ Mikrofon startovan');
-    } catch(e) {
-        window._isMicrophoneActive = false;
-        console.error('❌ Greška:', e);
-        status.innerHTML = '❌ Failed to start microphone';
-    }
+// Sprečavamo ulazak u beskonačnu petlju
+if (window._isMicrophoneActive) {
+    console.warn('⚠️ Mikrofon je već pokrenut, preskačem ponovno paljenje.');
+    return;
 }
 
+window._isMicrophoneActive = true;
+
+try {
+    console.trace('🔍 DA VIDIMO KO ME POZIVA U PETLJU:');
+    recognition.start();
+    console.log('✅ Mikrofon startovan');
+} catch(e) {
+    window._isMicrophoneActive = false;
+    console.error('❌ Greška:', e);
+    status.innerHTML = '❌ Failed to start microphone';
+}
 // ============================================
 // RENDER INVENTORY - ZALIHE
 // ============================================
