@@ -2292,64 +2292,7 @@ function startVoiceRecognition() {
     }
 }
 
-function processVoiceCommand(command) {
-    console.log('🎤 processVoiceCommand prima:', command);
-    
-    if (typeof window.voiceCommand === 'function') {
-        console.log('📞 Pozivam window.voiceCommand iz processVoiceCommand');
-        const result = window.voiceCommand(command);
-        console.log('✅ Rezultat voiceCommand:', result);
-        
-        if (result === true) {
-            if (typeof window.stopVoiceRecognition === 'function') {
-                window.stopVoiceRecognition();
-            }
-            document.dispatchEvent(new CustomEvent('voiceCommandProcessed', { 
-                detail: { success: true, command: command }
-            }));
-        }
-        return;
-    } else {
-        console.error('❌ window.voiceCommand nije definisan!');
-        
-        const cmd = command.toLowerCase().trim();
-        
-        const inventoryKeywords = ['stanje', 'zalihe', 'inventory', 'stock', 'bestand', 'készlet', 'запаси', '库存', 'inventario'];
-        if (inventoryKeywords.some(k => cmd.includes(k))) {
-            renderInventory();
-            return;
-        }
 
-        const shoppingKeywords = ['spisak', 'kupovina', 'potrebe', 'shopping', 'einkaufsliste', 'bevásárlólista', 'список', '购物清单'];
-        if (shoppingKeywords.some(k => cmd.includes(k))) {
-            renderShoppingList();
-            return;
-        }
-
-        const categoryKeywords = ['kategorije', 'kategorija', 'categories', 'kategorien'];
-        if (categoryKeywords.some(k => cmd.includes(k))) {
-            showScreen('mainScreen');
-            renderCategories();
-            return;
-        }
-
-        const catList = getMainCategories();
-        let matchedCategory = null;
-        catList.forEach(cat => {
-            if (cmd.includes(cat.toLowerCase())) {
-                matchedCategory = cat;
-            }
-        });
-
-        if (matchedCategory) {
-            showScreen('mainScreen');
-            renderSubcategories(matchedCategory);
-            return;
-        }
-
-        showModernAlert('Nepoznata komanda', `Nije prepoznato: "${command}"`, '❓');
-    }
-}
 
 function stopVoiceRecognition() {
     if (recognition) {
