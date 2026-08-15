@@ -2140,47 +2140,104 @@ function startVoiceRecognition() {
     }
 }
 
+// ============================================
+// VOICE COMMANDS - GLASOVNE KOMANDE
+// ============================================
+
 function processVoiceCommand(command) {
     console.log('🎤 processVoiceCommand prima:', command);
     
-    if (typeof window.voiceCommand === 'function') {
-        console.log('📞 Pozivam window.voiceCommand iz processVoiceCommand');
-        const result = window.voiceCommand(command);
-        console.log('✅ Rezultat voiceCommand:', result);
+    const cmd = command.toLowerCase().trim();
+    console.log('📝 Normalizovana komanda:', cmd);
+    
+    // ⭐⭐⭐ PRVO PROVERI "UNOS" ⭐⭐⭐
+    if (cmd.includes('unos') || cmd.includes('unesi') || 
+        cmd.includes('add') || cmd.includes('product') ||
+        cmd.includes('dodaj') || cmd.includes('novi') ||
+        cmd.includes('entry') || cmd.includes('data')) {
+        console.log('✅ Prepoznat UNOS!');
         
-        if (result === true) {
-            if (typeof window.stopVoiceRecognition === 'function') {
-                window.stopVoiceRecognition();
-            }
-            document.dispatchEvent(new CustomEvent('voiceCommandProcessed', { 
-                detail: { success: true, command: command }
-            }));
+        // Pozovi renderDataEntry direktno
+        if (typeof renderDataEntry === 'function') {
+            renderDataEntry('');
+            return true;
+        } else if (typeof window.renderDataEntry === 'function') {
+            window.renderDataEntry('');
+            return true;
+        } else {
+            console.log('⏳ renderDataEntry nije definisan, čekam...');
+            showModernAlert('Info', 'Funkcija za unos se učitava...', '⏳');
+            setTimeout(function() {
+                if (typeof renderDataEntry === 'function') {
+                    renderDataEntry('');
+                } else if (typeof window.renderDataEntry === 'function') {
+                    window.renderDataEntry('');
+                } else {
+                    showModernAlert('Greška', 'Funkcija za unos nije dostupna!', '❌');
+                }
+            }, 500);
+            return true;
         }
-        return;
-    } else {
-        console.error('❌ window.voiceCommand nije definisan!');
-        
-        const cmd = command.toLowerCase().trim();
-        
-        const inventoryKeywords = ['stanje', 'zalihe', 'inventory', 'stock', 'bestand', 'készlet', 'запаси', '库存', 'inventario'];
-        if (inventoryKeywords.some(k => cmd.includes(k))) {
+    }
+    
+    // ZALIHE
+    const inventoryKeywords = ['stanje', 'zalihe', 'inventory', 'stock', 'bestand', 'készlet', 'запаси', '库存', 'inventario'];
+    if (inventoryKeywords.some(k => cmd.includes(k))) {
+        console.log('✅ Prepoznate ZALIHE');
+        if (typeof renderInventory === 'function') {
             renderInventory();
-            return;
         }
+        return true;
+    }
 
-        const shoppingKeywords = ['spisak', 'kupovina', 'potrebe', 'shopping', 'einkaufsliste', 'bevásárlólista', 'список', '购物清单'];
-        if (shoppingKeywords.some(k => cmd.includes(k))) {
+    // SPISAK
+    const shoppingKeywords = ['spisak', 'kupovina', 'potrebe', 'shopping', 'einkaufsliste', 'bevásárlólista', 'список', '购物清单', 'list'];
+    if (shoppingKeywords.some(k => cmd.includes(k))) {
+        console.log('✅ Prepoznat SPISAK');
+        if (typeof renderShoppingList === 'function') {
             renderShoppingList();
-            return;
         }
+        return true;
+    }
 
-        const categoryKeywords = ['kategorije', 'kategorija', 'categories', 'kategorien'];
-        if (categoryKeywords.some(k => cmd.includes(k))) {
+    // NAZAD
+    const backKeywords = ['nazad', 'vrati', 'odustani', 'back', 'cancel', 'go back', 'return'];
+    if (backKeywords.some(k => cmd.includes(k))) {
+        console.log('✅ Prepoznat NAZAD');
+        if (typeof handleBackAction === 'function') {
+            handleBackAction();
+        } else if (typeof goBack === 'function') {
+            goBack();
+        }
+        return true;
+    }
+
+    // MENI
+    const menuKeywords = ['meni', 'početna', 'menu', 'home', 'main', 'glavni'];
+    if (menuKeywords.some(k => cmd.includes(k))) {
+        console.log('✅ Prepoznat MENI');
+        if (typeof showScreen === 'function' && typeof renderCategories === 'function') {
             showScreen('mainScreen');
             renderCategories();
-            return;
+        } else if (typeof renderMainMenu === 'function') {
+            renderMainMenu();
         }
+        return true;
+    }
 
+    // KATEGORIJE
+    const categoryKeywords = ['kategorije', 'kategorija', 'categories', 'kategorien'];
+    if (categoryKeywords.some(k => cmd.includes(k))) {
+        console.log('✅ Prepoznate KATEGORIJE');
+        if (typeof showScreen === 'function' && typeof renderCategories === 'function') {
+            showScreen('mainScreen');
+            renderCategories();
+        }
+        return true;
+    }
+
+    // PROVERI DA LI JE KATEGORIJA
+    if (typeof getMainCategories === 'function') {
         const catList = getMainCategories();
         let matchedCategory = null;
         catList.forEach(cat => {
@@ -2190,13 +2247,21 @@ function processVoiceCommand(command) {
         });
 
         if (matchedCategory) {
-            showScreen('mainScreen');
-            renderSubcategories(matchedCategory);
-            return;
+            console.log('✅ Prepoznata kategorija:', matchedCategory);
+            if (typeof showScreen === 'function' && typeof renderSubcategories === 'function') {
+                showScreen('mainScreen');
+                renderSubcategories(matchedCategory);
+            }
+            return true;
         }
-
-        showModernAlert('Nepoznata komanda', `Nije prepoznato: "${command}"`, '❓');
     }
+
+    // AKO NIJE PREPOZNATA
+    console.log('❌ Komanda nije prepoznata:', cmd);
+    if (typeof showModernAlert === 'function') {
+        showModernAlert('Nepoznata komanda', `"${command}" nije prepoznato.`, '❓');
+    }
+    return false;
 }
 
 function stopVoiceRecognition() {
@@ -2247,9 +2312,9 @@ function handleHeaderBack() {
 }
 
 // Izvezi funkcije globalno
-window.startVoiceRecognition = startVoiceRecognition;
+window.processVoiceCommand = processVoiceCommand;
 window.stopVoiceRecognition = stopVoiceRecognition;
 window.getCurrentLang = getCurrentLang;
 
 console.log('✅ Voice recognition dodatak učitan!');
-console.log('✅ stopVoiceRecognition i getCurrentLang izvezeni globalno');
+console.log('✅ processVoiceCommand, stopVoiceRecognition i getCurrentLang izvezeni globalno');
