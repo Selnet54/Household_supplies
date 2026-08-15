@@ -194,8 +194,6 @@ function goBack() {
 // ============================================
 function renderMainMenu() {
     currentScreenState = 'mainMenu';
-    const content = document.getElementById('mainContent');function renderMainMenu() {
-    currentScreenState = 'mainMenu';
     const content = document.getElementById('mainContent');
     if (!content) {
         console.error('❌ mainContent nije pronađen');
@@ -205,6 +203,7 @@ function renderMainMenu() {
     let html = `
         <div class="title">📋 Glavni meni</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;padding:20px;max-width:600px;margin:0 auto;">
+            <!-- ⭐ DODATO DUGME ZA UNOS ⭐ -->
             <button onclick="renderDataEntry('')" style="padding:30px;font-size:24px;border:none;border-radius:12px;background:#4CAF50;color:white;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
                 📝 Unos podataka
             </button>
