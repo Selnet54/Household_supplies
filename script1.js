@@ -22,7 +22,6 @@ console.log('✅ Script.js je učitan!');
     
     console.log('✅ Zaštita od preusmeravanja aktivirana!');
 })();
-
 // ===== TRENUTNO STANJE =====
 let currentLang = 'en';
 let currentCategory = '';
@@ -31,6 +30,317 @@ let currentProductPart = '';
 let currentScreenState = 'languages';
 let fromChoiceScreen = false; // <--- DODAJTE OVU LINIJU
 
+// ============================================
+// ⭐ UBAČI CEO SLEDEĆI KOD OVDE ⭐
+// ============================================
+
+// ============================================
+// RENDER DATA ENTRY - ČIST EKRAN ZA UNOS
+// ============================================
+function renderDataEntry(productPart) {
+    currentScreenState = 'dataEntry';
+    currentProductPart = productPart || '';
+    
+    const content = document.getElementById('mainContent');
+    if (!content) {
+        console.error('❌ mainContent nije pronađen');
+        return;
+    }
+    
+    const storageOptions = [
+        'Zamrzivač 1',
+        'Zamrzivač 2', 
+        'Zamrzivač 3',
+        'Frižider',
+        'Ostava',
+        'Ostalo'
+    ];
+    
+    const unitOptions = ['kg', 'g', 'kom', 'l', 'ml', 'pak', 'kutija'];
+    
+    let html = `
+        <div class="title">Unos podataka</div>
+        <div style="background:white;padding:25px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1);max-width:700px;margin:0 auto;">
+            
+            <!-- Naziv proizvoda -->
+            <div class="row">
+                <label>Proizvod</label>
+                <input type="text" id="productName" placeholder="Naziv proizvoda" style="flex:1;padding:16px;border:2px solid #ddd;border-radius:12px;font-size:22px;">
+            </div>
+            
+            <!-- Opis -->
+            <div class="row">
+                <label>Opis</label>
+                <input type="text" id="productDescription" placeholder="Opis proizvoda" style="flex:1;padding:16px;border:2px solid #ddd;border-radius:12px;font-size:22px;">
+            </div>
+            
+            <!-- Količina i jedinica mere -->
+            <div class="row">
+                <label>Količina</label>
+                <div class="inline-group">
+                    <input type="number" id="productQuantity" placeholder="0" min="0" step="0.1" style="flex:2;padding:16px;border:2px solid #ddd;border-radius:12px;font-size:22px;">
+                    <select id="productUnit" style="flex:1;padding:16px;border:2px solid #ddd;border-radius:12px;font-size:22px;">
+                        ${unitOptions.map(unit => `<option value="${unit}">${unit}</option>`).join('')}
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Rok trajanja -->
+            <div class="row">
+                <label>Rok (meseci)</label>
+                <input type="number" id="productShelfLife" placeholder="12" min="0" style="flex:1;padding:16px;border:2px solid #ddd;border-radius:12px;font-size:22px;">
+            </div>
+            
+            <!-- Automatski rok -->
+            <div class="row">
+                <label>Rok ističe</label>
+                <div id="expiryDisplay" style="flex:1;padding:16px;background:#f0f0f0;border-radius:12px;font-size:22px;font-weight:bold;color:#1a237e;text-align:center;">-</div>
+            </div>
+            
+            <!-- Mesto skladištenja -->
+            <div class="row">
+                <label>Skladište</label>
+                <select id="productStorage" style="flex:1;padding:16px;border:2px solid #ddd;border-radius:12px;font-size:22px;">
+                    ${storageOptions.map(place => `<option value="${place}">${place}</option>`).join('')}
+                </select>
+            </div>
+            
+            <!-- Datum unosa -->
+            <div class="row">
+                <label>Datum unosa</label>
+                <div style="flex:1;padding:16px;background:#f0f0f0;border-radius:12px;font-size:22px;font-weight:bold;color:#1a237e;">${new Date().toISOString().split('T')[0]}</div>
+            </div>
+            
+            <!-- Dugmad -->
+            <div class="btn-group">
+                <button onclick="saveProduct()" class="btn-save">✅ Unesi</button>
+                <button onclick="goBack()" class="btn-cancel">✖ Odustani</button>
+            </div>
+        </div>
+    `;
+    
+    content.innerHTML = html;
+    
+    // Auto-izračunavanje roka
+    const shelfLifeInput = document.getElementById('productShelfLife');
+    const expiryDisplay = document.getElementById('expiryDisplay');
+    if (shelfLifeInput && expiryDisplay) {
+        shelfLifeInput.addEventListener('input', function() {
+            const months = parseInt(this.value) || 0;
+            if (months > 0) {
+                const today = new Date();
+                today.setMonth(today.getMonth() + months);
+                expiryDisplay.textContent = today.toISOString().split('T')[0];
+            } else {
+                expiryDisplay.textContent = '-';
+            }
+        });
+    }
+}
+
+// ============================================
+// SAVE PRODUCT - ČUVANJE PODATAKA
+// ============================================
+function saveProduct() {
+    const name = document.getElementById('productName')?.value || '';
+    const description = document.getElementById('productDescription')?.value || '';
+    const quantity = parseFloat(document.getElementById('productQuantity')?.value) || 0;
+    const unit = document.getElementById('productUnit')?.value || 'kom';
+    const shelfLife = parseInt(document.getElementById('productShelfLife')?.value) || 0;
+    const storage = document.getElementById('productStorage')?.value || 'Ostalo';
+    
+    if (!name) {
+        alert('Molimo unesite naziv proizvoda!');
+        return;
+    }
+    
+    const product = {
+        name,
+        description,
+        quantity,
+        unit,
+        shelfLife,
+        storage,
+        category: currentCategory || 'Nepoznato',
+        subcategory: currentSubcategory || 'Nepoznato',
+        dateAdded: new Date().toISOString().split('T')[0],
+        expiryDate: shelfLife > 0 ? new Date(Date.now() + shelfLife * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] : null
+    };
+    
+    console.log('✅ Proizvod sačuvan:', product);
+    alert(`✅ Proizvod "${name}" je uspešno sačuvan!`);
+    
+    // Vrati na prethodni ekran
+    goBack();
+}
+
+// ============================================
+// GO BACK - POVRATAK NAZAD
+// ============================================
+function goBack() {
+    // Ako dolazimo sa ekrana za izbor, vrati na izbor
+    if (fromChoiceScreen) {
+        fromChoiceScreen = false;
+        renderCategorySelection();
+        return;
+    }
+    
+    // Inače vrati na glavni meni
+    renderMainMenu();
+}
+
+// ============================================
+// RENDER MAIN MENU - GLAVNI MENI
+// ============================================
+function renderMainMenu() {
+    currentScreenState = 'mainMenu';
+    const content = document.getElementById('mainContent');
+    if (!content) {
+        console.error('❌ mainContent nije pronađen');
+        return;
+    }
+    
+    let html = `
+        <div class="title">📋 Glavni meni</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;padding:20px;max-width:600px;margin:0 auto;">
+            <button onclick="renderDataEntry('')" style="padding:30px;font-size:24px;border:none;border-radius:12px;background:#4CAF50;color:white;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+                📝 Unos podataka
+            </button>
+            <button onclick="renderInventory()" style="padding:30px;font-size:24px;border:none;border-radius:12px;background:#2196F3;color:white;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+                📦 Zalihe
+            </button>
+            <button onclick="renderShoppingList()" style="padding:30px;font-size:24px;border:none;border-radius:12px;background:#FF9800;color:white;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+                🛒 Spisak
+            </button>
+            <button onclick="renderSettings()" style="padding:30px;font-size:24px;border:none;border-radius:12px;background:#9E9E9E;color:white;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+                ⚙️ Postavke
+            </button>
+        </div>
+    `;
+    
+    content.innerHTML = html;
+}
+
+// ============================================
+// RENDER INVENTORY - PRIKAZ ZALIHA
+// ============================================
+function renderInventory() {
+    currentScreenState = 'inventory';
+    const content = document.getElementById('mainContent');
+    if (!content) {
+        console.error('❌ mainContent nije pronađen');
+        return;
+    }
+    
+    let html = `
+        <div class="title">📦 Zalihe</div>
+        <div style="background:white;padding:25px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1);max-width:700px;margin:0 auto;">
+            <p style="font-size:20px;color:#666;text-align:center;">Trenutno nema artikala u zalihama.</p>
+            <div class="btn-group">
+                <button onclick="renderMainMenu()" class="btn-cancel">← Nazad</button>
+            </div>
+        </div>
+    `;
+    
+    content.innerHTML = html;
+}
+
+// ============================================
+// RENDER SHOPPING LIST - SPISAK ZA KUPOVINU
+// ============================================
+function renderShoppingList() {
+    currentScreenState = 'shoppingList';
+    const content = document.getElementById('mainContent');
+    if (!content) {
+        console.error('❌ mainContent nije pronađen');
+        return;
+    }
+    
+    let html = `
+        <div class="title">🛒 Spisak za kupovinu</div>
+        <div style="background:white;padding:25px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1);max-width:700px;margin:0 auto;">
+            <p style="font-size:20px;color:#666;text-align:center;">Spisak je prazan.</p>
+            <div class="btn-group">
+                <button onclick="renderMainMenu()" class="btn-cancel">← Nazad</button>
+            </div>
+        </div>
+    `;
+    
+    content.innerHTML = html;
+}
+
+// ============================================
+// RENDER SETTINGS - POSTAVKE
+// ============================================
+function renderSettings() {
+    currentScreenState = 'settings';
+    const content = document.getElementById('mainContent');
+    if (!content) {
+        console.error('❌ mainContent nije pronađen');
+        return;
+    }
+    
+    let html = `
+        <div class="title">⚙️ Postavke</div>
+        <div style="background:white;padding:25px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1);max-width:700px;margin:0 auto;">
+            <p style="font-size:20px;">Postavke aplikacije</p>
+            <div class="btn-group">
+                <button onclick="renderMainMenu()" class="btn-cancel">← Nazad</button>
+            </div>
+        </div>
+    `;
+    
+    content.innerHTML = html;
+}
+
+// ============================================
+// VOICE COMMAND - GLASOVNE KOMANDE
+// ============================================
+function processVoiceCommand(command) {
+    const lowerCommand = command.toLowerCase();
+    console.log('🎤 Prepoznata komanda:', lowerCommand);
+    
+    if (lowerCommand.includes('unos') || lowerCommand.includes('unesi')) {
+        renderDataEntry('');
+        return true;
+    }
+    
+    if (lowerCommand.includes('zalihe') || lowerCommand.includes('stanje')) {
+        renderInventory();
+        return true;
+    }
+    
+    if (lowerCommand.includes('spisak') || lowerCommand.includes('lista')) {
+        renderShoppingList();
+        return true;
+    }
+    
+    if (lowerCommand.includes('nazad') || lowerCommand.includes('vrati')) {
+        goBack();
+        return true;
+    }
+    
+    if (lowerCommand.includes('meni') || lowerCommand.includes('početna')) {
+        renderMainMenu();
+        return true;
+    }
+    
+    console.log('❌ Komanda nije prepoznata');
+    return false;
+}
+
+// ============================================
+// POKRETANJE APLIKACIJE
+// ============================================
+document.addEventListener('DOMContentLoaded', function() {
+    // Prikaz glavnog menija
+    renderMainMenu();
+    
+    // Opciono: test za glasovne komande
+    console.log('✅ Aplikacija je pokrenuta!');
+    console.log('📝 Probajte: renderDataEntry("") za unos');
+    console.log('🎤 Probajte: processVoiceCommand("unos") za glasovnu komandu');
+});
 // ===== 0. EXIT FUNKCIJA =====
 function exitApp() {
     console.log("🚪 Exit dugme kliknuto!");
