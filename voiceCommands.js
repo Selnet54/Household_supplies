@@ -4,6 +4,16 @@
 
 let recognition = null;
 
+// ===== POMOĆNA FUNKCIJA ZA SAKRIVANJE VOICE MENIJA =====
+function hideVoiceMenu() {
+    const voiceMenu = document.getElementById('voiceMenuScreen');
+    if (voiceMenu) {
+        voiceMenu.style.display = 'none';
+        voiceMenu.classList.remove('active');
+        console.log('🔇 Voice menu sakriven');
+    }
+}
+
 // ===== FUNKCIJA ZA OBRADU GLASOVNIH KOMANDI =====
 function processVoiceCommand(command) {
     console.log('🎤 processVoiceCommand prima:', command);
@@ -247,3 +257,131 @@ function processVoiceCommand(command) {
     showModernAlert('Nepoznata komanda', `"${command}" nije prepoznato.`, '❓');
     return false;
 }
+
+// ===== POKRETAČ ZA GLASOVNI UNOS =====
+function startVoiceRecognition() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    
+    if (!SpeechRecognition) {
+        showModernAlert('Greška', 'Vaš pretraživač ne podržava glasovne komande.', '❌');
+        return;
+    }
+
+    if (recognition) {
+        try { recognition.stop(); } catch(e) {}
+        recognition = null;
+    }
+
+    recognition = new SpeechRecognition();
+    const langCode = typeof currentLang !== 'undefined' ? currentLang : 'sr';
+    const speechLangMap = {
+        sr: 'sr-RS', en: 'en-US', de: 'de-DE', hu: 'hu-HU',
+        uk: 'uk-UA', ru: 'ru-RU', zh: 'zh-CN', es: 'es-ES',
+        pt: 'pt-PT', fr: 'fr-FR'
+    };
+    recognition.lang = speechLangMap[langCode] || 'sr-RS';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    const statusEl = document.getElementById('voiceStatus');
+    if (statusEl) {
+        statusEl.textContent = '🎤 Slušam... Govorite komandu';
+        statusEl.style.color = '#2196F3';
+    }
+
+    recognition.onstart = function() {
+        console.log('🎤 Glasovno prepoznavanje pokrenuto na jeziku:', recognition.lang);
+        const statusEl = document.getElementById('voiceStatus');
+        if (statusEl) {
+            statusEl.textContent = '🎤 Slušam...';
+            statusEl.style.color = '#2196F3';
+        }
+    };
+
+    recognition.onresult = function(event) {
+        const speechResult = event.results[0][0].transcript.trim();
+        console.log('🗣️ Prepoznato:', speechResult);
+        
+        const statusEl = document.getElementById('voiceStatus');
+        if (statusEl) {
+            statusEl.textContent = `🗣️ "${speechResult}"`;
+            statusEl.style.color = '#FFD700';
+        }
+        
+        processVoiceCommand(speechResult);
+    };
+
+    recognition.onerror = function(event) {
+        console.error('⚠️ Greška u prepoznavanju glasa:', event.error);
+        const statusEl = document.getElementById('voiceStatus');
+        if (statusEl) {
+            statusEl.textContent = '❌ Greška. Pokušajte ponovo.';
+            statusEl.style.color = '#f44336';
+        }
+        if (event.error === 'not-allowed') {
+            showModernAlert('Greška', 'Dozvolite pristup mikrofonu!', '🎤');
+        }
+    };
+
+    recognition.onend = function() {
+        console.log('🎤 Glasovno prepoznavanje završeno.');
+        const voiceMenu = document.getElementById('voiceMenuScreen');
+        if (voiceMenu && voiceMenu.classList.contains('active')) {
+            setTimeout(function() {
+                if (recognition) {
+                    try {
+                        recognition.start();
+                        console.log('🎤 Ponovo pokrenuto slušanje');
+                    } catch(e) {
+                        console.log('⏳ Čekanje pre ponovnog pokretanja...');
+                    }
+                }
+            }, 500);
+        }
+    };
+
+    try {
+        recognition.start();
+        console.log('🎤 Slušam...');
+    } catch(e) {
+        console.error('❌ Greška pri startovanju:', e);
+        const statusEl = document.getElementById('voiceStatus');
+        if (statusEl) {
+            statusEl.textContent = '❌ Greška pri pokretanju mikrofona';
+            statusEl.style.color = '#f44336';
+        }
+    }
+}
+
+// ===== ZAUSTAVI GLASOVNO PREPOZNAVANJE =====
+function stopVoiceRecognition() {
+    if (recognition) {
+        try {
+            recognition.stop();
+            recognition = null;
+            console.log('🛑 Recognition zaustavljen');
+        } catch(e) {}
+    }
+    const statusEl = document.getElementById('voiceStatus');
+    if (statusEl) {
+        statusEl.textContent = '⏸️ Prepoznavanje zaustavljeno';
+        statusEl.style.color = '#aaa';
+    }
+}
+
+// ===== POVRATAK SA VOICE MENIJA =====
+function goBackFromVoice() {
+    console.log('◀ Povratak sa glasovnog menija');
+    stopVoiceRecognition();
+    showScreen('choiceScreen');
+}
+
+// ===== IZVEZI FUNKCIJE GLOBALNO =====
+window.processVoiceCommand = processVoiceCommand;
+window.startVoiceRecognition = startVoiceRecognition;
+window.stopVoiceRecognition = stopVoiceRecognition;
+window.goBackFromVoice = goBackFromVoice;
+window.hideVoiceMenu = hideVoiceMenu;
+
+console.log('✅ Voice Commands učitan - FIX verzija!');
