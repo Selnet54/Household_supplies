@@ -1927,6 +1927,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     console.log('✅ Svi događaji uspešno inicijalizovani!');
 });
+
 // ===== 2. DELEGIRANI KLIKOVI - SVI U JEDNOM =====
 document.addEventListener('click', function(e) {
     const target = e.target;
@@ -1979,6 +1980,42 @@ document.addEventListener('click', function(e) {
 }, true);
 
 // ============================================
+// FUNKCIJA ZA AŽURIRANJE JEZIKA (Ekran 4 i ostalo)
+// ============================================
+function updateInterfaceLanguage() {
+    const lang = typeof currentLang !== 'undefined' ? currentLang : 'sr';
+    
+    const getTxt = (key, fallback) => {
+        if (typeof translations !== 'undefined' && translations[lang] && translations[lang][key]) {
+            return translations[lang][key];
+        }
+        return fallback;
+    };
+
+    const texts = {
+        'voiceMenuTitleText': getTxt('glasovna_kontrola', '🎤 Voice Control'),
+        'voiceMenuPromptText': getTxt('izaberi_opciju', 'Choose an action:'),
+        'invMenuText': getTxt('stanje', 'Inventory'),
+        'shopMenuText': getTxt('spisak', 'Shopping List'),
+        'addMenuText': getTxt('unos_podataka', 'Add Product'),
+        'exitMenuText': getTxt('izlaz', 'EXIT'),
+        'voiceStatus': getTxt('status_glas', 'Choose an option above or say a command'),
+        'backVoiceText': getTxt('nazad', '◀ Back')
+    };
+
+    for (const [id, text] of Object.entries(texts)) {
+        const el = document.getElementById(id);
+        if (el) {
+            if (id === 'voiceStatus') {
+                el.innerHTML = `🎤 ${text}`;
+            } else {
+                el.textContent = text;
+            }
+        }
+    }
+}
+
+// ============================================
 // GLOBALNE FUNKCIJE ZA VOICE ADDON
 // ============================================
 window.renderInventory = renderInventory;
@@ -1989,9 +2026,9 @@ window.showScreen = showScreen;
 window.exitApp = exitApp;
 window.t = t;
 window.currentLang = currentLang;
+window.updateInterfaceLanguage = updateInterfaceLanguage; // Dodato i za globalni pristup
 
 console.log('✅ Originalne funkcije izvezene!');
-
 // ============================================
 // FUNKCIJE ZA 3. EKRAN (IZBOR NAČINA UNOSA)
 // ============================================
