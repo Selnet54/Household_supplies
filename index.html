@@ -385,34 +385,34 @@
 <div id="voiceMenuScreen" class="screen" style="display:none;">
     <div class="voice-menu-container">
         <div class="voice-menu-box">
-            <div id="voiceMenuTitleText" style="font-size:20px; color:#FFD700; margin-bottom:5px;">🎤 Voice Control</div>
-            <div id="voiceMenuPromptText" style="font-size:16px; color:#aaa; margin-bottom:25px;">Choose an action:</div>
+            <div id="voiceMenuTitleText" style="font-size:20px; color:#FFD700; margin-bottom:5px;">🎤 Glasovna kontrola</div>
+            <div id="voiceMenuPromptText" style="font-size:16px; color:#aaa; margin-bottom:25px;">Izaberite opciju:</div>
             
             <!-- NOVI MENI SA DIREKTNIM KLIKOVIMA -->
             <div class="voice-grid">
                 <button class="voice-btn" onclick="renderInventory()">
                     <div style="font-size:40px;">📦</div>
-                    <div id="invMenuText" style="font-size:20px; font-weight:bold;">Inventory</div>
+                    <div id="invMenuText" style="font-size:20px; font-weight:bold;">Zalihe</div>
                 </button>
                 <button class="voice-btn" onclick="renderShoppingList()">
                     <div style="font-size:40px;">🛒</div>
-                    <div id="shopMenuText" style="font-size:20px; font-weight:bold;">Shopping List</div>
+                    <div id="shopMenuText" style="font-size:20px; font-weight:bold;">Spisak</div>
                 </button>
                 <button class="voice-btn" onclick="openVoiceDataEntry()">
                     <div style="font-size:40px;">📝</div>
-                    <div id="addMenuText" style="font-size:20px; font-weight:bold;">Add Product</div>
+                    <div id="addMenuText" style="font-size:20px; font-weight:bold;">Unos podataka</div>
                 </button>
                 <button class="voice-btn voice-btn-exit" onclick="exitApp()">
                     <div style="font-size:40px;">🚪</div>
-                    <div id="exitMenuText" style="font-size:20px; font-weight:bold;">EXIT</div>
+                    <div id="exitMenuText" style="font-size:20px; font-weight:bold;">IZLAZ</div>
                 </button>
             </div>
             
             <div id="voiceStatus" style="margin-top:20px; padding:15px; background:rgba(255,255,255,0.1); border-radius:12px; color:#aaa; font-size:16px;">
-                🎤 Choose an option above or say a command
+                🎤 Izaberite opciju iznad ili izgovorite komandu
             </div>
             <button id="backFromVoiceBtn" class="btn btn-orange" style="margin-top:15px;" onclick="goBackFromVoice()">
-                <span id="backVoiceText">◀ Back</span>
+                <span id="backVoiceText">◀ Nazad</span>
             </button>
         </div>
     </div>
