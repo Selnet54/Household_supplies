@@ -2029,6 +2029,7 @@ window.currentLang = currentLang;
 window.updateInterfaceLanguage = updateInterfaceLanguage; // Dodato i za globalni pristup
 
 console.log('✅ Originalne funkcije izvezene!');
+
 // ============================================
 // FUNKCIJE ZA 3. EKRAN (IZBOR NAČINA UNOSA)
 // ============================================
@@ -2056,126 +2057,5 @@ function goBackFromVoice() {
     showScreen('choiceScreen');
 }
 
-// ============================================
-// GLASOVNA KONTROLA I MAPIRANJE JEZIKA (VOICE ADDON)
-// ============================================
-
-let recognition = null;
-let isListening = false;
-
-const speechLangMap = {
-    sr: 'sr-RS',
-    en: 'en-US',
-    de: 'de-DE',
-    hu: 'hu-HU',
-    uk: 'uk-UA',
-    ru: 'ru-RU',
-    zh: 'zh-CN',
-    es: 'es-ES',
-    pt: 'pt-PT',
-    fr: 'fr-FR'
-};
-
-function speakText(text) {
-    if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = speechLangMap[currentLang] || 'en-US';
-        utterance.rate = 1.0;
-        window.speechSynthesis.speak(utterance);
-    }
-}
-
-function startVoiceRecognition() {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    
-    if (!SpeechRecognition) {
-        showModernAlert('Greška', 'Vaš pretraživač ne podržava glasovne komande.', '❌');
-        return;
-    }
-
-    if (recognition) {
-        try { recognition.stop(); } catch(e) {}
-        recognition = null;
-    }
-
-    recognition = new SpeechRecognition();
-    recognition.lang = speechLangMap[currentLang] || 'en-US';
-    recognition.continuous = false;
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
-
-    const statusEl = document.getElementById('voiceStatus');
-    if (statusEl) {
-        statusEl.textContent = '🎤 Slušam... Govorite komandu';
-        statusEl.style.color = '#2196F3';
-    }
-
-    recognition.onstart = function() {
-        console.log('🎤 Glasovno prepoznavanje pokrenuto na jeziku:', recognition.lang);
-        const statusEl = document.getElementById('voiceStatus');
-        if (statusEl) {
-            statusEl.textContent = '🎤 Slušam...';
-            statusEl.style.color = '#2196F3';
-        }
-    };
-
-    recognition.onresult = function(event) {
-        const speechResult = event.results[0][0].transcript.trim();
-        console.log('🗣️ Prepoznato:', speechResult);
-        
-        const statusEl = document.getElementById('voiceStatus');
-        if (statusEl) {
-            statusEl.textContent = `🗣️ "${speechResult}"`;
-            statusEl.style.color = '#FFD700';
-        }
-        
-        processVoiceCommand(speechResult);
-        
-        setTimeout(function() {
-            const voiceMenu = document.getElementById('voiceMenuScreen');
-            if (voiceMenu) {
-                voiceMenu.style.display = 'none';
-                voiceMenu.classList.remove('active');
-                console.log('🔇 Voice menu sakriven nakon komande');
-            }
-            const mainScreen = document.getElementById('mainScreen');
-            if (mainScreen && mainScreen.style.display !== 'flex') {
-                mainScreen.style.display = 'flex';
-                mainScreen.classList.add('active');
-                console.log('✅ mainScreen prikazan iz recognition.onresult');
-            }
-        }, 300);
-    };
-
-    recognition.onerror = function(event) {
-        console.error('⚠️ Greška u prepoznavanju glasa:', event.error);
-        const statusEl = document.getElementById('voiceStatus');
-        if (statusEl) {
-            statusEl.textContent = '❌ Greška u prepoznavanju. Pokušajte ponovo.';
-            statusEl.style.color = '#f44336';
-        }
-        if (event.error === 'not-allowed') {
-            showModernAlert('Greška', 'Dozvolite pristup mikrofonu!', '🎤');
-        }
-    };
-
-    recognition.onend = function() {
-        console.log('🎤 Glasovno prepoznavanje završeno.');
-    };
-
-    try {
-        recognition.start();
-        console.log('🎤 Slušam...');
-    } catch(e) {
-        console.error('❌ Greška pri startovanju:', e);
-        const statusEl = document.getElementById('voiceStatus');
-        if (statusEl) {
-            statusEl.textContent = '❌ Greška pri pokretanju mikrofona';
-            statusEl.style.color = '#f44336';
-        }
-    }
-}
-
-console.log('✅ Voice recognition dodatak učitan!');
-console.log('✅ stopVoiceRecognition i getCurrentLang izvezeni globalno');
+// ===== KRAJ FAJLA =====
+// NEMA NIŠTA VIŠE POSLE OVOGA!
