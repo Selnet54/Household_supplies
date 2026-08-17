@@ -30,51 +30,29 @@ function processVoiceCommand(command) {
     hideVoiceMenu();
     
 // ===== UNOS PODATAKA =====
+// ===== 1. UNOS PODATAKA =====
 if (cmd.includes('unos') || cmd.includes('unesi') || cmd.includes('dodaj') || 
     cmd.includes('add') || cmd.includes('entry') || cmd.includes('data')) {
     console.log('✅ Prepoznat UNOS PODATAKA!');
-    
-    // Sakrij voice menu
-    const voiceMenu = document.getElementById('voiceMenuScreen');
-    if (voiceMenu) {
-        voiceMenu.style.display = 'none';
-        voiceMenu.classList.remove('active');
-    }
-    
-    // Otvori Data Entry
-    const mainScreen = document.getElementById('mainScreen');
-    if (mainScreen) {
-        mainScreen.style.display = 'flex';
-        mainScreen.classList.add('active');
-    }
-    
-    // 🔥 RESTARTUJ MIKROFON NAKON OT VARANJA EKRANA
     setTimeout(function() {
+        const mainScreen = document.getElementById('mainScreen');
+        if (mainScreen) {
+            mainScreen.style.display = 'flex';
+            mainScreen.classList.add('active');
+        }
         if (typeof renderDataEntry === 'function') {
             renderDataEntry('');
-        } else if (typeof window.renderDataEntry === 'function') {
-            window.renderDataEntry('');
         }
         
-        // Postavi stanje
-        voiceState = 'waiting_for_start';
+        // --- DODATO: Automatsko pokretanje mikrofona ---
+        startVoiceRecognition(); 
         
         const statusEl = document.getElementById('voiceStatus');
         if (statusEl) {
             statusEl.textContent = '🎤 Recite "Start" pa diktirajte podatke';
             statusEl.style.color = '#4CAF50';
         }
-        
-        // 🔥 VAŽNO: Restartuj mikrofon
-        console.log('🔄 Restartujem mikrofon...');
-        stopVoiceRecognition(); // Zaustavi stari
-        setTimeout(function() {
-            startVoiceRecognition(); // Pokreni novi
-            console.log('✅ Mikrofon restartovan');
-        }, 300);
-        
-    }, 500); // Daj vremena UI da se osveži
-    
+    }, 500); // Povećao sam na 500ms da sačeka renderovanje
     return true;
 }
     // ===== MENI =====
@@ -393,23 +371,23 @@ function startVoiceRecognition() {
 
     // ===== OVAJ DEO JE PROMENJEN - NE GASI SE AUTOMATSKI =====
     recognition.onend = function() {
-        console.log('🎤 Mikrofon je zaustavljen (onend)');
-        // Ne radi ništa - mikrofon se ne restartuje automatski
-        // Korisnik će ponovo kliknuti "Voice Input" ako treba
-    };
-
-    try {
-        recognition.start();
-        console.log('🎤 Slušam...');
-    } catch(e) {
-        console.error('❌ Greška:', e);
-        const statusEl = document.getElementById('voiceStatus');
-        if (statusEl) {
-            statusEl.textContent = '❌ Greška pri pokretanju mikrofona';
-            statusEl.style.color = '#f44336';
-        }
+    console.log('🎤 Mikrofon zaustavljen');
+    
+    // Umesto vezivanja za voiceMenuScreen, proveravamo da li je aplikacija u "aktivnom" stanju
+    // ili jednostavno želimo da mikrofon bude stalno dostupan kada smo u modu unosa.
+    const isDataEntryMode = document.getElementById('mainScreen')?.classList.contains('active');
+    
+    if (isDataEntryMode) {
+        setTimeout(function() {
+            if (recognition) {
+                try {
+                    recognition.start();
+                    console.log('🎤 Ponovo pokrenut automatski');
+                } catch(e) { console.log('⚠️ Već radi'); }
+            }
+        }, 500);
     }
-}
+};
 // ===== ZAUSTAVI =====
 function stopVoiceRecognition() {
     if (recognition) {
