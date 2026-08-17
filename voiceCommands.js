@@ -29,64 +29,53 @@ function processVoiceCommand(command) {
     
     hideVoiceMenu();
     
-// ===== UNOS PODATAKA - NE GASI MIKROFON =====
+// ===== UNOS PODATAKA =====
 if (cmd.includes('unos') || cmd.includes('unesi') || cmd.includes('dodaj') || 
     cmd.includes('add') || cmd.includes('entry') || cmd.includes('data')) {
     console.log('✅ Prepoznat UNOS PODATAKA!');
     
-    // 🔥 DIREKTNO SAKRIVANJE VOICE MENIJA
+    // Sakrij voice menu
     const voiceMenu = document.getElementById('voiceMenuScreen');
     if (voiceMenu) {
         voiceMenu.style.display = 'none';
         voiceMenu.classList.remove('active');
-        console.log('🔇 Voice menu sakriven');
     }
     
-    // 🔥 DIREKTNO PRIKAZIVANJE MAIN SCREEN-A
+    // Otvori Data Entry
     const mainScreen = document.getElementById('mainScreen');
     if (mainScreen) {
         mainScreen.style.display = 'flex';
         mainScreen.classList.add('active');
-        console.log('📱 Main screen prikazan');
-    } else {
-        console.error('❌ mainScreen nije pronađen!');
     }
     
-    // 🔥 DIREKTNO POZIVANJE renderDataEntry
+    // 🔥 RESTARTUJ MIKROFON NAKON OT VARANJA EKRANA
     setTimeout(function() {
-        // Pokušaj više načina da pozoveš renderDataEntry
         if (typeof renderDataEntry === 'function') {
             renderDataEntry('');
-            console.log('✅ renderDataEntry pozvan (global)');
         } else if (typeof window.renderDataEntry === 'function') {
             window.renderDataEntry('');
-            console.log('✅ renderDataEntry pozvan (window)');
-        } else {
-            console.error('❌ renderDataEntry nije definisan!');
-            // Pokušaj da pronađeš funkciju u globalnom scope-u
-            if (window.hasOwnProperty('renderDataEntry')) {
-                window.renderDataEntry('');
-            }
         }
         
-        // Postavi status
+        // Postavi stanje
+        voiceState = 'waiting_for_start';
+        
         const statusEl = document.getElementById('voiceStatus');
         if (statusEl) {
             statusEl.textContent = '🎤 Recite "Start" pa diktirajte podatke';
             statusEl.style.color = '#4CAF50';
         }
         
-        // 🔥 DODATNO: sakrij voice menu ponovo (za svaki slučaj)
-        const voiceMenuAgain = document.getElementById('voiceMenuScreen');
-        if (voiceMenuAgain) {
-            voiceMenuAgain.style.display = 'none';
-        }
+        // 🔥 VAŽNO: Restartuj mikrofon
+        console.log('🔄 Restartujem mikrofon...');
+        stopVoiceRecognition(); // Zaustavi stari
+        setTimeout(function() {
+            startVoiceRecognition(); // Pokreni novi
+            console.log('✅ Mikrofon restartovan');
+        }, 300);
         
-        console.log('📢 Data Entry bi trebalo da bude otvoren');
-        
-    }, 100); // Smanjeno na 100ms za bržu reakciju
+    }, 500); // Daj vremena UI da se osveži
     
-    return true; // MIKROFON OSTJE UKLJUČEN
+    return true;
 }
     // ===== MENI =====
     if (cmd.includes('meni') || cmd.includes('početna') || cmd.includes('menu') || cmd.includes('home')) {
