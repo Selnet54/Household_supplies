@@ -29,94 +29,65 @@ function processVoiceCommand(command) {
     
     hideVoiceMenu();
     
-    // ===== UNOS PODATAKA =====
-    // ===== UNOS PODATAKA - NE GASI MIKROFON =====
+// ===== UNOS PODATAKA - NE GASI MIKROFON =====
 if (cmd.includes('unos') || cmd.includes('unesi') || cmd.includes('dodaj') || 
     cmd.includes('add') || cmd.includes('entry') || cmd.includes('data')) {
     console.log('✅ Prepoznat UNOS PODATAKA!');
-    // OT vori Data Entry - BEZ GAŠENJA MIKROFONA
+    
+    // 🔥 DIREKTNO SAKRIVANJE VOICE MENIJA
+    const voiceMenu = document.getElementById('voiceMenuScreen');
+    if (voiceMenu) {
+        voiceMenu.style.display = 'none';
+        voiceMenu.classList.remove('active');
+        console.log('🔇 Voice menu sakriven');
+    }
+    
+    // 🔥 DIREKTNO PRIKAZIVANJE MAIN SCREEN-A
+    const mainScreen = document.getElementById('mainScreen');
+    if (mainScreen) {
+        mainScreen.style.display = 'flex';
+        mainScreen.classList.add('active');
+        console.log('📱 Main screen prikazan');
+    } else {
+        console.error('❌ mainScreen nije pronađen!');
+    }
+    
+    // 🔥 DIREKTNO POZIVANJE renderDataEntry
     setTimeout(function() {
-        const mainScreen = document.getElementById('mainScreen');
-        if (mainScreen) {
-            mainScreen.style.display = 'flex';
-            mainScreen.classList.add('active');
-        }
+        // Pokušaj više načina da pozoveš renderDataEntry
         if (typeof renderDataEntry === 'function') {
             renderDataEntry('');
+            console.log('✅ renderDataEntry pozvan (global)');
         } else if (typeof window.renderDataEntry === 'function') {
             window.renderDataEntry('');
+            console.log('✅ renderDataEntry pozvan (window)');
+        } else {
+            console.error('❌ renderDataEntry nije definisan!');
+            // Pokušaj da pronađeš funkciju u globalnom scope-u
+            if (window.hasOwnProperty('renderDataEntry')) {
+                window.renderDataEntry('');
+            }
         }
+        
+        // Postavi status
         const statusEl = document.getElementById('voiceStatus');
         if (statusEl) {
             statusEl.textContent = '🎤 Recite "Start" pa diktirajte podatke';
             statusEl.style.color = '#4CAF50';
         }
-    }, 300);
-    return true;  // <--- NEMA stopVoiceRecognition()!
-}
-    
-    // ===== START =====
-    if (cmd.includes('start') || cmd.includes('stat') || cmd.includes('stard')) {
-        console.log('🚀 Prepoznat START!');
-        let restOfCommand = command.replace(/^start\s*/i, '').trim();
-        if (restOfCommand) {
-            processStartCommand(restOfCommand);
-        } else {
-            const statusEl = document.getElementById('voiceStatus');
-            if (statusEl) {
-                statusEl.textContent = '🎤 Diktirajte: naziv komad količina rok skladište';
-                statusEl.style.color = '#FFD700';
-            }
+        
+        // 🔥 DODATNO: sakrij voice menu ponovo (za svaki slučaj)
+        const voiceMenuAgain = document.getElementById('voiceMenuScreen');
+        if (voiceMenuAgain) {
+            voiceMenuAgain.style.display = 'none';
         }
-        return true;
-    }
+        
+        console.log('📢 Data Entry bi trebalo da bude otvoren');
+        
+    }, 100); // Smanjeno na 100ms za bržu reakciju
     
-    // ===== ZALIHE =====
-    if (cmd.includes('stanje') || cmd.includes('zalihe') || cmd.includes('inventory') || cmd.includes('stock')) {
-        console.log('✅ Prepoznate ZALIHE');
-        setTimeout(function() {
-            const mainScreen = document.getElementById('mainScreen');
-            if (mainScreen) {
-                mainScreen.style.display = 'flex';
-                mainScreen.classList.add('active');
-            }
-            if (typeof renderInventory === 'function') {
-                renderInventory();
-            }
-        }, 300);
-        return true;
-    }
-
-    // ===== SPISAK =====
-    if (cmd.includes('spisak') || cmd.includes('kupovina') || cmd.includes('shopping') || cmd.includes('list')) {
-        console.log('✅ Prepoznat SPISAK');
-        setTimeout(function() {
-            const mainScreen = document.getElementById('mainScreen');
-            if (mainScreen) {
-                mainScreen.style.display = 'flex';
-                mainScreen.classList.add('active');
-            }
-            if (typeof renderShoppingList === 'function') {
-                renderShoppingList();
-            }
-        }, 300);
-        return true;
-    }
-
-    // ===== NAZAD =====
-    if (cmd.includes('nazad') || cmd.includes('vrati') || cmd.includes('odustani') || 
-        cmd.includes('back') || cmd.includes('cancel')) {
-        console.log('✅ Prepoznat NAZAD');
-        setTimeout(function() {
-            if (typeof handleBackAction === 'function') {
-                handleBackAction();
-            } else if (typeof goBackFromVoice === 'function') {
-                goBackFromVoice();
-            }
-        }, 300);
-        return true;
-    }
-
+    return true; // MIKROFON OSTJE UKLJUČEN
+}
     // ===== MENI =====
     if (cmd.includes('meni') || cmd.includes('početna') || cmd.includes('menu') || cmd.includes('home')) {
         console.log('✅ Prepoznat MENI');
