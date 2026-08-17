@@ -77,21 +77,34 @@ function processVoiceCommand(command) {
         return true;
     }
     
-    if (cmd.includes('start') || cmd.includes('stat') || cmd.includes('stard')) {
-        console.log('🚀 Prepoznat START!');
-        let restOfCommand = command.replace(/^start\s*/i, '').trim();
-        if (restOfCommand) {
-            processStartCommand(restOfCommand);
-        } else {
-            const statusEl = document.getElementById('voiceStatus');
-            if (statusEl) {
-                statusEl.textContent = '🎤 Diktirajte: naziv komad količina rok skladište + plus';
-                statusEl.style.color = '#FFD700';
-            }
+    // ===== PROVERI "START" KOMANDU =====
+// ===== PROVERI "START" KOMANDU =====
+if (cmd.includes('start') || cmd.includes('stat') || cmd.includes('stard')) {
+    console.log('🚀 Prepoznat START!');
+    
+    // Ukloni "start" iz komande - ali uzmi CEO tekst, ne samo ostatak
+    let fullCommand = command;
+    let restOfCommand = fullCommand.replace(/^start\s*/i, '').trim();
+    
+    console.log('📝 Cela komanda:', fullCommand);
+    console.log('📝 Ostatak komande:', restOfCommand);
+    
+    // Ako nema ostatka, možda je "start" bio odvojen rečenicom
+    if (!restOfCommand) {
+        // Pokušaj da uzmeš ceo tekst iz fullSpeechResult
+        const statusEl = document.getElementById('voiceStatus');
+        if (statusEl) {
+            statusEl.textContent = '🎤 Diktirajte: naziv komad količina rok skladište + plus';
+            statusEl.style.color = '#FFD700';
         }
+        showModernAlert('Info', 'Recite "Start" pa diktirajte proizvod', '🎤');
         return true;
     }
     
+    // Obradi ostatak komande
+    processStartCommand(restOfCommand);
+    return true;
+}
     const dataEntryKeywords = [
         'unos', 'unesi', 'dodaj', 'novi', 'podatak', 'unos podataka',
         'add', 'product', 'entry', 'data', 'new', 'insert', 'create',
@@ -437,7 +450,17 @@ function goBackFromVoice() {
 
 function parseVoiceDataEntry(command) {
     console.log('🔍 Parsiranje glasovnog unosa:', command);
-    let text = command.replace(/^start\s*/i, '').replace(/\s*plus\s*$/i, '').trim().toLowerCase();
+    
+    // Ukloni "start" i "plus" sa kraja
+    let text = command
+        .replace(/^start\s*/i, '')
+        .replace(/\s*plus\s*$/i, '')
+        .trim()
+        .toLowerCase();
+    
+    console.log('📝 Tekst za parsiranje:', text);
+    
+    // Brojevi rečima -> brojevi
     const brojMap = {
         'jedan': '1', 'jedna': '1',
         'dva': '2',
@@ -452,10 +475,14 @@ function parseVoiceDataEntry(command) {
         'jedanaest': '11',
         'dvanaest': '12'
     };
+    
     Object.keys(brojMap).forEach(function(key) {
         var re = new RegExp('\\b' + key + '\\b', 'gi');
         text = text.replace(re, brojMap[key]);
     });
+    
+    console.log('📝 Posle konverzije brojeva:', text);
+    
     var result = {
         product_name: '',
         piece: '1',
@@ -464,6 +491,8 @@ function parseVoiceDataEntry(command) {
         shelf_life: '',
         storage: 'Zamrzivač 1'
     };
+    
+    // Skladište
     if (text.includes('zamrzivač 2') || text.includes('zamrzivac 2')) {
         result.storage = 'Zamrzivač 2';
     } else if (text.includes('zamrzivač 3') || text.includes('zamrzivac 3')) {
@@ -475,6 +504,8 @@ function parseVoiceDataEntry(command) {
     } else if (text.includes('ostava')) {
         result.storage = 'Ostava';
     }
+    
+    // Jedinica + količina
     var unitMatch = text.match(/(\d+(?:[.,]\d+)?)\s*(kilogram|kilograma|kg|gram|grama|g|litar|litara|l|mililitar|mililitara|ml|komad|komada|kom)/);
     if (unitMatch) {
         result.quantity = unitMatch[1].replace(',', '.');
@@ -485,22 +516,65 @@ function parseVoiceDataEntry(command) {
         else if (unitWord.includes('mililitar') || unitWord === 'ml') result.unit = 'ml';
         else result.unit = 'kom';
     }
+    
+    // Izvuci sve brojeve
     var numbers = text.match(/\d+(?:[.,]\d+)?/g) || [];
+    console.log('📊 Pronađeni brojevi:', numbers);
+    
+    // Ako imamo 3 broja: komad, količina, rok
     if (numbers.length >= 3) {
         result.piece = numbers[0];
+        // Količina je već postavljena iz unitMatch
         result.shelf_life = parseInt(numbers[numbers.length - 1]);
+    } else if (numbers.length === 2) {
+        result.piece = numbers[0];
+        result.shelf_life = parseInt(numbers[1]);
+    } else if (numbers.length === 1) {
+        // Ako imamo samo jedan broj, to je verovatno količina
+        if (!result.quantity || result.quantity === '1') {
+            result.quantity = numbers[0];
+            result.piece = '1';
+        }
     }
+    
+    // Naziv proizvoda = sve pre prvog broja
     var firstNumberPos = text.search(/\d/);
     if (firstNumberPos > 0) {
-        result.product_name = text.substring(0, firstNumberPos).trim();
+        var namePart = text.substring(0, firstNumberPos).trim();
+        // Ukloni reči koje nisu deo naziva
+        var removeWords = ['kilogram', 'gram', 'litar', 'mililitar', 'komad', 'kg', 'g', 'l', 'ml', 'kom'];
+        removeWords.forEach(function(word) {
+            namePart = namePart.replace(new RegExp('\\b' + word + '\\b', 'gi'), '');
+        });
+        result.product_name = namePart.trim();
     }
+    
+    // Ako nema naziva, uzmi prvi deo
+    if (!result.product_name) {
+        var words = text.split(' ');
+        for (var i = 0; i < words.length; i++) {
+            if (words[i].length > 2 && !/^\d+$/.test(words[i])) {
+                result.product_name = words[i];
+                break;
+            }
+        }
+    }
+    
     console.log('✅ Parsirano:', result);
     return result;
 }
-
 function processStartCommand(command) {
     console.log('🚀 Procesiram Start komandu:', command);
+    
+    // Ako je command prazan, vrati se
+    if (!command || command.trim() === '') {
+        console.log('❌ Prazna komanda za Start');
+        return false;
+    }
+    
     var data = parseVoiceDataEntry(command);
+    console.log('📊 Parsirani podaci:', data);
+    
     if (!data.product_name) {
         showModernAlert('Greška', 'Nije prepoznat naziv proizvoda!', '❌');
         var statusEl = document.getElementById('voiceStatus');
@@ -510,6 +584,7 @@ function processStartCommand(command) {
         }
         return false;
     }
+    
     var productInput = document.getElementById('productInput');
     if (!productInput) {
         console.log('📂 Data Entry nije otvoren, otvaram...');
@@ -575,7 +650,7 @@ function popuniStartPodatke(data) {
         statusEl.textContent = '✅ Popunjeno: ' + data.product_name + ', ' + data.quantity + ' ' + data.unit;
         statusEl.style.color = '#4CAF50';
     }
-    setTimeout(function() {
+       setTimeout(function() {
         if (typeof saveProduct === 'function') {
             saveProduct();
             showModernAlert('✅ Uspešno', 'Proizvod je sačuvan glasovno!', '🎤');
@@ -592,6 +667,7 @@ function popuniStartPodatke(data) {
     }, 1000);
 }
 
+// ===== IZVEZI FUNKCIJE GLOBALNO =====
 window.processVoiceCommand = processVoiceCommand;
 window.startVoiceRecognition = startVoiceRecognition;
 window.stopVoiceRecognition = stopVoiceRecognition;
