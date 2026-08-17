@@ -381,7 +381,7 @@ function startVoiceRecognition() {
     recognition.lang = speechLangMap[langCode] || 'sr-RS';
     
     // ===== OVO JE VAŽNO - NE GASI SE =====
-    recognition.continuous = true;   // <--- OSTJE UKLJUČEN
+    recognition.continuous = true;
     recognition.interimResults = true;
     recognition.maxAlternatives = 1;
 
@@ -392,7 +392,7 @@ function startVoiceRecognition() {
     }
 
     recognition.onstart = function() {
-        console.log('🎤 Mikrofon aktivan - čekam komande');
+        console.log('🎤 Mikrofon aktivan');
         const statusEl = document.getElementById('voiceStatus');
         if (statusEl) {
             statusEl.textContent = '🎤 Slušam...';
@@ -401,17 +401,22 @@ function startVoiceRecognition() {
     };
 
     recognition.onresult = function(event) {
-        const speechResult = event.results[0][0].transcript.trim();
-        console.log('🗣️ Prepoznato:', speechResult);
+        // Uzmi poslednji rezultat
+        const result = event.results[event.results.length - 1];
+        const speechResult = result[0].transcript.trim();
         
-        const statusEl = document.getElementById('voiceStatus');
-        if (statusEl) {
-            statusEl.textContent = '🗣️ "' + speechResult + '"';
-            statusEl.style.color = '#FFD700';
+        if (speechResult && speechResult.length > 0) {
+            console.log('🗣️ Prepoznato:', speechResult);
+            
+            const statusEl = document.getElementById('voiceStatus');
+            if (statusEl) {
+                statusEl.textContent = '🗣️ "' + speechResult + '"';
+                statusEl.style.color = '#FFD700';
+            }
+            
+            // OBRADI KOMANDU - MIKROFON OSTJE UKLJUČEN
+            processVoiceCommand(speechResult);
         }
-        
-        // OBRADI KOMANDU - ALI NE GASI MIKROFON!
-        processVoiceCommand(speechResult);
     };
 
     recognition.onerror = function(event) {
@@ -426,20 +431,11 @@ function startVoiceRecognition() {
         }
     };
 
+    // ===== OVAJ DEO JE PROMENJEN - NE GASI SE AUTOMATSKI =====
     recognition.onend = function() {
-        console.log('🎤 Mikrofon zaustavljen');
-        // Automatski ponovo pokreni ako je voice menu aktivan
-        const voiceMenu = document.getElementById('voiceMenuScreen');
-        if (voiceMenu && voiceMenu.classList.contains('active')) {
-            setTimeout(function() {
-                if (recognition) {
-                    try {
-                        recognition.start();
-                        console.log('🎤 Ponovo pokrenut');
-                    } catch(e) {}
-                }
-            }, 500);
-        }
+        console.log('🎤 Mikrofon je zaustavljen (onend)');
+        // Ne radi ništa - mikrofon se ne restartuje automatski
+        // Korisnik će ponovo kliknuti "Voice Input" ako treba
     };
 
     try {
@@ -454,7 +450,6 @@ function startVoiceRecognition() {
         }
     }
 }
-
 // ===== ZAUSTAVI =====
 function stopVoiceRecognition() {
     if (recognition) {
