@@ -1,10 +1,11 @@
-// ============================================
+/ ============================================
 // VOICE COMMANDS - GLASOVNE KOMANDE - FIX
 // ============================================
 
 let recognition = null;
-let isDataEntryMode = false;  // Da li smo u režimu unosa podataka
-let firstStartDone = false;   // Da li je "Start" već izgovoren
+let fullSpeechResult = '';
+let speechTimeout = null;  // <--- DODATO
+
 // ===== POMOĆNA FUNKCIJA ZA SAKRIVANJE VOICE MENIJA =====
 function hideVoiceMenu() {
     const voiceMenu = document.getElementById('voiceMenuScreen');
