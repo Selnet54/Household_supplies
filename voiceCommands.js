@@ -638,3 +638,6 @@ window.processStartCommand = processStartCommand;
 window.popuniStartPodatke = popuniStartPodatke;
 
 console.log('✅ Voice Commands učitan - FIX verzija!');
+
+// OVO JE ZAGRADA KOJA ZATVARA CEO FAJL
+}  // <--- DODAJ OVO!
