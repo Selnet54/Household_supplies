@@ -29,12 +29,13 @@ function processVoiceCommand(command) {
     // ===== PRVO SAKRIVANJE VOICE MENIJA =====
     hideVoiceMenu();
     
-    // ===== DODATO: PRVO PROVERI "START" KOMANDU =====
-    if (cmd.includes('start')) {
+    // ===== PRVO PROVERI "START" KOMANDU =====
+    if (cmd.includes('start') || cmd.includes('stat') || cmd.includes('stard')) {
         console.log('🚀 Prepoznat START!');
         processStartCommand(command);
         return true;
     }
+    
     // ===== UNOS PODATAKA - SVI JEZICI =====
     const dataEntryKeywords = [
         // SRPSKI
@@ -60,27 +61,31 @@ function processVoiceCommand(command) {
     ];
     if (dataEntryKeywords.some(k => cmd.includes(k))) {
         console.log('✅ Prepoznat UNOS PODATAKA!');
+        
+        // OTVORI Data Entry ekran (bez gašenja mikrofona)
         setTimeout(function() {
             const mainScreen = document.getElementById('mainScreen');
             if (mainScreen) {
                 mainScreen.style.display = 'flex';
                 mainScreen.classList.add('active');
+                console.log('✅ mainScreen prikazan za UNOS');
             }
             if (typeof renderDataEntry === 'function') {
                 renderDataEntry('');
             } else if (typeof window.renderDataEntry === 'function') {
                 window.renderDataEntry('');
-            } else {
-                setTimeout(function() {
-                    if (typeof renderDataEntry === 'function') {
-                        renderDataEntry('');
-                    } else if (typeof window.renderDataEntry === 'function') {
-                        window.renderDataEntry('');
-                    } else {
-                        showModernAlert('Greška', 'Funkcija za unos nije dostupna!', '❌');
-                    }
-                }, 500);
             }
+            // Status obaveštenje
+            const statusEl = document.getElementById('voiceStatus');
+            if (statusEl) {
+                statusEl.textContent = '🎤 Sada recite "Start" pa diktirajte podatke (naziv, komad, količina, rok, skladište)';
+                statusEl.style.color = '#4CAF50';
+            }
+            // Vrati fokus na polje za proizvod
+            setTimeout(function() {
+                const productInput = document.getElementById('productInput');
+                if (productInput) productInput.focus();
+            }, 300);
         }, 300);
         return true;
     }
@@ -263,7 +268,6 @@ function processVoiceCommand(command) {
     showModernAlert('Nepoznata komanda', `"${command}" nije prepoznato.`, '❓');
     return false;
 }
-
 // ===== POKRETAČ ZA GLASOVNI UNOS =====
 function startVoiceRecognition() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -286,7 +290,9 @@ function startVoiceRecognition() {
         pt: 'pt-PT', fr: 'fr-FR'
     };
     recognition.lang = speechLangMap[langCode] || 'sr-RS';
-    recognition.continuous = false;
+    
+    // ===== PROMENI OVO - neka nastavi da sluša =====
+    recognition.continuous = true;  // <--- PROMENJENO sa false na true
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
 
@@ -306,7 +312,7 @@ function startVoiceRecognition() {
     };
 
     recognition.onresult = function(event) {
-        const speechResult = event.results[0][0].transcript.trim();
+        const speechResult = event.results[event.results.length - 1][0].transcript.trim();
         console.log('🗣️ Prepoznato:', speechResult);
         
         const statusEl = document.getElementById('voiceStatus');
@@ -315,6 +321,7 @@ function startVoiceRecognition() {
             statusEl.style.color = '#FFD700';
         }
         
+        // Obradi komandu (ali NEMOJ da zaustavljaš recognition)
         processVoiceCommand(speechResult);
     };
 
@@ -332,6 +339,7 @@ function startVoiceRecognition() {
 
     recognition.onend = function() {
         console.log('🎤 Glasovno prepoznavanje završeno.');
+        // Ako je voice menu još uvek aktivan, ponovo pokreni
         const voiceMenu = document.getElementById('voiceMenuScreen');
         if (voiceMenu && voiceMenu.classList.contains('active')) {
             setTimeout(function() {
@@ -572,3 +580,80 @@ function processStartCommand(command) {
     
     return true;
 }
+// ===== POVRATAK SA VOICE MENIJA =====
+function goBackFromVoice() {
+    console.log('◀ Povratak sa glasovnog menija');
+    stopVoiceRecognition();
+    showScreen('choiceScreen');
+}
+
+// ===== POMOĆNA FUNKCIJA ZA POPUNJAVANJE PODATAKA IZ START KOMANDE =====
+function popuniStartPodatke(data) {
+    console.log('📝 Popunjavam polja sa:', data);
+    
+    const productInput = document.getElementById('productInput');
+    const pieceInput = document.getElementById('pieceInput');
+    const quantityInput = document.getElementById('quantityInput');
+    const shelfLifeInput = document.getElementById('shelfLifeInput');
+    const unitSelect = document.getElementById('unitSelect');
+    const storageSelect = document.getElementById('storageSelect');
+    
+    if (productInput) productInput.value = data.product_name;
+    if (pieceInput) pieceInput.value = data.piece || '1';
+    if (quantityInput) quantityInput.value = data.quantity || data.piece || '1';
+    if (shelfLifeInput) shelfLifeInput.value = data.shelf_life || '12';
+    
+    if (unitSelect && data.unit) {
+        for (let option of unitSelect.options) {
+            if (option.value === data.unit) {
+                option.selected = true;
+                break;
+            }
+        }
+    }
+    
+    if (storageSelect && data.storage) {
+        for (let option of storageSelect.options) {
+            if (option.value === data.storage || option.text.includes(data.storage)) {
+                option.selected = true;
+                break;
+            }
+        }
+    }
+    
+    if (typeof updateExpiryDate === 'function') {
+        updateExpiryDate();
+    }
+    
+    if (typeof prikaziSveUnose === 'function') {
+        prikaziSveUnose();
+    }
+    
+    const statusEl = document.getElementById('voiceStatus');
+    if (statusEl) {
+        statusEl.textContent = `✅ Popunjeno: ${data.product_name}, ${data.quantity} ${data.unit}`;
+        statusEl.style.color = '#4CAF50';
+    }
+    
+    setTimeout(function() {
+        if (typeof saveProduct === 'function') {
+            saveProduct();
+            showModernAlert('✅ Uspešno', 'Proizvod je sačuvan glasovno!', '🎤');
+            if (statusEl) {
+                statusEl.textContent = '🎤 Recite "Start" za novi unos, ili drugu komandu';
+                statusEl.style.color = '#FFD700';
+            }
+        }
+    }, 1000);
+}
+// ===== IZVEZI FUNKCIJE GLOBALNO =====
+window.processVoiceCommand = processVoiceCommand;
+window.startVoiceRecognition = startVoiceRecognition;
+window.stopVoiceRecognition = stopVoiceRecognition;
+window.goBackFromVoice = goBackFromVoice;
+window.hideVoiceMenu = hideVoiceMenu;
+window.parseVoiceDataEntry = parseVoiceDataEntry;
+window.processStartCommand = processStartCommand;
+window.popuniStartPodatke = popuniStartPodatke;
+
+console.log('✅ Voice Commands učitan - FIX verzija!');
