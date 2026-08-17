@@ -29,8 +29,8 @@ function processVoiceCommand(command) {
     
     hideVoiceMenu();
     
-// ===== UNOS PODATAKA =====
-// ===== 1. UNOS PODATAKA =====
+
+// ===== 1. UNOS PODATAKA =====// ===== 1. UNOS PODATAKA =====
 if (cmd.includes('unos') || cmd.includes('unesi') || cmd.includes('dodaj') || 
     cmd.includes('add') || cmd.includes('entry') || cmd.includes('data')) {
     console.log('✅ Prepoznat UNOS PODATAKA!');
@@ -42,17 +42,19 @@ if (cmd.includes('unos') || cmd.includes('unesi') || cmd.includes('dodaj') ||
         }
         if (typeof renderDataEntry === 'function') {
             renderDataEntry('');
+        } else if (typeof window.renderDataEntry === 'function') {
+            window.renderDataEntry('');
         }
         
-        // --- DODATO: Automatsko pokretanje mikrofona ---
-        startVoiceRecognition(); 
+        // --- AUTOMATSKO POKRETANJE MIKROFONA ---
+        startVoiceRecognition();
         
         const statusEl = document.getElementById('voiceStatus');
         if (statusEl) {
             statusEl.textContent = '🎤 Recite "Start" pa diktirajte podatke';
             statusEl.style.color = '#4CAF50';
         }
-    }, 500); // Povećao sam na 500ms da sačeka renderovanje
+    }, 500);
     return true;
 }
     // ===== MENI =====
@@ -373,8 +375,7 @@ function startVoiceRecognition() {
     recognition.onend = function() {
     console.log('🎤 Mikrofon zaustavljen');
     
-    // Umesto vezivanja za voiceMenuScreen, proveravamo da li je aplikacija u "aktivnom" stanju
-    // ili jednostavno želimo da mikrofon bude stalno dostupan kada smo u modu unosa.
+    // Proveravamo da li je aplikacija u aktivnom modusu unosa
     const isDataEntryMode = document.getElementById('mainScreen')?.classList.contains('active');
     
     if (isDataEntryMode) {
@@ -383,7 +384,9 @@ function startVoiceRecognition() {
                 try {
                     recognition.start();
                     console.log('🎤 Ponovo pokrenut automatski');
-                } catch(e) { console.log('⚠️ Već radi'); }
+                } catch(e) { 
+                    console.log('⚠️ Već radi ili je došlo do greške pri ponovnom pokretanju:', e); 
+                }
             }
         }, 500);
     }
