@@ -376,18 +376,20 @@ function startVoiceRecognition() {
         pt: 'pt-PT', fr: 'fr-FR'
     };
     recognition.lang = speechLangMap[langCode] || 'sr-RS';
-    recognition.continuous = false;
-    recognition.interimResults = false;
+    
+    // ===== OVO JE VAŽNO - NE GASI SE =====
+    recognition.continuous = true;   // <--- OSTJE UKLJUČEN
+    recognition.interimResults = true;
     recognition.maxAlternatives = 1;
 
     const statusEl = document.getElementById('voiceStatus');
     if (statusEl) {
-        statusEl.textContent = '🎤 Slušam...';
+        statusEl.textContent = '🎤 Slušam... Govorite komandu';
         statusEl.style.color = '#2196F3';
     }
 
     recognition.onstart = function() {
-        console.log('🎤 Mikrofon aktivan');
+        console.log('🎤 Mikrofon aktivan - čekam komande');
         const statusEl = document.getElementById('voiceStatus');
         if (statusEl) {
             statusEl.textContent = '🎤 Slušam...';
@@ -405,6 +407,7 @@ function startVoiceRecognition() {
             statusEl.style.color = '#FFD700';
         }
         
+        // OBRADI KOMANDU - ALI NE GASI MIKROFON!
         processVoiceCommand(speechResult);
     };
 
@@ -422,6 +425,7 @@ function startVoiceRecognition() {
 
     recognition.onend = function() {
         console.log('🎤 Mikrofon zaustavljen');
+        // Automatski ponovo pokreni ako je voice menu aktivan
         const voiceMenu = document.getElementById('voiceMenuScreen');
         if (voiceMenu && voiceMenu.classList.contains('active')) {
             setTimeout(function() {
