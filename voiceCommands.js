@@ -402,103 +402,101 @@ function goBackFromVoice() {
 // ===== PARSIRANJE GLASOVNOG UNOSA =====
 function parseVoiceDataEntry(command) {
     console.log('🔍 Parsiranje glasovnog unosa:', command);
-    
-    let text = command.replace(/^start\s*/i, '').trim();
-    console.log('📝 Tekst za parsiranje:', text);
-    
-    let parts = text.split(',').map(s => s.trim());
-    console.log('📊 Delovi:', parts);
-    
-    let result = {
+
+    let text = command
+        .replace(/^start\s*/i, '')
+        .trim()
+        .toLowerCase();
+
+    // Brojevi rečima
+    const brojMap = {
+        'jedan': '1',
+        'jedna': '1',
+        'dva': '2',
+        'tri': '3',
+        'četiri': '4',
+        'cetiri': '4',
+        'pet': '5',
+        'šest': '6',
+        'sest': '6',
+        'sedam': '7',
+        'osam': '8',
+        'devet': '9',
+        'deset': '10',
+        'jedanaest': '11',
+        'dvanaest': '12'
+    };
+
+    Object.keys(brojMap).forEach(key => {
+        const re = new RegExp('\\b' + key + '\\b', 'gi');
+        text = text.replace(re, brojMap[key]);
+    });
+
+    const result = {
         product_name: '',
-        piece: '',
-        quantity: '',
-        unit: 'kom',
+        piece: '1',
+        quantity: '1',
+        unit: 'kg',
         shelf_life: '',
         storage: 'Zamrzivač 1'
     };
-    
-    const unitMap = {
-        'kilogram': 'kg', 'kilograma': 'kg', 'kg': 'kg',
-        'gram': 'g', 'grama': 'g', 'g': 'g',
-        'litar': 'l', 'litara': 'l', 'l': 'l',
-        'mililitar': 'ml', 'mililitara': 'ml', 'ml': 'ml',
-        'komad': 'kom', 'komada': 'kom', 'kom': 'kom',
-        'paket': 'pak', 'paketa': 'pak', 'pak': 'pak',
-        'kutija': 'kutija', 'kutije': 'kutija'
-    };
-    
-    const storageMap = {
-        'zamrzivač': 'Zamrzivač 1', 'zamrzivac': 'Zamrzivač 1',
-        'zamrzivač 1': 'Zamrzivač 1', 'zamrzivac 1': 'Zamrzivač 1',
-        'zamrzivač 2': 'Zamrzivač 2', 'zamrzivac 2': 'Zamrzivač 2',
-        'zamrzivač 3': 'Zamrzivač 3', 'zamrzivac 3': 'Zamrzivač 3',
-        'frižider': 'Frižider', 'frizider': 'Frižider', 'hladnjak': 'Frižider',
-        'ostava': 'Ostava', 'špajz': 'Ostava', 'pantry': 'Ostava',
-        'ostalo': 'Ostalo', 'drugo': 'Ostalo', 'other': 'Ostalo'
-    };
-    
-    parts.forEach((part, index) => {
-        part = part.toLowerCase().trim();
-        
-        if (index === 0) {
-            if (!/\d/.test(part)) {
-                result.product_name = parts[0].trim();
-                return;
-            }
-        }
-        
-        for (let [key, value] of Object.entries(storageMap)) {
-            if (part.includes(key)) {
-                result.storage = value;
-                return;
-            }
-        }
-        
-        for (let [key, value] of Object.entries(unitMap)) {
-            if (part.includes(key)) {
-                let numMatch = part.match(/([\d.]+)/);
-                if (numMatch) {
-                    result.quantity = numMatch[1];
-                    result.unit = value;
-                }
-                return;
-            }
-        }
-        
-        let numMatch = part.match(/(\d+)/);
-        if (numMatch) {
-            let num = numMatch[1];
-            if (parts.length > index + 1) {
-                let nextPart = parts[index + 1]?.toLowerCase().trim() || '';
-                let isStorage = false;
-                for (let key of Object.keys(storageMap)) {
-                    if (nextPart.includes(key)) {
-                        isStorage = true;
-                        break;
-                    }
-                }
-                if (!isStorage && !result.shelf_life) {
-                    result.shelf_life = num;
-                    return;
-                }
-            }
-            if (!result.piece) {
-                result.piece = num;
-            }
-        }
-    });
-    
-    if (!result.product_name && parts.length > 0) {
-        result.product_name = parts[0].trim();
+
+    // Skladište
+    if (text.includes('zamrzivač 2') || text.includes('zamrzivac 2')) {
+        result.storage = 'Zamrzivač 2';
+    } else if (text.includes('zamrzivač 3') || text.includes('zamrzivac 3')) {
+        result.storage = 'Zamrzivač 3';
+    } else if (text.includes('zamrzivač') || text.includes('zamrzivac')) {
+        result.storage = 'Zamrzivač 1';
+    } else if (text.includes('frižider') || text.includes('frizider')) {
+        result.storage = 'Frižider';
+    } else if (text.includes('ostava')) {
+        result.storage = 'Ostava';
     }
-    
-    if (!result.quantity && result.piece) {
-        result.quantity = result.piece;
-        result.unit = 'kom';
+
+    // Jedinica + količina
+    const unitMatch = text.match(
+        /(\d+(?:[.,]\d+)?)\s*(kilogram|kilograma|kg|gram|grama|g|litar|litara|l|mililitar|mililitara|ml|komad|komada|kom)/
+    );
+
+    if (unitMatch) {
+        result.quantity = unitMatch[1].replace(',', '.');
+
+        const unitWord = unitMatch[2];
+
+        if (unitWord.includes('kilogram') || unitWord === 'kg')
+            result.unit = 'kg';
+        else if (unitWord.includes('gram') || unitWord === 'g')
+            result.unit = 'g';
+        else if (unitWord.includes('litar') || unitWord === 'l')
+            result.unit = 'l';
+        else if (unitWord.includes('mililitar') || unitWord === 'ml')
+            result.unit = 'ml';
+        else
+            result.unit = 'kom';
     }
-    
-    console.log('✅ Parsirani rezultat:', result);
+
+    const numbers = text.match(/\d+(?:[.,]\d+)?/g) || [];
+
+    // format:
+    // naziv + komad + količina + rok + skladište
+
+    if (numbers.length >= 3) {
+        result.piece = numbers[0];
+        result.shelf_life = parseInt(numbers[numbers.length - 1]);
+    }
+
+    // Naziv proizvoda = sve pre prvog broja
+    const firstNumberPos = text.search(/\d/);
+
+    if (firstNumberPos > 0) {
+        result.product_name = text
+            .substring(0, firstNumberPos)
+            .trim();
+    }
+
+    console.log('✅ Parsirano:', result);
+
     return result;
 }
 
