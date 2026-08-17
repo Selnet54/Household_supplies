@@ -292,8 +292,8 @@ function startVoiceRecognition() {
     recognition.lang = speechLangMap[langCode] || 'sr-RS';
     
     // ===== PROMENI OVO - neka nastavi da sluša =====
-    recognition.continuous = true;  // <--- PROMENJENO sa false na true
-    recognition.interimResults = false;
+    recognition.continuous = false;  // Vrati na false
+    recognition.interimResults = true;  // Dodaj ovo
     recognition.maxAlternatives = 1;
 
     const statusEl = document.getElementById('voiceStatus');
@@ -312,62 +312,43 @@ function startVoiceRecognition() {
     };
 
     recognition.onresult = function(event) {
-        const speechResult = event.results[event.results.length - 1][0].transcript.trim();
-        console.log('🗣️ Prepoznato:', speechResult);
-        
-        const statusEl = document.getElementById('voiceStatus');
-        if (statusEl) {
-            statusEl.textContent = `🗣️ "${speechResult}"`;
-            statusEl.style.color = '#FFD700';
-        }
-        
-        // Obradi komandu (ali NEMOJ da zaustavljaš recognition)
-        processVoiceCommand(speechResult);
-    };
-
-    recognition.onerror = function(event) {
-        console.error('⚠️ Greška u prepoznavanju glasa:', event.error);
-        const statusEl = document.getElementById('voiceStatus');
-        if (statusEl) {
-            statusEl.textContent = '❌ Greška. Pokušajte ponovo.';
-            statusEl.style.color = '#f44336';
-        }
-        if (event.error === 'not-allowed') {
-            showModernAlert('Greška', 'Dozvolite pristup mikrofonu!', '🎤');
-        }
-    };
-
-    recognition.onend = function() {
-        console.log('🎤 Glasovno prepoznavanje završeno.');
-        // Ako je voice menu još uvek aktivan, ponovo pokreni
-        const voiceMenu = document.getElementById('voiceMenuScreen');
-        if (voiceMenu && voiceMenu.classList.contains('active')) {
-            setTimeout(function() {
-                if (recognition) {
-                    try {
-                        recognition.start();
-                        console.log('🎤 Ponovo pokrenuto slušanje');
-                    } catch(e) {
-                        console.log('⏳ Čekanje pre ponovnog pokretanja...');
-                    }
-                }
-            }, 500);
-        }
-    };
-
-    try {
-        recognition.start();
-        console.log('🎤 Slušam...');
-    } catch(e) {
-        console.error('❌ Greška pri startovanju:', e);
-        const statusEl = document.getElementById('voiceStatus');
-        if (statusEl) {
-            statusEl.textContent = '❌ Greška pri pokretanju mikrofona';
-            statusEl.style.color = '#f44336';
+    // SAKUPLJAJ SVE REČI DO KRAJA
+    let fullText = '';
+    
+    // Prođi kroz sve rezultate
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+        const result = event.results[i];
+        if (result.isFinal) {
+            fullText += result[0].transcript + ' ';
+            console.log(`✅ Final result ${i}:`, result[0].transcript);
         }
     }
-}
-
+    
+    const speechResult = fullText.trim();
+    console.log('🗣️ CEO PREPOZNAT TEKST:', speechResult);
+    
+    // Ako nema finalnog rezultata, uzmi poslednji (privremeni)
+    if (!speechResult) {
+        const lastResult = event.results[event.results.length - 1];
+        if (lastResult && lastResult[0]) {
+            const tempResult = lastResult[0].transcript.trim();
+            console.log('⏳ Privremeni rezultat:', tempResult);
+            // Za privremene rezultate ne radimo ništa, čekamo finalni
+            return;
+        }
+    }
+    
+    const statusEl = document.getElementById('voiceStatus');
+    if (statusEl) {
+        statusEl.textContent = `🗣️ "${speechResult}"`;
+        statusEl.style.color = '#FFD700';
+    }
+    
+    // Obradi celu rečenicu
+    if (speechResult && speechResult.length > 0) {
+        processVoiceCommand(speechResult);
+    }
+};
 // ===== ZAUSTAVI GLASOVNO PREPOZNAVANJE =====
 function stopVoiceRecognition() {
     if (recognition) {
