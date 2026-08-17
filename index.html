@@ -417,7 +417,68 @@
         </div>
     </div>
 </div>
-
+<!-- ===== EKRAN 4b: VOICE DATA ENTRY ===== -->
+<div id="voiceDataEntryScreen" class="screen" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; justify-content:center; align-items:center;">
+    <div style="background:white; border-radius:20px; padding:30px; max-width:500px; width:90%; max-height:80vh; overflow-y:auto;">
+        <h2 style="text-align:center; color:#2196F3;">🎤 Glasovni unos</h2>
+        <p style="text-align:center; color:#666;">Recite <strong>"Start"</strong> pa podatke</p>
+        
+        <div style="margin:20px 0;">
+            <label style="display:block; font-weight:bold; margin-bottom:5px;">📦 Proizvod:</label>
+            <input id="voiceProductInput" type="text" style="width:100%; padding:10px; border:2px solid #ddd; border-radius:10px; font-size:16px;">
+        </div>
+        
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div>
+                <label style="display:block; font-weight:bold; margin-bottom:5px;">🔢 Količina:</label>
+                <input id="voiceQuantityInput" type="number" value="1" style="width:100%; padding:10px; border:2px solid #ddd; border-radius:10px; font-size:16px;">
+            </div>
+            <div>
+                <label style="display:block; font-weight:bold; margin-bottom:5px;">📏 Jedinica:</label>
+                <select id="voiceUnitSelect" style="width:100%; padding:10px; border:2px solid #ddd; border-radius:10px; font-size:16px;">
+                    <option value="komad">komad</option>
+                    <option value="kg">kg</option>
+                    <option value="g">g</option>
+                    <option value="l">l</option>
+                    <option value="ml">ml</option>
+                </select>
+            </div>
+        </div>
+        
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
+            <div>
+                <label style="display:block; font-weight:bold; margin-bottom:5px;">📅 Rok (meseci):</label>
+                <input id="voiceShelfLifeInput" type="number" value="12" style="width:100%; padding:10px; border:2px solid #ddd; border-radius:10px; font-size:16px;">
+            </div>
+            <div>
+                <label style="display:block; font-weight:bold; margin-bottom:5px;">🏠 Skladište:</label>
+                <select id="voiceStorageSelect" style="width:100%; padding:10px; border:2px solid #ddd; border-radius:10px; font-size:16px;">
+                    <option value="Soba">Soba</option>
+                    <option value="Frižider">Frižider</option>
+                    <option value="Zamrzivač">Zamrzivač</option>
+                    <option value="Podrum">Podrum</option>
+                    <option value="Ostava">Ostava</option>
+                </select>
+            </div>
+        </div>
+        
+        <div style="margin-top:20px; text-align:center;">
+            <div id="voiceStatus" style="padding:10px; background:#f5f5f5; border-radius:10px; margin-bottom:10px; min-height:40px; color:#666;">
+                🎤 Slušam...
+            </div>
+            <button onclick="saveVoiceProduct()" style="background:#4CAF50; color:white; border:none; padding:12px 30px; border-radius:25px; font-size:16px; cursor:pointer; margin:5px;">
+                💾 Sačuvaj
+            </button>
+            <button onclick="closeVoiceDataEntry()" style="background:#f44336; color:white; border:none; padding:12px 30px; border-radius:25px; font-size:16px; cursor:pointer; margin:5px;">
+                ✖ Zatvori
+            </button>
+        </div>
+        
+        <div id="voiceProductList" style="margin-top:15px; max-height:150px; overflow-y:auto; border-top:1px solid #eee; padding-top:10px;">
+            <p style="color:#999; text-align:center;">📭 Još nema dodanih proizvoda</p>
+        </div>
+    </div>
+</div>
 <!-- ===== EKRAN 5: GLAVNI EKRAN ===== -->
 <div id="mainScreen" class="screen" style="display:none; flex-direction:column; background:#f5f5f5; min-height:100vh;">
     <div class="header">
