@@ -3,6 +3,7 @@
 // ============================================
 
 let recognition = null;
+let isListening = false;  // <--- DODAJ OVO
 
 // ===== SAKRIVANJE VOICE MENIJA =====
 function hideVoiceMenu() {
@@ -29,28 +30,30 @@ function processVoiceCommand(command) {
     hideVoiceMenu();
     
     // ===== UNOS PODATAKA =====
-    if (cmd.includes('unos') || cmd.includes('unesi') || cmd.includes('dodaj') || 
-        cmd.includes('add') || cmd.includes('entry') || cmd.includes('data')) {
-        console.log('✅ Prepoznat UNOS PODATAKA!');
-        setTimeout(function() {
-            const mainScreen = document.getElementById('mainScreen');
-            if (mainScreen) {
-                mainScreen.style.display = 'flex';
-                mainScreen.classList.add('active');
-            }
-            if (typeof renderDataEntry === 'function') {
-                renderDataEntry('');
-            } else if (typeof window.renderDataEntry === 'function') {
-                window.renderDataEntry('');
-            }
-            const statusEl = document.getElementById('voiceStatus');
-            if (statusEl) {
-                statusEl.textContent = '🎤 Recite "Start" pa diktirajte podatke';
-                statusEl.style.color = '#4CAF50';
-            }
-        }, 300);
-        return true;
-    }
+    // ===== UNOS PODATAKA - NE GASI MIKROFON =====
+if (cmd.includes('unos') || cmd.includes('unesi') || cmd.includes('dodaj') || 
+    cmd.includes('add') || cmd.includes('entry') || cmd.includes('data')) {
+    console.log('✅ Prepoznat UNOS PODATAKA!');
+    // OT vori Data Entry - BEZ GAŠENJA MIKROFONA
+    setTimeout(function() {
+        const mainScreen = document.getElementById('mainScreen');
+        if (mainScreen) {
+            mainScreen.style.display = 'flex';
+            mainScreen.classList.add('active');
+        }
+        if (typeof renderDataEntry === 'function') {
+            renderDataEntry('');
+        } else if (typeof window.renderDataEntry === 'function') {
+            window.renderDataEntry('');
+        }
+        const statusEl = document.getElementById('voiceStatus');
+        if (statusEl) {
+            statusEl.textContent = '🎤 Recite "Start" pa diktirajte podatke';
+            statusEl.style.color = '#4CAF50';
+        }
+    }, 300);
+    return true;  // <--- NEMA stopVoiceRecognition()!
+}
     
     // ===== START =====
     if (cmd.includes('start') || cmd.includes('stat') || cmd.includes('stard')) {
