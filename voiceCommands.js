@@ -259,6 +259,11 @@ function processVoiceCommand(command) {
 
 // ===== POKRETAČ ZA GLASOVNI UNOS =====
 function startVoiceRecognition() {
+     fullSpeechResult = '';
+    if (speechTimeout) {
+        clearTimeout(speechTimeout);
+        speechTimeout = null;
+    }
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     
     if (!SpeechRecognition) {
@@ -300,38 +305,45 @@ function startVoiceRecognition() {
         fullSpeechResult = '';
     };
 
-    recognition.onresult = function(event) {
-        let fullText = '';
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-            const result = event.results[i];
-            if (result.isFinal) {
-                fullText += result[0].transcript + ' ';
-                console.log(`✅ Final result ${i}:`, result[0].transcript);
-            }
+    let speechTimeout = null;
+
+recognition.onresult = function(event) {
+    // Sakupi sve finalne rezultate
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+        const result = event.results[i];
+        if (result.isFinal) {
+            fullSpeechResult += result[0].transcript + ' ';
+            console.log(`✅ Dodata reč: "${result[0].transcript}"`);
+        }
+    }
+    
+    const currentText = fullSpeechResult.trim();
+    console.log('📝 Trenutno skupljeno:', currentText);
+    
+    // Prikaži u statusu
+    const statusEl = document.getElementById('voiceStatus');
+    if (statusEl && currentText) {
+        statusEl.textContent = `🗣️ "${currentText}"`;
+        statusEl.style.color = '#FFD700';
+    }
+    
+    // Resetuj timer - čekamo pauzu u govoru
+    clearTimeout(speechTimeout);
+    speechTimeout = setTimeout(function() {
+        // Kada nema novih reči 1.5 sekundi, obradi celu rečenicu
+        const finalText = fullSpeechResult.trim();
+        console.log('🎯 KONAČAN TEKST ZA OBRADU:', finalText);
+        
+        if (finalText && finalText.length > 0) {
+            processVoiceCommand(finalText);
         }
         
-        const speechResult = fullText.trim();
-        console.log('🗣️ CEO PREPOZNAT TEKST:', speechResult);
-        
-        if (!speechResult) {
-            const lastResult = event.results[event.results.length - 1];
-            if (lastResult && lastResult[0]) {
-                const tempResult = lastResult[0].transcript.trim();
-                console.log('⏳ Privremeni rezultat:', tempResult);
-                return;
-            }
-        }
-        
-        const statusEl = document.getElementById('voiceStatus');
-        if (statusEl) {
-            statusEl.textContent = `🗣️ "${speechResult}"`;
-            statusEl.style.color = '#FFD700';
-        }
-        
-        if (speechResult && speechResult.length > 0) {
-            processVoiceCommand(speechResult);
-        }
-    };
+        // Resetuj za sledeći unos
+        setTimeout(function() {
+            fullSpeechResult = '';
+        }, 500);
+    }, 1500);
+};
 
     recognition.onerror = function(event) {
         console.error('⚠️ Greška u prepoznavanju glasa:', event.error);
@@ -377,6 +389,12 @@ function startVoiceRecognition() {
 
 // ===== ZAUSTAVI GLASOVNO PREPOZNAVANJE =====
 function stopVoiceRecognition() {
+    fullSpeechResult = '';
+    if (speechTimeout) {
+        clearTimeout(speechTimeout);
+        speechTimeout = null;
+    }
+    
     if (recognition) {
         try {
             recognition.stop();
@@ -384,7 +402,6 @@ function stopVoiceRecognition() {
             console.log('🛑 Recognition zaustavljen');
         } catch(e) {}
     }
-    fullSpeechResult = '';
     const statusEl = document.getElementById('voiceStatus');
     if (statusEl) {
         statusEl.textContent = '⏸️ Prepoznavanje zaustavljeno';
