@@ -4,6 +4,7 @@
 
 let recognition = null;
 let fullSpeechResult = '';
+let speechTimeout = null;
 
 // ===== POMOĆNA FUNKCIJA ZA SAKRIVANJE VOICE MENIJA =====
 function hideVoiceMenu() {
@@ -259,11 +260,12 @@ function processVoiceCommand(command) {
 
 // ===== POKRETAČ ZA GLASOVNI UNOS =====
 function startVoiceRecognition() {
-     fullSpeechResult = '';
+    fullSpeechResult = '';
     if (speechTimeout) {
         clearTimeout(speechTimeout);
         speechTimeout = null;
     }
+    
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     
     if (!SpeechRecognition) {
@@ -274,7 +276,6 @@ function startVoiceRecognition() {
     if (recognition) {
         try { recognition.stop(); } catch(e) {}
         recognition = null;
-        fullSpeechResult = '';
     }
 
     recognition = new SpeechRecognition();
@@ -305,45 +306,39 @@ function startVoiceRecognition() {
         fullSpeechResult = '';
     };
 
-    let speechTimeout = null;
-
-recognition.onresult = function(event) {
-    // Sakupi sve finalne rezultate
-    for (let i = event.resultIndex; i < event.results.length; i++) {
-        const result = event.results[i];
-        if (result.isFinal) {
-            fullSpeechResult += result[0].transcript + ' ';
-            console.log(`✅ Dodata reč: "${result[0].transcript}"`);
-        }
-    }
-    
-    const currentText = fullSpeechResult.trim();
-    console.log('📝 Trenutno skupljeno:', currentText);
-    
-    // Prikaži u statusu
-    const statusEl = document.getElementById('voiceStatus');
-    if (statusEl && currentText) {
-        statusEl.textContent = `🗣️ "${currentText}"`;
-        statusEl.style.color = '#FFD700';
-    }
-    
-    // Resetuj timer - čekamo pauzu u govoru
-    clearTimeout(speechTimeout);
-    speechTimeout = setTimeout(function() {
-        // Kada nema novih reči 1.5 sekundi, obradi celu rečenicu
-        const finalText = fullSpeechResult.trim();
-        console.log('🎯 KONAČAN TEKST ZA OBRADU:', finalText);
-        
-        if (finalText && finalText.length > 0) {
-            processVoiceCommand(finalText);
+    recognition.onresult = function(event) {
+        // Sakupi sve finalne rezultate
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+            const result = event.results[i];
+            if (result.isFinal) {
+                fullSpeechResult += result[0].transcript + ' ';
+                console.log(`✅ Dodata reč: "${result[0].transcript}"`);
+            }
         }
         
-        // Resetuj za sledeći unos
-        setTimeout(function() {
-            fullSpeechResult = '';
-        }, 500);
-    }, 1500);
-};
+        const currentText = fullSpeechResult.trim();
+        console.log('📝 Trenutno skupljeno:', currentText);
+        
+        const statusEl = document.getElementById('voiceStatus');
+        if (statusEl && currentText) {
+            statusEl.textContent = `🗣️ "${currentText}"`;
+            statusEl.style.color = '#FFD700';
+        }
+        
+        clearTimeout(speechTimeout);
+        speechTimeout = setTimeout(function() {
+            const finalText = fullSpeechResult.trim();
+            console.log('🎯 KONAČAN TEKST ZA OBRADU:', finalText);
+            
+            if (finalText && finalText.length > 0) {
+                processVoiceCommand(finalText);
+            }
+            
+            setTimeout(function() {
+                fullSpeechResult = '';
+            }, 500);
+        }, 1500);
+    };
 
     recognition.onerror = function(event) {
         console.error('⚠️ Greška u prepoznavanju glasa:', event.error);
@@ -427,15 +422,12 @@ function parseVoiceDataEntry(command) {
 
     // Brojevi rečima
     const brojMap = {
-        'jedan': '1',
-        'jedna': '1',
+        'jedan': '1', 'jedna': '1',
         'dva': '2',
         'tri': '3',
-        'četiri': '4',
-        'cetiri': '4',
+        'četiri': '4', 'cetiri': '4',
         'pet': '5',
-        'šest': '6',
-        'sest': '6',
+        'šest': '6', 'sest': '6',
         'sedam': '7',
         'osam': '8',
         'devet': '9',
@@ -478,25 +470,15 @@ function parseVoiceDataEntry(command) {
 
     if (unitMatch) {
         result.quantity = unitMatch[1].replace(',', '.');
-
         const unitWord = unitMatch[2];
-
-        if (unitWord.includes('kilogram') || unitWord === 'kg')
-            result.unit = 'kg';
-        else if (unitWord.includes('gram') || unitWord === 'g')
-            result.unit = 'g';
-        else if (unitWord.includes('litar') || unitWord === 'l')
-            result.unit = 'l';
-        else if (unitWord.includes('mililitar') || unitWord === 'ml')
-            result.unit = 'ml';
-        else
-            result.unit = 'kom';
+        if (unitWord.includes('kilogram') || unitWord === 'kg') result.unit = 'kg';
+        else if (unitWord.includes('gram') || unitWord === 'g') result.unit = 'g';
+        else if (unitWord.includes('litar') || unitWord === 'l') result.unit = 'l';
+        else if (unitWord.includes('mililitar') || unitWord === 'ml') result.unit = 'ml';
+        else result.unit = 'kom';
     }
 
     const numbers = text.match(/\d+(?:[.,]\d+)?/g) || [];
-
-    // format:
-    // naziv + komad + količina + rok + skladište
 
     if (numbers.length >= 3) {
         result.piece = numbers[0];
@@ -505,15 +487,11 @@ function parseVoiceDataEntry(command) {
 
     // Naziv proizvoda = sve pre prvog broja
     const firstNumberPos = text.search(/\d/);
-
     if (firstNumberPos > 0) {
-        result.product_name = text
-            .substring(0, firstNumberPos)
-            .trim();
+        result.product_name = text.substring(0, firstNumberPos).trim();
     }
 
     console.log('✅ Parsirano:', result);
-
     return result;
 }
 
