@@ -1,5 +1,5 @@
 // ============================================
-// VOICE COMMANDS - GLASOVNE KOMANDE - FIX V2
+// VOICE COMMANDS - GLASOVNE KOMANDE - FIX V4
 // ============================================
 
 let recognition = null;
@@ -30,9 +30,17 @@ function processVoiceCommand(command) {
     // ===== PRVO SAKRIVANJE VOICE MENIJA =====
     hideVoiceMenu();
     
-    // ===== PROVERI "START" ILI UNOS PODATAKA =====
+    // ===== 1. "START" KOMANDA - SAMO ZA DIKTIRANJE I SNIMANJE PODATAKA =====
+    const startKeywords = ['start', 'stat', 'stard'];
+    if (startKeywords.some(k => cmd.startsWith(k) || cmd.includes(k))) {
+        console.log('🚀 Prepoznat START za unos podataka!');
+        processStartCommand(command);
+        return true;
+    }
+    
+    // ===== 2. UNOS / OTVARANJE EKRANA ZA UNOS (MENI KOMANDA) =====
     const dataEntryKeywords = [
-        'start', 'stat', 'stard', 'unos', 'unesi', 'dodaj', 'novi', 'podatak', 'unos podataka',
+        'unos', 'unesi', 'dodaj', 'novi', 'podatak', 'unos podataka',
         'add', 'product', 'entry', 'data', 'new', 'insert', 'create',
         'eintrag', 'produkt', 'hinzufügen', 'neu', 'daten', 'eingabe',
         'bevitel', 'új', 'termék', 'hozzáad', 'rögzít', 'adat', 'beír',
@@ -44,9 +52,29 @@ function processVoiceCommand(command) {
         'saisie', 'données', 'produit', 'nouveau', 'ajouter', 'entrer'
     ];
     
-    if (dataEntryKeywords.some(k => cmd.includes(k))) {
-        console.log('✅ Prepoznat START / UNOS PODATAKA!');
-        processStartCommand(command);
+    if (dataEntryKeywords.some(k => cmd === k || cmd.includes(k))) {
+        console.log('✅ Prepoznat UNOS - Otvaram ekran za unos!');
+        setTimeout(function() {
+            const mainScreen = document.getElementById('mainScreen');
+            if (mainScreen) {
+                mainScreen.style.display = 'flex';
+                mainScreen.classList.add('active');
+            }
+            if (typeof renderDataEntry === 'function') {
+                renderDataEntry('');
+            } else if (typeof window.renderDataEntry === 'function') {
+                window.renderDataEntry('');
+            }
+            const statusEl = document.getElementById('voiceStatus');
+            if (statusEl) {
+                statusEl.textContent = '🎤 Ekran otvoren. Recite "Start" pa diktirajte podatke.';
+                statusEl.style.color = '#4CAF50';
+            }
+            setTimeout(function() {
+                const productInput = document.getElementById('productInput');
+                if (productInput) productInput.focus();
+            }, 300);
+        }, 300);
         return true;
     }
     
@@ -342,11 +370,12 @@ function goBackFromVoice() {
     showScreen('choiceScreen');
 }
 
-// ===== NOVA POBOLJŠANA FUNKCIJA ZA PARSIRANJE GLASOVNog UNOSA =====
+// ===== FUNKCIJA ZA PARSIRANJE GLASOVNOG UNOSA =====
 function parseVoiceDataEntry(command) {
     console.log('🔍 Parsiranje glasovnog unosa:', command);
     
-    let text = command.replace(/^(start|stat|stard|unos|unesi|dodaj|novi)\s*/i, '').trim();
+    // Uklanja samo reč "start" sa početka da bi ostali podaci za proizvod
+    let text = command.replace(/^(start|stat|stard)\s*/i, '').trim();
     console.log('📝 Tekst za parsiranje:', text);
     
     let result = {
@@ -424,7 +453,7 @@ function parseVoiceDataEntry(command) {
     return result;
 }
 
-// ===== OBRADA "START" KOMANDE ZA UNOS =====
+// ===== OBRADA "START" KOMANDE SA PODACIMA =====
 function processStartCommand(command) {
     console.log('🚀 Procesiram Start komandu:', command);
     
@@ -537,4 +566,4 @@ window.parseVoiceDataEntry = parseVoiceDataEntry;
 window.processStartCommand = processStartCommand;
 window.popuniStartPodatke = popuniStartPodatke;
 
-console.log('✅ Voice Commands učitan - FIX V2 verzija!');
+console.log('✅ Voice Commands učitan - FIX V4 verzija!');
