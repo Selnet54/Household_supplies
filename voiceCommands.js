@@ -1,6 +1,9 @@
 // ============================================================
-// VOICE DATA ENTRY - NOVA STABILNA VERZIJA
-// Glas -> Data Entry -> Pregled unosa -> Zalihe
+// VOICE DATA ENTRY - PRAVI TOK
+// "unos" -> otvara Data Entry
+// "start" -> počinje novi unos na Data Entry ekranu
+// "plus" -> završava unos i počinje novi
+// "end" -> otvara zalihe
 // ============================================================
 
 (function () {
@@ -9,6 +12,8 @@
     let recognition = null;
     let voiceBuffer = '';
     let isProcessingVoiceItem = false;
+    let isDataEntryOpen = false; // Da li je Data Entry ekran otvoren
+    let currentEntryData = null; // Trenutni podaci za unos
 
     // ---------------------------------------------------------
     // POMOĆNE FUNKCIJE
@@ -24,7 +29,6 @@
 
         element.value = value == null ? '' : String(value);
 
-        // Obavesti aplikaciju da je vrednost promenjena
         element.dispatchEvent(new Event('input', { bubbles: true }));
         element.dispatchEvent(new Event('change', { bubbles: true }));
 
@@ -231,29 +235,14 @@
 
     // ---------------------------------------------------------
     // PARSIRANJE GLASOVNOG UNOSA
-    //
-    // Primer:
-    //
-    // Pileći batak 1 kilogram 6 meseci zamrzivač 1
-    //
-    // rezultat:
-    //
-    // product_name = Pileći batak
-    // quantity     = 1
-    // unit         = kg
-    // shelf_life   = 6
-    // storage      = Zamrzivač 1
     // ---------------------------------------------------------
 
     function parseVoiceDataEntry(command) {
 
+        // Ukloni "start" ako je na početku
         let text = String(command || '')
-            .replace(/\b(start|unos|unesi|dodaj|novi|add)\b/gi, '')
-            .trim();
-
-        text = text
-            .replace(/\b(end|enter|friend|kraj|gotovo)\b/gi, '')
-            .replace(/\b(plus|sledeći|sledeci)\b/gi, '')
+            .replace(/^start\s+/i, '')
+            .replace(/^start$/i, '')
             .trim();
 
         if (!text) {
@@ -350,8 +339,6 @@
 
             // ---------------------------------------------
             // REČ "MESEC", "MESECI", "MESECA"
-            //
-            // Ako je prethodni broj rok, samo preskoči
             // ---------------------------------------------
 
             if (
@@ -372,7 +359,8 @@
                 word === 'u' ||
                 word === 'za' ||
                 word === 'rok' ||
-                word === 'trajanje'
+                word === 'trajanje' ||
+                word === 'na'
             ) {
                 i++;
                 continue;
@@ -542,101 +530,103 @@
 
     function openDataEntry() {
 
+        console.log('🔥 Otvaram Data Entry ekran...');
+
         hideVoiceMenu();
 
+        // 1. Pokušaj preko mainScreen
         const mainScreen = el('mainScreen');
 
         if (mainScreen) {
             mainScreen.style.display = 'flex';
             mainScreen.classList.add('active');
+            console.log('✅ mainScreen otvoren');
         }
 
-        // Ako aplikacija ima svoj način otvaranja ekrana
+        // 2. Pokušaj preko showScreen
         if (typeof window.showScreen === 'function') {
-
             try {
                 window.showScreen('mainScreen');
+                console.log('✅ showScreen pozvan');
             } catch (error) {
-                console.warn(
-                    'showScreen greška:',
-                    error
-                );
+                console.warn('showScreen greška:', error);
             }
         }
+
+        // 3. Pokušaj preko openDataEntry
+        if (typeof window.openDataEntry === 'function') {
+            try {
+                window.openDataEntry();
+                console.log('✅ openDataEntry pozvan');
+            } catch (error) {
+                console.warn('openDataEntry greška:', error);
+            }
+        }
+
+        // 4. Pokušaj da nađeš dugme za unos i klikneš
+        const dataEntryBtn = document.querySelector(
+            '[data-screen="mainScreen"], ' +
+            '.open-data-entry, ' +
+            '#openDataEntryBtn, ' +
+            'button[onclick*="dataEntry"], ' +
+            'button[onclick*="mainScreen"]'
+        );
+
+        if (dataEntryBtn) {
+            try {
+                dataEntryBtn.click();
+                console.log('✅ Kliknuo na dugme za unos');
+            } catch (error) {
+                console.warn('Klik greška:', error);
+            }
+        }
+
+        isDataEntryOpen = true;
+
+        showVoiceStatus(
+            '📝 Ekran za unos otvoren. Recite "start" za novi unos.',
+            '#4CAF50'
+        );
     }
 
     // ---------------------------------------------------------
     // ČUVANJE PODATAKA
-    //
-    // VAŽNO:
-    // prvo popunimo formu,
-    // zatim sačekamo da DOM primi podatke,
-    // tek onda pozivamo postojeće čuvanje.
     // ---------------------------------------------------------
 
     async function saveVoiceData(data) {
 
         if (!data) return false;
 
-        console.log(
-            'ČUVAM GLASOVNI UNOS:',
-            data
-        );
+        console.log('ČUVAM GLASOVNI UNOS:', data);
 
         // -----------------------------------------------------
-        // 1. Ako aplikacija ima saveProduct()
+        // 1. saveProduct()
         // -----------------------------------------------------
 
         if (typeof window.saveProduct === 'function') {
 
             try {
-
-                const result =
-                    await window.saveProduct();
-
-                console.log(
-                    'saveProduct rezultat:',
-                    result
-                );
-
+                const result = await window.saveProduct();
+                console.log('saveProduct rezultat:', result);
                 return true;
-
             } catch (error) {
-
-                console.error(
-                    'saveProduct greška:',
-                    error
-                );
-
+                console.error('saveProduct greška:', error);
                 return false;
             }
         }
 
         // -----------------------------------------------------
-        // 2. Druga moguća funkcija
+        // 2. handleFormSubmit()
         // -----------------------------------------------------
 
         if (typeof window.handleFormSubmit === 'function') {
 
             try {
-
-                const result =
-                    await window.handleFormSubmit();
-
-                console.log(
-                    'handleFormSubmit rezultat:',
-                    result
-                );
-
+                const result = await window.handleFormSubmit();
+                console.log('handleFormSubmit rezultat:', result);
                 return true;
-
             } catch (error) {
-
-                console.error(
-                    'handleFormSubmit greška:',
-                    error
-                );
-
+                console.error('handleFormSubmit greška:', error);
                 return false;
             }
         }
@@ -648,63 +638,38 @@
         if (typeof window.addProduct === 'function') {
 
             try {
-
-                const result =
-                    await window.addProduct();
-
-                console.log(
-                    'addProduct rezultat:',
-                    result
-                );
-
+                const result = await window.addProduct();
+                console.log('addProduct rezultat:', result);
                 return true;
-
             } catch (error) {
-
-                console.error(
-                    'addProduct greška:',
-                    error
-                );
-
+                console.error('addProduct greška:', error);
                 return false;
             }
         }
 
         // -----------------------------------------------------
-        // 4. Ako ne postoji nijedna funkcija,
-        //    pokušaj submit forme
+        // 4. Submit forme
         // -----------------------------------------------------
 
-        const form =
-            document.querySelector(
-                '#mainScreen form, #dataEntryForm, form'
-            );
+        const form = document.querySelector(
+            '#mainScreen form, #dataEntryForm, form'
+        );
 
         if (form) {
 
             try {
-
                 if (typeof form.requestSubmit === 'function') {
                     form.requestSubmit();
                 } else {
                     form.submit();
                 }
-
                 return true;
-
             } catch (error) {
-
-                console.error(
-                    'Submit forme greška:',
-                    error
-                );
+                console.error('Submit forme greška:', error);
             }
         }
 
-        console.error(
-            'Nije pronađena funkcija za čuvanje podataka.'
-        );
-
+        console.error('Nije pronađena funkcija za čuvanje podataka.');
         return false;
     }
 
@@ -714,13 +679,7 @@
 
     function refreshApplicationScreens() {
 
-        console.log(
-            'Osvežavam Pregled unosa i Zalihe...'
-        );
-
-        // -----------------------------------------------------
-        // Moguće funkcije za osvežavanje pregleda
-        // -----------------------------------------------------
+        console.log('Osvežavam Pregled unosa i Zalihe...');
 
         const refreshFunctions = [
             'renderEntries',
@@ -736,27 +695,13 @@
 
         refreshFunctions.forEach(function (functionName) {
 
-            if (
-                typeof window[functionName] ===
-                'function'
-            ) {
+            if (typeof window[functionName] === 'function') {
 
                 try {
-
                     window[functionName]();
-
-                    console.log(
-                        'Pozvana:',
-                        functionName
-                    );
-
+                    console.log('Pozvana:', functionName);
                 } catch (error) {
-
-                    console.warn(
-                        functionName +
-                        ' greška:',
-                        error
-                    );
+                    console.warn(functionName + ' greška:', error);
                 }
             }
         });
@@ -772,39 +717,23 @@
 
         setTimeout(function () {
 
-            if (
-                typeof window.openInventoryAndShowHighlight ===
-                'function'
-            ) {
-
+            if (typeof window.openInventoryAndShowHighlight === 'function') {
                 window.openInventoryAndShowHighlight();
                 return;
             }
 
-            if (
-                typeof window.showScreen ===
-                'function'
-            ) {
-
-                window.showScreen(
-                    'inventoryScreen'
-                );
-
+            if (typeof window.showScreen === 'function') {
+                window.showScreen('inventoryScreen');
                 return;
             }
 
-            const inventory =
-                el('inventoryScreen');
-
-            const main =
-                el('mainScreen');
+            const inventory = el('inventoryScreen');
+            const main = el('mainScreen');
 
             if (inventory) {
-
                 if (main) {
                     main.style.display = 'none';
                 }
-
                 inventory.style.display = 'flex';
                 inventory.classList.add('active');
             }
@@ -813,19 +742,13 @@
     }
 
     // ---------------------------------------------------------
-    // GLAVNA FUNKCIJA:
-    //
-    // GLAS -> PARSE -> DATA ENTRY -> SAVE -> REFRESH
+    // OBRADA GLASOVNOG UNOSA NA DATA ENTRY EKRANU
     // ---------------------------------------------------------
 
-    async function processAndSaveItem(command) {
+    async function processVoiceDataOnDataEntry(command) {
 
         if (isProcessingVoiceItem) {
-
-            console.warn(
-                'Već obrađujem jedan glasovni unos.'
-            );
-
+            console.warn('Već obrađujem jedan glasovni unos.');
             return false;
         }
 
@@ -834,98 +757,59 @@
         try {
 
             // 1. Parsiranje
-            const data =
-                parseVoiceDataEntry(command);
+            const data = parseVoiceDataEntry(command);
 
             if (!data) {
-
                 showVoiceStatus(
-                    '❌ Nisam prepoznao podatke.',
+                    '❌ Nisam prepoznao podatke. Probajte: "start pileći batak 1 kg zamrzivač 1"',
                     '#f44336'
                 );
-
                 return false;
             }
 
-            // 2. Otvori Data Entry
-            openDataEntry();
+            console.log('📦 Parsirani podaci:', data);
 
-            // 3. Prvo popuni formu
+            // 2. Popuni formu
             fillDataEntryForm(data);
 
-            // 4. Daj browseru vremena da upiše DOM
+            // 3. Sačekaj da se podaci upišu
             await new Promise(function (resolve) {
                 setTimeout(resolve, 150);
             });
 
-            // 5. Proveri da li je naziv zaista upisan
-            const productInput =
-                el('productInput');
-
-            if (
-                productInput &&
-                productInput.value.trim() !==
-                data.product_name.trim()
-            ) {
-
-                console.warn(
-                    'Naziv nije pravilno upisan, ponavljam upis.'
-                );
-
+            // 4. Proveri da li je naziv upisan
+            const productInput = el('productInput');
+            if (productInput && productInput.value.trim() !== data.product_name.trim()) {
+                console.warn('Naziv nije pravilno upisan, ponavljam...');
                 fillDataEntryForm(data);
-
                 await new Promise(function (resolve) {
                     setTimeout(resolve, 100);
                 });
             }
 
-            // 6. Sačuvaj
-            const saved =
-                await saveVoiceData(data);
+            // 5. Sačuvaj podatke
+            const saved = await saveVoiceData(data);
 
-            if (!saved) {
-
+            if (saved) {
                 showVoiceStatus(
-                    '❌ Podaci nisu sačuvani.',
+                    '✅ Sačuvano: ' + data.product_name + ' (' + data.quantity + ' ' + data.unit + ')',
+                    '#4CAF50'
+                );
+                console.log('✅ Podaci uspešno sačuvani');
+                return true;
+            } else {
+                showVoiceStatus(
+                    '❌ Greška pri čuvanju podataka',
                     '#f44336'
                 );
-
                 return false;
             }
 
-            // 7. Osveži pregled i zalihe
-            refreshApplicationScreens();
-
-            showVoiceStatus(
-                '✅ Sačuvano: ' +
-                data.product_name +
-                ' — ' +
-                data.quantity +
-                ' ' +
-                data.unit +
-                ' — ' +
-                data.storage,
-                '#4CAF50'
-            );
-
-            console.log(
-                '================================='
-            );
-
-            console.log(
-                'GLASOVNI UNOS USPEŠNO SAČUVAN'
-            );
-
-            console.log(data);
-
-            console.log(
-                '================================='
-            );
-
-            return true;
-
+        } catch (error) {
+            console.error('Greška pri obradi:', error);
+            showVoiceStatus('❌ Greška: ' + error.message, '#f44336');
+            return false;
         } finally {
-
             isProcessingVoiceItem = false;
         }
     }
@@ -941,35 +825,27 @@
             window.webkitSpeechRecognition;
 
         if (!SpeechRecognition) {
-
             showVoiceStatus(
                 '❌ Browser ne podržava glasovno prepoznavanje.',
                 '#f44336'
             );
-
             return;
         }
 
-        // Ako već radi
         if (recognition) {
-
             try {
                 recognition.stop();
             } catch (e) {}
-
             recognition = null;
         }
 
-        recognition =
-            new SpeechRecognition();
+        recognition = new SpeechRecognition();
 
-        const langCode =
-            typeof window.currentLang !== 'undefined'
-                ? window.currentLang
-                : 'sr';
+        const langCode = typeof window.currentLang !== 'undefined'
+            ? window.currentLang
+            : 'sr';
 
         const languages = {
-
             sr: 'sr-RS',
             en: 'en-US',
             de: 'de-DE',
@@ -982,26 +858,23 @@
             fr: 'fr-FR'
         };
 
-        recognition.lang =
-            languages[langCode] || 'sr-RS';
-
+        recognition.lang = languages[langCode] || 'sr-RS';
         recognition.continuous = true;
         recognition.interimResults = true;
         recognition.maxAlternatives = 1;
 
         voiceBuffer = '';
+        isDataEntryOpen = false;
 
         // -----------------------------------------------------
         // START
         // -----------------------------------------------------
 
         recognition.onstart = function () {
-
             showVoiceStatus(
-                '🎤 Slušam... Recite npr. "Pileći batak 1 kilogram 6 meseci zamrzivač 1 plus".',
+                '🎤 Slušam... Recite "unos" za otvaranje ekrana, zatim "start" za novi unos.',
                 '#2196F3'
             );
-
             voiceBuffer = '';
         };
 
@@ -1014,126 +887,140 @@
             let finalText = '';
             let interimText = '';
 
-            for (
-                let i = event.resultIndex;
-                i < event.results.length;
-                i++
-            ) {
-
-                const result =
-                    event.results[i];
-
-                const transcript =
-                    result[0].transcript.trim();
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                const result = event.results[i];
+                const transcript = result[0].transcript.trim();
 
                 if (result.isFinal) {
-                    finalText +=
-                        (finalText ? ' ' : '') +
-                        transcript;
+                    finalText += (finalText ? ' ' : '') + transcript;
                 } else {
-                    interimText +=
-                        transcript;
+                    interimText += transcript;
                 }
             }
 
             if (finalText) {
-
-                voiceBuffer +=
-                    (voiceBuffer ? ' ' : '') +
-                    finalText;
-
-                console.log(
-                    'VOICE BUFFER:',
-                    voiceBuffer
-                );
+                voiceBuffer += (voiceBuffer ? ' ' : '') + finalText;
+                console.log('VOICE BUFFER:', voiceBuffer);
             }
 
-            const display =
-                voiceBuffer +
-                (interimText
-                    ? ' ' + interimText
-                    : '');
-
-            showVoiceStatus(
-                '🎤 ' + display,
-                '#FFD700'
-            );
+            const display = voiceBuffer + (interimText ? ' ' + interimText : '');
+            showVoiceStatus('🎤 ' + display, '#FFD700');
 
             // -------------------------------------------------
             // PROVERA KOMANDI
             // -------------------------------------------------
 
-            const lower =
-                normalizeText(voiceBuffer);
+            const lower = normalizeText(voiceBuffer);
 
-            // PLUS = sačuvaj trenutni proizvod
-            // i nastavi sa sledećim
-            if (
-                /\bplus\b/.test(lower)
-            ) {
+            // ⭐ 1. "UNOS" - otvara Data Entry ekran
+            if (/\b(unos|unesi|dodaj|novi|open)\b/.test(lower)) {
+                console.log('🔥 UNOS komanda prepoznata! Otvaram Data Entry...');
+                
+                // Očisti buffer od "unos" komande
+                const cleaned = voiceBuffer.replace(
+                    /\b(unos|unesi|dodaj|novi|open)\b/gi,
+                    ''
+                ).trim();
 
-                const parts =
-                    voiceBuffer.split(
-                        /\bplus\b/i
-                    );
-
-                const itemText =
-                    parts[0].trim();
-
-                voiceBuffer =
-                    parts
-                        .slice(1)
-                        .join(' ')
-                        .trim();
-
-                if (itemText) {
-
-                    processAndSaveItem(
-                        itemText
+                // Otvori Data Entry
+                openDataEntry();
+                
+                // Ako ima podataka nakon "unos", procesiraj ih
+                if (cleaned) {
+                    // Ovo je za slučaj "unos mleko 1 litar" - direktno popuni
+                    setTimeout(() => {
+                        processVoiceDataOnDataEntry('start ' + cleaned);
+                    }, 500);
+                } else {
+                    showVoiceStatus(
+                        '📝 Ekran otvoren. Recite "start" za novi unos.',
+                        '#4CAF50'
                     );
                 }
-
+                
+                voiceBuffer = '';
                 return;
             }
 
-            // END / ENTER / KRAJ / GOTOVO
-            if (
-                /\b(end|enter|kraj|gotovo)\b/i
-                    .test(lower)
-            ) {
+            // ⭐ 2. "START" - novi unos na Data Entry ekranu
+            if (/\bstart\b/.test(lower) && isDataEntryOpen) {
+                console.log('🔥 START komanda prepoznata na Data Entry ekranu!');
+                
+                // Izvuci podatke nakon "start"
+                const match = voiceBuffer.match(/start\s+(.+)/i);
+                const dataText = match ? match[1].trim() : '';
 
-                const parts =
-                    voiceBuffer.split(
-                        /\b(end|enter|kraj|gotovo)\b/i
-                    );
-
-                const itemText =
-                    parts[0].trim();
-
-                voiceBuffer = '';
-
-                if (itemText) {
-
-                    processAndSaveItem(
-                        itemText
-                    ).then(function () {
-
-                        stopVoiceRecognition();
-
-                        setTimeout(
-                            openInventory,
-                            500
-                        );
-                    });
-
+                if (dataText) {
+                    // Procesiraj unos
+                    processVoiceDataOnDataEntry(voiceBuffer);
                 } else {
-
-                    stopVoiceRecognition();
-
-                    setTimeout(
-                        openInventory,
-                        500
+                    showVoiceStatus(
+                        '⚠️ Recite podatke nakon "start", npr. "start pileći batak 1 kg"',
+                        '#FF9800'
                     );
+                }
+                
+                voiceBuffer = '';
+                return;
+            }
+
+            // ⭐ 3. "PLUS" - završava trenutni unos i započinje novi
+            if (/\bplus\b/.test(lower) && isDataEntryOpen) {
+                console.log('🔥 PLUS komanda prepoznata! Završavam unos...');
+                
+                const parts = voiceBuffer.split(/\bplus\b/i);
+                const itemText = parts[0].trim();
+                
+                // Sačuvaj trenutni unos
+                if (itemText) {
+                    processVoiceDataOnDataEntry('start ' + itemText);
+                }
+                
+                // Očisti buffer i spremi se za sledeći unos
+                voiceBuffer = parts.slice(1).join(' ').trim();
+                
+                showVoiceStatus(
+                    '➕ Unos sačuvan. Spremni za sledeći. Recite "start" ili diktirajte podatke.',
+                    '#4CAF50'
+                );
+                
+                return;
+            }
+
+            // ⭐ 4. "KRAJ" ili "GOTOVO" ili "END" - završava sve i otvara zalihe
+            if (/\b(kraj|gotovo|end|gotov|završi|zavrsi)\b/i.test(lower)) {
+                console.log('🔥 KRAJ komanda prepoznata! Otvaram zalihe...');
+                
+                // Ako ima podataka u bufferu, sačuvaj ih prvo
+                const parts = voiceBuffer.split(/\b(kraj|gotovo|end|gotov|završi|zavrsi)\b/i);
+                const itemText = parts[0].trim();
+                
+                if (itemText) {
+                    await processVoiceDataOnDataEntry('start ' + itemText);
+                }
+                
+                // Zaustavi prepoznavanje i otvori zalihe
+                stopVoiceRecognition();
+                setTimeout(openInventory, 500);
+                voiceBuffer = '';
+                isDataEntryOpen = false;
+                
+                return;
+            }
+
+            // Ako je Data Entry otvoren i nema specijalne komande,
+            // ali ima finalText, automatski procesiraj kao podatke
+            if (isDataEntryOpen && finalText && !/\b(start|plus|kraj|gotovo|end)\b/.test(lower)) {
+                // Ako nema "start" na početku, dodaj ga automatski
+                if (!/^start\b/.test(normalizeText(voiceBuffer))) {
+                    // Sačekaj malo da vidiš da li će korisnik reći još nešto
+                    setTimeout(() => {
+                        if (voiceBuffer.trim() && !/\b(start|plus|kraj|gotovo|end)\b/.test(normalizeText(voiceBuffer))) {
+                            console.log('🔄 Automatska obrada podataka:', voiceBuffer);
+                            processVoiceDataOnDataEntry('start ' + voiceBuffer);
+                            voiceBuffer = '';
+                        }
+                    }, 1500);
                 }
             }
         };
@@ -1142,50 +1029,26 @@
         // ERROR
         // -----------------------------------------------------
 
-        recognition.onerror =
-            function (event) {
-
-                console.error(
-                    'Speech Recognition error:',
-                    event.error
-                );
-
-                if (
-                    event.error ===
-                    'not-allowed'
-                ) {
-
-                    showVoiceStatus(
-                        '❌ Dozvolite pristup mikrofonu.',
-                        '#f44336'
-                    );
-                }
-            };
+        recognition.onerror = function (event) {
+            console.error('Speech Recognition error:', event.error);
+            if (event.error === 'not-allowed') {
+                showVoiceStatus('❌ Dozvolite pristup mikrofonu.', '#f44336');
+            }
+        };
 
         // -----------------------------------------------------
         // END
         // -----------------------------------------------------
 
         recognition.onend = function () {
-
-            console.log(
-                '🎤 Glasovno prepoznavanje završeno.'
-            );
-
+            console.log('🎤 Glasovno prepoznavanje završeno.');
             recognition = null;
         };
 
         try {
-
             recognition.start();
-
         } catch (error) {
-
-            console.error(
-                'Greška pri startovanju:',
-                error
-            );
-
+            console.error('Greška pri startovanju:', error);
             recognition = null;
         }
     }
@@ -1195,22 +1058,15 @@
     // ---------------------------------------------------------
 
     function stopVoiceRecognition() {
-
         if (recognition) {
-
             try {
                 recognition.stop();
             } catch (e) {}
-
             recognition = null;
         }
-
         voiceBuffer = '';
-
-        showVoiceStatus(
-            '⏸️ Glasovni unos zaustavljen',
-            '#aaa'
-        );
+        isDataEntryOpen = false;
+        showVoiceStatus('⏸️ Glasovni unos zaustavljen', '#aaa');
     }
 
     // ---------------------------------------------------------
@@ -1218,17 +1074,9 @@
     // ---------------------------------------------------------
 
     function goBackFromVoice() {
-
         stopVoiceRecognition();
-
-        if (
-            typeof window.showScreen ===
-            'function'
-        ) {
-
-            window.showScreen(
-                'choiceScreen'
-            );
+        if (typeof window.showScreen === 'function') {
+            window.showScreen('choiceScreen');
         }
     }
 
@@ -1236,59 +1084,36 @@
     // JAVNE FUNKCIJE
     // ---------------------------------------------------------
 
-    window.startVoiceRecognition =
-        startVoiceRecognition;
-
-    window.stopVoiceRecognition =
-        stopVoiceRecognition;
-
-    window.goBackFromVoice =
-        goBackFromVoice;
-
-    window.hideVoiceMenu =
-        hideVoiceMenu;
-
-    window.parseVoiceDataEntry =
-        parseVoiceDataEntry;
-
-    window.processVoiceCommand =
-        processAndSaveItem;
-
-    window.processStartCommand =
-        processAndSaveItem;
-
-    window.popuniStartPodatke =
-        fillDataEntryForm;
-
-    window.otvoriZaliheEkran =
-        openInventory;
+    window.startVoiceRecognition = startVoiceRecognition;
+    window.stopVoiceRecognition = stopVoiceRecognition;
+    window.goBackFromVoice = goBackFromVoice;
+    window.hideVoiceMenu = hideVoiceMenu;
+    window.parseVoiceDataEntry = parseVoiceDataEntry;
+    window.processVoiceCommand = processVoiceDataOnDataEntry;
+    window.popuniStartPodatke = fillDataEntryForm;
+    window.otvoriZaliheEkran = openInventory;
+    window.openDataEntryVoice = openDataEntry;
 
     // ---------------------------------------------------------
-    // TEST FUNKCIJA
-    // Možeš iz Console da pokreneš:
-    //
-    // testVoiceEntry()
-    //
+    // TEST FUNKCIJE
     // ---------------------------------------------------------
 
-    window.testVoiceEntry =
-        async function () {
+    window.testVoiceEntry = async function () {
+        const testData = 'start Pileći batak 1 kilogram 6 meseci zamrzivač 1';
+        console.log('TEST GLASOVNOG UNOSA:', testData);
+        return await processVoiceDataOnDataEntry(testData);
+    };
 
-            const testData =
-                'Pileći batak 1 kilogram 6 meseci zamrzivač 1';
+    window.testOpenDataEntry = function () {
+        console.log('Test otvaranja Data Entry...');
+        openDataEntry();
+        isDataEntryOpen = true;
+    };
 
-            console.log(
-                'TEST GLASOVNOG UNOSA:',
-                testData
-            );
-
-            return await processAndSaveItem(
-                testData
-            );
-        };
-
-    console.log(
-        '✅ NOVI VOICE DATA ENTRY MODUL JE UČITAN'
-    );
+    console.log('✅ VOICE DATA ENTRY MODUL JE UČITAN');
+    console.log('🎤 Tok: "unos" → otvara Data Entry');
+    console.log('📝 Zatim: "start gril pile 1 kg zamrzivač 1"');
+    console.log('➕ "plus" → završava unos i počinje novi');
+    console.log('🏁 "end" → otvara zalihe');
 
 })();
