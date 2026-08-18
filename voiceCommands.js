@@ -51,7 +51,7 @@ function startVoiceRecognition() {
     recognition.onstart = function() {
         console.log('🎤 Glasovno prepoznavanje pokrenuto');
         if (statusEl) {
-            statusEl.textContent = '🎤 Slušam... Recite "unos" pa diktirajte podatke.';
+            statusEl.textContent = '🎤 Slušam... Diktirajte artikle (završite sa "plus" ili "end").';
             statusEl.style.color = '#2196F3';
         }
         activeBuffer = '';
@@ -84,7 +84,7 @@ function startVoiceRecognition() {
         
         const lowerBuffer = activeBuffer.toLowerCase();
         
-        // 1. Ako korisnik kaže "unos", odmah sakrij 4. ekran i otvori formu za unos
+        // 1. Ako detektujemo reč "unos", odmah sakrivamo 4. ekran i otvaramo formu
         const dataEntryKeywords = ['unos', 'unesi', 'dodaj', 'novi', 'add'];
         if (dataEntryKeywords.some(k => lowerBuffer.includes(k))) {
             hideVoiceMenu();
@@ -96,30 +96,32 @@ function startVoiceRecognition() {
             }
         }
         
-        // 2. Čekamo da korisnik izgovori "plus" ili "end" da bismo obradili sakupljeni tekst
+        // 2. Kada korisnik izgovori "plus" ili "end", obrađujemo segment do tog trenutka
         if (lowerBuffer.includes('plus') || lowerBuffer.includes('end')) {
-            console.log('✅ Detektovan završetak unosa (plus/end) iz bafera:', activeBuffer);
+            console.log('✅ Detektovan prekid (plus/end) u baferu:', activeBuffer);
             
-            // Uklanjamo komandne reči iz teksta
-            let cleanText = activeBuffer
-                .replace(/unos/gi, '')
-                .replace(/unesi/gi, '')
-                .replace(/plus/gi, '')
-                .replace(/end/gi, '')
-                .trim();
+            // Uzimamo tekst pre "plus" ili "end"
+            let segmentToProcess = activeBuffer;
             
-            if (cleanText.length > 1) {
-                processStartCommand(cleanText);
+            // Ako u baferu ima još reči posle plus/end, njih ostavljamo za sledeći krug
+            let splitKeyword = lowerBuffer.includes('end') ? 'end' : 'plus';
+            let parts = activeBuffer.split(new RegExp(splitKeyword, 'i'));
+            
+            let currentSegment = parts[0].trim();
+            // Ostatak (ako je korisnik nastavio da govori posle plus) vraćamo u bafer
+            activeBuffer = parts.slice(1).join(splitKeyword).trim(); 
+            
+            if (currentSegment.length > 2) {
+                processStartCommand(currentSegment);
             }
             
             if (lowerBuffer.includes('end')) {
+                console.log('🏁 Kraj unosa (END detektovan)');
+                stopVoiceRecognition();
                 if (typeof openInventoryAndShowHighlight === 'function') {
                     openInventoryAndShowHighlight();
                 }
             }
-            
-            // Resetujemo bafer za sledeći unos
-            activeBuffer = ''; 
         }
     };
 
@@ -164,13 +166,17 @@ function goBackFromVoice() {
 
 // ===== PARSIRANJE GLASOVNOG UNOSA =====
 function parseVoiceDataEntry(command) {
-    let text = command.trim();
-    let parts = text.split(',').map(s => s.trim());
+    let text = command
+        .replace(/^unos\s*/i, '')
+        .replace(/^start\s*/i, '')
+        .trim();
+        
+    let parts = text.split(/,|\s+/).map(s => s.trim()).filter(Boolean);
     
     let result = {
         product_name: '',
-        piece: '',
-        quantity: '',
+        piece: '1',
+        quantity: '1',
         unit: 'kom',
         shelf_life: '12',
         storage: 'Zamrzivač 1'
@@ -185,55 +191,55 @@ function parseVoiceDataEntry(command) {
     };
     
     const storageMap = {
+        'zamrzivač': 'Zamrzivač 1', 'zamrzivac': 'Zamrzivač 1',
         'zamrzivač 1': 'Zamrzivač 1', 'zamrzivac 1': 'Zamrzivač 1',
         'zamrzivač 2': 'Zamrzivač 2', 'zamrzivac 2': 'Zamrzivač 2',
         'zamrzivač 3': 'Zamrzivač 3', 'zamrzivac 3': 'Zamrzivač 3',
         'frižider': 'Frižider', 'frizider': 'Frižider',
         'ostava': 'Ostava', 'špajz': 'Ostava'
     };
+
+    // Rekonstrukcija naziva i parametara iz reči
+    let nameWords = [];
+    let foundNumber = false;
     
-    parts.forEach((part, index) => {
-        part = part.toLowerCase().trim();
+    for (let i = 0; i < parts.length; i++) {
+        let p = parts[i].toLowerCase();
         
-        if (index === 0) {
-            result.product_name = parts[0].trim();
-            return;
+        if (p === 'start' || p === 'unos') continue;
+        
+        if (storageMap[p] || (p === 'zamrzivač' && parts[i+1] === 'jedan')) {
+            result.storage = storageMap[p] || 'Zamrzivač 1';
+            if (p === 'zamrzivač' && parts[i+1] === 'jedan') i++;
+            continue;
         }
         
-        for (let [key, value] of Object.entries(storageMap)) {
-            if (part.includes(key)) {
-                result.storage = value;
-                return;
+        if (unitMap[p]) {
+            result.unit = unitMap[p];
+            if (i > 0 && !isNaN(parts[i-1])) {
+                result.quantity = parts[i-1];
             }
+            continue;
         }
         
-        for (let [key, value] of Object.entries(unitMap)) {
-            if (part.includes(key)) {
-                let numMatch = part.match(/([\d.]+)/);
-                if (numMatch) {
-                    result.quantity = numMatch[1];
-                    result.unit = value;
-                }
-                return;
+        if (!isNaN(p)) {
+            if (!foundNumber) {
+                result.piece = p;
+                result.quantity = p;
+                foundNumber = true;
+            } else {
+                result.shelf_life = p;
             }
+            continue;
         }
         
-        let numMatch = part.match(/(\d+)/);
-        if (numMatch) {
-            let num = numMatch[1];
-            if (!result.piece) {
-                result.piece = num;
-                if (!result.quantity) result.quantity = num;
-            } else if (!result.shelf_life) {
-                result.shelf_life = num;
-            }
+        if (!foundNumber) {
+            nameWords.push(parts[i]);
         }
-    });
-    
-    if (!result.product_name && parts.length > 0) {
-        result.product_name = parts[0].trim();
     }
     
+    result.product_name = nameWords.join(' ') || 'Proizvod';
+    console.log('✅ Parsirani podaci:', result);
     return result;
 }
 
@@ -334,4 +340,4 @@ window.parseVoiceDataEntry = parseVoiceDataEntry;
 window.processStartCommand = processStartCommand;
 window.popuniStartPodatke = popuniStartPodatke;
 
-console.log('✅ Voice Commands očišćen i ispravljen!');
+console.log('✅ Voice Commands potpuno ispravljen i spreman!');
