@@ -380,7 +380,91 @@
         </div>
     </div>
 </div>
-
+<!-- ===== EKRAN 3.5: DATA ENTRY (TVOJ ORIGINALNI) ===== -->
+<div id="dataEntryScreen" class="screen" style="display:none;">
+    <div class="container">
+        <h2 class="title" id="dataEntryTitle">📝 Unos podataka</h2>
+        
+        <div class="row">
+            <label for="productInput" id="productLabel">Proizvod:</label>
+            <input type="text" id="productInput" placeholder="Unesite naziv proizvoda">
+        </div>
+        
+        <div class="row">
+            <label for="pieceInput" id="pieceLabel">Komada:</label>
+            <input type="number" id="pieceInput" value="1" min="1">
+        </div>
+        
+        <div class="row">
+            <label for="quantityInput" id="quantityLabel">Količina:</label>
+            <input type="number" id="quantityInput" value="1" min="1" step="0.1">
+        </div>
+        
+        <div class="row">
+            <label for="shelfLifeInput" id="shelfLifeLabel">Rok (meseci):</label>
+            <div class="inline-group">
+                <input type="number" id="shelfLifeInput" value="12" min="1" style="flex:1;">
+                <span id="expiryDisplay" style="font-size:20px; padding:10px; background:#f0f0f0; border-radius:8px; min-width:120px; text-align:center;">
+                    📅 <span id="expiryDateText">2026-08-18</span>
+                </span>
+            </div>
+        </div>
+        
+        <div class="row">
+            <label for="unitSelect" id="unitLabel">Jedinica:</label>
+            <select id="unitSelect">
+                <option value="komad">komad</option>
+                <option value="kg">kg</option>
+                <option value="g">g</option>
+                <option value="l">l</option>
+                <option value="ml">ml</option>
+            </select>
+        </div>
+        
+        <div class="row">
+            <label for="storageSelect" id="storageLabel">Skladište:</label>
+            <select id="storageSelect">
+                <option value="Soba">Soba</option>
+                <option value="Frižider">Frižider</option>
+                <option value="Zamrzivač 1">Zamrzivač 1</option>
+                <option value="Zamrzivač 2">Zamrzivač 2</option>
+                <option value="Zamrzivač 3">Zamrzivač 3</option>
+                <option value="Podrum">Podrum</option>
+                <option value="Ostava">Ostava</option>
+            </select>
+        </div>
+        
+        <div class="btn-group">
+            <button class="btn-save" onclick="saveProduct()">💾 Sačuvaj</button>
+            <button class="btn-cancel" onclick="cancelDataEntry()">✖ Otkaži</button>
+        </div>
+        
+        <!-- TABELA ZA PRIKAZ UNOSA -->
+        <div class="table-container" style="margin-top:20px;">
+            <div class="table-title" id="tableTitle">📋 Trenutni unos</div>
+            <div id="dataEntryTable">
+                <div class="table-row header-row">
+                    <div class="cell" id="thProduct">Proizvod</div>
+                    <div class="cell" id="thQuantity">Količina</div>
+                    <div class="cell" id="thUnit">Jedinica</div>
+                    <div class="cell" id="thStorage">Skladište</div>
+                    <div class="cell" id="thExpiry">Rok</div>
+                </div>
+                <div id="dataEntryRows">
+                    <div class="table-row" style="color:#999;">
+                        <div class="cell" colspan="5" style="text-align:center; padding:20px;" id="noEntriesText">📭 Još nema unosa</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div style="text-align:center; margin-top:20px;">
+            <button onclick="renderInventory()" class="btn-save" style="background:#2196F3; padding:12px 30px; font-size:18px;">
+                📦 Pregled zaliha
+            </button>
+        </div>
+    </div>
+</div>
 <!-- ===== EKRAN 4: ZVUČNI UNOS - GLAVNI MENI ===== -->
 <div id="voiceMenuScreen" class="screen" style="display:none;">
     <div class="voice-menu-container">
@@ -417,51 +501,7 @@
         </div>
     </div>
 </div>
-<!-- ===== EKRAN 4b: VOICE DATA ENTRY ===== -->
-<div id="voiceDataEntryScreen" class="screen" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; justify-content:center; align-items:center;">
-    <div style="background:white; border-radius:20px; padding:30px; max-width:500px; width:90%; max-height:80vh; overflow-y:auto;">
-        <h2 style="text-align:center; color:#2196F3;">🎤 Glasovni unos</h2>
-        <p style="text-align:center; color:#666;">Recite <strong>"Start"</strong> pa podatke</p>
-        
-        <div style="margin:20px 0;">
-            <label style="display:block; font-weight:bold; margin-bottom:5px;">📦 Proizvod:</label>
-            <input id="voiceProductInput" type="text" style="width:100%; padding:10px; border:2px solid #ddd; border-radius:10px; font-size:16px;">
-        </div>
-        
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-            <div>
-                <label style="display:block; font-weight:bold; margin-bottom:5px;">🔢 Količina:</label>
-                <input id="voiceQuantityInput" type="number" value="1" style="width:100%; padding:10px; border:2px solid #ddd; border-radius:10px; font-size:16px;">
-            </div>
-            <div>
-                <label style="display:block; font-weight:bold; margin-bottom:5px;">📏 Jedinica:</label>
-                <select id="voiceUnitSelect" style="width:100%; padding:10px; border:2px solid #ddd; border-radius:10px; font-size:16px;">
-                    <option value="komad">komad</option>
-                    <option value="kg">kg</option>
-                    <option value="g">g</option>
-                    <option value="l">l</option>
-                    <option value="ml">ml</option>
-                </select>
-            </div>
-        </div>
-        
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
-            <div>
-                <label style="display:block; font-weight:bold; margin-bottom:5px;">📅 Rok (meseci):</label>
-                <input id="voiceShelfLifeInput" type="number" value="12" style="width:100%; padding:10px; border:2px solid #ddd; border-radius:10px; font-size:16px;">
-            </div>
-            <div>
-                <label style="display:block; font-weight:bold; margin-bottom:5px;">🏠 Skladište:</label>
-                <select id="voiceStorageSelect" style="width:100%; padding:10px; border:2px solid #ddd; border-radius:10px; font-size:16px;">
-                    <option value="Soba">Soba</option>
-                    <option value="Frižider">Frižider</option>
-                    <option value="Zamrzivač">Zamrzivač</option>
-                    <option value="Podrum">Podrum</option>
-                    <option value="Ostava">Ostava</option>
-                </select>
-            </div>
-        </div>
-        
+       
         <div style="margin-top:20px; text-align:center;">
             <div id="voiceStatus" style="padding:10px; background:#f5f5f5; border-radius:10px; margin-bottom:10px; min-height:40px; color:#666;">
                 🎤 Slušam...
