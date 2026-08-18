@@ -1,5 +1,5 @@
 // ============================================
-// VOICE COMMANDS - PRAVA INTEGRACIJA SA SCRIPT.JS
+// VOICE COMMANDS - RADNA VERZIJA
 // ============================================
 
 let activeBuffer = ''; 
@@ -86,11 +86,9 @@ function startVoiceRecognition() {
             const itemText = parts[0].trim();
             
             if (itemText.length > 2) {
-                // DIREKTNO PROCESIRANJE
                 processVoiceInput(itemText);
             }
             
-            // Zaustavi i otvori zalihe
             stopVoiceRecognition();
             setTimeout(() => {
                 otvoriZaliheDirektno();
@@ -137,63 +135,23 @@ function stopVoiceRecognition() {
     }
 }
 
-// ===== OTVARANJE ZALIHA - PRAVA INTEGRACIJA =====
+// ===== OTVARANJE ZALIHA =====
 function otvoriZaliheDirektno() {
     console.log('📦 Otvaranje zaliha...');
     
     hideVoiceMenu();
     
-    // DIREKTNO POZIVANJE renderInventory() iz script.js
+    // POZIVAMO renderInventory() iz script.js
     if (typeof renderInventory === 'function') {
         renderInventory();
-        console.log('✅ Otvoreno preko renderInventory()');
+        console.log('✅ renderInventory() pozvan');
         return;
     }
     
-    // Ako nema renderInventory, probaj sa showScreen
-    if (typeof showScreen === 'function') {
-        showScreen('mainScreen');
-        // Nakon što prikažemo mainScreen, pozovemo renderInventory
-        setTimeout(() => {
-            if (typeof renderInventory === 'function') {
-                renderInventory();
-            }
-        }, 100);
-        console.log('✅ Otvoreno preko showScreen + renderInventory');
-        return;
-    }
-    
-    // Rezervna metoda - direktna DOM manipulacija
-    const mainScreen = document.getElementById('mainScreen');
-    const invScreen = document.getElementById('inventoryScreen');
-    const voiceScreen = document.getElementById('voiceMenuScreen');
-    const choiceScreen = document.getElementById('choiceScreen');
-    
-    if (mainScreen) {
-        mainScreen.style.display = 'flex';
-        mainScreen.classList.add('active');
-    }
-    if (invScreen) {
-        invScreen.style.display = 'none';
-    }
-    if (voiceScreen) {
-        voiceScreen.style.display = 'none';
-    }
-    if (choiceScreen) {
-        choiceScreen.style.display = 'none';
-    }
-    
-    // Pokušaj da renderuješ inventory
-    if (typeof renderInventory === 'function') {
-        setTimeout(() => {
-            renderInventory();
-        }, 100);
-    }
-    
-    console.log('✅ Otvoren mainScreen');
+    console.log('⚠️ renderInventory nije definisan');
 }
 
-// ===== PARSIRANJE GLASOVNE KOMANDE =====
+// ===== PARSIRANJE =====
 function parseVoiceInput(text) {
     const data = {
         product_name: '',
@@ -204,7 +162,6 @@ function parseVoiceInput(text) {
         storage: 'Zamrzivač 1'
     };
     
-    // Mape za prevod
     const unitMap = {
         'kilogram': 'kg', 'kilograma': 'kg', 'kg': 'kg',
         'gram': 'g', 'grama': 'g', 'g': 'g',
@@ -237,27 +194,25 @@ function parseVoiceInput(text) {
         'dvanaest': '12'
     };
     
-    // Ukloni "unos" i slično
     let clean = text.replace(/^(unos|unesi|dodaj|start)\s*/i, '');
     let words = clean.toLowerCase().split(/\s+/);
     
     let nameParts = [];
     let i = 0;
     let state = 'name';
+    let foundStorage = false;
+    let foundUnit = false;
     
     while (i < words.length) {
         let w = words[i];
         
-        // Preskoči "mesec" reči
         if (['mesec', 'meseca', 'meseci', 'mjeseci', 'month', 'months'].includes(w)) {
             i++;
             continue;
         }
         
-        // Skladište
-        if (storageMap[w]) {
+        if (storageMap[w] && !foundStorage) {
             data.storage = storageMap[w];
-            // Proveri da li sledi broj
             if (i + 1 < words.length) {
                 let next = words[i + 1];
                 if (!isNaN(next) && next >= '1' && next <= '9') {
@@ -268,20 +223,18 @@ function parseVoiceInput(text) {
                     i++;
                 }
             }
-            state = 'done';
+            foundStorage = true;
             i++;
             continue;
         }
         
-        // Jedinica
-        if (unitMap[w]) {
+        if (unitMap[w] && !foundUnit) {
             data.unit = unitMap[w];
-            state = 'unit';
+            foundUnit = true;
             i++;
             continue;
         }
         
-        // Broj
         let num = null;
         if (!isNaN(w) && w !== '') {
             num = w;
@@ -292,22 +245,26 @@ function parseVoiceInput(text) {
         if (num !== null && state === 'name') {
             data.quantity = num;
             data.piece = num;
-            state = 'unit';
+            state = 'done';
             i++;
             continue;
-        } else if (num !== null && state === 'unit') {
-            data.shelf_life = num;
-            state = 'storage';
+        } else if (num !== null && state === 'done' && !foundUnit) {
+            data.quantity = num;
+            data.piece = num;
             i++;
             continue;
         }
         
-        // Dodaj u naziv
-        if (state === 'name') {
+        // Dodaj u naziv (samo ako nije skladište ili jedinica)
+        if (!storageMap[w] && !unitMap[w] && !numberWords[w] && isNaN(w)) {
             nameParts.push(words[i]);
         }
         
         i++;
+    }
+    
+    if (nameParts.length === 0) {
+        nameParts = words.filter(w => !storageMap[w] && !unitMap[w] && !numberWords[w] && isNaN(w));
     }
     
     data.product_name = nameParts.join(' ') || 'Proizvod';
@@ -315,37 +272,54 @@ function parseVoiceInput(text) {
     return data;
 }
 
-// ===== GLAVNA FUNKCIJA ZA OBRADU =====
+// ===== GLAVNA OBRADA =====
 function processVoiceInput(text) {
     console.log('🔄 Obrada:', text);
     
     const data = parseVoiceInput(text);
     
-    if (!data.product_name || data.product_name === 'Proizvod') {
+    if (!data.product_name || data.product_name === 'Proizvod' || data.product_name.length < 2) {
         console.log('❌ Nevalidan unos');
+        if (typeof showModernAlert === 'function') {
+            showModernAlert('Greška', 'Nije prepoznat naziv proizvoda. Pokušajte ponovo.', '❌');
+        }
         return false;
     }
     
-    // Sakrij voice menu
     hideVoiceMenu();
     
-    // Otvori mainScreen i renderDataEntry
+    // Otvori mainScreen
     if (typeof showScreen === 'function') {
         showScreen('mainScreen');
     }
     
-    // DIREKTNO POZIVANJE renderDataEntry iz script.js
+    // Pozovi renderDataEntry iz script.js
     if (typeof renderDataEntry === 'function') {
-        // Prvo otvori data entry sa nazivom proizvoda
         renderDataEntry(data.product_name);
         
-        // Zatim popuni ostala polja
         setTimeout(() => {
-            popuniFormuPodacima(data);
+            popuniFormu(data);
             
-            // Automatski sačuvaj
             setTimeout(() => {
-                direktnoSacuvaj();
+                // Pozovi saveProduct iz script.js
+                if (typeof saveProduct === 'function') {
+                    saveProduct();
+                    console.log('✅ saveProduct() pozvan');
+                    
+                    // Osveži prikaz
+                    setTimeout(() => {
+                        if (typeof prikaziSveUnose === 'function') {
+                            prikaziSveUnose();
+                        }
+                    }, 200);
+                } else {
+                    // Ako nema saveProduct, klikni dugme
+                    const saveBtn = document.querySelector('.btn-save');
+                    if (saveBtn) {
+                        saveBtn.click();
+                        console.log('✅ Kliknuto dugme');
+                    }
+                }
             }, 400);
         }, 300);
     } else {
@@ -356,16 +330,14 @@ function processVoiceInput(text) {
     return true;
 }
 
-// ===== POPUNJAVANJE FORME =====
-function popuniFormuPodacima(data) {
-    console.log('📝 Popunjavanje forme sa:', data);
+// ===== POPUNI FORMU =====
+function popuniFormu(data) {
+    console.log('📝 Popunjavanje forme:', data);
     
-    // Popuni input polja
     const productInput = document.getElementById('productInput');
     if (productInput) {
         productInput.value = data.product_name;
         productInput.dispatchEvent(new Event('input', { bubbles: true }));
-        productInput.dispatchEvent(new Event('change', { bubbles: true }));
     }
     
     const pieceInput = document.getElementById('pieceInput');
@@ -386,7 +358,6 @@ function popuniFormuPodacima(data) {
         shelfLifeInput.dispatchEvent(new Event('input', { bubbles: true }));
     }
     
-    // Popuni select polja
     const unitSelect = document.getElementById('unitSelect');
     if (unitSelect) {
         for (let opt of unitSelect.options) {
@@ -400,16 +371,8 @@ function popuniFormuPodacima(data) {
     
     const storageSelect = document.getElementById('storageSelect');
     if (storageSelect) {
-        // Pronađi opciju po vrednosti ili tekstu
         for (let opt of storageSelect.options) {
-            const optValue = opt.value;
-            const optText = opt.text.toLowerCase();
-            const storageValue = data.storage;
-            const storageLower = storageValue.toLowerCase();
-            
-            if (optValue === storageValue || 
-                optText.includes(storageLower) || 
-                storageLower.includes(optValue.toLowerCase())) {
+            if (opt.value === data.storage || opt.text.includes(data.storage)) {
                 opt.selected = true;
                 storageSelect.dispatchEvent(new Event('change', { bubbles: true }));
                 break;
@@ -417,7 +380,6 @@ function popuniFormuPodacima(data) {
         }
     }
     
-    // Ažuriraj datum isteka
     if (typeof updateExpiryDate === 'function') {
         updateExpiryDate();
     }
@@ -425,35 +387,12 @@ function popuniFormuPodacima(data) {
     console.log('✅ Forma popunjena');
 }
 
-// ===== DIREKTNO ČUVANJE - POZIVA SAVEPRODUCT IZ SCRIPT.JS =====
-function direktnoSacuvaj() {
-    console.log('💾 Čuvanje preko saveProduct()...');
-    
-    // DIREKTNO POZIVANJE saveProduct() iz script.js
-    if (typeof saveProduct === 'function') {
-        saveProduct();
-        console.log('✅ saveProduct() pozvan');
-        
-        // Osveži prikaz unosa
-        setTimeout(() => {
-            if (typeof prikaziSveUnose === 'function') {
-                prikaziSveUnose();
-            }
-        }, 200);
-        
-        return true;
+// ===== POVRATAK =====
+function goBackFromVoice() {
+    stopVoiceRecognition();
+    if (typeof showScreen === 'function') {
+        showScreen('choiceScreen');
     }
-    
-    // Ako saveProduct ne postoji, probaj sa klikom na dugme
-    const saveBtn = document.querySelector('.btn-save');
-    if (saveBtn) {
-        saveBtn.click();
-        console.log('✅ Kliknuto dugme .btn-save');
-        return true;
-    }
-    
-    console.log('❌ Nije pronađena funkcija za čuvanje');
-    return false;
 }
 
 // ===== GLOBALNE FUNKCIJE =====
@@ -465,4 +404,4 @@ window.otvoriZaliheDirektno = otvoriZaliheDirektno;
 window.processVoiceInput = processVoiceInput;
 window.parseVoiceInput = parseVoiceInput;
 
-console.log('✅ Voice Commands - PRAVA INTEGRACIJA aktivirana!');
+console.log('✅ Voice Commands RADNA VERZIJA aktivirana!');
