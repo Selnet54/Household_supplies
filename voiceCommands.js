@@ -84,7 +84,7 @@ function startVoiceRecognition() {
         
         const lowerBuffer = activeBuffer.toLowerCase();
         
-        // 1. Ako detektujemo reč "unos", odmah sakrivamo 4. ekran i otvaramo formu
+        // Čim detektujemo "unos", sakrivamo 4. ekran i otvaramo formu
         const dataEntryKeywords = ['unos', 'unesi', 'dodaj', 'novi', 'add'];
         if (dataEntryKeywords.some(k => lowerBuffer.includes(k))) {
             hideVoiceMenu();
@@ -96,26 +96,23 @@ function startVoiceRecognition() {
             }
         }
         
-        // 2. Kada korisnik izgovori "plus" ili "end", obrađujemo segment do tog trenutka
-        if (lowerBuffer.includes('plus') || lowerBuffer.includes('end')) {
-            console.log('✅ Detektovan prekid (plus/end) u baferu:', activeBuffer);
+        // PROVERA ZA "PLUS" ILI "END" - DIREKTNO PREKO REGEX-A
+        if (/\b(plus|end)\b/i.test(activeBuffer)) {
+            console.log('✅ Detektovan PLUS ili END u baferu!');
             
-            // Uzimamo tekst pre "plus" ili "end"
-            let segmentToProcess = activeBuffer;
+            let isEnd = /\bend\b/i.test(activeBuffer);
+            // Uzimamo tekst pre reči plus ili end
+            let parts = activeBuffer.split(/\b(plus|end)\b/i);
+            let itemText = parts[0].trim();
             
-            // Ako u baferu ima još reči posle plus/end, njih ostavljamo za sledeći krug
-            let splitKeyword = lowerBuffer.includes('end') ? 'end' : 'plus';
-            let parts = activeBuffer.split(new RegExp(splitKeyword, 'i'));
-            
-            let currentSegment = parts[0].trim();
-            // Ostatak (ako je korisnik nastavio da govori posle plus) vraćamo u bafer
-            activeBuffer = parts.slice(1).join(splitKeyword).trim(); 
-            
-            if (currentSegment.length > 2) {
-                processStartCommand(currentSegment);
+            if (itemText.length > 2) {
+                processStartCommand(itemText);
             }
             
-            if (lowerBuffer.includes('end')) {
+            // Ostatak posle plus/end vraćamo u bafer za sledeći krug
+            activeBuffer = parts.slice(2).join('').trim();
+            
+            if (isEnd) {
                 console.log('🏁 Kraj unosa (END detektovan)');
                 stopVoiceRecognition();
                 if (typeof openInventoryAndShowHighlight === 'function') {
@@ -199,7 +196,6 @@ function parseVoiceDataEntry(command) {
         'ostava': 'Ostava', 'špajz': 'Ostava'
     };
 
-    // Rekonstrukcija naziva i parametara iz reči
     let nameWords = [];
     let foundNumber = false;
     
@@ -340,4 +336,4 @@ window.parseVoiceDataEntry = parseVoiceDataEntry;
 window.processStartCommand = processStartCommand;
 window.popuniStartPodatke = popuniStartPodatke;
 
-console.log('✅ Voice Commands potpuno ispravljen i spreman!');
+console.log('✅ Voice Commands konačno ispravljen!');
