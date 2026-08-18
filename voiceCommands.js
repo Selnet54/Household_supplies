@@ -69,76 +69,145 @@ function popuniStartPodatke(data) {
     const unitSelect = document.getElementById('unitSelect');
     const storageSelect = document.getElementById('storageSelect');
     
-    if (productInput) productInput.value = data.product_name;
+    if (productInput) productInput.value = data.product_name || '';
     if (pieceInput) pieceInput.value = data.piece || '1';
-    if (quantityInput) quantityInput.value = data.quantity || data.piece || '1';
+    if (quantityInput) quantityInput.value = data.quantity || '1';
     if (shelfLifeInput) shelfLifeInput.value = data.shelf_life || '12';
     
+    // ===== JEDINICA =====
     if (unitSelect && data.unit) {
+        let foundUnit = false;
+
         for (let option of unitSelect.options) {
-            if (option.value === data.unit) {
+            if (
+                option.value === data.unit ||
+                option.text.trim().toLowerCase() === data.unit.trim().toLowerCase()
+            ) {
                 option.selected = true;
+                foundUnit = true;
                 break;
             }
         }
+
+        if (!foundUnit) {
+            console.warn('⚠️ Jedinica nije pronađena:', data.unit);
+        }
     }
     
+    // ===== SKLADIŠTE =====
     if (storageSelect && data.storage) {
+        let foundStorage = false;
+
         for (let option of storageSelect.options) {
-            if (option.value === data.storage || option.text.includes(data.storage)) {
+            const value = (option.value || '').trim().toLowerCase();
+            const text = (option.text || '').trim().toLowerCase();
+            const wanted = data.storage.trim().toLowerCase();
+
+            if (
+                value === wanted ||
+                text === wanted ||
+                value.includes(wanted) ||
+                text.includes(wanted)
+            ) {
                 option.selected = true;
+                foundStorage = true;
                 break;
             }
         }
+
+        if (!foundStorage) {
+            console.warn('⚠️ Skladište nije pronađeno:', data.storage);
+        }
     }
     
+    // ===== AŽURIRAJ DATUM ISTEKA =====
     if (typeof updateExpiryDate === 'function') {
         updateExpiryDate();
     }
     
+    // ===== PRIKAŽI PODATKE =====
     if (typeof prikaziSveUnose === 'function') {
         prikaziSveUnose();
     }
     
     const statusEl = document.getElementById('voiceStatus');
     if (statusEl) {
-        statusEl.textContent = `✅ Popunjeno: ${data.product_name}, ${data.quantity} ${data.unit}`;
+        statusEl.textContent =
+            `✅ Popunjeno: ${data.product_name}, ${data.quantity} ${data.unit}`;
         statusEl.style.color = '#4CAF50';
     }
     
-    // Sačuvaj proizvod
+    // ===== SAČUVAJ U RECENT VOICE ENTRIES =====
+    const recent = JSON.parse(
+        localStorage.getItem('recentVoiceEntries') || '[]'
+    );
+
+    recent.push({
+        product_name: data.product_name,
+        timestamp: new Date().toISOString()
+    });
+
+    if (recent.length > 50) {
+        recent.shift();
+    }
+
+    localStorage.setItem(
+        'recentVoiceEntries',
+        JSON.stringify(recent)
+    );
+    
+    // ===== SAČUVAJ PROIZVOD =====
     setTimeout(function() {
+        
         if (typeof saveProduct === 'function') {
-            // Sačuvaj u recent entries za označavanje
-            const recent = JSON.parse(localStorage.getItem('recentVoiceEntries') || '[]');
-            recent.push({
-                product_name: data.product_name,
-                timestamp: new Date().toISOString()
-            });
-            if (recent.length > 20) recent.shift();
-            localStorage.setItem('recentVoiceEntries', JSON.stringify(recent));
             
             saveProduct();
             
-            showModernAlert('✅ Uspešno', `Dodato: ${data.product_name}`, '🎤');
+            // ==========================================
+            // TVOJ POSTOJEĆI ALERT OSTAVLJAMO
+            // ==========================================
+            
+            showModernAlert(
+                '✅ Uspešno',
+                `Dodato: ${data.product_name}`,
+                '🎤'
+            );
             
             if (statusEl) {
-                statusEl.textContent = '🎤 Recite "Start" za novi unos, ili "End" za kraj';
+                statusEl.textContent =
+                    '🎤 Recite "Plus" za sledeći unos, ili "End" za kraj';
                 statusEl.style.color = '#FFD700';
             }
             
-            // Očisti polja za sledeći unos
+            // ===== PRIPREMA POLJA ZA SLEDEĆI UNOS =====
             setTimeout(() => {
+                
                 if (productInput) {
                     productInput.value = '';
                     productInput.focus();
                 }
-                if (pieceInput) pieceInput.value = '1';
-                if (quantityInput) quantityInput.value = '1';
-                if (shelfLifeInput) shelfLifeInput.value = '12';
+                
+                if (pieceInput) {
+                    pieceInput.value = '1';
+                }
+                
+                if (quantityInput) {
+                    quantityInput.value = '1';
+                }
+                
+                if (shelfLifeInput) {
+                    shelfLifeInput.value = '12';
+                }
+                
             }, 500);
+            
+        } else {
+            
+            console.error('❌ saveProduct() ne postoji!');
         }
+        
         isProcessing = false;
+        
     }, 1000);
 }
 function normalizeUnit(unit) {
