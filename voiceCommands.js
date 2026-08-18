@@ -1,7 +1,8 @@
 // ============================================
 // VOICE COMMANDS - GLASOVNE KOMANDE - FIX
 // ============================================
-
+let activeBuffer = ''; 
+let isFirstEntry = true;
 let recognition = null;
 let fullSpeechResult = '';
 
@@ -301,35 +302,73 @@ function startVoiceRecognition() {
     };
 
     recognition.onresult = function(event) {
-        let fullText = '';
+        let newFinalText = '';
+        let interimText = '';
+        
         for (let i = event.resultIndex; i < event.results.length; i++) {
             const result = event.results[i];
+            const transcript = result[0].transcript.trim();
+            
             if (result.isFinal) {
-                fullText += result[0].transcript + ' ';
-                console.log(`✅ Final result ${i}:`, result[0].transcript);
+                newFinalText += (newFinalText ? ' ' : '') + transcript;
+                console.log(`✅ Finalni deo:`, transcript);
+            } else {
+                interimText += transcript;
             }
         }
         
-        const speechResult = fullText.trim();
-        console.log('🗣️ CEO PREPOZNAT TEKST:', speechResult);
-        
-        if (!speechResult) {
-            const lastResult = event.results[event.results.length - 1];
-            if (lastResult && lastResult[0]) {
-                const tempResult = lastResult[0].transcript.trim();
-                console.log('⏳ Privremeni rezultat:', tempResult);
-                return;
-            }
+        if (newFinalText) {
+            // Skupljamo sve u naš globalni activeBuffer
+            activeBuffer += (activeBuffer ? ' ' : '') + newFinalText;
+            console.log('🗣️ TRENUTNI BAFER UNOSA:', activeBuffer);
         }
         
+        // Prikazujemo i trenutni interim tekst da vidite šta prepoznaje u hodu
+        const currentDisplay = activeBuffer + (interimText ? ' ' + interimText : '');
         const statusEl = document.getElementById('voiceStatus');
         if (statusEl) {
-            statusEl.textContent = `🗣️ "${speechResult}"`;
+            statusEl.textContent = `🎤 Slušam: "${currentDisplay}"`;
             statusEl.style.color = '#FFD700';
         }
         
-        if (speechResult && speechResult.length > 0) {
-            processVoiceCommand(speechResult);
+        const lowerBuffer = activeBuffer.toLowerCase();
+        
+        // ===== PROVERA ZA START (samo kod prvog unosa) =====
+        if (isFirstEntry && lowerBuffer.includes('start')) {
+            console.log('🚀 Detektovan START!');
+            // Otvaramo ekran za unos ako već nije otvoren
+            const mainScreen = document.getElementById('mainScreen');
+            if (mainScreen) {
+                mainScreen.style.display = 'flex';
+                mainScreen.classList.add('active');
+            }
+        }
+        
+        // ===== PROVERA ZA PLUS ILI END (KRAJ JEDNOG ILI SVIH UNOSA) =====
+        if (lowerBuffer.includes('plus') || lowerBuffer.includes('end')) {
+            console.log('✅ Detektovan PLUS/END! Obrađujem unete podatke...');
+            
+            // Pozivamo funkciju koja obrađuje i upisuje podatke u polja i zalihe
+            if (typeof processAndSaveEntry === 'function') {
+                processAndSaveEntry(activeBuffer);
+            } else if (typeof window.processAndSaveEntry === 'function') {
+                window.processAndSaveEntry(activeBuffer);
+            } else {
+                // Rezervna opcija ako vam se funkcija drugačije zove
+                processVoiceCommand(activeBuffer);
+            }
+            
+            // Ako je izrečeno "end", završavamo sve i otvaramo zalihe
+            if (lowerBuffer.includes('end')) {
+                console.log('🚀 Kraj unosa (END). Otvaram zalihe sa svetloplavom pozadinom...');
+                if (typeof openInventoryAndShowHighlight === 'function') {
+                    openInventoryAndShowHighlight();
+                }
+            }
+            
+            // Resetujemo bafer za sledeći unos, a isFirstEntry postaje false (više ne treba "Start")
+            activeBuffer = '';
+            isFirstEntry = false;
         }
     };
 
