@@ -7,50 +7,16 @@ let recognition = null;
 
 // ===== POMOĆNA FUNKCIJA ZA SAKRIVANJE EKRANA / MENIJA =====
 function hideVoiceMenu() {
-    // Sakrij glasovni meni / 4. ekran
     const voiceMenu = document.getElementById('voiceMenuScreen');
     if (voiceMenu) {
         voiceMenu.style.display = 'none';
         voiceMenu.classList.remove('active');
     }
-    // Sakrij izbor ekrana ako je aktivan
     const choiceScreen = document.getElementById('choiceScreen');
     if (choiceScreen) {
         choiceScreen.style.display = 'none';
         choiceScreen.classList.remove('active');
     }
-}
-
-// ===== FUNKCIJA ZA OBRADU GLASOVNIH KOMANDI =====
-function processVoiceCommand(command) {
-    if (!command || command.trim() === '') return false;
-    const cmd = command.toLowerCase().trim();
-    
-    // Unos podataka
-    const dataEntryKeywords = ['unos', 'unesi', 'dodaj', 'novi', 'add', 'product', 'entry'];
-    if (dataEntryKeywords.some(k => cmd.includes(k))) {
-        // Prvo zatvori glasovni meni / 4. ekran
-        hideVoiceMenu();
-        
-        setTimeout(() => {
-            // Otvori ekran za unos podataka
-            const mainScreen = document.getElementById('mainScreen');
-            if (mainScreen) {
-                mainScreen.style.display = 'flex';
-                mainScreen.classList.add('active');
-            }
-            if (typeof renderDataEntry === 'function') {
-                renderDataEntry('');
-            }
-            const statusEl = document.getElementById('voiceStatus');
-            if (statusEl) {
-                statusEl.textContent = '🎤 Ekran za unos je otvoren. Recite npr: "Grilovano pile, 1 komad, 2 kg, zamrzivač 1" pa "plus" ili "end".';
-                statusEl.style.color = '#4CAF50';
-            }
-        }, 200);
-        return true;
-    }
-    return false;
 }
 
 // ===== POKRETAČ ZA GLASOVNI UNOS =====
@@ -85,7 +51,7 @@ function startVoiceRecognition() {
     recognition.onstart = function() {
         console.log('🎤 Glasovno prepoznavanje pokrenuto');
         if (statusEl) {
-            statusEl.textContent = '🎤 Slušam komandu...';
+            statusEl.textContent = '🎤 Slušam... Recite "unos" pa diktirajte podatke.';
             statusEl.style.color = '#2196F3';
         }
         activeBuffer = '';
@@ -118,30 +84,31 @@ function startVoiceRecognition() {
         
         const lowerBuffer = activeBuffer.toLowerCase();
         
-        // 1. Detekcija reči "unos" -> Zatvara 4. ekran i otvara formu za unos
+        // 1. Ako korisnik kaže "unos", odmah sakrij 4. ekran i otvori formu za unos
         const dataEntryKeywords = ['unos', 'unesi', 'dodaj', 'novi', 'add'];
-        if (dataEntryKeywords.some(k => lowerBuffer === k || lowerBuffer.startsWith(k + ' '))) {
+        if (dataEntryKeywords.some(k => lowerBuffer.includes(k))) {
             hideVoiceMenu();
             const mainScreen = document.getElementById('mainScreen');
-            if (mainScreen) {
+            if (mainScreen && mainScreen.style.display !== 'flex') {
                 mainScreen.style.display = 'flex';
                 mainScreen.classList.add('active');
                 if (typeof renderDataEntry === 'function') renderDataEntry('');
-                if (statusEl) {
-                    statusEl.textContent = '🎤 Ekran otvoren. Diktirajte podatke...';
-                    statusEl.style.color = '#4CAF50';
-                }
             }
-            return;
         }
         
-        // 2. Ako korisnik kaže "plus" ili "end", obrađujemo unete podatke
+        // 2. Čekamo da korisnik izgovori "plus" ili "end" da bismo obradili sakupljeni tekst
         if (lowerBuffer.includes('plus') || lowerBuffer.includes('end')) {
-            console.log('✅ Obrada unosa iz bafera:', activeBuffer);
+            console.log('✅ Detektovan završetak unosa (plus/end) iz bafera:', activeBuffer);
             
-            let cleanText = activeBuffer.replace(/plus/gi, '').replace(/end/gi, '').trim();
+            // Uklanjamo komandne reči iz teksta
+            let cleanText = activeBuffer
+                .replace(/unos/gi, '')
+                .replace(/unesi/gi, '')
+                .replace(/plus/gi, '')
+                .replace(/end/gi, '')
+                .trim();
             
-            if (cleanText.length > 2) {
+            if (cleanText.length > 1) {
                 processStartCommand(cleanText);
             }
             
@@ -151,6 +118,7 @@ function startVoiceRecognition() {
                 }
             }
             
+            // Resetujemo bafer za sledeći unos
             activeBuffer = ''; 
         }
     };
@@ -196,7 +164,7 @@ function goBackFromVoice() {
 
 // ===== PARSIRANJE GLASOVNOG UNOSA =====
 function parseVoiceDataEntry(command) {
-    let text = command.replace(/^start\s*/i, '').trim();
+    let text = command.trim();
     let parts = text.split(',').map(s => s.trim());
     
     let result = {
@@ -352,7 +320,12 @@ function popuniStartPodatke(data) {
 }
 
 // ===== GLOBALNE FUNKCIJE =====
-window.processVoiceCommand = processVoiceCommand;
+window.processVoiceCommand = function(command) {
+    if (!command) return false;
+    hideVoiceMenu();
+    processStartCommand(command);
+    return true;
+};
 window.startVoiceRecognition = startVoiceRecognition;
 window.stopVoiceRecognition = stopVoiceRecognition;
 window.goBackFromVoice = goBackFromVoice;
@@ -361,4 +334,4 @@ window.parseVoiceDataEntry = parseVoiceDataEntry;
 window.processStartCommand = processStartCommand;
 window.popuniStartPodatke = popuniStartPodatke;
 
-console.log('✅ Voice Commands uspešno ažuriran!');
+console.log('✅ Voice Commands očišćen i ispravljen!');
