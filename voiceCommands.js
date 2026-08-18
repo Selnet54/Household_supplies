@@ -320,7 +320,7 @@ function startVoiceRecognition() {
             
             activeBuffer = '';
         }
-    };
+    }; // <--- OVO JE ZAGRADA KOJA JE NEDOSTAJALA
 
     recognition.onerror = function(event) {
         console.log('⚠️ Speech Recognition greška:', event.error);
