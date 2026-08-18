@@ -503,9 +503,9 @@ function parseVoiceDataEntry(command) {
 }
 
 // ===== OBRADA "START" KOMANDE ZA UNOS =====
-// ===== OBRADA "START" KOMANDE ZA UNOS =====
+// ===== OBRADA "START" KOMANDE ZA UNOS - DIREKTNO REŠENJE =====
 function processStartCommand(command) {
-    console.log('🚀 Procesiram Start komandu:', command);
+    console.log('🚀 Procesiram Start komandu (Direktno):', command);
     
     let data = parseVoiceDataEntry(command);
     
@@ -519,43 +519,58 @@ function processStartCommand(command) {
         return false;
     }
     
-    // Prvo osiguravamo da je ekran za unos aktivan i da su elementi nacrtani
+    // 1. Prikažemo glavni ekran
     const mainScreen = document.getElementById('mainScreen');
     if (mainScreen) {
         mainScreen.style.display = 'flex';
         mainScreen.classList.add('active');
     }
     
+    // 2. Pokušavamo da prosledimo podatke direktno u render funkciji ako je prima
     if (typeof renderDataEntry === 'function') {
-        renderDataEntry('');
+        renderDataEntry(data); // Proveravamo da li render funkcija sama prihvata podatke
     } else if (typeof window.renderDataEntry === 'function') {
-        window.renderDataEntry('');
+        window.renderDataEntry(data);
     }
     
-    // Dajemo malo vremena DOM-u da iscrta elemente forme pre popunjavanja
-    setTimeout(function() {
-        popuniStartPodatke(data);
-    }, 400);
+    // 3. Pokrećemo praćenje DOM-a (MutationObserver) da uhvati polja čim se pojave
+    const observer = new MutationObserver((mutations, obs) => {
+        const productInput = document.getElementById('productInput');
+        if (productInput) {
+            obs.disconnect(); // Zaustavljamo posmatranje kad nađemo polja
+            popuniStartPodatke(data); // Sigurno popunjavamo
+        }
+    });
     
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+    
+    // Sigurnosna provera ako su elementi već tu
+    setTimeout(() => {
+        popuniStartPodatke(data);
+    }, 100);
+
     return true;
 }
 
-// ===== POMOĆNA FUNKCIJA ZA POPUNJAVANJE PODATAKA IZ START KOMANDE =====
+// ===== POMOĆNA FUNKCIJA ZA POPUNJAVANJE PODATAKA =====
 function popuniStartPodatke(data) {
-    console.log('📝 Popunjavam polja sa:', data);
-    
     const productInput = document.getElementById('productInput');
+    if (!productInput) return; // Ako polja još nema, prekidanja radi bez greške
+
+    console.log('📝 Popunjavam polja sigurno sa:', data);
+    
     const pieceInput = document.getElementById('pieceInput');
     const quantityInput = document.getElementById('quantityInput');
     const shelfLifeInput = document.getElementById('shelfLifeInput');
     const unitSelect = document.getElementById('unitSelect');
     const storageSelect = document.getElementById('storageSelect');
     
-    // Postavljamo vrednosti i opaljujemo 'input' event da aplikacija / framework registruje promenu
-    if (productInput) {
-        productInput.value = data.product_name;
-        productInput.dispatchEvent(new Event('input', { bubbles: true }));
-    }
+    productInput.value = data.product_name || '';
+    productInput.dispatchEvent(new Event('input', { bubbles: true }));
+    
     if (pieceInput) {
         pieceInput.value = data.piece || '1';
         pieceInput.dispatchEvent(new Event('input', { bubbles: true }));
@@ -598,9 +613,6 @@ function popuniStartPodatke(data) {
         statusEl.textContent = `✅ Popunjeno: ${data.product_name}, ${data.quantity || 1} ${data.unit || 'kom'}`;
         statusEl.style.color = '#4CAF50';
     }
-    
-    // NAPOMENA: Automatsko čuvanje (saveProduct) je uklonjeno 
-    // kako bi polja ostala popunjena na ekranu da ih vidite i proverite.
 }
 
 // ===== IZVEZI FUNKCIJE GLOBALNO =====
