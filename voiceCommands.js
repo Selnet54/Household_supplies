@@ -1,10 +1,11 @@
 // ============================================
-// VOICE COMMANDS - KONAČNO ISPRAVLJENA
+// VOICE COMMANDS - DEFINITIVNO REŠENJE
 // ============================================
 
 let activeBuffer = ''; 
 let recognition = null;
 let lastSavedData = null;
+let isEndDetected = false; // Flag za end
 
 // ===== POMOĆNA FUNKCIJA ZA SAKRIVANJE EKRANA =====
 function hideVoiceMenu() {
@@ -48,6 +49,7 @@ function startVoiceRecognition() {
     recognition.maxAlternatives = 1;
 
     const statusEl = document.getElementById('voiceStatus');
+    isEndDetected = false;
 
     recognition.onstart = function() {
         console.log('🎤 Glasovno prepoznavanje pokrenuto');
@@ -56,6 +58,7 @@ function startVoiceRecognition() {
             statusEl.style.color = '#2196F3';
         }
         activeBuffer = '';
+        isEndDetected = false;
     };
 
     recognition.onresult = function(event) {
@@ -83,13 +86,65 @@ function startVoiceRecognition() {
             statusEl.style.color = '#FFD700';
         }
         
-        const lowerBuffer = activeBuffer.toLowerCase();
+        // ============================================
+        // PRVO PROVERI "END" - IMA NAJVEĆI PRIORITET
+        // ============================================
+        if (/\b(end|enter|friend|kraj|gotovo)\b/i.test(activeBuffer)) {
+            console.log('🏁 END detektovan - završavam i otvaram zalihe');
+            isEndDetected = true;
+            
+            // Izvuci tekst pre "end"
+            let parts = activeBuffer.split(/\b(end|enter|friend|kraj|gotovo)\b/i);
+            let itemText = parts[0].trim();
+            
+            // Sačuvaj poslednji unos ako postoji
+            if (itemText.length > 2) {
+                processAndSaveItem(itemText);
+            }
+            
+            // Očisti buffer
+            activeBuffer = '';
+            
+            // Zaustavi i otvori zalihe
+            setTimeout(() => {
+                stopVoiceRecognition();
+                setTimeout(() => {
+                    otvoriZaliheEkran();
+                }, 500);
+            }, 300);
+            
+            return; // PREKINI - ništa drugo ne procesiraj
+        }
         
         // ============================================
-        // 1. DATA ENTRY KEYWORDS - "unos", "unesi", "dodaj"
+        // "PLUS" - SAMO ZAVRŠAVA TRENUTNI UNOS
+        // ============================================
+        if (/\bplus\b/i.test(activeBuffer)) {
+            console.log('✅ PLUS detektovan - završavam unos (NE otvaram zalihe)');
+            
+            let parts = activeBuffer.split(/\bplus\b/i);
+            let itemText = parts[0].trim();
+            
+            if (itemText.length > 2) {
+                processAndSaveItem(itemText);
+            }
+            
+            // Ostavi ostatak za sledeći unos
+            activeBuffer = parts.slice(1).join('').trim();
+            
+            if (statusEl) {
+                statusEl.textContent = `✅ Unos sačuvan. Recite sledeći ili "end" za kraj.`;
+                statusEl.style.color = '#4CAF50';
+            }
+            
+            return; // PREKINI - ne procesiraj dalje
+        }
+        
+        // ============================================
+        // DATA ENTRY KEYWORDS - "unos", "unesi", "dodaj"
         // ============================================
         const dataEntryKeywords = ['unos', 'unesi', 'dodaj', 'novi', 'add'];
-        if (dataEntryKeywords.some(k => lowerBuffer.includes(k))) {
+        if (dataEntryKeywords.some(k => activeBuffer.toLowerCase().includes(k))) {
             hideVoiceMenu();
             const mainScreen = document.getElementById('mainScreen');
             if (mainScreen && mainScreen.style.display !== 'flex') {
@@ -99,60 +154,6 @@ function startVoiceRecognition() {
             }
             // Očisti "unos" iz buffera
             activeBuffer = activeBuffer.replace(/^(unos|unesi|dodaj|novi|add)\s*/i, '');
-        }
-        
-        // ============================================
-        // 2. "PLUS" - SAMO ZAVRŠAVA TRENUTNI UNOS
-        //    Ne otvara zalihe!
-        // ============================================
-        if (/\bplus\b/i.test(activeBuffer)) {
-            // Proveri da li postoji "end" u istom bufferu
-            if (!/\b(end|enter|friend)\b/i.test(activeBuffer)) {
-                console.log('✅ PLUS detektovan - završavam unos (NE otvaram zalihe)');
-                
-                let parts = activeBuffer.split(/\bplus\b/i);
-                let itemText = parts[0].trim();
-                
-                if (itemText.length > 2) {
-                    processAndSaveItem(itemText);
-                }
-                
-                // Ostavi ostatak za sledeći unos
-                activeBuffer = parts.slice(1).join('').trim();
-                
-                if (statusEl) {
-                    statusEl.textContent = `✅ Unos sačuvan. Recite sledeći ili "end" za kraj.`;
-                    statusEl.style.color = '#4CAF50';
-                }
-                return; // VAŽNO: prekini dalje procesiranje
-            }
-        }
-        
-        // ============================================
-        // 3. "END", "ENTER" - ZAVRŠAVA I OTVARA ZALIHE
-        // ============================================
-        if (/\b(end|enter|friend)\b/i.test(activeBuffer)) {
-            console.log('🏁 END detektovan - završavam i otvaram zalihe');
-            
-            // Prvo izvuci tekst pre "end"
-            let parts = activeBuffer.split(/\b(end|enter|friend)\b/i);
-            let itemText = parts[0].trim();
-            
-            // Ako ima teksta pre "end", sačuvaj ga
-            if (itemText.length > 2) {
-                processAndSaveItem(itemText);
-            }
-            
-            // Očisti buffer
-            activeBuffer = '';
-            
-            // Zaustavi prepoznavanje i otvori zalihe
-            setTimeout(() => {
-                stopVoiceRecognition();
-                setTimeout(() => {
-                    otvoriZaliheEkran();
-                }, 500);
-            }, 300);
         }
     };
 
@@ -168,6 +169,9 @@ function startVoiceRecognition() {
 
     recognition.onend = function() {
         console.log('🎤 Glasovno prepoznavanje završeno.');
+        if (isEndDetected) {
+            console.log('🏁 Završeno zbog END komande');
+        }
     };
 
     try {
@@ -294,7 +298,6 @@ function parseVoiceDataEntry(command) {
     let nameWords = [];
     let quantityFound = false;
     let shelfLifeFound = false;
-    let storageFound = false;
     
     let i = 0;
     while (i < words.length) {
@@ -315,7 +318,6 @@ function parseVoiceDataEntry(command) {
         }
         if (storageMatch) {
             result.storage = storageMatch;
-            storageFound = true;
             i++;
             continue;
         }
@@ -552,5 +554,5 @@ window.popuniStartPodatke = popuniFormuPodacima;
 window.otvoriZaliheEkran = otvoriZaliheEkran;
 window.sacuvajPodatke = sacuvajPodatke;
 
-console.log('✅ Voice Commands - KONAČNO ISPRAVLJENA!');
+console.log('✅ Voice Commands - DEFINITIVNO REŠENJE!');
 console.log('🎤 "unos" → diktiraj → "plus" (samo završava) → "end" (otvara zalihe)');
