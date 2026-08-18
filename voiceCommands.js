@@ -29,7 +29,6 @@ function processVoiceCommand(command) {
     const cmd = command.toLowerCase().trim();
     console.log('📝 Normalizovana komanda:', cmd);
     
-    // Sakrivamo voice meni
     hideVoiceMenu();
     
     // ===== PROVERA "START" KOMANDE =====
@@ -259,7 +258,6 @@ function startVoiceRecognition() {
         }
         
         const currentDisplay = activeBuffer + (interimText ? ' ' + interimText : '');
-        const statusEl = document.getElementById('voiceStatus');
         if (statusEl) {
             statusEl.textContent = `🎤 Slušam: "${currentDisplay}"`;
             statusEl.style.color = '#FFD700';
@@ -267,12 +265,11 @@ function startVoiceRecognition() {
         
         const lowerBuffer = activeBuffer.toLowerCase();
         
-        // ===== 1. KORAK: Ako je rečeno "unos" (i još nije započet unos artikla) =====
+        // ===== 1. KORAK: Detekcija reči "unos" =====
         const dataEntryKeywords = ['unos', 'unesi', 'dodaj', 'novi', 'add', 'product', 'entry'];
         if (dataEntryKeywords.some(keyword => lowerBuffer.includes(keyword)) && !lowerBuffer.includes('start')) {
-            console.log('✅ Detektovan zahtev za UNOS! Otvaram ekran za unose...');
+            console.log('✅ Detektovan zahtev za UNOS! Otvaram ekran...');
             
-            // Otvaramo ekran unosa
             const mainScreen = document.getElementById('mainScreen');
             if (mainScreen) {
                 mainScreen.style.display = 'flex';
@@ -285,32 +282,29 @@ function startVoiceRecognition() {
             }
             
             if (statusEl) {
-                statusEl.textContent = '🎤 Ekran za unos otvoren. Sada recite "Start" pa diktirajte artikle...';
+                statusEl.textContent = '🎤 Ekran otvoren. Sada recite "Start" pa diktirajte artikle...';
                 statusEl.style.color = '#4CAF50';
             }
             
-            // Čistimo bafer da sada čeka "Start" i podatke
             activeBuffer = '';
             isFirstEntry = true;
             return;
         }
         
-        // ===== 2. KORAK: Nakon otvorenog ekrana, čekamo "START" pa podatke =====
+        // ===== 2. KORAK: Detekcija "START" sa podacima =====
         if (lowerBuffer.includes('start') || lowerBuffer.includes('stat') || lowerBuffer.includes('stard')) {
             console.log('🚀 Detektovan START i podaci:', activeBuffer);
             
-            // Obrađujemo i popunjavamo formu
             processStartCommand(activeBuffer);
             
-            // Resetujemo bafer za sledeće artikle uz plus/end
             activeBuffer = '';
             isFirstEntry = false;
             return;
         }
         
-        // ===== 3. KORAK: Provera za PLUS ili END (sledeći artikli ili kraj) =====
+        // ===== 3. KORAK: Detekcija "PLUS" ili "END" =====
         if (lowerBuffer.includes('plus') || lowerBuffer.includes('end')) {
-            console.log('✅ Detektovan PLUS/END! Obrađujem unete podatke...');
+            console.log('✅ Detektovan PLUS/END!');
             
             if (typeof processAndSaveEntry === 'function') {
                 processAndSaveEntry(activeBuffer);
@@ -319,7 +313,6 @@ function startVoiceRecognition() {
             }
             
             if (lowerBuffer.includes('end')) {
-                console.log('🚀 Kraj unosa (END). Otvaram zalihe...');
                 if (typeof openInventoryAndShowHighlight === 'function') {
                     openInventoryAndShowHighlight();
                 }
@@ -328,6 +321,21 @@ function startVoiceRecognition() {
             activeBuffer = '';
         }
     };
+
+    recognition.onerror = function(event) {
+        console.log('⚠️ Speech Recognition greška:', event.error);
+    };
+
+    recognition.onend = function() {
+        console.log('🎤 Glasovno prepoznavanje završeno.');
+    };
+
+    try {
+        recognition.start();
+    } catch(e) {
+        console.log('❌ Greška pri pokretanju recognition-a:', e);
+    }
+}
 
 // ===== ZAUSTAVI GLASOVNO PREPOZNAVANJE =====
 function stopVoiceRecognition() {
