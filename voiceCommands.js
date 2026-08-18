@@ -259,6 +259,7 @@ function startVoiceRecognition() {
         }
         
         const currentDisplay = activeBuffer + (interimText ? ' ' + interimText : '');
+        const statusEl = document.getElementById('voiceStatus');
         if (statusEl) {
             statusEl.textContent = `🎤 Slušam: "${currentDisplay}"`;
             statusEl.style.color = '#FFD700';
@@ -266,17 +267,48 @@ function startVoiceRecognition() {
         
         const lowerBuffer = activeBuffer.toLowerCase();
         
-        // ===== PROVERA ZA START (samo kod prvog unosa) =====
-        if (isFirstEntry && lowerBuffer.includes('start')) {
-            console.log('🚀 Detektovan START!');
+        // ===== 1. KORAK: Ako je rečeno "unos" (i još nije započet unos artikla) =====
+        const dataEntryKeywords = ['unos', 'unesi', 'dodaj', 'novi', 'add', 'product', 'entry'];
+        if (dataEntryKeywords.some(keyword => lowerBuffer.includes(keyword)) && !lowerBuffer.includes('start')) {
+            console.log('✅ Detektovan zahtev za UNOS! Otvaram ekran za unose...');
+            
+            // Otvaramo ekran unosa
             const mainScreen = document.getElementById('mainScreen');
             if (mainScreen) {
                 mainScreen.style.display = 'flex';
                 mainScreen.classList.add('active');
             }
+            if (typeof renderDataEntry === 'function') {
+                renderDataEntry('');
+            } else if (typeof window.renderDataEntry === 'function') {
+                window.renderDataEntry('');
+            }
+            
+            if (statusEl) {
+                statusEl.textContent = '🎤 Ekran za unos otvoren. Sada recite "Start" pa diktirajte artikle...';
+                statusEl.style.color = '#4CAF50';
+            }
+            
+            // Čistimo bafer da sada čeka "Start" i podatke
+            activeBuffer = '';
+            isFirstEntry = true;
+            return;
         }
         
-        // ===== PROVERA ZA PLUS ILI END (KRAJ JEDNOG ILI SVIH UNOSA) =====
+        // ===== 2. KORAK: Nakon otvorenog ekrana, čekamo "START" pa podatke =====
+        if (lowerBuffer.includes('start') || lowerBuffer.includes('stat') || lowerBuffer.includes('stard')) {
+            console.log('🚀 Detektovan START i podaci:', activeBuffer);
+            
+            // Obrađujemo i popunjavamo formu
+            processStartCommand(activeBuffer);
+            
+            // Resetujemo bafer za sledeće artikle uz plus/end
+            activeBuffer = '';
+            isFirstEntry = false;
+            return;
+        }
+        
+        // ===== 3. KORAK: Provera za PLUS ili END (sledeći artikli ili kraj) =====
         if (lowerBuffer.includes('plus') || lowerBuffer.includes('end')) {
             console.log('✅ Detektovan PLUS/END! Obrađujem unete podatke...');
             
@@ -284,58 +316,18 @@ function startVoiceRecognition() {
                 processAndSaveEntry(activeBuffer);
             } else if (typeof window.processAndSaveEntry === 'function') {
                 window.processAndSaveEntry(activeBuffer);
-            } else {
-                processVoiceCommand(activeBuffer);
             }
             
             if (lowerBuffer.includes('end')) {
-                console.log('🚀 Kraj unosa (END). Otvaram zalihe sa svetloplavom pozadinom...');
+                console.log('🚀 Kraj unosa (END). Otvaram zalihe...');
                 if (typeof openInventoryAndShowHighlight === 'function') {
                     openInventoryAndShowHighlight();
                 }
             }
             
             activeBuffer = '';
-            isFirstEntry = false;
         }
     };
-
-    recognition.onerror = function(event) {
-        console.error('⚠️ Greška u prepoznavanju glasa:', event.error);
-        if (statusEl) {
-            statusEl.textContent = '❌ Greška. Pokušajte ponovo.';
-            statusEl.style.color = '#f44336';
-        }
-    };
-
-    recognition.onend = function() {
-        console.log('🎤 Glasovno prepoznavanje završeno.');
-        const voiceMenu = document.getElementById('voiceMenuScreen');
-        if (voiceMenu && voiceMenu.classList.contains('active')) {
-            setTimeout(function() {
-                if (recognition) {
-                    try {
-                        recognition.start();
-                        console.log('🎤 Ponovo pokrenuto slušanje');
-                    } catch(e) {
-                        console.log('⏳ Čekanje pre ponovnog pokretanja...');
-                    }
-                }
-            }, 500);
-        }
-    };
-
-    try {
-        recognition.start();
-        console.log('🎤 Slušam...');
-    } catch(e) {
-        console.error('❌ Greška pri startovanju:', e);
-        if (statusEl) {
-            statusEl.textContent = '❌ Greška pri pokretanju mikrofona';
-            statusEl.style.color = '#f44336';
-        }
-    }
-}
 
 // ===== ZAUSTAVI GLASOVNO PREPOZNAVANJE =====
 function stopVoiceRecognition() {
