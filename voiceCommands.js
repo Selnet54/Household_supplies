@@ -1,21 +1,14 @@
 // ============================================
-// VOICE COMMANDS - JEDNOSTAVNO REŠENJE
+// VOICE COMMANDS - KOMPLETNO NOVO REŠENJE
 // ============================================
 
-let activeBuffer = ''; 
-let recognition = null;
+let voiceBuffer = '';
+let voiceRecognition = null;
+let isProcessing = false;
 
-// ===== SAKRIVANJE VOICE MENIJA =====
-function hideVoiceMenu() {
-    const voiceMenu = document.getElementById('voiceMenuScreen');
-    if (voiceMenu) {
-        voiceMenu.style.display = 'none';
-        voiceMenu.classList.remove('active');
-    }
-}
-
-// ===== POKRETAČ ZA GLASOVNI UNOS =====
+// ===== GLAVNA FUNKCIJA ZA POKRETANJE =====
 function startVoiceRecognition() {
+    // Provera podrške
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
         if (typeof showModernAlert === 'function') {
@@ -24,148 +17,169 @@ function startVoiceRecognition() {
         return;
     }
 
-    if (recognition) {
-        try { recognition.stop(); } catch(e) {}
-        recognition = null;
+    // Zaustavi prethodni
+    if (voiceRecognition) {
+        try { voiceRecognition.stop(); } catch(e) {}
+        voiceRecognition = null;
     }
 
-    recognition = new SpeechRecognition();
-    recognition.lang = 'sr-RS';
-    recognition.continuous = true;
-    recognition.interimResults = true;
+    // Kreiraj novi
+    voiceRecognition = new SpeechRecognition();
+    voiceRecognition.lang = 'sr-RS';
+    voiceRecognition.continuous = true;
+    voiceRecognition.interimResults = true;
+    voiceRecognition.maxAlternatives = 1;
 
     const statusEl = document.getElementById('voiceStatus');
 
-    recognition.onstart = function() {
-        console.log('🎤 Slušam...');
+    // Kada počne
+    voiceRecognition.onstart = function() {
+        console.log('🎤 Glasovno prepoznavanje pokrenuto');
         if (statusEl) {
-            statusEl.textContent = '🎤 Slušam... (recite "end" za kraj)';
-            statusEl.style.color = '#2196F3';
+            statusEl.textContent = '🎤 Slušam... Recite "end" za kraj';
+            statusEl.style.color = '#4CAF50';
         }
-        activeBuffer = '';
+        voiceBuffer = '';
+        isProcessing = false;
     };
 
-    recognition.onresult = function(event) {
+    // Kada dobije rezultat
+    voiceRecognition.onresult = function(event) {
         let finalText = '';
         
+        // Sakupi sve finalne delove
         for (let i = event.resultIndex; i < event.results.length; i++) {
             if (event.results[i].isFinal) {
-                finalText += event.results[i][0].transcript.trim() + ' ';
+                const transcript = event.results[i][0].transcript.trim();
+                if (transcript) {
+                    finalText += transcript + ' ';
+                }
             }
         }
         
         if (finalText) {
-            activeBuffer += finalText;
-            console.log('🗣️:', activeBuffer);
+            voiceBuffer += finalText;
+            console.log('🗣️ Buffer:', voiceBuffer);
             
+            // Prikaži status
             if (statusEl) {
-                statusEl.textContent = `🎤: "${activeBuffer.trim()}"`;
+                statusEl.textContent = `🎤: "${voiceBuffer.trim()}"`;
                 statusEl.style.color = '#FFD700';
             }
         }
         
-        // KADA ČUJE "END" - ODMAH OBRADI
-        if (activeBuffer.toLowerCase().includes('end')) {
-            console.log('✅ END DETEKTOVAN!');
+        // Proveri da li ima "end" i da nije već u obradi
+        if (voiceBuffer.toLowerCase().includes('end') && !isProcessing) {
+            console.log('✅ END detektovan!');
+            isProcessing = true;
             
             // Uzmi sve pre "end"
-            const text = activeBuffer.replace(/end.*$/i, '').trim();
-            console.log('📝 Tekst za obradu:', text);
+            const command = voiceBuffer.replace(/end.*$/i, '').trim();
+            console.log('📝 Komanda:', command);
             
-            if (text.length > 3) {
-                // DIREKTNO OBRADI
-                obradiGlasovnuKomandu(text);
+            if (command.length > 3) {
+                // Obradi komandu
+                processVoiceCommand(command);
             }
             
-            // Zaustavi
-            stopVoiceRecognition();
-            
-            // Otvori zalihe
+            // Zaustavi prepoznavanje posle kratke pauze
             setTimeout(function() {
-                otvoriZalihe();
-            }, 500);
+                stopVoiceRecognition();
+            }, 200);
         }
     };
 
-    recognition.onerror = function(event) {
+    // Greška
+    voiceRecognition.onerror = function(event) {
         console.log('❌ Greška:', event.error);
         if (statusEl) {
             statusEl.textContent = `❌ Greška: ${event.error}`;
             statusEl.style.color = '#f44336';
         }
+        isProcessing = false;
     };
 
-    recognition.onend = function() {
+    // Kraj
+    voiceRecognition.onend = function() {
         console.log('⏹️ Prepoznavanje završeno');
         if (statusEl) {
             statusEl.textContent = '⏸️ Zaustavljeno';
-            statusEl.style.color = '#aaa';
+            statusEl.style.color = '#999';
         }
+        isProcessing = false;
     };
 
+    // Pokreni
     try {
-        recognition.start();
+        voiceRecognition.start();
     } catch(e) {
-        console.log('❌', e);
+        console.log('❌ Greška pri pokretanju:', e);
+        isProcessing = false;
     }
 }
 
-// ===== ZAUSTAVI =====
+// ===== ZAUSTAVI PREPOZNAVANJE =====
 function stopVoiceRecognition() {
-    if (recognition) {
-        try { recognition.stop(); } catch(e) {}
-        recognition = null;
+    if (voiceRecognition) {
+        try {
+            voiceRecognition.stop();
+        } catch(e) {}
+        voiceRecognition = null;
     }
-    activeBuffer = '';
+    voiceBuffer = '';
+    isProcessing = false;
+    
+    const statusEl = document.getElementById('voiceStatus');
+    if (statusEl) {
+        statusEl.textContent = '⏸️ Zaustavljeno';
+        statusEl.style.color = '#999';
+    }
 }
 
-// ===== OTVORI ZALIHE - POZIVA renderInventory =====
-function otvoriZalihe() {
-    console.log('📦 Otvaranje zaliha...');
-    hideVoiceMenu();
+// ===== OBRADA GLASOVNE KOMANDE =====
+function processVoiceCommand(command) {
+    console.log('🔧 Obrada komande:', command);
     
-    // DIREKTNO POZIVANJE renderInventory IZ SCRIPT.JS
-    if (typeof renderInventory === 'function') {
-        renderInventory();
-        console.log('✅ renderInventory pozvan');
-    } else {
-        console.log('❌ renderInventory nije definisan');
-        // Pokušaj sa showScreen
-        if (typeof showScreen === 'function') {
-            showScreen('mainScreen');
-            setTimeout(function() {
-                if (typeof renderInventory === 'function') {
-                    renderInventory();
-                }
-            }, 300);
+    // IZDVOJI PODATKE
+    const data = extractData(command);
+    console.log('📊 Izdvojeni podaci:', data);
+    
+    // Provera
+    if (!data.product_name || data.product_name.length < 2) {
+        console.log('❌ Nevalidan naziv');
+        if (typeof showModernAlert === 'function') {
+            showModernAlert('Greška', 'Nije prepoznat naziv proizvoda. Pokušajte: "Pileći batak 5 kg 6 zamrzivač end"', '❌');
         }
+        return;
     }
+    
+    // SAČUVAJ
+    saveProductData(data);
 }
 
-// ===== JEDNOSTAVNA OBRADA =====
-function obradiGlasovnuKomandu(text) {
-    console.log('🔧 Obrada:', text);
-    
-    // IZDVOJI PODATKE JEDNOSTAVNO
-    const result = {
+// ===== EKSTRAKCIJA PODATAKA =====
+function extractData(text) {
+    // Podrazumevane vrednosti
+    const data = {
         product_name: '',
+        piece: '1',
         quantity: '1',
         unit: 'kom',
         shelf_life: '12',
         storage: 'Zamrzivač 1'
     };
     
-    // MAPE ZA PREVOD
-    const units = ['kg', 'g', 'l', 'ml', 'kom', 'pak', 'kutija'];
-    const unitMap = {
-        'kilogram': 'kg', 'kilograma': 'kg',
-        'gram': 'g', 'grama': 'g',
-        'litar': 'l', 'litara': 'l',
-        'komad': 'kom', 'komada': 'kom',
-        'paket': 'pak', 'paketa': 'pak'
+    // MAPE
+    const units = {
+        'kg': 'kg', 'kilogram': 'kg', 'kilograma': 'kg',
+        'g': 'g', 'gram': 'g', 'grama': 'g',
+        'l': 'l', 'litar': 'l', 'litara': 'l',
+        'ml': 'ml', 'mililitar': 'ml',
+        'kom': 'kom', 'komad': 'kom', 'komada': 'kom',
+        'pak': 'pak', 'paket': 'pak', 'paketa': 'pak'
     };
     
-    const storageMap = {
+    const storages = {
         'zamrzivač': 'Zamrzivač 1',
         'zamrzivac': 'Zamrzivač 1',
         'frižider': 'Frižider',
@@ -174,7 +188,7 @@ function obradiGlasovnuKomandu(text) {
     };
     
     const numbers = {
-        'jedan': '1', 'jedna': '1', 'jedno': '1',
+        'nula': '0', 'jedan': '1', 'jedna': '1', 'jedno': '1',
         'dva': '2', 'dve': '2',
         'tri': '3',
         'četiri': '4', 'cetiri': '4',
@@ -183,151 +197,187 @@ function obradiGlasovnuKomandu(text) {
         'sedam': '7',
         'osam': '8',
         'devet': '9',
-        'deset': '10'
+        'deset': '10',
+        'jedanaest': '11',
+        'dvanaest': '12',
+        'trinaest': '13',
+        'četrnaest': '14',
+        'petnaest': '15',
+        'šesnaest': '16',
+        'sedamnaest': '17',
+        'osamnaest': '18',
+        'devetnaest': '19',
+        'dvadeset': '20'
     };
     
-    // RAZBIJ NA REČI
+    // Ukloni reči za unos
     let words = text.toLowerCase().split(/\s+/);
-    console.log('📝 Reči:', words);
+    words = words.filter(w => !['unos', 'unesi', 'dodaj', 'start', 'plus', 'i'].includes(w));
     
-    // PRONAĐI SKLADIŠTE
+    console.log('📝 Reči za obradu:', words);
+    
+    // 1. PRONAĐI SKLADIŠTE
+    let storageFound = false;
     for (let i = 0; i < words.length; i++) {
         const w = words[i];
-        if (storageMap[w]) {
-            result.storage = storageMap[w];
+        if (storages[w]) {
+            data.storage = storages[w];
+            storageFound = true;
             // Proveri da li sledi broj (zamrzivač 2)
-            if (i + 1 < words.length && !isNaN(words[i + 1])) {
-                result.storage = `Zamrzivač ${words[i + 1]}`;
-                words.splice(i + 1, 1);
+            if (i + 1 < words.length) {
+                const next = words[i + 1];
+                if (!isNaN(next) && next >= '1' && next <= '9') {
+                    data.storage = `Zamrzivač ${next}`;
+                    words.splice(i + 1, 1);
+                } else if (numbers[next]) {
+                    data.storage = `Zamrzivač ${numbers[next]}`;
+                    words.splice(i + 1, 1);
+                }
             }
             words.splice(i, 1);
             i--;
         }
     }
     
-    // PRONAĐI JEDINICU I KOLIČINU
+    // 2. PRONAĐI JEDINICU I KOLIČINU
+    let unitFound = false;
     for (let i = 0; i < words.length; i++) {
         const w = words[i];
-        let unit = null;
-        
-        // Proveri da li je jedinica
-        if (unitMap[w]) {
-            unit = unitMap[w];
-        } else if (units.includes(w)) {
-            unit = w;
-        }
-        
-        if (unit) {
-            result.unit = unit;
+        if (units[w] && !unitFound) {
+            data.unit = units[w];
+            unitFound = true;
+            
             // Traži broj pre jedinice
             if (i > 0) {
                 const prev = words[i - 1];
                 if (!isNaN(prev)) {
-                    result.quantity = prev;
+                    data.quantity = prev;
+                    data.piece = prev;
+                    words.splice(i - 1, 1);
+                    i--;
                 } else if (numbers[prev]) {
-                    result.quantity = numbers[prev];
+                    data.quantity = numbers[prev];
+                    data.piece = numbers[prev];
+                    words.splice(i - 1, 1);
+                    i--;
                 }
             }
-            // Ukloni jedinicu i broj
+            // Ukloni jedinicu
             words.splice(i, 1);
-            if (i > 0 && !isNaN(words[i - 1])) {
-                words.splice(i - 1, 1);
-            } else if (i > 0 && numbers[words[i - 1]]) {
-                words.splice(i - 1, 1);
-            }
-            break;
+            i--;
         }
     }
     
-    // PRONAĐI ROK (broj posle jedinice)
+    // 3. PRONAĐI ROK (broj)
     for (let i = 0; i < words.length; i++) {
         const w = words[i];
+        let num = null;
+        
         if (!isNaN(w) && w >= '1' && w <= '99') {
-            result.shelf_life = w;
+            num = w;
+        } else if (numbers[w]) {
+            num = numbers[w];
+        }
+        
+        if (num) {
+            data.shelf_life = num;
             words.splice(i, 1);
             // Ukloni "meseci" ako postoji
-            if (i < words.length && ['mesec', 'meseca', 'meseci'].includes(words[i])) {
-                words.splice(i, 1);
-            }
-            break;
-        } else if (numbers[w]) {
-            result.shelf_life = numbers[w];
-            words.splice(i, 1);
-            if (i < words.length && ['mesec', 'meseca', 'meseci'].includes(words[i])) {
+            if (i < words.length && ['mesec', 'meseca', 'meseci', 'mjeseci'].includes(words[i])) {
                 words.splice(i, 1);
             }
             break;
         }
     }
     
-    // ONO ŠTO OSTANE JE NAZIV
-    // Ukloni "unos", "start", "plus"
-    words = words.filter(w => !['unos', 'start', 'plus', 'unesi', 'dodaj'].includes(w));
+    // 4. ONO ŠTO OSTANE JE NAZIV
+    // Ukloni sve brojeve koji su ostali
+    words = words.filter(w => {
+        if (!isNaN(w)) return false;
+        if (numbers[w]) return false;
+        return true;
+    });
     
-    result.product_name = words.join(' ') || 'Proizvod';
+    // Ukloni prazne reči
+    words = words.filter(w => w.length > 0);
     
-    console.log('✅ Parsirano:', result);
-    
-    // PROVERI DA LI JE VALIDNO
-    if (result.product_name === 'Proizvod' || result.product_name.length < 2) {
-        console.log('❌ Nevalidan naziv');
-        if (typeof showModernAlert === 'function') {
-            showModernAlert('Greška', 'Nije prepoznat naziv proizvoda. Pokušajte: "Pileći batak 5 kg 6 zamrzivač end"', '❌');
-        }
-        return;
+    // Ako nema reči, uzmi sve osim onih koje smo pronašli
+    if (words.length === 0) {
+        // Vrati sve originalne reči ali ukloni specijalne
+        const originalWords = text.toLowerCase().split(/\s+/);
+        words = originalWords.filter(w => {
+            if (['unos', 'unesi', 'dodaj', 'start', 'plus', 'i', 'end'].includes(w)) return false;
+            if (storages[w]) return false;
+            if (units[w]) return false;
+            if (!isNaN(w)) return false;
+            if (numbers[w]) return false;
+            return true;
+        });
     }
     
-    // SAČUVAJ PROIZVOD
-    sacuvajProizvod(result);
+    data.product_name = words.join(' ') || 'Proizvod';
+    
+    return data;
 }
 
-// ===== ČUVANJE PROIZVODA =====
-function sacuvajProizvod(data) {
+// ===== ČUVANJE PODATAKA =====
+function saveProductData(data) {
     console.log('💾 Čuvanje:', data);
     
-    // SAKRIJ VOICE MENU
+    // Sakrij voice menu
     hideVoiceMenu();
     
-    // OTVORI MAIN SCREEN
+    // Otvori main screen
     if (typeof showScreen === 'function') {
         showScreen('mainScreen');
     }
     
-    // POZOVI renderDataEntry
+    // Pozovi renderDataEntry
     if (typeof renderDataEntry === 'function') {
         renderDataEntry(data.product_name);
         
-        // POPUNI FORMU
+        // Popuni formu
         setTimeout(function() {
-            popuniFormu(data);
+            fillForm(data);
             
-            // SAČUVAJ
+            // Sačuvaj
             setTimeout(function() {
                 if (typeof saveProduct === 'function') {
                     saveProduct();
-                    console.log('✅ Sačuvano!');
+                    console.log('✅ saveProduct() pozvan');
+                    
+                    // Osveži prikaz
+                    setTimeout(function() {
+                        if (typeof prikaziSveUnose === 'function') {
+                            prikaziSveUnose();
+                        }
+                    }, 300);
                 } else {
                     const btn = document.querySelector('.btn-save');
-                    if (btn) btn.click();
+                    if (btn) {
+                        btn.click();
+                        console.log('✅ Kliknuto dugme');
+                    }
                 }
-            }, 500);
+            }, 400);
         }, 300);
     }
 }
 
 // ===== POPUNI FORMU =====
-function popuniFormu(data) {
-    console.log('📝 Popunjavanje:', data);
+function fillForm(data) {
+    console.log('📝 Popunjavanje forme:', data);
     
     const productInput = document.getElementById('productInput');
     if (productInput) {
         productInput.value = data.product_name;
         productInput.dispatchEvent(new Event('input', { bubbles: true }));
+        productInput.dispatchEvent(new Event('change', { bubbles: true }));
     }
     
     const pieceInput = document.getElementById('pieceInput');
     if (pieceInput) {
-        pieceInput.value = data.quantity;
+        pieceInput.value = data.piece;
         pieceInput.dispatchEvent(new Event('input', { bubbles: true }));
     }
     
@@ -370,6 +420,32 @@ function popuniFormu(data) {
     }
 }
 
+// ===== OTVORI ZALIHE =====
+function openInventory() {
+    console.log('📦 Otvaranje zaliha...');
+    hideVoiceMenu();
+    
+    if (typeof renderInventory === 'function') {
+        renderInventory();
+    } else if (typeof showScreen === 'function') {
+        showScreen('mainScreen');
+        setTimeout(function() {
+            if (typeof renderInventory === 'function') {
+                renderInventory();
+            }
+        }, 300);
+    }
+}
+
+// ===== SAKRIVANJE MENIJA =====
+function hideVoiceMenu() {
+    const voiceMenu = document.getElementById('voiceMenuScreen');
+    if (voiceMenu) {
+        voiceMenu.style.display = 'none';
+        voiceMenu.classList.remove('active');
+    }
+}
+
 // ===== POVRATAK =====
 function goBackFromVoice() {
     stopVoiceRecognition();
@@ -383,7 +459,9 @@ window.startVoiceRecognition = startVoiceRecognition;
 window.stopVoiceRecognition = stopVoiceRecognition;
 window.goBackFromVoice = goBackFromVoice;
 window.hideVoiceMenu = hideVoiceMenu;
-window.otvoriZalihe = otvoriZalihe;
-window.obradiGlasovnuKomandu = obradiGlasovnuKomandu;
+window.openInventory = openInventory;
+window.processVoiceCommand = processVoiceCommand;
+window.extractData = extractData;
+window.saveProductData = saveProductData;
 
-console.log('✅ Voice Commands - JEDNOSTAVNO REŠENJE aktivirano!');
+console.log('✅ Voice Commands - KOMPLETNO NOVO REŠENJE aktivirano!');
