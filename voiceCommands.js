@@ -1,38 +1,7 @@
 // ============================================
 // VOICE COMMANDS - DEFINITIVNO REŠENJE
 // ============================================
-// ============================================
-// VOICE COMMANDS - SAMO JEDNA IMPLEMENTACIJA
-// ============================================
 
-// ⚠️ PREKINI DUPLU IMPLEMENTACIJU IZ script1.js
-(function() {
-    // Ako postoji stara implementacija, zameni je
-    if (typeof window.oldStartVoiceRecognition === 'undefined') {
-        window.oldStartVoiceRecognition = window.startVoiceRecognition;
-    }
-    
-    // Prepiši startVoiceRecognition da koristi našu verziju
-    window.startVoiceRecognition = function() {
-        console.log('🎤 Koristim VOICE COMMANDS verziju (ne script1.js)');
-        // Pozovi našu implementaciju
-        if (typeof window._voiceCommandsStart === 'function') {
-            window._voiceCommandsStart();
-        } else {
-            console.error('❌ Voice commands nisu učitane!');
-        }
-    };
-    
-    // Prepiši stopVoiceRecognition
-    window.stopVoiceRecognition = function() {
-        console.log('🛑 Zaustavljam VOICE COMMANDS verziju');
-        if (typeof window._voiceCommandsStop === 'function') {
-            window._voiceCommandsStop();
-        }
-    };
-    
-    console.log('✅ Voice commands preuzete kontrole!');
-})();
 let activeBuffer = ''; 
 let recognition = null;
 let lastSavedData = null;
