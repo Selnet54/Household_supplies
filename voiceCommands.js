@@ -1,5 +1,5 @@
 // ============================================
-// VOICE COMMANDS - KONAČNO REŠENJE SA ZAŠTITOM
+// VOICE COMMANDS - KOMPLETAN FAJL
 // ============================================
 
 let activeBuffer = ''; 
@@ -548,116 +548,142 @@ function sacuvajPodatke(data) {
 }
 
 // ============================================
-// ⭐ PREGAZI SVE DUPLIKATE IZ script1.js
+// ⭐ PREUZIMANJE KONTROLE - OVO JE KLJUČNO!
 // ============================================
-(function() {
-    console.log('🔥 PREUZIMAM KONTROLU NAD GLASOVNIM KOMANDAMA!');
+
+// 1. Prvo sačuvaj PRAVE funkcije
+window._voiceCommandsStart = startVoiceRecognition;
+window._voiceCommandsStop = stopVoiceRecognition;
+window._voiceCommandsProcess = processAndSaveItem;
+window._voiceCommandsParse = parseVoiceDataEntry;
+window._voiceCommandsOpenZalihe = otvoriZaliheEkran;
+
+// 2. Onda pregazi sve iz script1.js
+window.startVoiceRecognition = function() {
+    console.log('🎤 startVoiceRecognition -> pozivam VOICE COMMANDS');
+    if (typeof window._voiceCommandsStart === 'function') {
+        return window._voiceCommandsStart();
+    }
+    console.error('❌ _voiceCommandsStart nije definisan!');
+};
+
+window.stopVoiceRecognition = function() {
+    console.log('🛑 stopVoiceRecognition -> pozivam VOICE COMMANDS');
+    if (typeof window._voiceCommandsStop === 'function') {
+        return window._voiceCommandsStop();
+    }
+};
+
+window.processVoiceCommand = function(command) {
+    console.log('🎤 processVoiceCommand (pregažen):', command);
     
-    // Sačuvaj naše funkcije
-    window._voiceCommandsStart = startVoiceRecognition;
-    window._voiceCommandsStop = stopVoiceRecognition;
-    window._processAndSaveItem = processAndSaveItem;
-    window._otvoriZalihe = otvoriZaliheEkran;
+    if (!command) return false;
+    const lower = command.toLowerCase();
     
-    // ===== PREGAZI startVoiceRecognition =====
-    window.startVoiceRecognition = function() {
-        console.log('🎤 Pokrećem VOICE COMMANDS verziju (pregaženo)');
-        return startVoiceRecognition();
-    };
-    
-    // ===== PREGAZI stopVoiceRecognition =====
-    window.stopVoiceRecognition = function() {
-        console.log('🛑 Zaustavljam VOICE COMMANDS verziju (pregaženo)');
-        return stopVoiceRecognition();
-    };
-    
-    // ===== PREGAZI processVoiceCommand (iz script1.js) =====
-    window.processVoiceCommand = function(command) {
-        console.log('🎤 processVoiceCommand (pregažen):', command);
-        
-        if (!command) return false;
-        const lower = command.toLowerCase();
-        
-        // PLUS - SAMO ZAVRŠAVA, NE OTVARA ZALIHE
-        if (lower.includes('plus')) {
-            console.log('✅ PLUS - završavam unos (NE otvaram zalihe)');
-            const itemText = command.replace(/plus/i, '').trim();
-            if (itemText) {
-                processAndSaveItem(itemText);
-            }
-            return true;
+    // PLUS - NE OTVARA ZALIHE
+    if (lower.includes('plus')) {
+        console.log('✅ PLUS - završavam unos (NE otvaram zalihe)');
+        const itemText = command.replace(/plus/i, '').trim();
+        if (itemText && typeof window._voiceCommandsProcess === 'function') {
+            window._voiceCommandsProcess(itemText);
         }
-        
-        // END - otvara zalihe
-        if (lower.includes('end') || lower.includes('kraj') || lower.includes('gotovo')) {
-            console.log('🏁 END - otvaram zalihe');
-            const itemText = command.replace(/end|kraj|gotovo/i, '').trim();
-            if (itemText) {
-                processAndSaveItem(itemText);
+        return true;
+    }
+    
+    // END - otvara zalihe
+    if (lower.includes('end') || lower.includes('kraj') || lower.includes('gotovo')) {
+        console.log('🏁 END - otvaram zalihe');
+        const itemText = command.replace(/end|kraj|gotovo/i, '').trim();
+        if (itemText && typeof window._voiceCommandsProcess === 'function') {
+            window._voiceCommandsProcess(itemText);
+        }
+        setTimeout(() => {
+            if (typeof window._voiceCommandsOpenZalihe === 'function') {
+                window._voiceCommandsOpenZalihe();
             }
+        }, 500);
+        return true;
+    }
+    
+    // UNOS
+    if (lower.includes('unos') || lower.includes('unesi') || lower.includes('dodaj')) {
+        console.log('📝 UNOS - otvaram data entry');
+        const itemText = command.replace(/unos|unesi|dodaj|novi|add/i, '').trim();
+        // Otvori data entry
+        const mainScreen = document.getElementById('mainScreen');
+        if (mainScreen) {
+            mainScreen.style.display = 'flex';
+            mainScreen.classList.add('active');
+            if (typeof renderDataEntry === 'function') renderDataEntry('');
+        }
+        if (itemText && typeof window._voiceCommandsProcess === 'function') {
             setTimeout(() => {
-                END_AKTIVAN = true;
-                otvoriZaliheEkran();
-                setTimeout(() => {
-                    END_AKTIVAN = false;
-                }, 1000);
+                window._voiceCommandsProcess(itemText);
             }, 500);
-            return true;
         }
-        
-        // UNOS - otvara data entry
-        if (lower.includes('unos') || lower.includes('unesi') || lower.includes('dodaj')) {
-            console.log('📝 UNOS - otvaram data entry');
-            const itemText = command.replace(/unos|unesi|dodaj|novi|add/i, '').trim();
-            hideVoiceMenu();
-            const mainScreen = document.getElementById('mainScreen');
-            if (mainScreen) {
-                mainScreen.style.display = 'flex';
-                mainScreen.classList.add('active');
-                if (typeof renderDataEntry === 'function') renderDataEntry('');
-            }
-            if (itemText) {
-                setTimeout(() => {
-                    processAndSaveItem(itemText);
-                }, 500);
-            }
-            return true;
-        }
-        
-        // Inače, pokušaj sa originalnom ako postoji
-        if (typeof window._originalProcessVoice === 'function') {
-            return window._originalProcessVoice(command);
-        }
-        
-        console.warn('⚠️ Nepoznata komanda:', command);
-        return false;
-    };
+        return true;
+    }
     
-    // ===== PREGAZI voiceCommand (ako postoji) =====
-    window.voiceCommand = function(command) {
-        console.log('🎤 voiceCommand (pregažen):', command);
-        return window.processVoiceCommand(command);
-    };
+    return false;
+};
+
+// 3. Pregazi i voiceCommand (iz script1.js)
+window.voiceCommand = function(command) {
+    console.log('🎤 voiceCommand -> processVoiceCommand');
+    return window.processVoiceCommand(command);
+};
+
+// 4. Pregazi selectVoiceMode
+window.selectVoiceMode = function() {
+    console.log('🎤 selectVoiceMode (pregažen)');
     
-    console.log('✅ Kontrola preuzeta!');
-    console.log('✅ PLUS - NE otvara zalihe');
-    console.log('✅ END - otvara zalihe');
-})();
+    document.querySelectorAll('.screen').forEach(s => {
+        s.style.display = 'none';
+        s.classList.remove('active');
+    });
+    
+    const voiceMenuScreen = document.getElementById('voiceMenuScreen');
+    if (voiceMenuScreen) {
+        voiceMenuScreen.style.display = 'flex';
+        voiceMenuScreen.classList.add('active');
+    }
+    
+    setTimeout(function() {
+        console.log('🎤 Pokrećem VOICE COMMANDS...');
+        if (typeof window.startVoiceRecognition === 'function') {
+            window.startVoiceRecognition();
+        }
+    }, 500);
+};
 
-// ============================================
-// IZVEZI GLOBALNE FUNKCIJE
-// ============================================
-window.startVoiceRecognition = startVoiceRecognition;
-window.stopVoiceRecognition = stopVoiceRecognition;
-window.goBackFromVoice = goBackFromVoice;
-window.hideVoiceMenu = hideVoiceMenu;
-window.parseVoiceDataEntry = parseVoiceDataEntry;
-window.processStartCommand = processAndSaveItem;
-window.popuniStartPodatke = popuniFormuPodacima;
-window.otvoriZaliheEkran = otvoriZaliheEkran;
-window.sacuvajPodatke = sacuvajPodatke;
-window.processAndSaveItem = processAndSaveItem;
+// 5. Pregazi i goBackFromVoice
+window.goBackFromVoice = function() {
+    console.log('◀ goBackFromVoice (pregažen)');
+    
+    if (typeof window.stopVoiceRecognition === 'function') {
+        window.stopVoiceRecognition();
+    }
+    
+    document.querySelectorAll('.screen').forEach(s => {
+        s.style.display = 'none';
+        s.classList.remove('active');
+    });
+    
+    const choiceScreen = document.getElementById('choiceScreen');
+    if (choiceScreen) {
+        choiceScreen.style.display = 'flex';
+        choiceScreen.classList.add('active');
+    }
+    
+    if (typeof updateHeaderLanguage === 'function') {
+        updateHeaderLanguage();
+    }
+    if (typeof updateInterfaceLanguage === 'function') {
+        updateInterfaceLanguage();
+    }
+};
 
-console.log('✅ Voice Commands - KONAČNO REŠENJE!');
-console.log('🎤 "unos" → diktiraj → "plus" (samo završava) → "end" (otvara zalihe)');
-console.log('⛔ PLUS NE otvara zalihe!');
+console.log('✅ VOICE COMMANDS - POTPUNO PREUZETE!');
+console.log('✅ Plus NE otvara zalihe!');
+console.log('✅ End otvara zalihe!');
+console.log('✅ 4. ekran (voiceMenuScreen) radi!');
