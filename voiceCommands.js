@@ -745,7 +745,18 @@ function stopVoiceRecognition() {
     isProcessingCommand = false;
     showVoiceStatus('⏸️ Prepoznavanje zaustavljeno', '#aaa');
 }
+// ============================================
+// 10.1 RESTART MIKROFONA
+// ============================================
 
+function restartMicrophone() {
+    console.log('🔄 Restartujem mikrofon...');
+    showVoiceStatus('🔄 Ponovno pokrećem mikrofon...', '#FF9800');
+    stopVoiceRecognition();
+    setTimeout(() => {
+        startVoiceRecognition();
+    }, 500);
+}
 // ============================================
 // 11. POVRATAK NA PREĐAŠNJI EKRAN
 // ============================================
@@ -899,6 +910,7 @@ window.otvoriZaliheEkran = otvoriZaliheEkran;
 window.sacuvajPodatke = sacuvajPodatke;
 window.parseVoiceDataEntry = parseVoiceDataEntry;
 window.processAndSaveItem = processAndSaveItem;
+window.restartMicrophone = restartMicrophone;  
 
 // ============================================
 // 14. ⛔ ZABRANA OTVARANJA ZALIHA IZ renderInventory
@@ -959,8 +971,27 @@ window.processAndSaveItem = processAndSaveItem;
     console.log('✅ 4. ekran (voiceMenuScreen) radi!');
 })();
 
+// ============================================
+// 15. IZVOZ SVIH FUNKCIJA
+// ============================================
+
+// Izvezi sve funkcije globalno
+window.startVoiceRecognition = startVoiceRecognition;
+window.stopVoiceRecognition = stopVoiceRecognition;
+window.goBackFromVoice = goBackFromVoice;
+window.hideVoiceMenu = hideVoiceMenu;
+window.parseVoiceDataEntry = parseVoiceDataEntry;
+window.processStartCommand = processAndSaveItem;
+window.popuniStartPodatke = popuniFormuPodacima;
+window.otvoriZaliheEkran = otvoriZaliheEkran;
+window.sacuvajPodatke = sacuvajPodatke;
+window.processAndSaveItem = processAndSaveItem;
+window.selectVoiceMode = selectVoiceMode;
+window.restartMicrophone = restartMicrophone;  // ⭐ DODATO
+
 console.log('✅ VOICE COMMANDS - KOMPLETNA VERZIJA UČITANA!');
 console.log('🎤 "unos" → diktiraj → "plus" (samo završava) → "end" (otvara zalihe)');
 console.log('⛔ PLUS NE otvara zalihe!');
 console.log('📦 END otvara zalihe!');
 console.log('📝 Pravilno parsiranje: 1. broj=komad, 2. broj=količina');
+console.log('🔄 restartMicrophone dostupan!');
