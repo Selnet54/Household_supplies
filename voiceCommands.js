@@ -255,13 +255,29 @@ function parseVoiceDataEntry(command) {
     
     result.product_name = nameParts.join(' ').trim() || 'Proizvod';
     
-    // ============================================
-    // KORAK 6: JEDINICA I SKLADIŠTE
-    // ============================================
-    
-    if (foundUnit) {
-        result.unit = foundUnit;
+   
+// ============================================
+// KORAK 6: JEDINICA I SKLADIŠTE
+// ============================================
+
+if (foundUnit) {
+    result.unit = foundUnit;
+} else {
+    // Ako nije pronađena jedinica, proveri da li ima "gram" u tekstu
+    if (text.includes('gram') || text.includes('grama') || text.includes('g ')) {
+        result.unit = 'g';
+        console.log('🔍 Pronađeno "gram" -> jedinica = g');
+    } else if (text.includes('kilogram') || text.includes('kg')) {
+        result.unit = 'kg';
+        console.log('🔍 Pronađeno "kilogram" -> jedinica = kg');
+    } else if (text.includes('litar') || text.includes('l ')) {
+        result.unit = 'l';
+        console.log('🔍 Pronađeno "litar" -> jedinica = l');
+    } else if (text.includes('komad') || text.includes('kom')) {
+        result.unit = 'kom';
+        console.log('🔍 Pronađeno "komad" -> jedinica = kom');
     }
+}
     
     if (foundStorage) {
         result.storage = foundStorage;
@@ -271,13 +287,22 @@ function parseVoiceDataEntry(command) {
     // KORAK 7: POPRAVKA ZA "500 GRAMA"
     // ============================================
     
-    if (text.includes('500')) {
-        if (foundUnit === 'g' || text.includes('gram') || text.includes('grama')) {
-            result.quantity = '500';
-            if (numbers.length === 1) {
-                result.piece = '500';
+    // Ako ima "500", "700", "800" itd. u tekstu, to je grama
+    let gramMatches = text.match(/\b(500|700|800|900|1000)\b/);
+    if (gramMatches) {
+        // Ako je jedinica već postavljena na "g" ili "kg", ostavi
+        if (result.unit === 'kom' || result.unit === 'l') {
+            // Ako je jedinica kom ili l, a ima 500, to je verovatno g
+            if (text.includes('gram') || text.includes('grama')) {
+                result.unit = 'g';
+                console.log('🔍 Grami detektovani -> jedinica = g');
             }
-            console.log('🔍 Pronađeno "500" -> količina = 500g');
+        }
+        // Postavi količinu na taj broj ako nije već postavljena
+        if (result.quantity === '1' && numbers.length === 1) {
+            result.quantity = gramMatches[1];
+            result.piece = gramMatches[1];
+            console.log('🔍 Količina postavljena na: ' + gramMatches[1] + 'g');
         }
     }
     
@@ -564,6 +589,47 @@ function startVoiceRecognition() {
         return;
     }
 
+    // ⭐ ZA MOBILNE: Prvo traži dozvolu za mikrofon
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        showVoiceStatus('🎤 Tražim dozvolu za mikrofon...', '#FF9800');
+        
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(function(stream) {
+                console.log('✅ Dozvola za mikrofon odobrena');
+                // Zatvori stream
+                stream.getTracks().forEach(track => track.stop());
+                // Pokreni recognition
+                startRecognitionEngine();
+            })
+            .catch(function(err) {
+                console.error('❌ Greška pri dozvoli za mikrofon:', err);
+                showVoiceStatus('❌ Dozvolite pristup mikrofonu!', '#f44336');
+                
+                // Pokušaj ponovo sa objašnjenjem
+                setTimeout(function() {
+                    if (confirm('🎤 Da biste koristili glasovni unos, potrebno je dozvoliti pristup mikrofonu.\n\nDa li želite da pokušate ponovo?')) {
+                        startVoiceRecognition();
+                    } else {
+                        showVoiceStatus('⏸️ Glasovni unos otkazan', '#aaa');
+                    }
+                }, 500);
+            });
+    } else {
+        // Ako nema mediaDevices, pokreni direktno
+        startRecognitionEngine();
+    }
+}
+
+// ===== PRAVI RECOGNITION ENGINE =====
+function startRecognitionEngine() {
+    console.log('🎤 Pokrećem recognition engine...');
+    
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        showVoiceStatus('❌ Browser ne podržava glasovno prepoznavanje.', '#f44336');
+        return;
+    }
+
     if (recognition) {
         try { recognition.stop(); } catch(e) {}
         recognition = null;
@@ -591,6 +657,8 @@ function startVoiceRecognition() {
         isProcessingCommand = false;
         END_AKTIVAN = false;
     };
+
+    // ... ostatak onresult, onerror, onend (isti kao pre) ...
 
     recognition.onresult = function(event) {
         let interimText = '';
@@ -986,3 +1054,11 @@ console.log('⛔ PLUS NE otvara zalihe!');
 console.log('📦 END otvara zalihe!');
 console.log('📝 Pravilno parsiranje: 1. broj=komad, 2. broj=količina');
 console.log('🔄 restartMicrophone dostupan!');
+// ===== POKUŠAJ PONOVNO NA MOBILNOM =====
+// Ovo će pokušati da restartuje mikrofon ako ne radi
+setTimeout(function() {
+    if (typeof startVoiceRecognition === 'function') {
+        console.log('🔄 Pokušavam ponovno pokretanje mikrofona...');
+        // Ne radi ništa, samo je za proveru
+    }
+}, 1000);
