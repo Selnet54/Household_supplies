@@ -448,6 +448,7 @@ function sacuvajPodatke(data) {
         showVoiceStatus(`✅ Sačuvano: ${data.product_name}`, '#4CAF50');
         console.log('✅ Podaci sačuvani!');
         
+        // ⭐ SAMO OSVEŽI PREGLED, NE OTVARAJ ZALIHE!
         setTimeout(() => {
             if (typeof prikaziSveUnose === 'function') {
                 try { 
@@ -457,13 +458,8 @@ function sacuvajPodatke(data) {
                     console.warn('prikaziSveUnose greška:', e);
                 }
             }
-            if (typeof renderInventory === 'function') {
-                try { 
-                    renderInventory(); 
-                    console.log('✅ Inventar osvežen');
-                } catch(e) {}
-            }
-            console.log('✅ Podaci osveženi');
+            // ⭐ UKLONJENO renderInventory() - NE otvaramo zalihe!
+            console.log('✅ Podaci osveženi (zalihe NISU otvorene)');
         }, 50);
         
     } else {
@@ -675,9 +671,6 @@ function startVoiceRecognition() {
                 setTimeout(() => {
                     if (typeof prikaziSveUnose === 'function') {
                         try { prikaziSveUnose(); } catch(e) {}
-                    }
-                    if (typeof renderInventory === 'function') {
-                        try { renderInventory(); } catch(e) {}
                     }
                     otvoriZaliheEkran();
                     END_AKTIVAN = false;
