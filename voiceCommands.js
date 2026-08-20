@@ -249,11 +249,20 @@ function parseVoiceDataEntry(command) {
         }
     }
     
-    // ============================================
-    // KORAK 5: NAZIV PROIZVODA
-    // ============================================
-    
-    result.product_name = nameParts.join(' ').trim() || 'Proizvod';
+   // ============================================
+// KORAK 5: NAZIV PROIZVODA
+// ============================================
+
+result.product_name = nameParts.join(' ').trim() || 'Proizvod';
+
+// ⭐ POPRAVKA: Ukloni "l" ako se pojavljuje kao greška (npr. "grill l pile" -> "grill pile")
+result.product_name = result.product_name.replace(/\b[lL]\b/g, '').trim();
+// Ako ima dupli razmak, smanji na jedan
+result.product_name = result.product_name.replace(/\s+/g, ' ');
+// Ukloni "l" i ako je spojeno sa rečju (npr. "pilel" -> "pile")
+result.product_name = result.product_name.replace(/l(?=[a-z])/gi, '');
+// Još jedna provera - ako ima "l pile" -> "pile"
+result.product_name = result.product_name.replace(/l\s+pile/gi, 'pile');
     
    
 // ============================================
@@ -579,6 +588,9 @@ function processAndSaveItem(command) {
 // ============================================
 // 9. GLAVNA FUNKCIJA - START VOICE RECOGNITION
 // ============================================
+// ============================================
+// 9. GLAVNA FUNKCIJA - START VOICE RECOGNITION
+// ============================================
 
 function startVoiceRecognition() {
     console.log('🎤 startVoiceRecognition POZVAN!');
@@ -596,16 +608,13 @@ function startVoiceRecognition() {
         navigator.mediaDevices.getUserMedia({ audio: true })
             .then(function(stream) {
                 console.log('✅ Dozvola za mikrofon odobrena');
-                // Zatvori stream
                 stream.getTracks().forEach(track => track.stop());
-                // Pokreni recognition
                 startRecognitionEngine();
             })
             .catch(function(err) {
                 console.error('❌ Greška pri dozvoli za mikrofon:', err);
                 showVoiceStatus('❌ Dozvolite pristup mikrofonu!', '#f44336');
                 
-                // Pokušaj ponovo sa objašnjenjem
                 setTimeout(function() {
                     if (confirm('🎤 Da biste koristili glasovni unos, potrebno je dozvoliti pristup mikrofonu.\n\nDa li želite da pokušate ponovo?')) {
                         startVoiceRecognition();
@@ -615,7 +624,6 @@ function startVoiceRecognition() {
                 }, 500);
             });
     } else {
-        // Ako nema mediaDevices, pokreni direktno
         startRecognitionEngine();
     }
 }
@@ -657,8 +665,6 @@ function startRecognitionEngine() {
         isProcessingCommand = false;
         END_AKTIVAN = false;
     };
-
-    // ... ostatak onresult, onerror, onend (isti kao pre) ...
 
     recognition.onresult = function(event) {
         let interimText = '';
@@ -780,6 +786,8 @@ function startRecognitionEngine() {
             showVoiceStatus('❌ Dozvolite pristup mikrofonu.', '#f44336');
         } else if (event.error === 'no-speech') {
             showVoiceStatus('⚠️ Nisam čuo govor. Pokušajte ponovo.', '#FF9800');
+        } else if (event.error === 'audio-capture') {
+            showVoiceStatus('❌ Greška pri hvatanju zvuka. Proverite mikrofon.', '#f44336');
         }
         isProcessingCommand = false;
     };
@@ -787,14 +795,39 @@ function startRecognitionEngine() {
     recognition.onend = function() {
         console.log('🎤 Glasovno prepoznavanje završeno.');
         isProcessingCommand = false;
+        
+        // Ako nije end, automatski restartuj (za mobilne)
+        if (!END_AKTIVAN && !isProcessingCommand) {
+            console.log('🔄 Automatski restartujem recognition...');
+            setTimeout(() => {
+                if (recognition) {
+                    try {
+                        recognition.start();
+                        console.log('✅ Recognition restartovan');
+                    } catch(e) {
+                        console.log('❌ Ne mogu da restartujem:', e);
+                    }
+                }
+            }, 1000);
+        }
     };
 
     try {
         recognition.start();
         console.log('✅ Mikrofon pokrenut!');
+        showVoiceStatus('🎤 Slušam...', '#2196F3');
     } catch(e) {
         console.error('❌ Greška pri pokretanju:', e);
         showVoiceStatus('❌ Greška pri pokretanju mikrofona', '#f44336');
+        setTimeout(() => {
+            if (recognition) {
+                try {
+                    recognition.start();
+                } catch(err) {
+                    console.error('❌ Ponovni pokušaj neuspešan:', err);
+                }
+            }
+        }, 2000);
     }
 }
 
@@ -1062,3 +1095,19 @@ setTimeout(function() {
         // Ne radi ništa, samo je za proveru
     }
 }, 1000);
+// ============================================
+// 16. POKRENI MIKROFON NA MOBILNOM
+// ============================================
+
+// Ovo pomaže da mikrofon radi na mobilnim uređajima
+document.addEventListener('touchstart', function() {
+    console.log('📱 Touch detektovan - priprema mikrofona');
+    // Ako je voice menu otvoren, pokušaj restart
+    const voiceMenu = document.getElementById('voiceMenuScreen');
+    if (voiceMenu && voiceMenu.style.display === 'flex') {
+        console.log('🔄 Restartujem mikrofon nakon touch-a');
+        if (typeof restartMicrophone === 'function') {
+            restartMicrophone();
+        }
+    }
+}, { once: false });
