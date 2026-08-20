@@ -903,15 +903,6 @@ window.goBackFromVoice = goBackFromVoice;
 // Pregazi hideVoiceMenu
 window.hideVoiceMenu = hideVoiceMenu;
 
-// Izvezi sve
-window.processStartCommand = processAndSaveItem;
-window.popuniStartPodatke = popuniFormuPodacima;
-window.otvoriZaliheEkran = otvoriZaliheEkran;
-window.sacuvajPodatke = sacuvajPodatke;
-window.parseVoiceDataEntry = parseVoiceDataEntry;
-window.processAndSaveItem = processAndSaveItem;
-window.restartMicrophone = restartMicrophone;  
-
 // ============================================
 // 14. ⛔ ZABRANA OTVARANJA ZALIHA IZ renderInventory
 // ============================================
