@@ -1235,4 +1235,101 @@ function debugFormVisibility() {
 
 // Eksportuj debug funkciju
 window.debugFormVisibility = debugFormVisibility;
+// ============================================
+// 19. POPRAVKA - ZADRŽAVANJE PODATAKA U FORMI
+// ============================================
+
+// Sačuvaj originalnu saveProduct funkciju
+const originalSaveProduct = window.saveProduct;
+
+// Override saveProduct da ne resetuje formu
+window.saveProduct = function() {
+    console.log('🛡️ saveProduct pozvan - čuvam podatke ali NE resetujem formu');
+    
+    // Prvo sačuvaj trenutne vrednosti
+    const productInput = document.getElementById('productInput');
+    const pieceInput = document.getElementById('pieceInput');
+    const quantityInput = document.getElementById('quantityInput');
+    const shelfLifeInput = document.getElementById('shelfLifeInput');
+    const unitSelect = document.getElementById('unitSelect');
+    const storageSelect = document.getElementById('storageSelect');
+    
+    const savedValues = {
+        product: productInput ? productInput.value : '',
+        piece: pieceInput ? pieceInput.value : '1',
+        quantity: quantityInput ? quantityInput.value : '1',
+        shelf_life: shelfLifeInput ? shelfLifeInput.value : '12',
+        unit: unitSelect ? unitSelect.value : 'kom',
+        storage: storageSelect ? storageSelect.value : 'Zamrzivač 1'
+    };
+    
+    console.log('💾 Sačuvane vrednosti pre čuvanja:', savedValues);
+    
+    // Pozovi originalnu saveProduct
+    if (typeof originalSaveProduct === 'function') {
+        try {
+            originalSaveProduct();
+            console.log('✅ originalSaveProduct uspešan');
+        } catch(e) {
+            console.warn('originalSaveProduct greška:', e);
+        }
+    }
+    
+    // VRAĆANJE VREDNOSTI NAKON ČUVANJA (sprečava resetovanje)
+    setTimeout(() => {
+        console.log('🔄 Vraćam vrednosti u formu...');
+        
+        if (productInput) {
+            productInput.value = savedValues.product;
+            productInput.dispatchEvent(new Event('input', { bubbles: true }));
+            productInput.dispatchEvent(new Event('change', { bubbles: true }));
+            console.log('✅ Naziv vraćen:', savedValues.product);
+        }
+        
+        if (pieceInput) {
+            pieceInput.value = savedValues.piece;
+            pieceInput.dispatchEvent(new Event('input', { bubbles: true }));
+            pieceInput.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        
+        if (quantityInput) {
+            quantityInput.value = savedValues.quantity;
+            quantityInput.dispatchEvent(new Event('input', { bubbles: true }));
+            quantityInput.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        
+        if (shelfLifeInput) {
+            shelfLifeInput.value = savedValues.shelf_life;
+            shelfLifeInput.dispatchEvent(new Event('input', { bubbles: true }));
+            shelfLifeInput.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        
+        if (unitSelect) {
+            for (let option of unitSelect.options) {
+                if (option.value === savedValues.unit) {
+                    option.selected = true;
+                    unitSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                    break;
+                }
+            }
+        }
+        
+        if (storageSelect) {
+            for (let option of storageSelect.options) {
+                if (option.value === savedValues.storage) {
+                    option.selected = true;
+                    storageSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                    break;
+                }
+            }
+        }
+        
+        // Još jednom prikaži polja
+        prikaziPoljaZaUnos();
+        
+        console.log('✅ Vrednosti vraćene u formu!');
+    }, 100);
+};
+
+console.log('🛡️ saveProduct override aktivan - podaci ostaju u formi!');
 console.log('🔄 Funkcije: popuniFormuPodacima(), ensureFormVisible(), prikaziTrenutnePodatke(), ocistiFormu()');
