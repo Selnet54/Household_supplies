@@ -959,23 +959,6 @@ window.restartMicrophone = restartMicrophone;
     console.log('✅ 4. ekran (voiceMenuScreen) radi!');
 })();
 
-// ============================================
-// 15. IZVOZ SVIH FUNKCIJA
-// ============================================
-
-window.startVoiceRecognition = startVoiceRecognition;
-window.stopVoiceRecognition = stopVoiceRecognition;
-window.goBackFromVoice = goBackFromVoice;
-window.hideVoiceMenu = hideVoiceMenu;
-window.parseVoiceDataEntry = parseVoiceDataEntry;
-window.processStartCommand = processAndSaveItem;
-window.popuniStartPodatke = popuniFormuPodacima;
-window.otvoriZaliheEkran = otvoriZaliheEkran;
-window.sacuvajPodatke = sacuvajPodatke;
-window.processAndSaveItem = processAndSaveItem;
-window.selectVoiceMode = selectVoiceMode;
-window.restartMicrophone = restartMicrophone;
-
 console.log('✅ VOICE COMMANDS - KONAČNA VERZIJA UČITANA!');
 console.log('🎤 "unos" → diktiraj → "plus" (samo završava) → "end" (otvara zalihe)');
 console.log('⛔ PLUS NE otvara zalihe!');
