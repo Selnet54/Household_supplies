@@ -226,30 +226,30 @@ function parseVoiceDataEntry(command) {
     result.product_name = nameParts.join(' ').trim() || 'Proizvod';
     
     // ============================================
-    // KORAK 6: JEDINICA I SKLADIŠTE
-    // ============================================
-    
-    if (foundUnit) {
-        result.unit = foundUnit;
-    } else {
-        if (text.includes('gram') || text.includes('grama') || text.includes('g ')) {
-            result.unit = 'g';
-            console.log('🔍 Pronađeno "gram" -> jedinica = g');
-        } else if (text.includes('kilogram') || text.includes('kg')) {
-            result.unit = 'kg';
-            console.log('🔍 Pronađeno "kilogram" -> jedinica = kg');
-        } else if (text.includes('litar') || text.includes('l ')) {
-            result.unit = 'l';
-            console.log('🔍 Pronađeno "litar" -> jedinica = l');
-        } else if (text.includes('komad') || text.includes('kom')) {
-            result.unit = 'kom';
-            console.log('🔍 Pronađeno "komad" -> jedinica = kom');
-        }
-    }
-    
-    if (foundStorage) {
-        result.storage = foundStorage;
-    }
+// KORAK 6: JEDINICA I SKLADIŠTE - POPRAVLJENO
+// ============================================
+
+// ⭐ PRVO PROVERI DA LI JE "g" U TEKSTU (pre svega ostalog!)
+if (text.includes('gram') || text.includes('grama') || text.includes('g ') || text.includes('g)')) {
+    result.unit = 'g';
+    console.log('🔍 Pronađeno "gram" -> jedinica = g');
+} else if (foundUnit) {
+    result.unit = foundUnit;
+    console.log('🔍 Pronađena jedinica iz reči:', foundUnit);
+} else if (text.includes('kilogram') || text.includes('kg')) {
+    result.unit = 'kg';
+    console.log('🔍 Pronađeno "kilogram" -> jedinica = kg');
+} else if (text.includes('litar') || text.includes('l ')) {
+    result.unit = 'l';
+    console.log('🔍 Pronađeno "litar" -> jedinica = l');
+} else if (text.includes('komad') || text.includes('kom')) {
+    result.unit = 'kom';
+    console.log('🔍 Pronađeno "komad" -> jedinica = kom');
+}
+
+if (foundStorage) {
+    result.storage = foundStorage;
+}
     
     // ============================================
     // KORAK 7: POPRAVKA ZA "500 GRAMA"
@@ -350,9 +350,16 @@ function sacuvajPodatke(data) {
     isVoiceInput = true;
     window._isVoiceInput = true;
     
+    // ⛔ UGASI SVE POPUP-OVE
     const originalShowModernAlert = window.showModernAlert;
     window.showModernAlert = function() {
         console.log('⛔ POP-UP ZABRANJEN (voice input)');
+        return;
+    };
+    
+    const originalAlert = window.alert;
+    window.alert = function() {
+        console.log('⛔ ALERT ZABRANJEN (voice input)');
         return;
     };
     
@@ -419,8 +426,10 @@ function sacuvajPodatke(data) {
         }
     }
     
+    // Vrati originalne funkcije
     setTimeout(() => {
         window.showModernAlert = originalShowModernAlert;
+        window.alert = originalAlert;
     }, 1000);
     
     if (saved) {
