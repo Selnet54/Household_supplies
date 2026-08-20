@@ -1408,14 +1408,15 @@ function renderInventory() {
             // ===== DODATO: Provera za novi proizvod =====
             const isNew = p.isNew === true;
             const isLow = (p.unit === 'g' && p.quantity < 400) || (p.unit === 'kg' && p.quantity < 0.4) || ((p.unit === 'kom' || p.unit === 'pcs') && p.quantity <= 2);
-            
-            // ===== DODATO: Svetloplava za nove, narandžasta za male količine =====
+
+            // ===== DODATO: Svetloplava za NOVE, narandžasta za KRITIČNE količine =====
             let bgColor = '';
             if (isNew) {
-                bgColor = '#90CAF9';  // Svetloplava
+                    bgColor = '#90CAF9';  // Svetloplava - NOVI PROIZVODI
             } else if (isLow) {
-                bgColor = '#F9AA65';  // Narandžasta
+                bgColor = '#F9AA65';  // Narandžasta - KRITIČNE KOLIČINE
             }
+            // Ako nije ni novo ni kritično, bgColor ostaje prazan (default boja)
             
             html += `<div class="table-row" style="display:grid; grid-template-columns:40px 1.2fr 1.2fr 0.8fr 0.8fr 0.8fr 0.8fr 1fr; gap:2px; border-bottom:1px solid #eee; padding:5px 0; background:${bgColor};">`;
             html += `<div class="cell" style="text-align:center;"><input type="checkbox" class="row-checkbox" data-index="${originalIndex}"></div>`;
