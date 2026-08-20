@@ -292,61 +292,64 @@ function parseVoiceDataEntry(command) {
 function popuniFormuPodacima(data) {
     console.log('📝 Popunjavam formu:', data);
     
-    const productInput = document.getElementById('productInput');
-    if (productInput) {
-        productInput.value = data.product_name || '';
-        productInput.dispatchEvent(new Event('input', { bubbles: true }));
-        productInput.dispatchEvent(new Event('change', { bubbles: true }));
-    }
-    
-    const pieceInput = document.getElementById('pieceInput');
-    if (pieceInput) {
-        pieceInput.value = data.piece || '1';
-        pieceInput.dispatchEvent(new Event('input', { bubbles: true }));
-        pieceInput.dispatchEvent(new Event('change', { bubbles: true }));
-    }
-    
-    const quantityInput = document.getElementById('quantityInput');
-    if (quantityInput) {
-        quantityInput.value = data.quantity || '1';
-        quantityInput.dispatchEvent(new Event('input', { bubbles: true }));
-        quantityInput.dispatchEvent(new Event('change', { bubbles: true }));
-    }
-    
-    const shelfLifeInput = document.getElementById('shelfLifeInput');
-    if (shelfLifeInput) {
-        shelfLifeInput.value = data.shelf_life || '12';
-        shelfLifeInput.dispatchEvent(new Event('input', { bubbles: true }));
-        shelfLifeInput.dispatchEvent(new Event('change', { bubbles: true }));
-    }
-    
-    const unitSelect = document.getElementById('unitSelect');
-    if (unitSelect && data.unit) {
-        for (let option of unitSelect.options) {
-            if (option.value === data.unit || option.text.toLowerCase().includes(data.unit)) {
-                option.selected = true;
-                unitSelect.dispatchEvent(new Event('change', { bubbles: true }));
-                break;
+    // Sačekaj da se forma učita
+    setTimeout(() => {
+        const productInput = document.getElementById('productInput');
+        if (productInput) {
+            productInput.value = data.product_name || '';
+            productInput.dispatchEvent(new Event('input', { bubbles: true }));
+            productInput.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        
+        const pieceInput = document.getElementById('pieceInput');
+        if (pieceInput) {
+            pieceInput.value = data.piece || '1';
+            pieceInput.dispatchEvent(new Event('input', { bubbles: true }));
+            pieceInput.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        
+        const quantityInput = document.getElementById('quantityInput');
+        if (quantityInput) {
+            quantityInput.value = data.quantity || '1';
+            quantityInput.dispatchEvent(new Event('input', { bubbles: true }));
+            quantityInput.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        
+        const shelfLifeInput = document.getElementById('shelfLifeInput');
+        if (shelfLifeInput) {
+            shelfLifeInput.value = data.shelf_life || '12';
+            shelfLifeInput.dispatchEvent(new Event('input', { bubbles: true }));
+            shelfLifeInput.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        
+        const unitSelect = document.getElementById('unitSelect');
+        if (unitSelect && data.unit) {
+            for (let option of unitSelect.options) {
+                if (option.value === data.unit || option.text.toLowerCase().includes(data.unit)) {
+                    option.selected = true;
+                    unitSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                    break;
+                }
             }
         }
-    }
-    
-    const storageSelect = document.getElementById('storageSelect');
-    if (storageSelect && data.storage) {
-        for (let option of storageSelect.options) {
-            if (option.value === data.storage || option.text.includes(data.storage)) {
-                option.selected = true;
-                storageSelect.dispatchEvent(new Event('change', { bubbles: true }));
-                break;
+        
+        const storageSelect = document.getElementById('storageSelect');
+        if (storageSelect && data.storage) {
+            for (let option of storageSelect.options) {
+                if (option.value === data.storage || option.text.includes(data.storage)) {
+                    option.selected = true;
+                    storageSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                    break;
+                }
             }
         }
-    }
-    
-    if (typeof updateExpiryDate === 'function') {
-        try { updateExpiryDate(); } catch(e) {}
-    }
-    
-    showVoiceStatus(`✅ Uneto: ${data.product_name} (${data.quantity} ${data.unit})`, '#4CAF50');
+        
+        if (typeof updateExpiryDate === 'function') {
+            try { updateExpiryDate(); } catch(e) {}
+        }
+        
+        showVoiceStatus(`✅ Uneto: ${data.product_name} (${data.quantity} ${data.unit})`, '#4CAF50');
+    }, 300);
 }
 
 // ============================================
@@ -359,8 +362,16 @@ function sacuvajPodatke(data) {
     isVoiceInput = true;
     window._isVoiceInput = true;
     
+    // ⛔ UGASI POP-UP OBAVEŠTENJE
+    const originalShowModernAlert = window.showModernAlert;
+    window.showModernAlert = function() {
+        console.log('⛔ POP-UP ZABRANJEN (voice input)');
+        return;
+    };
+    
     let saved = false;
     
+    // Pokušaj sa saveProduct
     if (typeof saveProduct === 'function') {
         try { 
             saveProduct(); 
@@ -371,6 +382,7 @@ function sacuvajPodatke(data) {
         }
     }
     
+    // Pokušaj sa handleFormSubmit
     if (!saved && typeof handleFormSubmit === 'function') {
         try { 
             handleFormSubmit(); 
@@ -381,6 +393,7 @@ function sacuvajPodatke(data) {
         }
     }
     
+    // Pokušaj sa addProduct
     if (!saved && typeof addProduct === 'function') {
         try { 
             addProduct(); 
@@ -391,6 +404,7 @@ function sacuvajPodatke(data) {
         }
     }
     
+    // Rezervni metod - direktno u inventory niz
     if (!saved && typeof window.inventory !== 'undefined' && Array.isArray(window.inventory)) {
         const newItem = {
             id: Date.now(),
@@ -408,6 +422,7 @@ function sacuvajPodatke(data) {
         console.log('✅ Dodat u inventory niz');
     }
     
+    // Pokušaj klik na dugme za čuvanje
     if (!saved) {
         const saveBtn = document.querySelector('#saveProductBtn, button[type="submit"], .btn-save, .save-btn');
         if (saveBtn) {
@@ -420,6 +435,11 @@ function sacuvajPodatke(data) {
             }
         }
     }
+    
+    // Vrati originalnu funkciju za pop-up
+    setTimeout(() => {
+        window.showModernAlert = originalShowModernAlert;
+    }, 1000);
     
     if (saved) {
         showVoiceStatus(`✅ Sačuvano: ${data.product_name}`, '#4CAF50');
