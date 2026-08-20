@@ -281,63 +281,75 @@ if (foundStorage) {
 function popuniFormuPodacima(data) {
     console.log('📝 Popunjavam formu:', data);
     
-    setTimeout(() => {
-        const productInput = document.getElementById('productInput');
-        if (productInput) {
-            productInput.value = data.product_name || '';
-            productInput.dispatchEvent(new Event('input', { bubbles: true }));
-            productInput.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-        
-        const pieceInput = document.getElementById('pieceInput');
-        if (pieceInput) {
-            pieceInput.value = data.piece || '1';
-            pieceInput.dispatchEvent(new Event('input', { bubbles: true }));
-            pieceInput.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-        
-        const quantityInput = document.getElementById('quantityInput');
-        if (quantityInput) {
-            quantityInput.value = data.quantity || '1';
-            quantityInput.dispatchEvent(new Event('input', { bubbles: true }));
-            quantityInput.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-        
-        const shelfLifeInput = document.getElementById('shelfLifeInput');
-        if (shelfLifeInput) {
-            shelfLifeInput.value = data.shelf_life || '12';
-            shelfLifeInput.dispatchEvent(new Event('input', { bubbles: true }));
-            shelfLifeInput.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-        
-        const unitSelect = document.getElementById('unitSelect');
-        if (unitSelect && data.unit) {
-            for (let option of unitSelect.options) {
-                if (option.value === data.unit || option.text.toLowerCase().includes(data.unit)) {
-                    option.selected = true;
-                    unitSelect.dispatchEvent(new Event('change', { bubbles: true }));
-                    break;
-                }
+    // ⭐ PRVO PROVERI DA LI FORMA POSTOJI
+    const productInput = document.getElementById('productInput');
+    if (!productInput) {
+        console.warn('⚠️ Forma nije pronađena, čekam 500ms pa pokušavam ponovo...');
+        setTimeout(() => {
+            popuniFormuPodacima(data);
+        }, 500);
+        return;
+    }
+    
+    // ⭐ DIREKTNO POPUNI BEZ setTimeout (ili sa kratkim)
+    productInput.value = data.product_name || '';
+    productInput.dispatchEvent(new Event('input', { bubbles: true }));
+    productInput.dispatchEvent(new Event('change', { bubbles: true }));
+    console.log('✅ Naziv postavljen:', productInput.value);
+    
+    const pieceInput = document.getElementById('pieceInput');
+    if (pieceInput) {
+        pieceInput.value = data.piece || '1';
+        pieceInput.dispatchEvent(new Event('input', { bubbles: true }));
+        pieceInput.dispatchEvent(new Event('change', { bubbles: true }));
+        console.log('✅ Komad postavljen:', pieceInput.value);
+    }
+    
+    const quantityInput = document.getElementById('quantityInput');
+    if (quantityInput) {
+        quantityInput.value = data.quantity || '1';
+        quantityInput.dispatchEvent(new Event('input', { bubbles: true }));
+        quantityInput.dispatchEvent(new Event('change', { bubbles: true }));
+        console.log('✅ Količina postavljena:', quantityInput.value);
+    }
+    
+    const shelfLifeInput = document.getElementById('shelfLifeInput');
+    if (shelfLifeInput) {
+        shelfLifeInput.value = data.shelf_life || '12';
+        shelfLifeInput.dispatchEvent(new Event('input', { bubbles: true }));
+        shelfLifeInput.dispatchEvent(new Event('change', { bubbles: true }));
+        console.log('✅ Rok postavljen:', shelfLifeInput.value);
+    }
+    
+    const unitSelect = document.getElementById('unitSelect');
+    if (unitSelect && data.unit) {
+        for (let option of unitSelect.options) {
+            if (option.value === data.unit || option.text.toLowerCase().includes(data.unit)) {
+                option.selected = true;
+                unitSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                console.log('✅ Jedinica postavljena:', unitSelect.value);
+                break;
             }
         }
-        
-        const storageSelect = document.getElementById('storageSelect');
-        if (storageSelect && data.storage) {
-            for (let option of storageSelect.options) {
-                if (option.value === data.storage || option.text.includes(data.storage)) {
-                    option.selected = true;
-                    storageSelect.dispatchEvent(new Event('change', { bubbles: true }));
-                    break;
-                }
+    }
+    
+    const storageSelect = document.getElementById('storageSelect');
+    if (storageSelect && data.storage) {
+        for (let option of storageSelect.options) {
+            if (option.value === data.storage || option.text.includes(data.storage)) {
+                option.selected = true;
+                storageSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                console.log('✅ Skladište postavljeno:', storageSelect.value);
+                break;
             }
         }
-        
-        if (typeof updateExpiryDate === 'function') {
-            try { updateExpiryDate(); } catch(e) {}
-        }
-        
-        showVoiceStatus(`✅ Uneto: ${data.product_name} (${data.quantity} ${data.unit})`, '#4CAF50');
-    }, 300);
+    }
+    
+    if (typeof updateExpiryDate === 'function') {
+        try { updateExpiryDate(); } catch(e) {}
+    }
+    
+    showVoiceStatus(`✅ Uneto: ${data.product_name} (${data.quantity} ${data.unit})`, '#4CAF50');
 }
 
 // ============================================
@@ -662,36 +674,40 @@ function startVoiceRecognition() {
         }
         
         // ============================================
-        // 2. "PLUS" - ZAVRŠAVA UNOS
-        // ============================================
-        if (lowerFull.includes('plus')) {
-            console.log('✅ PLUS DETEKTOVAN - završavam unos (NE otvaram zalihe)');
-            isProcessingCommand = true;
-            
-            let parts = activeBuffer.split(/\bplus\b/i);
-            let itemText = parts[0].trim();
-            
-            if (itemText.length > 2) {
-                processAndSaveItem(itemText);
-            }
-            
-            activeBuffer = parts.slice(1).join('').trim();
-            
-            showVoiceStatus('✅ Unos sačuvan. Recite sledeći ili "end" za kraj.', '#4CAF50');
-            
-            setTimeout(() => {
-                if (typeof prikaziSveUnose === 'function') {
-                    try { prikaziSveUnose(); } catch(e) {}
-                }
-                console.log('✅ Pregled osvežen nakon plus');
-            }, 200);
-            
-            setTimeout(() => {
-                isProcessingCommand = false;
-            }, 500);
-            
-            return;
+        // // ============================================
+// 2. "PLUS" - ZAVRŠAVA UNOS (NE OTVARA ZALIHE!)
+// ============================================
+if (lowerFull.includes('plus')) {
+    console.log('✅ PLUS DETEKTOVAN - završavam unos (NE otvaram zalihe)');
+    isProcessingCommand = true;
+    
+    // ⭐ SPREČI OTVARANJE ZALIHA
+    END_AKTIVAN = false;
+    
+    let parts = activeBuffer.split(/\bplus\b/i);
+    let itemText = parts[0].trim();
+    
+    if (itemText.length > 2) {
+        processAndSaveItem(itemText);
+    }
+    
+    activeBuffer = parts.slice(1).join('').trim();
+    
+    showVoiceStatus('✅ Unos sačuvan. Recite sledeći ili "end" za kraj.', '#4CAF50');
+    
+    setTimeout(() => {
+        if (typeof prikaziSveUnose === 'function') {
+            try { prikaziSveUnose(); } catch(e) {}
         }
+        console.log('✅ Pregled osvežen nakon plus');
+    }, 200);
+    
+    setTimeout(() => {
+        isProcessingCommand = false;
+    }, 500);
+    
+    return; // ⭐ OVO JE KLJUČNO - prekida dalje izvršavanje
+}
         
         // ============================================
         // 3. "UNOS" - OTVARA DATA ENTRY
