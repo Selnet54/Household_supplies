@@ -759,43 +759,58 @@ function startVoiceRecognition() {
         const lowerFull = activeBuffer.toLowerCase();
         console.log('🔍 PROVERAVAM CELI BAFER:', lowerFull);
         
-        if (lowerFull.includes('end')) {
-            console.log('🏁 END DETEKTOVAN - otvaram zalihe!');
-            isProcessingCommand = true;
-            END_AKTIVAN = true;
-            ALLOW_INVENTORY_OPEN = true;
-            
-            let itemText = activeBuffer;
-            const parts = itemText.split(/\bend\b/i);
-            itemText = parts[0].trim();
-            
-            if (itemText.length > 2) {
-                processAndSaveItem(itemText);
-            }
-            
-            activeBuffer = '';
-            
-            setTimeout(() => {
-                stopVoiceRecognition();
-                setTimeout(() => {
-                    if (typeof prikaziSveUnose === 'function') {
-                        try { prikaziSveUnose(); } catch(e) {}
-                    }
-                    ALLOW_INVENTORY_OPEN = true;
-                    otvoriZaliheEkran();
-                    setTimeout(() => {
-                        ALLOW_INVENTORY_OPEN = false;
-                        END_AKTIVAN = false;
-                        setTimeout(() => {
-                            console.log('🔄 Restartujem mikrofon nakon "end"');
-                            startVoiceRecognition();
-                        }, 2000);
-                    }, 2000);
-                }, 500);
-            }, 800);
-            
-            return;
+       // ============================================
+// 1. "END" - OTVARA ZALIHE (POPRAVLJENA DETEKCIJA)
+// ============================================
+// Proveri da li sadrži "end" ili "and" (zbog lošeg prepoznavanja)
+if (lowerFull.includes('end') || lowerFull.includes(' and ')) {
+    console.log('🏁 END DETEKTOVAN - otvaram zalihe!');
+    isProcessingCommand = true;
+    END_AKTIVAN = true;
+    ALLOW_INVENTORY_OPEN = true;
+    
+    let itemText = activeBuffer;
+    // Ukloni "end" i "and" iz teksta
+    let parts = itemText.split(/\bend\b/i);
+    if (parts.length === 1) {
+        parts = itemText.split(/\band\b/i);
+    }
+    itemText = parts[0].trim();
+    
+    // Ako ima teksta pre "end", sačuvaj ga
+    if (itemText.length > 2 && !itemText.toLowerCase().includes('and')) {
+        processAndSaveItem(itemText);
+    } else if (itemText.length > 2 && itemText.toLowerCase().includes('and')) {
+        // Ukloni "and" iz teksta
+        itemText = itemText.replace(/\band\b/i, '').trim();
+        if (itemText.length > 2) {
+            processAndSaveItem(itemText);
         }
+    }
+    
+    activeBuffer = '';
+    
+    setTimeout(() => {
+        stopVoiceRecognition();
+        setTimeout(() => {
+            if (typeof prikaziSveUnose === 'function') {
+                try { prikaziSveUnose(); } catch(e) {}
+            }
+            ALLOW_INVENTORY_OPEN = true;
+            otvoriZaliheEkran();
+            setTimeout(() => {
+                ALLOW_INVENTORY_OPEN = false;
+                END_AKTIVAN = false;
+                setTimeout(() => {
+                    console.log('🔄 Restartujem mikrofon nakon "end"');
+                    startVoiceRecognition();
+                }, 2000);
+            }, 2000);
+        }, 500);
+    }, 800);
+    
+    return;
+}
         
         if (lowerFull.includes('plus')) {
             console.log('✅ PLUS DETEKTOVAN - završavam unos (NE otvaram zalihe)');
