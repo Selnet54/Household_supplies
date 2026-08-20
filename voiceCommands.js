@@ -627,7 +627,7 @@ function otvoriZaliheEkran() {
 }
 
 // ============================================
-// 8. OBRADA I ČUVANJE
+// 8. OBRADA I ČUVANJE (MORA BITI PRE startVoiceRecognition!)
 // ============================================
 
 function processAndSaveItem(command) {
@@ -669,7 +669,7 @@ function processAndSaveItem(command) {
 // ============================================
 
 function startVoiceRecognition() {
-    console.log('🎤 startVoiceRecognition POZVAN!');
+     console.log('🎤 startVoiceRecognition POZVAN!');
     
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
