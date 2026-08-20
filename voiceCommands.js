@@ -8,6 +8,7 @@ let lastSavedData = null;
 let isProcessingCommand = false;
 let END_AKTIVAN = false;
 let isVoiceInput = false;
+let isRestarting = false;  // ⭐ DODAJ OVO - sprečava petlju
 
 // ============================================
 // 1. POMOĆNE FUNKCIJE
@@ -588,12 +589,14 @@ function processAndSaveItem(command) {
 // ============================================
 // 9. GLAVNA FUNKCIJA - START VOICE RECOGNITION
 // ============================================
-// ============================================
-// 9. GLAVNA FUNKCIJA - START VOICE RECOGNITION
-// ============================================
 
 function startVoiceRecognition() {
     console.log('🎤 startVoiceRecognition POZVAN!');
+    
+    // ⭐ Resetuj flagove - sprečava petlju
+    isRestarting = false;
+    isProcessingCommand = false;
+    END_AKTIVAN = false;
     
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
@@ -627,10 +630,15 @@ function startVoiceRecognition() {
         startRecognitionEngine();
     }
 }
-
 // ===== PRAVI RECOGNITION ENGINE =====
 function startRecognitionEngine() {
     console.log('🎤 Pokrećem recognition engine...');
+    
+    // ⭐ SPREČI PETLJU
+    if (isRestarting) {
+        console.log('⏳ Već se restartuje, preskačem...');
+        return;
+    }
     
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
@@ -642,7 +650,6 @@ function startRecognitionEngine() {
         try { recognition.stop(); } catch(e) {}
         recognition = null;
     }
-
     recognition = new SpeechRecognition();
     const langCode = typeof currentLang !== 'undefined' ? currentLang : 'sr';
     const speechLangMap = {
@@ -793,24 +800,18 @@ function startRecognitionEngine() {
     };
 
     recognition.onend = function() {
-        console.log('🎤 Glasovno prepoznavanje završeno.');
-        isProcessingCommand = false;
-        
-        // Ako nije end, automatski restartuj (za mobilne)
-        if (!END_AKTIVAN && !isProcessingCommand) {
-            console.log('🔄 Automatski restartujem recognition...');
-            setTimeout(() => {
-                if (recognition) {
-                    try {
-                        recognition.start();
-                        console.log('✅ Recognition restartovan');
-                    } catch(e) {
-                        console.log('❌ Ne mogu da restartujem:', e);
-                    }
-                }
-            }, 1000);
-        }
-    };
+    console.log('🎤 Glasovno prepoznavanje završeno.');
+    isProcessingCommand = false;
+    
+    // ⭐ UKLONJEN automatski restart - to je stvaralo petlju!
+    // Mikrofon se restartuje samo preko restartMicrophone() ili ponovnim klikom na Voice Input
+    
+    // Samo obavesti korisnika ako je završeno bez "end"
+    if (!END_AKTIVAN) {
+        console.log('⏸️ Recognition završen (nije "end")');
+        // Ne radi ništa - korisnik mora ponovo da pokrene
+    }
+};
 
     try {
         recognition.start();
