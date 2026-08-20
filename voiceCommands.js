@@ -322,32 +322,104 @@ function parseVoiceDataEntry(command) {
 // ============================================
 
 function ensureFormVisible() {
-    const mainScreen = document.getElementById('mainScreen');
-    const dataEntry = document.getElementById('dataEntryScreen');
+    console.log('🔍 ensureFormVisible POZVAN!');
     
-    // Sakrij sve ekrane
+    // SAKRIVI sve ekrane
     document.querySelectorAll('.screen').forEach(s => {
         s.style.display = 'none';
         s.classList.remove('active');
     });
     
-    // Prikaži mainScreen
+    // PRIKAŽI mainScreen
+    const mainScreen = document.getElementById('mainScreen');
     if (mainScreen) {
         mainScreen.style.display = 'flex';
         mainScreen.classList.add('active');
+        console.log('✅ mainScreen prikazan');
     }
     
-    // Prikaži data entry
+    // PRIKAŽI data entry ekran
+    const dataEntry = document.getElementById('dataEntryScreen');
     if (dataEntry) {
         dataEntry.style.display = 'block';
         dataEntry.classList.add('active');
+        console.log('✅ dataEntryScreen prikazan');
+    } else {
+        console.warn('⚠️ dataEntryScreen nije pronađen!');
+        // Pokušaj da pronađeš formu direktno
+        const form = document.querySelector('form');
+        if (form) {
+            form.style.display = 'block';
+            console.log('✅ Forma prikazana direktno');
+        }
     }
+    
+    // DIREKTNO prikaži polja (ovo je ključno!)
+    setTimeout(() => {
+        prikaziPoljaZaUnos();
+    }, 100);
     
     console.log('✅ Forma prikazana');
 }
-
 // ============================================
-// 6. POPUNJAVANJE FORME (NOVA VERZIJA)
+// 5.1 DIREKTNO PRIKAZIVANJE POLJA
+// ============================================
+
+function prikaziPoljaZaUnos() {
+    console.log('🔍 PRIKAZUJEM POLJA ZA UNOS...');
+    
+    // 1. Pokušaj da prikažeš dataEntryScreen
+    const dataEntry = document.getElementById('dataEntryScreen');
+    if (dataEntry) {
+        dataEntry.style.display = 'block';
+        dataEntry.style.visibility = 'visible';
+        dataEntry.style.opacity = '1';
+        dataEntry.classList.add('active');
+        console.log('✅ dataEntryScreen prikazan');
+    } else {
+        console.warn('⚠️ dataEntryScreen nije pronađen!');
+    }
+    
+    // 2. Pokušaj da prikažeš mainScreen
+    const mainScreen = document.getElementById('mainScreen');
+    if (mainScreen) {
+        mainScreen.style.display = 'flex';
+        mainScreen.style.visibility = 'visible';
+        mainScreen.style.opacity = '1';
+        mainScreen.classList.add('active');
+        console.log('✅ mainScreen prikazan');
+    }
+    
+    // 3. DIREKTNO prikaži sva polja
+    const polja = ['productInput', 'pieceInput', 'quantityInput', 'shelfLifeInput'];
+    polja.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.style.display = 'block';
+            el.style.visibility = 'visible';
+            el.style.opacity = '1';
+            console.log(`✅ Polje ${id} prikazano`);
+        } else {
+            console.warn(`⚠️ Polje ${id} nije pronađeno!`);
+        }
+    });
+    
+    // 4. Prikaži select polja
+    const selects = ['unitSelect', 'storageSelect'];
+    selects.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.style.display = 'block';
+            el.style.visibility = 'visible';
+            el.style.opacity = '1';
+            console.log(`✅ Select ${id} prikazan`);
+        }
+    });
+    
+    console.log('✅ Sva polja za unos su prikazana!');
+}
+// ============================================
+// 6. POPUNJAVANJE FORME (NOVA VERZIJA SA PRIKAZOM POLJA)
 // ============================================
 
 function popuniFormuPodacima(data) {
@@ -358,9 +430,15 @@ function popuniFormuPodacima(data) {
     
     // Sačekaj da se forma prikaže
     setTimeout(() => {
+        // ⭐ DIREKTNO prikaži sva polja PRE popunjavanja
+        prikaziPoljaZaUnos();
+        
         const productInput = document.getElementById('productInput');
         if (!productInput) {
-            console.warn('⚠️ Forma nije pronađena!');
+            console.warn('⚠️ productInput nije pronađen!');
+            // Pokušaj da pronađeš polja po drugom selektoru
+            const inputs = document.querySelectorAll('input[type="text"], input[type="number"]');
+            console.log('🔍 Pronađeni inputi:', inputs);
             return;
         }
         
@@ -394,22 +472,35 @@ function popuniFormuPodacima(data) {
             console.log('✅ Rok postavljen:', shelfLifeInput.value);
         }
         
-        // Postavi jedinicu
+        // Postavi jedinicu - POPRAVLJENA VERZIJA
         const unitSelect = document.getElementById('unitSelect');
         if (unitSelect && data.unit) {
             let found = false;
+            // Prvo probaj po vrednosti
             for (let option of unitSelect.options) {
-                if (option.value === data.unit || 
-                    option.text.toLowerCase().trim() === data.unit.toLowerCase().trim() ||
-                    option.text.toLowerCase().includes(data.unit.toLowerCase())) {
+                if (option.value === data.unit) {
                     option.selected = true;
                     found = true;
-                    unitSelect.dispatchEvent(new Event('change', { bubbles: true }));
-                    console.log('✅ Jedinica postavljena na:', unitSelect.value);
                     break;
                 }
             }
+            // Ako nije po vrednosti, probaj po tekstu
             if (!found) {
+                for (let option of unitSelect.options) {
+                    const optText = option.text.toLowerCase().trim();
+                    const unitText = data.unit.toLowerCase().trim();
+                    if (optText === unitText || optText.includes(unitText) || unitText.includes(optText)) {
+                        option.selected = true;
+                        found = true;
+                        break;
+                    }
+                }
+            }
+            if (found) {
+                unitSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                console.log('✅ Jedinica postavljena na:', unitSelect.value);
+            } else {
+                console.warn('⚠️ Jedinica nije pronađena:', data.unit);
                 unitSelect.selectedIndex = 0;
                 unitSelect.dispatchEvent(new Event('change', { bubbles: true }));
             }
@@ -455,6 +546,9 @@ function popuniFormuPodacima(data) {
                 quantityInput.dispatchEvent(new Event('input', { bubbles: true }));
             }
             console.log('🔄 Ponovno postavljanje vrednosti izvršeno');
+            
+            // JOŠ JEDNOM prikaži polja
+            prikaziPoljaZaUnos();
         }, 100);
         
     }, 200);
@@ -1107,4 +1201,38 @@ console.log('⛔ PLUS NE otvara zalihe!');
 console.log('📦 END otvara zalihe!');
 console.log('🔄 restartMicrophone dostupan!');
 console.log('📝 Podaci će se trajno prikazivati u formi!');
+// ============================================
+// 18. DEBUG FUNKCIJA
+// ============================================
+
+function debugFormVisibility() {
+    console.log('🔍 DEBUG FORME:');
+    const dataEntry = document.getElementById('dataEntryScreen');
+    console.log('dataEntryScreen:', dataEntry);
+    if (dataEntry) {
+        console.log('  display:', dataEntry.style.display);
+        console.log('  className:', dataEntry.className);
+        console.log('  offsetParent:', dataEntry.offsetParent ? 'vidljiv' : 'sakriven');
+    }
+    const productInput = document.getElementById('productInput');
+    if (productInput) {
+        console.log('productInput value:', productInput.value);
+        console.log('productInput display:', productInput.style.display);
+        console.log('productInput offsetParent:', productInput.offsetParent ? 'vidljiv' : 'sakriven');
+    }
+    const mainScreen = document.getElementById('mainScreen');
+    if (mainScreen) {
+        console.log('mainScreen display:', mainScreen.style.display);
+    }
+    
+    // Dodatno: prikaži sve inpute
+    const allInputs = document.querySelectorAll('input');
+    console.log('📋 Svi inputi na stranici:');
+    allInputs.forEach(inp => {
+        console.log(`  ${inp.id || 'nema-id'}: value="${inp.value}", display=${inp.style.display}`);
+    });
+}
+
+// Eksportuj debug funkciju
+window.debugFormVisibility = debugFormVisibility;
 console.log('🔄 Funkcije: popuniFormuPodacima(), ensureFormVisible(), prikaziTrenutnePodatke(), ocistiFormu()');
