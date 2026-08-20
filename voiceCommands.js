@@ -1,5 +1,6 @@
 // ============================================
-// VOICE COMMANDS - KONAČNA ISPRAVNA VERZIJA
+// VOICE COMMANDS - KONAČNA VERZIJA
+// SAMO "plus" i "end"
 // ============================================
 
 let activeBuffer = ''; 
@@ -74,31 +75,16 @@ function getNumber(word) {
 // ============================================
 
 const UNIT_MAP = {
-    'kilogram': 'kg', 
-    'kilograma': 'kg', 
-    'kg': 'kg',
-    'kilogrami': 'kg',
-    'kilogramima': 'kg',
-    'gram': 'g', 
-    'grama': 'g', 
-    'g': 'g',
-    'grami': 'g',
-    'gramima': 'g',
-    'litar': 'l', 
-    'litara': 'l', 
-    'l': 'l',
-    'litri': 'l',
-    'litrima': 'l',
-    'komad': 'kom', 
-    'komada': 'kom', 
-    'kom': 'kom',
-    'komadi': 'kom',
-    'komadima': 'kom',
-    'paket': 'pak', 
-    'paketa': 'pak', 
-    'pak': 'pak',
-    'paketi': 'pak',
-    'paketima': 'pak'
+    'kilogram': 'kg', 'kilograma': 'kg', 'kg': 'kg',
+    'kilogrami': 'kg', 'kilogramima': 'kg',
+    'gram': 'g', 'grama': 'g', 'g': 'g',
+    'grami': 'g', 'gramima': 'g',
+    'litar': 'l', 'litara': 'l', 'l': 'l',
+    'litri': 'l', 'litrima': 'l',
+    'komad': 'kom', 'komada': 'kom', 'kom': 'kom',
+    'komadi': 'kom', 'komadima': 'kom',
+    'paket': 'pak', 'paketa': 'pak', 'pak': 'pak',
+    'paketi': 'pak', 'paketima': 'pak'
 };
 
 const STORAGE_MAP = {
@@ -166,7 +152,6 @@ function parseVoiceDataEntry(command) {
     for (let i = 0; i < words.length; i++) {
         let w = words[i].toLowerCase();
         
-        // Provera za skladište
         let storageMatch = getStorage(w);
         if (storageMatch) {
             foundStorage = storageMatch;
@@ -174,7 +159,6 @@ function parseVoiceDataEntry(command) {
             console.log('🏠 Pronađeno skladište:', foundStorage);
         }
         
-        // Provera za jedinicu
         let unitMatch = getUnit(w);
         if (unitMatch) {
             foundUnit = unitMatch;
@@ -194,18 +178,13 @@ function parseVoiceDataEntry(command) {
     // ============================================
     // 2. SPECIJALNI SLUČAJEVI ZA JEDINICE
     // ============================================
-    // Ako u tekstu ima "gram" ili "grama" - uvek je g
     if (text.includes('gram') || text.includes('grama')) {
         foundUnit = 'g';
         console.log('🔍 Spec. slučaj: gram -> jedinica = g');
-    }
-    // Ako u tekstu ima "kilogram" ili "kg" - uvek je kg
-    else if (text.includes('kilogram') || text.includes('kg')) {
+    } else if (text.includes('kilogram') || text.includes('kg')) {
         foundUnit = 'kg';
         console.log('🔍 Spec. slučaj: kilogram -> jedinica = kg');
-    }
-    // Ako u tekstu ima "litar" - uvek je l
-    else if (text.includes('litar') || text.includes('litara')) {
+    } else if (text.includes('litar') || text.includes('litara')) {
         foundUnit = 'l';
         console.log('🔍 Spec. slučaj: litar -> jedinica = l');
     }
@@ -217,17 +196,14 @@ function parseVoiceDataEntry(command) {
         let w = words[i].toLowerCase();
         let originalW = words[i];
         
-        // Preskoči reči koje su skladište ili jedinica
         if (i === storageIndex || i === unitIndex) {
             continue;
         }
         
-        // Preskoči pomoćne reči
         if (skipWords.includes(w)) {
             continue;
         }
         
-        // Proveri da li je broj
         let numVal = getNumber(w);
         if (numVal !== null) {
             numbers.push(numVal);
@@ -235,7 +211,6 @@ function parseVoiceDataEntry(command) {
             continue;
         }
         
-        // Sve ostalo ide u naziv
         nameParts.push(originalW);
     }
     
@@ -243,23 +218,19 @@ function parseVoiceDataEntry(command) {
     console.log('📊 Naziv delovi:', nameParts);
     
     // ============================================
-    // 4. DODELA BROJEVA (POPRAVLJENO!)
+    // 4. DODELA BROJEVA
     // ============================================
     if (foundUnit === 'kg' || foundUnit === 'g') {
-        // Za kg/g: 
-        // - Ako ima 2 broja: prvi je komad (ili 0), drugi je kg
-        // - Ako ima 1 broj: to je kg, komad = 0
         if (numbers.length >= 2) {
-            result.piece = numbers[0];      // prvi broj = komad (može biti 0)
-            result.quantity = numbers[1];   // drugi broj = kg
+            result.piece = numbers[0];
+            result.quantity = numbers[1];
             console.log('📦 kg/g: komad=' + numbers[0] + ', količina=' + numbers[1] + 'kg');
         } else if (numbers.length === 1) {
-            result.piece = '0';              // ako nema komada, stavi 0
-            result.quantity = numbers[0];    // jedini broj = kg
+            result.piece = '0';
+            result.quantity = numbers[0];
             console.log('📦 kg/g: komad=0, količina=' + numbers[0] + 'kg');
         }
     } else if (foundUnit === 'l') {
-        // Za litre: slično kao kg
         if (numbers.length >= 2) {
             result.piece = numbers[0];
             result.quantity = numbers[1];
@@ -270,7 +241,6 @@ function parseVoiceDataEntry(command) {
             console.log('📦 l: komad=0, količina=' + numbers[0] + 'l');
         }
     } else {
-        // Za komad (default)
         if (numbers.length >= 2) {
             result.piece = numbers[0];
             result.quantity = numbers[1];
@@ -287,7 +257,6 @@ function parseVoiceDataEntry(command) {
     // ============================================
     let rokPronadjen = false;
     
-    // Provera za "6 meseci" ili "šest meseci"
     let meseciMatch = text.match(/(\d+)\s*meseci/);
     if (meseciMatch) {
         result.shelf_life = meseciMatch[1];
@@ -295,33 +264,16 @@ function parseVoiceDataEntry(command) {
         console.log('🔍 Pronađeno "' + meseciMatch[1] + ' meseci" -> rok = ' + meseciMatch[1]);
     }
     
-    // Ako nema "meseci" ali ima broj 6, 12, 24 - možda je rok
     if (!rokPronadjen && numbers.length >= 3) {
-        // Treći broj je verovatno rok (ako postoje 3 broja)
         result.shelf_life = numbers[2];
         rokPronadjen = true;
         console.log('🔍 Treći broj -> rok =', numbers[2]);
     }
     
-    // Ako ima "6" u tekstu a nije deo "6 meseci"
-    if (!rokPronadjen && /\b6\b/.test(text) && !text.includes('6 meseci')) {
-        // Proveri da li je 6 možda rok (ako nije kg/l)
-        if (foundUnit === 'kg' || foundUnit === 'g') {
-            // Ako imamo 2 broja (kg + nešto), treći bi mogao biti rok
-            if (numbers.length >= 3) {
-                result.shelf_life = numbers[2];
-                rokPronadjen = true;
-                console.log('🔍 Broj 6 kao rok (treći broj)');
-            }
-        }
-    }
-    
     // ============================================
     // 6. NAZIV PROIZVODA
     // ============================================
-    // Ukloni brojeve iz naziva ako su ostali
     let cleanNameParts = nameParts.filter(part => {
-        // Ako je deo broj (cifre), ukloni ga
         return !/^\d+$/.test(part);
     });
     result.product_name = cleanNameParts.join(' ').trim() || 'Proizvod';
@@ -359,13 +311,6 @@ function parseVoiceDataEntry(command) {
             result.piece = '0';
         }
         console.log('🔍 Grami detektovani -> jedinica = g, količina = ' + gramMatches[1]);
-    }
-    
-    // ============================================
-    // 10. POPRAVKA: Ako je komad=0 i jedinica=kg, ostavi tako
-    // ============================================
-    if (result.piece === '0' && (result.unit === 'kg' || result.unit === 'g' || result.unit === 'l')) {
-        console.log('ℹ️ Komad=0 za jedinicu ' + result.unit + ' - ostavljam');
     }
     
     console.log('✅ PARSIRANO:', result);
@@ -420,10 +365,12 @@ function popuniFormuPodacima(data) {
     const unitSelect = document.getElementById('unitSelect');
     if (unitSelect && data.unit) {
         for (let option of unitSelect.options) {
-            if (option.value === data.unit || option.text.toLowerCase().includes(data.unit)) {
+            if (option.value === data.unit || 
+                option.text.toLowerCase().trim() === data.unit.toLowerCase().trim() ||
+                option.text.toLowerCase().includes(data.unit.toLowerCase())) {
                 option.selected = true;
                 unitSelect.dispatchEvent(new Event('change', { bubbles: true }));
-                console.log('✅ Jedinica postavljena:', unitSelect.value);
+                console.log('✅ Jedinica postavljena na:', unitSelect.value);
                 break;
             }
         }
@@ -432,10 +379,12 @@ function popuniFormuPodacima(data) {
     const storageSelect = document.getElementById('storageSelect');
     if (storageSelect && data.storage) {
         for (let option of storageSelect.options) {
-            if (option.value === data.storage || option.text.includes(data.storage)) {
+            if (option.value === data.storage || 
+                option.text.toLowerCase().trim() === data.storage.toLowerCase().trim() ||
+                option.text.toLowerCase().includes(data.storage.toLowerCase())) {
                 option.selected = true;
                 storageSelect.dispatchEvent(new Event('change', { bubbles: true }));
-                console.log('✅ Skladište postavljeno:', storageSelect.value);
+                console.log('✅ Skladište postavljeno na:', storageSelect.value);
                 break;
             }
         }
@@ -455,7 +404,6 @@ function popuniFormuPodacima(data) {
 function sacuvajPodatke(data) {
     console.log('💾 Čuvam podatke:', data);
     
-    // ⭐ SPREČI OTVARANJE ZALIHA
     ALLOW_INVENTORY_OPEN = false;
     END_AKTIVAN = false;
     
@@ -546,7 +494,6 @@ function sacuvajPodatke(data) {
         showVoiceStatus(`✅ Sačuvano: ${data.product_name}`, '#4CAF50');
         console.log('✅ Podaci sačuvani!');
         
-        // ⭐ SAMO OSVEŽI PREGLED, NE OTVARAJ ZALIHE!
         setTimeout(() => {
             if (typeof prikaziSveUnose === 'function') {
                 try { 
@@ -623,15 +570,14 @@ function otvoriZaliheEkran() {
         showVoiceStatus('📦 Zalihe otvorene', '#4CAF50');
         
         ALLOW_INVENTORY_OPEN = false;
-    }, 200);
+    }, 300);
 }
 
 // ============================================
-// 8. OBRADA I ČUVANJE (MORA BITI PRE startVoiceRecognition!)
+// 8. OBRADA I ČUVANJE
 // ============================================
 
 function processAndSaveItem(command) {
-    // ⭐ SPREČI OTVARANJE ZALIHA
     ALLOW_INVENTORY_OPEN = false;
     END_AKTIVAN = false;
     
@@ -669,7 +615,7 @@ function processAndSaveItem(command) {
 // ============================================
 
 function startVoiceRecognition() {
-     console.log('🎤 startVoiceRecognition POZVAN!');
+    console.log('🎤 startVoiceRecognition POZVAN!');
     
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
@@ -737,25 +683,15 @@ function startVoiceRecognition() {
         // ============================================
         // 1. "END" - OTVARA ZALIHE
         // ============================================
-        if (lowerFull.includes('end') || 
-            lowerFull.includes('kraj') || 
-            lowerFull.includes('gotovo') ||
-            lowerFull.includes('enter') ||
-            lowerFull.includes('friend')) {
+        if (lowerFull.includes('end')) {
             console.log('🏁 END DETEKTOVAN - otvaram zalihe!');
             isProcessingCommand = true;
             END_AKTIVAN = true;
             ALLOW_INVENTORY_OPEN = true;
             
             let itemText = activeBuffer;
-            const endWords = ['end', 'kraj', 'gotovo', 'enter', 'friend'];
-            for (let word of endWords) {
-                if (itemText.toLowerCase().includes(word)) {
-                    const parts = itemText.split(new RegExp(word, 'i'));
-                    itemText = parts[0].trim();
-                    break;
-                }
-            }
+            const parts = itemText.split(/\bend\b/i);
+            itemText = parts[0].trim();
             
             if (itemText.length > 2) {
                 processAndSaveItem(itemText);
@@ -769,22 +705,25 @@ function startVoiceRecognition() {
                     if (typeof prikaziSveUnose === 'function') {
                         try { prikaziSveUnose(); } catch(e) {}
                     }
+                    ALLOW_INVENTORY_OPEN = true;
                     otvoriZaliheEkran();
-                    END_AKTIVAN = false;
+                    setTimeout(() => {
+                        ALLOW_INVENTORY_OPEN = false;
+                        END_AKTIVAN = false;
+                    }, 2000);
                 }, 500);
-            }, 300);
+            }, 800);
             
             return;
         }
         
         // ============================================
-        // 2. "PLUS" - ZAVRŠAVA UNOS (NE OTVARA ZALIHE!)
+        // 2. "PLUS" - ZAVRŠAVA UNOS (NE OTVARA ZALIHE)
         // ============================================
         if (lowerFull.includes('plus')) {
             console.log('✅ PLUS DETEKTOVAN - završavam unos (NE otvaram zalihe)');
             isProcessingCommand = true;
             
-            // ⭐ SPREČI OTVARANJE ZALIHA
             ALLOW_INVENTORY_OPEN = false;
             END_AKTIVAN = false;
             
@@ -877,7 +816,7 @@ function stopVoiceRecognition() {
 }
 
 // ============================================
-// 10.1 RESTART MIKROFONA
+// 11. RESTART MIKROFONA
 // ============================================
 
 function restartMicrophone() {
@@ -889,7 +828,7 @@ function restartMicrophone() {
 }
 
 // ============================================
-// 11. POVRATAK NA PREĐAŠNJI EKRAN
+// 12. POVRATAK NA PREĐAŠNJI EKRAN
 // ============================================
 
 function goBackFromVoice() {
@@ -916,7 +855,7 @@ function goBackFromVoice() {
 }
 
 // ============================================
-// 12. SELEKTOVANJE VOICE MODE
+// 13. SELEKTOVANJE VOICE MODE
 // ============================================
 
 function selectVoiceMode() {
@@ -941,7 +880,7 @@ function selectVoiceMode() {
 }
 
 // ============================================
-// 13. PREUZIMANJE KONTROLE
+// 14. PREUZIMANJE KONTROLE
 // ============================================
 
 window._voiceCommandsStart = startVoiceRecognition;
@@ -975,9 +914,9 @@ window.processVoiceCommand = function(command) {
         return true;
     }
     
-    if (lower.includes('end') || lower.includes('kraj') || lower.includes('gotovo') || lower.includes('enter')) {
+    if (lower.includes('end')) {
         console.log('🏁 END - otvaram zalihe');
-        const itemText = command.replace(/end|kraj|gotovo|enter/i, '').trim();
+        const itemText = command.replace(/end/i, '').trim();
         if (itemText && typeof window._voiceCommandsProcess === 'function') {
             window._voiceCommandsProcess(itemText);
         }
@@ -1025,7 +964,7 @@ window.hideVoiceMenu = hideVoiceMenu;
 window.restartMicrophone = restartMicrophone;
 
 // ============================================
-// 14. ZABRANA OTVARANJA ZALIHA IZ renderInventory
+// 15. ZABRANA OTVARANJA ZALIHA IZ VOICE KOMANDI
 // ============================================
 
 (function() {
@@ -1080,36 +1019,14 @@ window.restartMicrophone = restartMicrophone;
     console.log('✅ Otvaranje zaliha BLOKIRANO za voice komande!');
     console.log('⛔ Plus NE otvara zalihe!');
     console.log('✅ End otvara zalihe!');
-    console.log('✅ 4. ekran (voiceMenuScreen) radi!');
 })();
 
 // ============================================
-// TEST END - Ručno otvaranje zaliha
+// 16. KRAJ
 // ============================================
-
-window.forceOpenInventory = function() {
-    console.log('🔓 FORSIRAM otvaranje zaliha!');
-    ALLOW_INVENTORY_OPEN = true;
-    if (typeof prikaziSveUnose === 'function') {
-        try { prikaziSveUnose(); } catch(e) {}
-    }
-    if (typeof renderInventory === 'function') {
-        try { renderInventory(); } catch(e) {}
-    }
-    if (typeof openInventoryAndShowHighlight === 'function') {
-        try { openInventoryAndShowHighlight(); } catch(e) {}
-    } else if (typeof showScreen === 'function') {
-        try { showScreen('inventoryScreen'); } catch(e) {}
-    }
-    console.log('✅ Zalihe otvorene');
-    setTimeout(() => {
-        ALLOW_INVENTORY_OPEN = false;
-    }, 1000);
-};
 
 console.log('✅ VOICE COMMANDS - KONAČNA VERZIJA UČITANA!');
 console.log('🎤 "unos" → diktiraj → "plus" (samo završava) → "end" (otvara zalihe)');
 console.log('⛔ PLUS NE otvara zalihe!');
 console.log('📦 END otvara zalihe!');
-console.log('📝 Pravilno parsiranje: 1. broj=komad, 2. broj=količina');
 console.log('🔄 restartMicrophone dostupan!');
