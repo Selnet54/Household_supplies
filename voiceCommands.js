@@ -424,97 +424,83 @@ function sacuvajPodatke(data) {
     
     let saved = false;
     
-    if (typeof saveProduct === 'function') {
-        try { 
-            saveProduct(); 
-            saved = true; 
-            console.log('✅ saveProduct'); 
-        } catch(e) {
-            console.warn('saveProduct greška:', e);
-        }
-    }
+    // ⭐ PRVO POPUNI FORMU
+    popuniFormuPodacima(data);
     
-    if (!saved && typeof handleFormSubmit === 'function') {
-        try { 
-            handleFormSubmit(); 
-            saved = true; 
-            console.log('✅ handleFormSubmit'); 
-        } catch(e) {
-            console.warn('handleFormSubmit greška:', e);
-        }
-    }
-    
-    if (!saved && typeof addProduct === 'function') {
-        try { 
-            addProduct(); 
-            saved = true; 
-            console.log('✅ addProduct'); 
-        } catch(e) {
-            console.warn('addProduct greška:', e);
-        }
-    }
-    
-    if (!saved && typeof window.inventory !== 'undefined' && Array.isArray(window.inventory)) {
-        const newItem = {
-            id: Date.now(),
-            productName: data.product_name,
-            piece: parseInt(data.piece) || 1,
-            quantity: parseFloat(data.quantity) || 1,
-            unit: data.unit || 'kom',
-            shelfLife: parseInt(data.shelf_life) || 12,
-            storage: data.storage || 'Zamrzivač 1',
-            dateAdded: new Date().toISOString(),
-            expiryDate: new Date(Date.now() + parseInt(data.shelf_life || 12) * 30 * 24 * 60 * 60 * 1000).toISOString(),
-            isNew: true
-        };
-        window.inventory.push(newItem);
-        saved = true;
-        console.log('✅ Dodat u inventory niz');
-    }
-    
-    if (!saved) {
-        const saveBtn = document.querySelector('#saveProductBtn, button[type="submit"], .btn-save, .save-btn');
-        if (saveBtn) {
+    // ⭐ SAČEKAJ DA SE FORMA POPUNI PA POZOVI saveProduct()
+    setTimeout(() => {
+        console.log('🔍 Pokušavam da sačuvam preko saveProduct()...');
+        
+        if (typeof saveProduct === 'function') {
             try { 
-                saveBtn.click(); 
+                saveProduct(); 
                 saved = true; 
-                console.log('✅ Klik na dugme za čuvanje'); 
+                console.log('✅ saveProduct uspešan!'); 
             } catch(e) {
-                console.warn('Klik greška:', e);
+                console.warn('saveProduct greška:', e);
+            }
+        } else {
+            console.warn('⚠️ saveProduct nije definisan!');
+        }
+        
+        // ⭐ AKO saveProduct NE RADI, DIREKTAN UPIS U localStorage
+        if (!saved) {
+            console.log('🔍 Pokušavam direktan upis u localStorage...');
+            try {
+                const zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
+                const newItem = {
+                    id: Date.now(),
+                    product_name: data.product_name,
+                    piece: parseInt(data.piece) || 1,
+                    quantity: parseFloat(data.quantity) || 1,
+                    unit: data.unit || 'kom',
+                    shelf_life_months: parseInt(data.shelf_life) || 12,
+                    storage_location: data.storage || 'Zamrzivač 1',
+                    entry_date: new Date().toISOString().split('T')[0],
+                    isNew: true
+                };
+                zalihe.push(newItem);
+                localStorage.setItem('zalihe', JSON.stringify(zalihe));
+                saved = true;
+                console.log('✅ Direktan upis u localStorage uspešan!');
+            } catch(e) {
+                console.warn('localStorage greška:', e);
             }
         }
-    }
-    
-    setTimeout(() => {
-        window.showModernAlert = originalShowModernAlert;
-        window.alert = originalAlert;
-    }, 1000);
-    
-    if (saved) {
-        showVoiceStatus(`✅ Sačuvano: ${data.product_name}`, '#4CAF50');
-        console.log('✅ Podaci sačuvani!');
         
         setTimeout(() => {
-            if (typeof prikaziSveUnose === 'function') {
-                try { 
-                    prikaziSveUnose(); 
-                    console.log('✅ Pregled unosa osvežen');
-                } catch(e) {
-                    console.warn('prikaziSveUnose greška:', e);
-                }
-            }
-            console.log('✅ Podaci osveženi (zalihe NISU otvorene)');
-        }, 50);
+            window.showModernAlert = originalShowModernAlert;
+            window.alert = originalAlert;
+        }, 1000);
         
-    } else {
-        console.error('❌ Greška pri čuvanju!');
-        showVoiceStatus('❌ Greška pri čuvanju!', '#f44336');
-    }
-    
-    setTimeout(() => {
-        isVoiceInput = false;
-        window._isVoiceInput = false;
-    }, 1000);
+        if (saved) {
+            showVoiceStatus(`✅ Sačuvano: ${data.product_name}`, '#4CAF50');
+            console.log('✅ Podaci sačuvani!');
+            
+            // ⭐ OSVEŽI PREGLED UNOSA
+            setTimeout(() => {
+                if (typeof prikaziSveUnose === 'function') {
+                    try { 
+                        prikaziSveUnose(); 
+                        console.log('✅ Pregled unosa osvežen');
+                    } catch(e) {
+                        console.warn('prikaziSveUnose greška:', e);
+                    }
+                }
+                console.log('✅ Podaci osveženi');
+            }, 200);
+            
+        } else {
+            console.error('❌ Greška pri čuvanju!');
+            showVoiceStatus('❌ Greška pri čuvanju!', '#f44336');
+        }
+        
+        setTimeout(() => {
+            isVoiceInput = false;
+            window._isVoiceInput = false;
+        }, 1000);
+        
+    }, 300); // ⭐ SAČEKAJ 300ms DA SE FORMA POPUNI
 }
 
 // ============================================
@@ -573,7 +559,7 @@ function otvoriZaliheEkran() {
     }, 300);
 }
 
-// ============================================
+/// ============================================
 // 8. OBRADA I ČUVANJE
 // ============================================
 
@@ -598,13 +584,9 @@ function processAndSaveItem(command) {
         mainScreen.classList.add('active');
     }
     
+    // ⭐ DIREKTNO POZOVI ČUVANJE (sacuvajPodatke će popuniti formu)
     setTimeout(() => {
-        popuniFormuPodacima(data);
-        
-        setTimeout(() => {
-            sacuvajPodatke(data);
-        }, 200);
-        
+        sacuvajPodatke(data);
     }, 100);
 
     return true;
