@@ -1,79 +1,44 @@
 // ============================================
-// VOICE COMMANDS - MOBILNA OPTIMIZOVANA VERZIJA
+// VOICE COMMANDS - MOBILE & TABLET READY
 // ============================================
-
-// ===== MOBILNA DETEKCIJA =====
-const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|Windows Phone/i.test(navigator.userAgent);
-const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
 let activeBuffer = '';
 let recognition = null;
-let isRecognitionActive = false;
-let silenceTimer = null;
-let sessionStartTime = null;
+let isUserStopped = false; // Zastavica za ručno zaustavljanje
+let restartTimer = null;
 
-// ===== MOBILNI KONFIGURACIONI PARAMETRI =====
-const MOBILE_CONFIG = {
-    silenceTimeout: isMobile ? 3000 : 5000,
-    maxSessionDuration: isMobile ? 45000 : 120000,
-    vibrateOnStart: isMobile,
-    vibrateOnEnd: isMobile,
-    useContinuous: !isMobile, // Na mobilnim uređajima ne koristi continuous
-    audioConstraints: {
-        echoCancellation: true,
-        noiseSuppression: true,
-        autoGainControl: true
+// ===== POMOĆNA FUNKCIJA ZA SAKRIVANJE EKRANA =====
+function hideVoiceMenu() {
+    const voiceMenu = document.getElementById('voiceMenuScreen');
+    if (voiceMenu) {
+        voiceMenu.style.display = 'none';
+        voiceMenu.classList.remove('active');
     }
-};
+    const choiceScreen = document.getElementById('choiceScreen');
+    if (choiceScreen) {
+        choiceScreen.style.display = 'none';
+        choiceScreen.classList.remove('active');
+    }
+}
 
-// ===== POBOLJŠANI POKRETAČ ZA MOBILNE UREĐAJE =====
+// ===== POKRETAČ ZA GLASOVNO PREPOZNAVANJE =====
 function startVoiceRecognition() {
-    // Provera podrške
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-        showMobileFallback();
+        if (typeof showModernAlert === 'function') {
+            showModernAlert('Greška', 'Vaš pretraživač ne podržava glasovne komande.', '❌');
+        }
         return;
     }
 
-    // Zaustavi prethodnu sesiju
+    isUserStopped = false;
+
     if (recognition) {
-        try { recognition.stop(); } catch(e) {}
+        try { recognition.abort(); } catch(e) {}
         recognition = null;
     }
 
-    // Zahtev za permisiju na mobilnim uređajima
-    if (isMobile) {
-        requestMicrophonePermission().then(granted => {
-            if (granted) {
-                initializeRecognition();
-            } else {
-                showMicrophonePermissionError();
-            }
-        });
-    } else {
-        initializeRecognition();
-    }
-}
-
-// ===== ZAHTEV ZA PERMISIJU =====
-async function requestMicrophonePermission() {
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-            audio: MOBILE_CONFIG.audioConstraints 
-        });
-        stream.getTracks().forEach(track => track.stop());
-        return true;
-    } catch(e) {
-        console.error('❌ Mikrofon nije dozvoljen:', e);
-        return false;
-    }
-}
-
-// ===== INICIJALIZACIJA RECOGNITION =====
-function initializeRecognition() {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     recognition = new SpeechRecognition();
-    
     const langCode = typeof currentLang !== 'undefined' ? currentLang : 'sr';
     const speechLangMap = {
         sr: 'sr-RS', en: 'en-US', de: 'de-DE', hu: 'hu-HU',
@@ -82,55 +47,24 @@ function initializeRecognition() {
     };
     
     recognition.lang = speechLangMap[langCode] || 'sr-RS';
-    
-    // MOBILNA OPTIMIZACIJA - ne koristi continuous na mobilnim
-    recognition.continuous = MOBILE_CONFIG.useContinuous;
+    recognition.continuous = true;
     recognition.interimResults = true;
-    recognition.maxAlternatives = isMobile ? 3 : 1;
-    
-    // Povećaj timeout za mobilne
-    if (isMobile) {
-        recognition.timeout = 30000;
-    }
+    recognition.maxAlternatives = 1;
 
-    setupRecognitionEvents();
-    
-    try {
-        recognition.start();
-        isRecognitionActive = true;
-        sessionStartTime = Date.now();
-        
-        // Vibracija za mobilne
-        if (MOBILE_CONFIG.vibrateOnStart) {
-            navigator.vibrate && navigator.vibrate(50);
-        }
-        
-        updateVoiceStatus('🎤 Slušam... (mobilni režim)', '#2196F3');
-        console.log('🎤 Mobile voice recognition started');
-    } catch(e) {
-        console.log('❌ Greška pri pokretanju:', e);
-        showMobileFallback();
-    }
-}
+    const statusEl = document.getElementById('voiceStatus');
 
-// ===== POSTAVLJANJE EVENTOVA =====
-function setupRecognitionEvents() {
-    let interimTimeout = null;
-    
     recognition.onstart = function() {
-        console.log('🎤 Prepoznavanje pokrenuto');
-        isRecognitionActive = true;
-        activeBuffer = '';
-        lastSpeechTime = Date.now();
-        
-        // Resetuj timer za tišinu
-        resetSilenceTimer();
+        console.log('🎤 Glasovno prepoznavanje aktivno (Slušam...)');
+        if (statusEl) {
+            statusEl.textContent = '🎤 Slušam... Recite "unos" za početak ili diktirajte.';
+            statusEl.style.color = '#2196F3';
+        }
     };
 
     recognition.onresult = function(event) {
         let interimText = '';
         let finalChunk = '';
-        
+
         for (let i = event.resultIndex; i < event.results.length; i++) {
             const result = event.results[i];
             const transcript = result[0].transcript.trim();
@@ -140,378 +74,282 @@ function setupRecognitionEvents() {
                 interimText += transcript;
             }
         }
-        
+
         if (finalChunk) {
             activeBuffer += (activeBuffer ? ' ' : '') + finalChunk;
-            lastSpeechTime = Date.now();
-            resetSilenceTimer();
+            console.log('🗣️ TRENUTNI BAFER:', activeBuffer);
         }
-        
+
         const currentDisplay = activeBuffer + (interimText ? ' ' + interimText : '');
-        updateVoiceStatus(`🎤 Slušam: "${currentDisplay}"`, '#FFD700');
-        
-        // Proveri komande
-        checkVoiceCommands(activeBuffer);
-        
-        // MOBILNA OPTIMIZACIJA - ograniči trajanje sesije
-        if (isMobile && sessionStartTime && (Date.now() - sessionStartTime > MOBILE_CONFIG.maxSessionDuration)) {
-            stopVoiceRecognition();
-            showMobileTimeoutMessage();
+        if (statusEl) {
+            statusEl.textContent = `🎤 Slušam: "${currentDisplay}"`;
+            statusEl.style.color = '#FFD700';
+        }
+
+        const lowerBuffer = (activeBuffer + ' ' + interimText).toLowerCase();
+
+        // 1. OTVARANJE DATA ENTRY EKRANA NA REČ "UNOS"
+        const dataEntryKeywords = ['unos', 'unesi', 'dodaj', 'novi', 'add'];
+        if (dataEntryKeywords.some(k => lowerBuffer.includes(k))) {
+            hideVoiceMenu();
+            const mainScreen = document.getElementById('mainScreen');
+            if (mainScreen && mainScreen.style.display !== 'flex') {
+                mainScreen.style.display = 'flex';
+                mainScreen.classList.add('active');
+                if (typeof renderDataEntry === 'function') renderDataEntry('');
+            }
+        }
+
+        // 2. DETEKCIJA KRAJA NIZA (PLUS, END, ENTER, FRIEND)
+        if (/\b(plus|end|enter|friend)\b/i.test(activeBuffer)) {
+            console.log('✅ Detektovan prekid u baferu:', activeBuffer);
+
+            let isEnd = /\b(end|enter|friend)\b/i.test(activeBuffer);
+            let parts = activeBuffer.split(/\b(plus|end|enter|friend)\b/i);
+            let itemText = parts[0].trim();
+
+            if (itemText.length > 2) {
+                processAndSaveItem(itemText);
+            }
+
+            activeBuffer = parts.slice(2).join('').trim();
+
+            if (isEnd) {
+                console.log('🏁 Kraj unosa (END/ENTER)');
+                stopVoiceRecognition(); // Ručno zaustavljanje na komandu krajem unosa
+                setTimeout(() => {
+                    otvoriZaliheEkran();
+                }, 800);
+            }
         }
     };
 
     recognition.onerror = function(event) {
-        console.log('⚠️ Speech greška:', event.error);
-        
+        console.warn('⚠️ Speech Recognition greška:', event.error);
         if (event.error === 'not-allowed') {
-            showMicrophonePermissionError();
-        } else if (event.error === 'no-speech') {
-            // Na mobilnim - pokušaj ponovo
-            if (isMobile && isRecognitionActive) {
-                setTimeout(() => {
-                    if (isRecognitionActive) {
-                        try { recognition.start(); } catch(e) {}
-                    }
-                }, 1000);
+            isUserStopped = true; // Zabrana pristupa mikrofonu
+            if (statusEl) {
+                statusEl.textContent = '❌ Dozvolite pristup mikrofonu u podešavanjima.';
+                statusEl.style.color = '#f44336';
             }
-        } else if (event.error === 'audio-capture') {
-            showMobileFallback();
         }
     };
 
+    // KLJUČNO ZA MOBILNE UREĐAJE: Automatsko ponovno pokretanje mikrofona
     recognition.onend = function() {
-        console.log('🎤 Prepoznavanje završeno');
-        isRecognitionActive = false;
-        
-        // Vibracija za mobilne
-        if (MOBILE_CONFIG.vibrateOnEnd) {
-            navigator.vibrate && navigator.vibrate(30);
-        }
-        
-        // Automatski restart na mobilnim ako je aktivno
-        if (isMobile && !document.hidden) {
-            setTimeout(() => {
-                if (!isRecognitionActive && !recognition) {
-                    startVoiceRecognition();
+        console.log('🎤 Mikrofon se isključio.');
+        if (!isUserStopped) {
+            console.log('🔄 Automatsko ponovno pokretanje mikrofona za mobilne uređaje...');
+            clearTimeout(restartTimer);
+            restartTimer = setTimeout(() => {
+                try {
+                    recognition.start();
+                } catch(e) {
+                    console.log('Prepoznavanje je već aktivno ili osveženo:', e);
                 }
-            }, 2000);
-        }
-    };
-}
-
-// ===== TIMER ZA TIŠINU =====
-function resetSilenceTimer() {
-    if (silenceTimer) {
-        clearTimeout(silenceTimer);
-        silenceTimer = null;
-    }
-    
-    silenceTimer = setTimeout(() => {
-        if (isRecognitionActive && activeBuffer.length > 0) {
-            // Ako ima teksta u baferu, procesuiraj ga
-            console.log('⏰ Tišina detektovana, procesuiram...');
-            processBufferAndStop();
-        } else if (isMobile && isRecognitionActive) {
-            // Na mobilnim restartuj ako nema aktivnosti
-            stopVoiceRecognition();
-            setTimeout(() => startVoiceRecognition(), 1000);
-        }
-    }, MOBILE_CONFIG.silenceTimeout);
-}
-
-// ===== MOBILNI FALLBACK - TEKSTUALNI UNOS =====
-function showMobileFallback() {
-    hideVoiceMenu();
-    
-    // Prikaži modal sa opcijama
-    const fallbackHTML = `
-        <div id="mobileFallbackModal" class="mobile-modal active" style="
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); display: flex; align-items: center;
-            justify-content: center; z-index: 9999; padding: 20px;
-        ">
-            <div style="
-                background: #1e1e1e; border-radius: 20px; padding: 30px;
-                max-width: 400px; width: 100%; text-align: center;
-                box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-            ">
-                <div style="font-size: 48px; margin-bottom: 15px;">🎙️</div>
-                <h2 style="color: #fff; margin-bottom: 10px;">Glasovni unos nije podržan</h2>
-                <p style="color: #aaa; margin-bottom: 20px; font-size: 14px;">
-                    Vaš pretraživač ne podržava glasovne komande. 
-                    Unesite proizvod ručno:
-                </p>
-                
-                <input type="text" id="fallbackInput" placeholder="Npr. Pileći batak 1 kg 6 meseci" style="
-                    width: 100%; padding: 15px; border-radius: 12px;
-                    border: 2px solid #333; background: #2a2a2a;
-                    color: #fff; font-size: 16px; margin-bottom: 15px;
-                    box-sizing: border-box;
-                ">
-                
-                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <button onclick="processFallbackInput()" style="
-                        flex: 1; padding: 14px; border-radius: 12px;
-                        background: #4CAF50; border: none; color: #fff;
-                        font-size: 16px; font-weight: bold; cursor: pointer;
-                        min-width: 100px;
-                    ">
-                        ✅ Unesi
-                    </button>
-                    <button onclick="closeFallbackModal()" style="
-                        flex: 1; padding: 14px; border-radius: 12px;
-                        background: #333; border: none; color: #fff;
-                        font-size: 16px; cursor: pointer; min-width: 100px;
-                    ">
-                        ✖️ Otkaži
-                    </button>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    // Dodaj modal
-    const existingModal = document.getElementById('mobileFallbackModal');
-    if (existingModal) existingModal.remove();
-    
-    document.body.insertAdjacentHTML('beforeend', fallbackHTML);
-    
-    // Fokusiraj input
-    setTimeout(() => {
-        const input = document.getElementById('fallbackInput');
-        if (input) {
-            input.focus();
-            if (isTouchDevice) {
-                input.click();
+            }, 300); // Kratak delay za mobilne pregledače
+        } else {
+            if (statusEl) {
+                statusEl.textContent = '⏸️ Prepoznavanje zaustavljeno';
+                statusEl.style.color = '#aaa';
             }
         }
-    }, 500);
-}
+    };
 
-// ===== OBRADA FALLBACK UNOSA =====
-function processFallbackInput() {
-    const input = document.getElementById('fallbackInput');
-    if (input && input.value.trim().length > 2) {
-        closeFallbackModal();
-        processAndSaveItem(input.value.trim());
-    } else {
-        showModernAlert('Greška', 'Unesite validan naziv proizvoda.', '⚠️');
+    try {
+        recognition.start();
+    } catch(e) {
+        console.warn('❌ Greška pri startovanju:', e);
     }
 }
 
-function closeFallbackModal() {
-    const modal = document.getElementById('mobileFallbackModal');
-    if (modal) modal.remove();
-}
-
-// ===== GREŠKA ZA PERMISIJU MIKROFONA =====
-function showMicrophonePermissionError() {
-    if (typeof showModernAlert === 'function') {
-        showModernAlert(
-            'Dozvolite mikrofon', 
-            'Da biste koristili glasovne komande, dozvolite pristup mikrofonu u podešavanjima vašeg pretraživača.',
-            '🎤'
-        );
-    } else {
-        alert('🎤 Dozvolite pristup mikrofonu da biste koristili glasovne komande.');
-    }
-}
-
-// ===== PORUKA ZA TIMEOUT =====
-function showMobileTimeoutMessage() {
-    if (typeof showModernAlert === 'function') {
-        showModernAlert(
-            '⏰ Pauza', 
-            'Sesija je automatski zaustavljena da bi se sačuvala baterija. Pritisnite ponovo za glasovni unos.',
-            '🔋'
-        );
-    }
-}
-
-// ===== PROCESS BUFFER =====
-function processBufferAndStop() {
-    if (activeBuffer && activeBuffer.length > 2) {
-        processAndSaveItem(activeBuffer);
-        activeBuffer = '';
-    }
-    stopVoiceRecognition();
-}
-
-// ===== MOBILNI STATUS UPDATE =====
-function updateVoiceStatus(text, color = '#fff') {
-    const statusEl = document.getElementById('voiceStatus');
-    if (statusEl) {
-        statusEl.textContent = text;
-        statusEl.style.color = color;
-    }
-}
-
-// ===== POBOLJŠANO ZAUSTAVLJANJE =====
+// ===== ZAUSTAVI GLASOVNO PREPOZNAVANJE =====
 function stopVoiceRecognition() {
-    isRecognitionActive = false;
-    
-    if (silenceTimer) {
-        clearTimeout(silenceTimer);
-        silenceTimer = null;
-    }
-    
+    isUserStopped = true; // Sprečava ponovno auto-pokretanje unutar onend
+    clearTimeout(restartTimer);
     if (recognition) {
         try {
             recognition.stop();
-            recognition = null;
         } catch(e) {}
     }
-    
     activeBuffer = '';
-    updateVoiceStatus('⏸️ Prepoznavanje zaustavljeno', '#aaa');
 }
 
-// ===== MOBILNI DUGMIĆ ZA GLASOVNI UNOS =====
-function createMobileVoiceButton() {
-    const buttonHTML = `
-        <button id="mobileVoiceButton" style="
-            position: fixed; bottom: 30px; right: 30px;
-            width: 70px; height: 70px; border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none; color: #fff; font-size: 32px;
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-            cursor: pointer; z-index: 9998;
-            display: ${isMobile ? 'flex' : 'none'};
-            align-items: center; justify-content: center;
-            transition: transform 0.3s, box-shadow 0.3s;
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
-        " 
-        onclick="handleMobileVoiceButton()"
-        onmousedown="this.style.transform='scale(0.9)'"
-        onmouseup="this.style.transform='scale(1)'"
-        ontouchstart="this.style.transform='scale(0.9)'"
-        ontouchend="this.style.transform='scale(1)'"
-        >
-            🎤
-        </button>
-    `;
-    
-    document.body.insertAdjacentHTML('beforeend', buttonHTML);
-}
-
-// ===== HANDLER ZA MOBILNI DUGMIĆ =====
-function handleMobileVoiceButton() {
-    const button = document.getElementById('mobileVoiceButton');
-    
-    if (isRecognitionActive) {
-        // Ako je aktivno, zaustavi
-        stopVoiceRecognition();
-        if (button) {
-            button.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-            button.textContent = '🎤';
-        }
+// ===== OTVORI ZALIHE / PREGLED =====
+function otvoriZaliheEkran() {
+    if (typeof refreshInventoryData === 'function') refreshInventoryData();
+    if (typeof openInventoryAndShowHighlight === 'function') {
+        openInventoryAndShowHighlight();
+    } else if (typeof showScreen === 'function') {
+        showScreen('inventoryScreen');
     } else {
-        // Pokreni prepoznavanje
-        startVoiceRecognition();
-        if (button) {
-            button.style.background = 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)';
-            button.textContent = '⏹️';
-            
-            // Animacija pulsiranja
-            button.style.animation = 'pulse 1.5s ease-in-out infinite';
+        const inv = document.getElementById('inventoryScreen');
+        const main = document.getElementById('mainScreen');
+        if (inv) {
+            if (main) main.style.display = 'none';
+            inv.style.display = 'flex';
+            inv.classList.add('active');
         }
     }
 }
 
-// ===== CSS ANIMACIJE =====
-function addMobileStyles() {
-    const styles = `
-        @keyframes pulse {
-            0% { transform: scale(1); box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4); }
-            50% { transform: scale(1.1); box-shadow: 0 8px 40px rgba(245, 87, 108, 0.6); }
-            100% { transform: scale(1); box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4); }
-        }
-        
-        @media (max-width: 768px) {
-            .voice-status-container {
-                position: fixed;
-                bottom: 120px;
-                left: 50%;
-                transform: translateX(-50%);
-                width: 90%;
-                background: rgba(0,0,0,0.85);
-                border-radius: 16px;
-                padding: 15px;
-                z-index: 9999;
-                backdrop-filter: blur(10px);
-                border: 1px solid rgba(255,255,255,0.1);
-            }
-            
-            .voice-status-text {
-                color: #fff;
-                text-align: center;
-                font-size: 14px;
-                margin: 0;
-                word-wrap: break-word;
-                max-height: 80px;
-                overflow-y: auto;
-            }
-        }
-        
-        /* Touch optimizacija */
-        .touch-optimized {
-            cursor: pointer;
-            min-height: 44px;
-            min-width: 44px;
-        }
-        
-        @media (hover: none) {
-            .touch-optimized:hover {
-                transform: none !important;
-            }
-        }
-    `;
-    
-    const styleSheet = document.createElement('style');
-    styleSheet.textContent = styles;
-    document.head.appendChild(styleSheet);
+function goBackFromVoice() {
+    stopVoiceRecognition();
+    if (typeof showScreen === 'function') showScreen('choiceScreen');
 }
 
-// ===== INICIJALIZACIJA =====
-function initMobileVoice() {
-    if (isMobile) {
-        createMobileVoiceButton();
-        addMobileStyles();
-        console.log('📱 Mobile voice commands initialized');
-        
-        // Dodaj touch event listener za celu stranicu
-        document.addEventListener('touchstart', function() {
-            // Resetuj idle timer ako je potrebno
-        }, { passive: true });
-        
-        // Handle visibility change (app background)
-        document.addEventListener('visibilitychange', function() {
-            if (document.hidden && isRecognitionActive) {
-                stopVoiceRecognition();
-                const button = document.getElementById('mobileVoiceButton');
-                if (button) {
-                    button.textContent = '🎤';
-                    button.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-                    button.style.animation = 'none';
-                }
+// ===== PARSIRANJE I SPREMANJE PODATAKA =====
+function parseVoiceDataEntry(command) {
+    let text = command.replace(/^unos\s*/i, '').replace(/^start\s*/i, '').trim();
+    let words = text.split(/\s+/).map(s => s.trim()).filter(Boolean);
+
+    let result = {
+        product_name: '', piece: '1', quantity: '1', unit: 'kom', shelf_life: '12', storage: 'Zamrzivač 1'
+    };
+
+    const unitMap = {
+        'kilogram': 'kg', 'kilograma': 'kg', 'kg': 'kg', 'gram': 'g', 'grama': 'g', 'g': 'g',
+        'litar': 'l', 'litara': 'l', 'l': 'l', 'komad': 'kom', 'komada': 'kom', 'kom': 'kom', 'paket': 'pak'
+    };
+
+    const storageMap = {
+        'zamrzivač': 'Zamrzivač 1', 'zamrzivac': 'Zamrzivač 1', 'frižider': 'Frižider', 'frizider': 'Frižider', 'ostava': 'Ostava'
+    };
+
+    const numberWordsMap = {
+        'jedan': '1', 'jedna': '1', 'dva': '2', 'dve': '2', 'tri': '3', 'četiri': '4', 'pet': '5',
+        'šest': '6', 'sedam': '7', 'osam': '8', 'devet': '9', 'deset': '10', 'dvanaest': '12'
+    };
+
+    let nameWords = [];
+    let quantityFound = false;
+    let shelfLifeFound = false;
+
+    for (let i = 0; i < words.length; i++) {
+        let w = words[i].toLowerCase();
+        if (w === 'start' || w === 'unos') continue;
+
+        if (storageMap[w]) { result.storage = storageMap[w]; continue; }
+        if (unitMap[w]) { result.unit = unitMap[w]; continue; }
+
+        let numVal = (!isNaN(w) && w !== '') ? w : numberWordsMap[w];
+        if (numVal) {
+            if (!quantityFound) {
+                result.quantity = numVal;
+                result.piece = numVal;
+                quantityFound = true;
+            } else if (!shelfLifeFound) {
+                result.shelf_life = numVal;
+                shelfLifeFound = true;
             }
+            continue;
+        }
+
+        if (['u', 'za', 'rok', 'trajanje', 'na', 'mesec', 'meseca', 'meseci'].includes(w)) continue;
+
+        if (!quantityFound) nameWords.push(words[i]);
+    }
+
+    result.product_name = nameWords.join(' ') || 'Proizvod';
+    return result;
+}
+
+function processAndSaveItem(command) {
+    let data = parseVoiceDataEntry(command);
+    if (!data.product_name || data.product_name === 'Proizvod') return false;
+
+    hideVoiceMenu();
+    const mainScreen = document.getElementById('mainScreen');
+    if (mainScreen) {
+        mainScreen.style.display = 'flex';
+        mainScreen.classList.add('active');
+    }
+
+    setTimeout(() => {
+        popuniFormuPodacima(data);
+        setTimeout(() => sacuvajPodatke(data), 200);
+    }, 100);
+
+    return true;
+}
+
+function popuniFormuPodacima(data) {
+    const setVal = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.value = val;
+            el.dispatchEvent(new Event('input', { bubbles: true }));
+            el.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+    };
+
+    setVal('productInput', data.product_name);
+    setVal('pieceInput', data.piece);
+    setVal('quantityInput', data.quantity);
+    setVal('shelfLifeInput', data.shelf_life);
+
+    const unitSelect = document.getElementById('unitSelect');
+    if (unitSelect && data.unit) {
+        for (let opt of unitSelect.options) {
+            if (opt.value === data.unit || opt.text.toLowerCase().includes(data.unit)) {
+                opt.selected = true;
+                unitSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                break;
+            }
+        }
+    }
+
+    const storageSelect = document.getElementById('storageSelect');
+    if (storageSelect && data.storage) {
+        for (let opt of storageSelect.options) {
+            if (opt.value === data.storage || opt.text.includes(data.storage)) {
+                opt.selected = true;
+                storageSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                break;
+            }
+        }
+    }
+
+    if (typeof updateExpiryDate === 'function') try { updateExpiryDate(); } catch(e) {}
+}
+
+function sacuvajPodatke(data) {
+    let saved = false;
+    if (typeof saveProduct === 'function') { try { saveProduct(); saved = true; } catch(e) {} }
+    if (!saved && typeof handleFormSubmit === 'function') { try { handleFormSubmit(); saved = true; } catch(e) {} }
+    if (!saved && typeof addProduct === 'function') { try { addProduct(); saved = true; } catch(e) {} }
+
+    if (!saved && typeof window.inventory !== 'undefined' && Array.isArray(window.inventory)) {
+        window.inventory.push({
+            id: Date.now(),
+            productName: data.product_name,
+            piece: parseInt(data.piece) || 1,
+            quantity: parseFloat(data.quantity) || 1,
+            unit: data.unit || 'kom',
+            shelfLife: parseInt(data.shelf_life) || 12,
+            storage: data.storage || 'Zamrzivač 1',
+            dateAdded: new Date().toISOString()
         });
+        saved = true;
+        if (typeof renderInventory === 'function') renderInventory();
+    }
+
+    if (!saved) {
+        const saveBtn = document.querySelector('#saveProductBtn, button[type="submit"], .btn-save, .save-btn');
+        if (saveBtn) { try { saveBtn.click(); saved = true; } catch(e) {} }
+    }
+
+    const statusEl = document.getElementById('voiceStatus');
+    if (statusEl) {
+        statusEl.textContent = saved ? `✅ Sačuvano: ${data.product_name}` : '❌ Greška pri čuvanju!';
+        statusEl.style.color = saved ? '#4CAF50' : '#f44336';
     }
 }
 
-// ===== EKSPORT =====
+// Globalne eksportovane funkcije
 window.startVoiceRecognition = startVoiceRecognition;
 window.stopVoiceRecognition = stopVoiceRecognition;
-window.processAndSaveItem = processAndSaveItem;
-window.initMobileVoice = initMobileVoice;
-window.showMobileFallback = showMobileFallback;
-window.processFallbackInput = processFallbackInput;
-window.closeFallbackModal = closeFallbackModal;
-window.handleMobileVoiceButton = handleMobileVoiceButton;
-
-// ===== AUTO-INICIJALIZACIJA =====
-document.addEventListener('DOMContentLoaded', function() {
-    initMobileVoice();
-    console.log('✅ Mobile Voice Commands loaded!');
-});
+window.goBackFromVoice = goBackFromVoice;
+window.hideVoiceMenu = hideVoiceMenu;
+window.parseVoiceDataEntry = parseVoiceDataEntry;
+window.processVoiceCommand = processAndSaveItem;
