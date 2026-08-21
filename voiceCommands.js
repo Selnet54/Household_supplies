@@ -661,3 +661,112 @@ window.restartMicrophone = restartMicrophone;
 console.log('🌐 VOICE COMMANDS - VIŠEJEZIČNA VERZIJA UČITANA!');
 console.log('🎤 Podržani jezici: sr, en, de, hu, uk, ru, zh, es, pt, fr');
 console.log('📝 Komande rade na svim jezicima!');
+// ============================================
+// 20. POPRAVKA - POVEZIVANJE selectVoiceMode SA PRAVIM startVoiceRecognition
+// ============================================
+
+// ⭐ PREGAZI selectVoiceMode DIREKTNO
+window.selectVoiceMode = function() {
+    console.log('🎤 selectVoiceMode (PREGAŽEN) - otvaram voice menu');
+    
+    // Sakrij sve ekrane
+    document.querySelectorAll('.screen').forEach(s => {
+        s.style.display = 'none';
+        s.classList.remove('active');
+    });
+    
+    // Pokaži voice menu
+    const voiceMenuScreen = document.getElementById('voiceMenuScreen');
+    if (voiceMenuScreen) {
+        voiceMenuScreen.style.display = 'flex';
+        voiceMenuScreen.classList.add('active');
+        console.log('✅ Voice menu prikazan');
+    }
+    
+    // Pokreni PRAVI startVoiceRecognition
+    setTimeout(function() {
+        console.log('🎤 Pokrećem VOICE COMMANDS startVoiceRecognition...');
+        if (typeof window.startVoiceRecognition === 'function') {
+            window.startVoiceRecognition();
+        } else {
+            console.error('❌ startVoiceRecognition nije dostupan!');
+        }
+    }, 500);
+};
+
+// ⭐ PREGAZI goBackFromVoice DIREKTNO
+window.goBackFromVoice = function() {
+    console.log('◀ goBackFromVoice (PREGAŽEN)');
+    
+    if (typeof window.stopVoiceRecognition === 'function') {
+        window.stopVoiceRecognition();
+    }
+    
+    document.querySelectorAll('.screen').forEach(s => {
+        s.style.display = 'none';
+        s.classList.remove('active');
+    });
+    
+    const choiceScreen = document.getElementById('choiceScreen');
+    if (choiceScreen) {
+        choiceScreen.style.display = 'flex';
+        choiceScreen.classList.add('active');
+    }
+    
+    if (typeof updateHeaderLanguage === 'function') {
+        updateHeaderLanguage();
+    }
+    if (typeof updateInterfaceLanguage === 'function') {
+        updateInterfaceLanguage();
+    }
+};
+
+console.log('✅ selectVoiceMode i goBackFromVoice PREGAŽENI!');
+console.log('🎤 Klik na "Voice Input" će pokrenuti PRAVI mikrofon!');
+// ============================================
+// 21. FORSIRANO POKRETANJE - ZADNJA LINIJA
+// ============================================
+
+// ⭐ DIREKTNO POVEZIVANJE selectVoiceMode
+(function() {
+    console.log('🔥 FORSIRAM POVEZIVANJE selectVoiceMode!');
+    
+    // Sačuvaj originalnu funkciju iz script1.js
+    const originalSelectVoiceMode = window.selectVoiceMode;
+    
+    // Zameni je sa našom
+    window.selectVoiceMode = function() {
+        console.log('🎤 selectVoiceMode (PREGAŽEN od strane voiceCommands.js)');
+        
+        // Sakrij sve ekrane
+        document.querySelectorAll('.screen').forEach(s => {
+            s.style.display = 'none';
+            s.classList.remove('active');
+        });
+        
+        // Pokaži voice menu
+        const voiceMenuScreen = document.getElementById('voiceMenuScreen');
+        if (voiceMenuScreen) {
+            voiceMenuScreen.style.display = 'flex';
+            voiceMenuScreen.classList.add('active');
+            console.log('✅ Voice menu prikazan');
+        }
+        
+        // Pokreni PRAVI startVoiceRecognition
+        setTimeout(() => {
+            console.log('🎤 Pokrećem VOICE COMMANDS startVoiceRecognition...');
+            if (typeof window.startVoiceRecognition === 'function') {
+                window.startVoiceRecognition();
+            } else {
+                console.error('❌ startVoiceRecognition nije dostupan!');
+                // Pokušaj direktno
+                if (typeof startVoiceRecognition === 'function') {
+                    startVoiceRecognition();
+                }
+            }
+        }, 500);
+    };
+    
+    console.log('✅ selectVoiceMode uspešno pregažen!');
+    console.log('🎤 Sada klik na "Voice Input" radi!');
+})();
