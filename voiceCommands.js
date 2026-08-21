@@ -17,16 +17,9 @@
     let isRecognitionStarting = false;
 
     const SPEECH_LANGUAGES = {
-        sr: 'sr-RS',
-        en: 'en-US',
-        de: 'de-DE',
-        hu: 'hu-HU',
-        uk: 'uk-UA',
-        ru: 'ru-RU',
-        zh: 'zh-CN',
-        es: 'es-ES',
-        pt: 'pt-PT',
-        fr: 'fr-FR'
+        sr: 'sr-RS', en: 'en-US', de: 'de-DE', hu: 'hu-HU',
+        uk: 'uk-UA', ru: 'ru-RU', zh: 'zh-CN', es: 'es-ES',
+        pt: 'pt-PT', fr: 'fr-FR'
     };
 
     const DATA_ENTRY_KEYWORDS = ['unos', 'unesi', 'dodaj', 'novi', 'add', 'start'];
@@ -49,18 +42,16 @@
     };
 
     const NUMBER_WORDS = {
-        jedan: 1, jedna: 1, jedno: 1,
-        dva: 2, dve: 2,
-        tri: 3, četiri: 4, cetiri: 4,
-        pet: 5, šest: 6, sest: 6,
-        sedam: 7, osam: 8, devet: 9, deset: 10,
-        jedanaest: 11, dvanaest: 12, trinaest: 13, četrnaest: 14, cetrnaest: 14,
-        petnaest: 15, šesnaest: 16, sesnaest: 16, sedamnaest: 17, osamnaest: 18,
+        jedan: 1, jedna: 1, jedno: 1, dva: 2, dve: 2, tri: 3, 
+        četiri: 4, cetiri: 4, pet: 5, šest: 6, sest: 6, sedam: 7, 
+        osam: 8, devet: 9, deset: 10, jedanaest: 11, dvanaest: 12, 
+        trinaest: 13, četrnaest: 14, cetrnaest: 14, petnaest: 15, 
+        šesnaest: 16, sesnaest: 16, sedamnaest: 17, osamnaest: 18, 
         devetnaest: 19, dvadeset: 20
     };
 
     // --------------------------------------------------------
-    // UTILITIES & SINGLE SOURCE OF TRUTH FOR LANG
+    // UTILITIES
     // --------------------------------------------------------
     function normalizeText(text) {
         return String(text || '')
@@ -98,12 +89,10 @@
     }
 
     // --------------------------------------------------------
-    // STRICT PARSER (Dodeljuje: 1 -> piece, 2 -> quantity, 6 -> shelf_life)
+    // STRICT PARSER
     // --------------------------------------------------------
     function parseVoiceDataEntry(command) {
         let text = normalizeText(command);
-        
-        // Očisti uvodne reči
         text = text.replace(/^(start|unos|dodaj|unesi)\s+/i, '').trim();
 
         const words = text.split(/\s+/).filter(Boolean);
@@ -125,25 +114,21 @@
         for (let i = 0; i < words.length; i++) {
             const word = words[i];
 
-            // 1. Storage check
             if (STORAGE_MAP[word]) {
                 result.storage_location = STORAGE_MAP[word];
                 continue;
             }
 
-            // 2. Unit check
             if (UNIT_MAP[word]) {
                 unitFound = UNIT_MAP[word];
                 continue;
             }
 
-            // 3. Number check
             if (isNumber(word)) {
                 foundNumbers.push(getNumber(word));
                 continue;
             }
 
-            // Ignorišemo pomoćne reči pri slaganju naziva
             if (['u', 'za', 'rok', 'trajanje', 'na', 'mesec', 'meseca', 'meseci'].includes(word)) {
                 continue;
             }
@@ -151,32 +136,22 @@
             nameWords.push(word);
         }
 
-        // Dodeljivanje tačnih vrednosti na osnovu sekvence brojeva
-        if (foundNumbers.length > 0) {
-            result.piece = String(foundNumbers[0]); // Prvi broj -> piece
-        }
-        if (foundNumbers.length > 1) {
-            result.quantity = String(foundNumbers[1]); // Drugi broj -> quantity
-        }
-        if (foundNumbers.length > 2) {
-            result.shelf_life_months = String(foundNumbers[2]); // Treći broj -> shelf_life
-        }
+        if (foundNumbers.length > 0) result.piece = String(foundNumbers[0]);
+        if (foundNumbers.length > 1) result.quantity = String(foundNumbers[1]);
+        if (foundNumbers.length > 2) result.shelf_life_months = String(foundNumbers[2]);
 
-        if (unitFound) {
-            result.unit = unitFound;
-        }
+        if (unitFound) result.unit = unitFound;
 
         result.product_name = nameWords.join(' ').trim();
         return result;
     }
 
     // --------------------------------------------------------
-    // STORAGE & FORM DIRECT INTERACTION
+    // STORAGE & FORM INTERACTION
     // --------------------------------------------------------
     function saveProductDirectlyToStorage(data) {
         try {
             const zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
-            
             const newEntry = {
                 id: Date.now() + Math.random().toString(36).slice(2, 7),
                 product_name: data.product_name,
@@ -197,7 +172,7 @@
             }
             return true;
         } catch (e) {
-            console.error('Greška pri čuvanju u zalihe:', e);
+            console.error('Greška pri čuvanju:', e);
             return false;
         }
     }
@@ -212,16 +187,14 @@
                 return;
             }
 
-            // Sinhrono otvaranje forme
             openDataEntryScreen();
 
-            // Korišćenje requestAnimationFrame umesto setTimeout(100/150)
             requestAnimationFrame(() => {
                 popuniFormuPodacima(data);
                 const saved = saveProductDirectlyToStorage(data);
 
                 updateVoiceStatus(
-                    saved ? `✅ Upisano: ${data.product_name}` : `❌ Greška pri upisu: ${data.product_name}`,
+                    saved ? `✅ Upisano: ${data.product_name}` : `❌ Greška: ${data.product_name}`,
                     saved ? '#4CAF50' : '#F44336'
                 );
 
@@ -231,7 +204,7 @@
     }
 
     // --------------------------------------------------------
-    // UI CONTROL
+    // UI CONTROL (Popravljen prelazak ekrana)
     // --------------------------------------------------------
     function hideVoiceMenu() {
         const screens = ['voiceMenuScreen', 'choiceScreen'];
@@ -245,34 +218,31 @@
     }
 
     function openDataEntryScreen() {
-    hideVoiceMenu();
-    
-    // Ako imate u aplikaciji opštu showScreen funkciju, iskoristite je
-    if (typeof window.showScreen === 'function') {
-        window.showScreen('mainScreen');
-    } else {
-        // Ručno sakrivanje ostalih i prikazivanje glavnog ekrana
-        const allScreens = document.querySelectorAll('.screen, [id$="Screen"]');
-        allScreens.forEach(el => {
-            el.style.display = 'none';
-            el.classList.remove('active');
-        });
+        hideVoiceMenu();
 
-        const mainScreen = document.getElementById('mainScreen');
-        if (mainScreen) {
-            mainScreen.style.display = 'block'; // ili 'flex', zavisno od vašeg CSS-a
-            mainScreen.classList.add('active');
+        if (typeof window.showScreen === 'function') {
+            window.showScreen('mainScreen');
+        } else {
+            // Univerzalno sklanjanje ostalih ekrana i prikaz glavnog
+            document.querySelectorAll('section, div[id$="Screen"]').forEach(el => {
+                if (el.id !== 'mainScreen') {
+                    el.style.display = 'none';
+                    el.classList.remove('active');
+                }
+            });
+
+            const mainScreen = document.getElementById('mainScreen');
+            if (mainScreen) {
+                mainScreen.style.display = 'block';
+                mainScreen.classList.add('active');
+            }
+        }
+
+        if (typeof renderDataEntry === 'function') {
+            try { renderDataEntry(''); } catch (error) {}
         }
     }
 
-    if (typeof renderDataEntry === 'function') {
-        try {
-            renderDataEntry('');
-        } catch (error) {
-            console.error('Greška u renderDataEntry:', error);
-        }
-    }
-}
     function popuniFormuPodacima(data) {
         const setValue = (id, value) => {
             const el = document.getElementById(id);
@@ -303,21 +273,23 @@
         const mainScreen = document.getElementById('mainScreen');
         if (inventoryScreen) {
             if (mainScreen) mainScreen.style.display = 'none';
-            inventoryScreen.style.display = 'flex';
+            inventoryScreen.style.display = 'block';
             inventoryScreen.classList.add('active');
         }
     }
 
     // --------------------------------------------------------
-    // SPEECH RECOGNITION ENGINE
+    // SPEECH RECOGNITION ENGINE (Stabilizacija mikrofon semafora)
     // --------------------------------------------------------
     function startVoiceRecognition() {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
         if (!SpeechRecognition) {
-            updateVoiceStatus('❌ Glasovni unos nije podržan u ovom pregledaču.', '#F44336');
+            updateVoiceStatus('❌ Glasovni unos nije podržan.', '#F44336');
             return;
         }
+
+        if (isRecognitionStarting || (recognition && !isUserStopped)) return;
 
         clearTimeout(restartTimer);
         isUserStopped = false;
@@ -334,7 +306,7 @@
 
         recognition.onstart = () => {
             isRecognitionStarting = false;
-            updateVoiceStatus('🎤 Slušam... Recite unos ili komandu.', '#2196F3');
+            updateVoiceStatus('🎤 Slušam...', '#2196F3');
         };
 
         recognition.onresult = (event) => {
@@ -362,7 +334,7 @@
 
             const displayText = `${activeBuffer}${interimText ? ' ' + interimText : ''}`.trim();
             if (displayText) {
-                updateVoiceStatus(`🎤 Slušam: "${displayText}"`, '#FFD700');
+                updateVoiceStatus(`🎤 Prepoznato: "${displayText}"`, '#FFD700');
             }
         };
 
@@ -370,7 +342,7 @@
             if (['no-speech', 'aborted'].includes(event.error)) return;
             if (event.error === 'not-allowed') {
                 isUserStopped = true;
-                updateVoiceStatus('❌ Mikrofon nije dozvoljen.', '#F44336');
+                updateVoiceStatus('❌ Mikrofon onemogućen.', '#F44336');
             }
         };
 
@@ -378,16 +350,17 @@
             isRecognitionStarting = false;
             if (isUserStopped) return;
 
+            // Sprečavanje semafor efekta (veća pauza pre ponovnog paljenja)
             clearTimeout(restartTimer);
             restartTimer = setTimeout(() => {
-                if (isUserStopped || !recognition || isRecognitionStarting) return;
+                if (isUserStopped || isRecognitionStarting) return;
                 try {
                     isRecognitionStarting = true;
-                    recognition.start();
+                    if (recognition) recognition.start();
                 } catch (e) {
                     isRecognitionStarting = false;
                 }
-            }, 700);
+            }, 1200);
         };
 
         try {
@@ -409,72 +382,73 @@
             recognition = null;
         }
         activeBuffer = '';
+        updateVoiceStatus('⏹️ Mikrofon ugašen', '#888');
     }
 
     function processVoiceBuffer() {
-    if (!activeBuffer || isProcessing) return;
+        if (!activeBuffer || isProcessing) return;
 
-    const normalized = normalizeText(activeBuffer);
+        const normalized = normalizeText(activeBuffer);
 
-    // DOKATAK: Ako je izgovoreno SAMO "unos" (ili "unesi", "dodaj"...)
-    if (DATA_ENTRY_KEYWORDS.includes(normalized)) {
-        activeBuffer = ''; // Očisti bafer
-        openDataEntryScreen();
-        updateVoiceStatus(' Otvoren ekran za unos.', '#4CAF50');
-        return;
-    }
+        // Prepoznavanje okidača za prelazak na novi ekran
+        const hasTriggerWord = DATA_ENTRY_KEYWORDS.some(k => normalized.includes(k));
 
-    // Ako u rečenici ima "unos" plus još nešto, otvori ekran i nastavi sa obradom
-    if (DATA_ENTRY_KEYWORDS.some(k => normalized.includes(k))) {
-        openDataEntryScreen();
-    }
-
-    const separatorRegex = /\b(plus|end|enter|kraj|završi|zavrsi)\b/i;
-    const match = activeBuffer.match(separatorRegex);
-
-    if (!match) return;
-
-    const separatorIndex = match.index;
-    const itemText = activeBuffer.substring(0, separatorIndex).trim();
-    const command = match[0].toLowerCase();
-    const remainingText = activeBuffer.substring(separatorIndex + match[0].length).trim();
-    const isEnd = END_WORDS.includes(command);
-
-    if (itemText.length > 2) {
-        isProcessing = true;
-
-        saveVoiceItem(itemText).finally(() => {
-            isProcessing = false;
-
-            if (isEnd) {
+        if (hasTriggerWord) {
+            openDataEntryScreen();
+            
+            // Ako je rekavsi SAMO "unos", očisti bafer i sačekaj sledeću rečenicu za podatke
+            if (DATA_ENTRY_KEYWORDS.includes(normalized)) {
                 activeBuffer = '';
-                stopVoiceRecognition();
-                otvoriZaliheEkran();
+                updateVoiceStatus(' Izvolite, recite proizvod...', '#4CAF50');
                 return;
             }
+        }
 
-            activeBuffer = remainingText;
-            if (activeBuffer) processVoiceBuffer();
-        });
-        return;
-    }
+        const separatorRegex = /\b(plus|end|enter|kraj|završi|zavrsi)\b/i;
+        const match = activeBuffer.match(separatorRegex);
 
-    activeBuffer = remainingText;
-    if (isEnd) {
-        activeBuffer = '';
-        stopVoiceRecognition();
-        otvoriZaliheEkran();
+        if (!match) return;
+
+        const separatorIndex = match.index;
+        const itemText = activeBuffer.substring(0, separatorIndex).trim();
+        const command = match[0].toLowerCase();
+        const remainingText = activeBuffer.substring(separatorIndex + match[0].length).trim();
+        const isEnd = END_WORDS.includes(command);
+
+        if (itemText.length > 2) {
+            isProcessing = true;
+
+            saveVoiceItem(itemText).finally(() => {
+                isProcessing = false;
+
+                if (isEnd) {
+                    activeBuffer = '';
+                    stopVoiceRecognition();
+                    otvoriZaliheEkran();
+                    return;
+                }
+
+                activeBuffer = remainingText;
+                if (activeBuffer) processVoiceBuffer();
+            });
+            return;
+        }
+
+        activeBuffer = remainingText;
+        if (isEnd) {
+            activeBuffer = '';
+            stopVoiceRecognition();
+            otvoriZaliheEkran();
+        }
     }
-}
 
     // --------------------------------------------------------
-    // PUBLIC API (Single Entry Point)
+    // PUBLIC API
     // --------------------------------------------------------
     window.startVoiceRecognition = startVoiceRecognition;
     window.stopVoiceRecognition = stopVoiceRecognition;
     window.parseVoiceDataEntry = parseVoiceDataEntry;
     
-    // Objedinjena funkcija umesto dve konfliktne:
     window.processVoiceCommand = function(command) {
         if (!command) return;
         const text = normalizeText(command);
