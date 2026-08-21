@@ -245,22 +245,34 @@
     }
 
     function openDataEntryScreen() {
-        hideVoiceMenu();
+    hideVoiceMenu();
+    
+    // Ako imate u aplikaciji opštu showScreen funkciju, iskoristite je
+    if (typeof window.showScreen === 'function') {
+        window.showScreen('mainScreen');
+    } else {
+        // Ručno sakrivanje ostalih i prikazivanje glavnog ekrana
+        const allScreens = document.querySelectorAll('.screen, [id$="Screen"]');
+        allScreens.forEach(el => {
+            el.style.display = 'none';
+            el.classList.remove('active');
+        });
+
         const mainScreen = document.getElementById('mainScreen');
         if (mainScreen) {
-            mainScreen.style.display = 'flex';
+            mainScreen.style.display = 'block'; // ili 'flex', zavisno od vašeg CSS-a
             mainScreen.classList.add('active');
-        }
-
-        if (typeof renderDataEntry === 'function') {
-            try {
-                renderDataEntry(''); // Sinhrono popunjava DOM izbegavajući potebu za timere-ima
-            } catch (error) {
-                console.error('Greška u renderDataEntry:', error);
-            }
         }
     }
 
+    if (typeof renderDataEntry === 'function') {
+        try {
+            renderDataEntry('');
+        } catch (error) {
+            console.error('Greška u renderDataEntry:', error);
+        }
+    }
+}
     function popuniFormuPodacima(data) {
         const setValue = (id, value) => {
             const el = document.getElementById(id);
@@ -400,51 +412,60 @@
     }
 
     function processVoiceBuffer() {
-        if (!activeBuffer || isProcessing) return;
+    if (!activeBuffer || isProcessing) return;
 
-        const normalized = normalizeText(activeBuffer);
+    const normalized = normalizeText(activeBuffer);
 
-        if (DATA_ENTRY_KEYWORDS.some(k => normalized.includes(k))) {
-            openDataEntryScreen();
-        }
-
-        const separatorRegex = /\b(plus|end|enter|kraj|završi|zavrsi)\b/i;
-        const match = activeBuffer.match(separatorRegex);
-
-        if (!match) return;
-
-        const separatorIndex = match.index;
-        const itemText = activeBuffer.substring(0, separatorIndex).trim();
-        const command = match[0].toLowerCase();
-        const remainingText = activeBuffer.substring(separatorIndex + match[0].length).trim();
-        const isEnd = END_WORDS.includes(command);
-
-        if (itemText.length > 2) {
-            isProcessing = true;
-
-            saveVoiceItem(itemText).finally(() => {
-                isProcessing = false;
-
-                if (isEnd) {
-                    activeBuffer = '';
-                    stopVoiceRecognition();
-                    otvoriZaliheEkran();
-                    return;
-                }
-
-                activeBuffer = remainingText;
-                if (activeBuffer) processVoiceBuffer();
-            });
-            return;
-        }
-
-        activeBuffer = remainingText;
-        if (isEnd) {
-            activeBuffer = '';
-            stopVoiceRecognition();
-            otvoriZaliheEkran();
-        }
+    // DOKATAK: Ako je izgovoreno SAMO "unos" (ili "unesi", "dodaj"...)
+    if (DATA_ENTRY_KEYWORDS.includes(normalized)) {
+        activeBuffer = ''; // Očisti bafer
+        openDataEntryScreen();
+        updateVoiceStatus(' Otvoren ekran za unos.', '#4CAF50');
+        return;
     }
+
+    // Ako u rečenici ima "unos" plus još nešto, otvori ekran i nastavi sa obradom
+    if (DATA_ENTRY_KEYWORDS.some(k => normalized.includes(k))) {
+        openDataEntryScreen();
+    }
+
+    const separatorRegex = /\b(plus|end|enter|kraj|završi|zavrsi)\b/i;
+    const match = activeBuffer.match(separatorRegex);
+
+    if (!match) return;
+
+    const separatorIndex = match.index;
+    const itemText = activeBuffer.substring(0, separatorIndex).trim();
+    const command = match[0].toLowerCase();
+    const remainingText = activeBuffer.substring(separatorIndex + match[0].length).trim();
+    const isEnd = END_WORDS.includes(command);
+
+    if (itemText.length > 2) {
+        isProcessing = true;
+
+        saveVoiceItem(itemText).finally(() => {
+            isProcessing = false;
+
+            if (isEnd) {
+                activeBuffer = '';
+                stopVoiceRecognition();
+                otvoriZaliheEkran();
+                return;
+            }
+
+            activeBuffer = remainingText;
+            if (activeBuffer) processVoiceBuffer();
+        });
+        return;
+    }
+
+    activeBuffer = remainingText;
+    if (isEnd) {
+        activeBuffer = '';
+        stopVoiceRecognition();
+        otvoriZaliheEkran();
+    }
+}
 
     // --------------------------------------------------------
     // PUBLIC API (Single Entry Point)
