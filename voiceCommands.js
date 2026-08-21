@@ -934,20 +934,19 @@ function startVoiceRecognition() {
     };
 
     recognition.onend = function() {
-        console.log('🎤 Glasovno prepoznavanje završeno.');
-        isProcessingCommand = false;
-        
-        // ⭐ Mobilni - automatski restart ako nije ručno zaustavljeno
-        if (isMobile && !isProcessingCommand && !END_AKTIVAN) {
-            setTimeout(() => {
-                if (!recognition && !isProcessingCommand) {
-                    console.log('📱 Automatski restart mikrofona...');
-                    startVoiceRecognition();
-                }
-            }, 3000);
-        }
-    };
-
+    console.log('🎤 Glasovno prepoznavanje završeno.');
+    isProcessingCommand = false;
+    
+    // ⭐ Mobilni - automatski restart sa keep-alive
+    if (isMobile && !isProcessingCommand && !END_AKTIVAN) {
+        setTimeout(() => {
+            if (!recognition && !isProcessingCommand) {
+                console.log('📱 Restart mikrofona (keep-alive)');
+                startVoiceRecognition();
+            }
+        }, 1000);
+    }
+};
     try {
         recognition.start();
         console.log('✅ Mikrofon pokrenut!');
@@ -1499,7 +1498,88 @@ selectVoiceMode = function() {
 
 // Eksportuj novu funkciju
 window.aktivirajMikrofonNaMobilnom = aktivirajMikrofonNaMobilnom;
+// ============================================
+// 22. KEEP-ALIVE ZA MIKROFON (MOBILNI)
+// ============================================
 
+let keepAliveTimer = null;
+let keepAliveActive = false;
+
+// Funkcija koja održava mikrofon aktivnim
+function keepMicAlive() {
+    if (!recognition) {
+        console.log('🔇 Mikrofon nije aktivan - restartujem...');
+        startVoiceRecognition();
+        return;
+    }
+    
+    // Ako nema aktivnosti duže od 5 sekundi, pošalji "tihi" restart
+    if (!isProcessingCommand && activeBuffer.length === 0) {
+        console.log('🔄 Keep-alive: osvežavam vezu mikrofona...');
+        try {
+            // Nežan restart - samo osveži vezu
+            recognition.stop();
+            setTimeout(() => {
+                if (!isProcessingCommand) {
+                    recognition.start();
+                    console.log('✅ Veza osvežena');
+                }
+            }, 200);
+        } catch(e) {
+            console.warn('Keep-alive greška:', e);
+            startVoiceRecognition();
+        }
+    }
+}
+
+// Pokreni keep-alive
+function startKeepAlive() {
+    if (keepAliveTimer) {
+        clearInterval(keepAliveTimer);
+    }
+    
+    keepAliveActive = true;
+    keepAliveTimer = setInterval(() => {
+        keepMicAlive();
+    }, 8000); // Svakih 8 sekundi
+}
+
+// Zaustavi keep-alive
+function stopKeepAlive() {
+    keepAliveActive = false;
+    if (keepAliveTimer) {
+        clearInterval(keepAliveTimer);
+        keepAliveTimer = null;
+    }
+    console.log('⏹️ Keep-alive zaustavljen');
+}
+
+// Override startVoiceRecognition da pokrene keep-alive
+const originalStartVoiceKeep = startVoiceRecognition;
+startVoiceRecognition = function() {
+    console.log('🎤 startVoiceRecognition (sa keep-alive)');
+    stopKeepAlive();
+    originalStartVoiceKeep();
+    setTimeout(() => {
+        startKeepAlive();
+        console.log('✅ Keep-alive pokrenut');
+    }, 2000);
+};
+
+// Override stopVoiceRecognition da zaustavi keep-alive
+const originalStopVoiceKeep = stopVoiceRecognition;
+stopVoiceRecognition = function() {
+    console.log('🛑 stopVoiceRecognition (sa keep-alive)');
+    stopKeepAlive();
+    originalStopVoiceKeep();
+};
+
+// Eksportuj
+window.startKeepAlive = startKeepAlive;
+window.stopKeepAlive = stopKeepAlive;
+window.keepMicAlive = keepMicAlive;
+
+console.log('🔄 Keep-alive aktiviran - mikrofon se održava aktivnim');
 console.log('📱 Mobilna podrška aktivirana - klik za aktivaciju mikrofona');
 
 // ============================================
