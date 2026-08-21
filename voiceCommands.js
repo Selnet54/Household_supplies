@@ -1,14 +1,14 @@
 // ============================================
-// VOICE COMMANDS - STABLE MOBILE & TABLET (NO POPUP)
+// VOICE COMMANDS - NO-LOOP / STABLE MOBILE
 // ============================================
 
 let activeBuffer = '';
 let recognition = null;
 let isUserStopped = false;
-let isProcessing = false; // Zaključavanje dok se podaci upisuju
-let restartTimer = null;
+let isProcessing = false;
+let isMicStarting = false;
 
-// Isključivanje standardnih pop-up obaveštenja u aplikaciji
+// Gašenje svih pop-up poruka
 window.showModernAlert = function() { return false; };
 window.alert = function() { return false; };
 
@@ -29,7 +29,14 @@ function startVoiceRecognition() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) return;
 
+    // Ako je već pokrenut ili u fazi paljenja, ne diraj ga
+    if (isMicStarting || (recognition && !isUserStopped)) {
+        console.log('🎤 Mikrofon je već aktivan, preskačem restart.');
+        return;
+    }
+
     isUserStopped = false;
+    isMicStarting = true;
 
     if (recognition) {
         try { recognition.abort(); } catch(e) {}
@@ -52,15 +59,16 @@ function startVoiceRecognition() {
     const statusEl = document.getElementById('voiceStatus');
 
     recognition.onstart = function() {
-        console.log('🎤 Mikrofon je stabilno uključen.');
+        isMicStarting = false;
+        console.log('🎤 Mikrofon stabilno radi.');
         if (statusEl) {
-            statusEl.textContent = '🎤 Slušam... Recite "unos" ili diktirajte.';
+            statusEl.textContent = '🎤 Slušam... Recite "unos" pa diktirajte.';
             statusEl.style.color = '#2196F3';
         }
     };
 
     recognition.onresult = function(event) {
-        if (isProcessing) return; // Ignoresi nove glasove dok traje obrada unosa
+        if (isProcessing) return;
 
         let interimText = '';
         let finalChunk = '';
@@ -87,21 +95,15 @@ function startVoiceRecognition() {
 
         const lowerBuffer = (activeBuffer + ' ' + interimText).toLowerCase();
 
-        // 1. EKRAN DATA ENTRY NA REČ "UNOS"
+        // 1. REČ "UNOS" - Otvara ekran TIHO bez ponovnog pokretanja skripte
         const dataEntryKeywords = ['unos', 'unesi', 'dodaj', 'novi', 'add'];
         if (dataEntryKeywords.some(k => lowerBuffer.includes(k))) {
-            hideVoiceMenu();
-            const mainScreen = document.getElementById('mainScreen');
-            if (mainScreen && mainScreen.style.display !== 'flex') {
-                mainScreen.style.display = 'flex';
-                mainScreen.classList.add('active');
-                if (typeof renderDataEntry === 'function') renderDataEntry('');
-            }
+            prikaziDataEntryBezReseta();
         }
 
-        // 2. DETEKCIJA KRAJA NIZA (PLUS, END, ENTER, FRIEND)
+        // 2. DETEKCIJA KRAJA NIZA
         if (/\b(plus|end|enter|friend)\b/i.test(activeBuffer)) {
-            isProcessing = true; // Zaključaj obradu da sprečiš brze petlje mikrofona
+            isProcessing = true;
 
             let isEnd = /\b(end|enter|friend)\b/i.test(activeBuffer);
             let parts = activeBuffer.split(/\b(plus|end|enter|friend)\b/i);
@@ -115,48 +117,61 @@ function startVoiceRecognition() {
 
             if (isEnd) {
                 stopVoiceRecognition();
-                setTimeout(() => {
-                    otvoriZaliheEkran();
-                }, 600);
+                setTimeout(() => { otvoriZaliheEkran(); }, 600);
             } else {
-                // Posle obrade "plus", otključaj mikrofon za sledeći proizvod
-                setTimeout(() => {
-                    isProcessing = false;
-                }, 1000);
+                setTimeout(() => { isProcessing = false; }, 1200);
             }
         }
     };
 
     recognition.onerror = function(event) {
-        if (event.error === 'no-speech' || event.error === 'aborted') {
-            return; // Ignoriši bezazlene mobilne prekide tišine
-        }
-        if (event.error === 'not-allowed') {
-            isUserStopped = true;
-        }
+        isMicStarting = false;
+        // Ignorišemo greške koje nastaju pri tišini ili prelasku ekrana
+        if (event.error === 'no-speech' || event.error === 'aborted') return;
+        if (event.error === 'not-allowed') isUserStopped = true;
     };
 
-    // PAMETNA STABILIZACIJA PETLJE (Sprečava "semafor" bljeskanje)
+    // BEZBEDNI ONEND (Bez brzog reseta koji pravi semafor)
     recognition.onend = function() {
-        if (!isUserStopped) {
-            clearTimeout(restartTimer);
-            restartTimer = setTimeout(() => {
+        isMicStarting = false;
+        console.log('🎤 Mikrofon se ugasio.');
+        
+        // Restartujemo SAMO ako korisnik nije ručno ugasio i ako nismo u obradi
+        if (!isUserStopped && !isProcessing) {
+            setTimeout(() => {
                 try {
-                    if (recognition) recognition.start();
-                } catch(e) {}
-            }, 1000); // 1 sekunda stabilne pauze pre nego što mobilni mikrofon ponovo počne da sluša
+                    if (recognition && !isUserStopped) {
+                        recognition.start();
+                    }
+                } catch(e) {
+                    console.log('Mikrofon sprečen od agresivnog reseta:', e);
+                }
+            }, 1500); // Duža pauza sprečava brza treperenja
         }
     };
 
     try {
         recognition.start();
-    } catch(e) {}
+    } catch(e) {
+        isMicStarting = false;
+    }
+}
+
+// OTKRIVANJE EKRANA BEZ RE-RENDERA I PREKIDA MIKROFONA
+function prikaziDataEntryBezReseta() {
+    hideVoiceMenu();
+    const mainScreen = document.getElementById('mainScreen');
+    if (mainScreen && mainScreen.style.display !== 'flex') {
+        mainScreen.style.display = 'flex';
+        mainScreen.classList.add('active');
+        // NE POZIVAMO renderDataEntry() ako on u pozadini resetuje mikrofonske skripte!
+    }
 }
 
 function stopVoiceRecognition() {
     isUserStopped = true;
     isProcessing = false;
-    clearTimeout(restartTimer);
+    isMicStarting = false;
     if (recognition) {
         try { recognition.stop(); } catch(e) {}
     }
@@ -178,11 +193,6 @@ function otvoriZaliheEkran() {
             inv.classList.add('active');
         }
     }
-}
-
-function goBackFromVoice() {
-    stopVoiceRecognition();
-    if (typeof showScreen === 'function') showScreen('choiceScreen');
 }
 
 function parseVoiceDataEntry(command) {
@@ -244,12 +254,7 @@ function processAndSaveItem(command) {
     let data = parseVoiceDataEntry(command);
     if (!data.product_name || data.product_name === 'Proizvod') return false;
 
-    hideVoiceMenu();
-    const mainScreen = document.getElementById('mainScreen');
-    if (mainScreen) {
-        mainScreen.style.display = 'flex';
-        mainScreen.classList.add('active');
-    }
+    prikaziDataEntryBezReseta();
 
     setTimeout(() => {
         popuniFormuPodacima(data);
@@ -299,7 +304,6 @@ function popuniFormuPodacima(data) {
     if (typeof updateExpiryDate === 'function') try { updateExpiryDate(); } catch(e) {}
 }
 
-// TIHO ČUVANJE (Potpuno bez iskakanja pop-up obaveštenja)
 function sacuvajPodatkeTiho(data) {
     let saved = false;
     
@@ -320,11 +324,6 @@ function sacuvajPodatkeTiho(data) {
 
     if (!saved && typeof saveProduct === 'function') { try { saveProduct(); saved = true; } catch(e) {} }
     if (!saved && typeof handleFormSubmit === 'function') { try { handleFormSubmit(); saved = true; } catch(e) {} }
-    
-    if (!saved) {
-        const saveBtn = document.querySelector('#saveProductBtn, button[type="submit"], .btn-save, .save-btn');
-        if (saveBtn) { try { saveBtn.click(); saved = true; } catch(e) {} }
-    }
 
     const statusEl = document.getElementById('voiceStatus');
     if (statusEl) {
@@ -333,10 +332,13 @@ function sacuvajPodatkeTiho(data) {
     }
 }
 
-// Globalne funkcije
+// Globalne eksportovane funkcije
 window.startVoiceRecognition = startVoiceRecognition;
 window.stopVoiceRecognition = stopVoiceRecognition;
-window.goBackFromVoice = goBackFromVoice;
+window.goBackFromVoice = function() {
+    stopVoiceRecognition();
+    if (typeof showScreen === 'function') showScreen('choiceScreen');
+};
 window.hideVoiceMenu = hideVoiceMenu;
 window.parseVoiceDataEntry = parseVoiceDataEntry;
 window.processVoiceCommand = processAndSaveItem;
