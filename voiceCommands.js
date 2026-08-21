@@ -1386,6 +1386,87 @@ window.monitorMicStatus = monitorMicStatus;
 
 console.log('🔄 Monitoring mikrofona aktiviran - restartuje se svakih 30 sekundi');
 console.log('🔄 Funkcije: popuniFormuPodacima(), ensureFormVisible(), prikaziTrenutnePodatke(), ocistiFormu()');
+// ============================================
+// 21. MOBILNI - AKTIVACIJA MIKROFONA NA KLIK
+// ============================================
+
+// Funkcija za aktivaciju mikrofona na mobilnim uređajima
+function aktivirajMikrofonNaMobilnom() {
+    console.log('📱 Aktivacija mikrofona za mobilni uređaj...');
+    
+    // Proveri da li je mobilni uređaj
+    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|Opera Mini|IEMobile/i.test(navigator.userAgent);
+    
+    if (isMobile) {
+        console.log('📱 Mobilni uređaj detektovan - pripremam mikrofon...');
+        
+        // Pokušaj da pokreneš mikrofon na klik
+        if (typeof startVoiceRecognition === 'function') {
+            try {
+                startVoiceRecognition();
+                console.log('✅ Mikrofon aktiviran na mobilnom');
+            } catch(e) {
+                console.warn('⚠️ Greška pri aktivaciji mikrofona:', e);
+            }
+        }
+        
+        // Dodatno - pokušaj sa korisničkom interakcijom
+        document.addEventListener('click', function mobilniKlik() {
+            if (!recognition) {
+                console.log('📱 Klik na ekran - pokrećem mikrofon...');
+                startVoiceRecognition();
+                // Ukloni event listener posle prvog klika
+                document.removeEventListener('click', mobilniKlik);
+            }
+        }, { once: true });
+    }
+}
+
+// Override selectVoiceMode za mobilne uređaje
+const originalSelectVoiceMode = selectVoiceMode;
+selectVoiceMode = function() {
+    console.log('🎤 selectVoiceMode (mobilna verzija)');
+    
+    // Prvo prikaži voice menu
+    document.querySelectorAll('.screen').forEach(s => {
+        s.style.display = 'none';
+        s.classList.remove('active');
+    });
+    
+    const voiceMenuScreen = document.getElementById('voiceMenuScreen');
+    if (voiceMenuScreen) {
+        voiceMenuScreen.style.display = 'flex';
+        voiceMenuScreen.classList.add('active');
+        console.log('✅ Voice menu prikazan');
+    }
+    
+    // Na mobilnim uređajima, pokreni mikrofon nakon korisničkog klika
+    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|Opera Mini|IEMobile/i.test(navigator.userAgent);
+    
+    if (isMobile) {
+        console.log('📱 Mobilni uređaj - čekam klik za aktivaciju mikrofona...');
+        showVoiceStatus('📱 Dodirnite ekran za aktivaciju mikrofona', '#FF9800');
+        
+        // Dodaj event listener za klik na ceo ekran
+        document.addEventListener('click', function mobilniStart() {
+            console.log('📱 Klik detektovan - pokrećem mikrofon...');
+            startVoiceRecognition();
+            document.removeEventListener('click', mobilniStart);
+            showVoiceStatus('🎤 Mikrofon aktiviran', '#4CAF50');
+        }, { once: true });
+    } else {
+        // Desktop - pokreni odmah
+        setTimeout(function() {
+            console.log('🎤 Pokrećem VOICE COMMANDS...');
+            startVoiceRecognition();
+        }, 500);
+    }
+};
+
+// Eksportuj novu funkciju
+window.aktivirajMikrofonNaMobilnom = aktivirajMikrofonNaMobilnom;
+
+console.log('📱 Mobilna podrška aktivirana - klik za aktivaciju mikrofona');
 
 // ============================================
 // KRAJ FAJLA
