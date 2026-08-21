@@ -344,17 +344,7 @@
     <div class="voice-menu-container">
         <div class="voice-menu-box">
             <div id="voiceMenuTitleText" style="font-size:20px; color:#FFD700; margin-bottom:5px;">🎤 Voice Control</div>
-            <div id="voiceMenuPromptText" style="font-size:16px; color:#aaa; margin-bottom:15px;">Say what you want to do:</div>
-            
-            <!-- ⭐ DODAJ OVO - DUGME ZA POKRETANJE MIKROFONA NA MOBILNOM -->
-            <button onclick="startVoiceRecognition()" 
-                    style="font-size:22px; padding:18px 20px; margin:0 0 15px 0; 
-                           background: #4CAF50; color: white; border: none; border-radius: 12px; 
-                           cursor: pointer; width: 100%; box-shadow: 0 4px 15px rgba(76,175,80,0.4);
-                           font-weight: bold;">
-                🎤 Pokreni mikrofon
-            </button>
-            
+            <div id="voiceMenuPromptText" style="font-size:16px; color:#aaa; margin-bottom:25px;">Say what you want to do:</div>
             <div class="voice-grid">
                 <button class="voice-btn" onclick="voiceCommand('inventory')">
                     <div style="font-size:40px;">📦</div>
@@ -382,6 +372,7 @@
         </div>
     </div>
 </div>
+
 <!-- ===== EKRAN 5: GLAVNI EKRAN ===== -->
 <div id="mainScreen" class="screen" style="display:none; flex-direction:column; background:#f5f5f5; min-height:100vh;">
     <div class="header">
