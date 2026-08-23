@@ -1,5 +1,5 @@
 // ============================================
-// VOICE COMMANDS - KONAČNA ISPRAVNA VERZIJA
+// VOICE COMMANDS - POTPUNO NOVA VERZIJA
 // ============================================
 
 let activeBuffer = ''; 
@@ -8,9 +8,109 @@ let lastSavedData = null;
 let isProcessingCommand = false;
 let END_AKTIVAN = false;
 let isVoiceInput = false;
+let currentVoiceLang = 'sr-RS';
+let currentLang = 'sr';
 
 // ============================================
-// 1. POMOĆNE FUNKCIJE
+// REČNIK ZA VOICE KOMANDE NA SVIH 10 JEZIKA
+// ============================================
+
+const VOICE_COMMANDS = {
+    sr: {
+        inventory: ['zalihe', 'zaliha', 'inventar', 'spisak', 'popis', 'stanje'],
+        end: ['end', 'kraj', 'gotovo', 'enter', 'friend', 'završi', 'dosta'],
+        plus: ['plus', 'dodaj', 'unesi', 'snimi', 'sačuvaj', 'zapiši'],
+        start: ['start', 'počni', 'započni', 'pokreni', 'unos', 'novi']
+    },
+    en: {
+        inventory: ['inventory', 'stock', 'list', 'items', 'supplies', 'warehouse', 'storage'],
+        end: ['end', 'done', 'finish', 'complete', 'enter', 'stop', 'exit'],
+        plus: ['plus', 'add', 'save', 'submit', 'record', 'store'],
+        start: ['start', 'begin', 'go', 'record', 'new', 'input']
+    },
+    de: {
+        inventory: ['bestand', 'inventar', 'liste', 'vorrat', 'lager', 'waren', 'vorräte'],
+        end: ['ende', 'fertig', 'beenden', 'eingabe', 'enter', 'stopp', 'exit'],
+        plus: ['plus', 'hinzufügen', 'speichern', 'add', 'aufnehmen', 'eintragen'],
+        start: ['start', 'beginn', 'los', 'aufnahme', 'neu', 'eingabe']
+    },
+    hu: {
+        inventory: ['készlet', 'leltár', 'lista', 'raktár', 'áru', 'készletek', 'termékek'],
+        end: ['vége', 'kész', 'befejez', 'enter', 'rendben', 'stop', 'exit'],
+        plus: ['plusz', 'hozzáad', 'mentés', 'rögzít', 'felvétel', 'tárol'],
+        start: ['indul', 'kezd', 'start', 'elindít', 'új', 'bevitel']
+    },
+    uk: {
+        inventory: ['запаси', 'інвентар', 'список', 'склад', 'товари', 'продукти', 'наявність'],
+        end: ['кінець', 'готово', 'завершити', 'введення', 'enter', 'стоп', 'вихід'],
+        plus: ['плюс', 'додати', 'зберегти', 'записати', 'додавання', 'зберігання'],
+        start: ['почати', 'старт', 'розпочати', 'запустити', 'новий', 'введення']
+    },
+    ru: {
+        inventory: ['запасы', 'инвентарь', 'список', 'склад', 'товары', 'продукты', 'наличие'],
+        end: ['конец', 'готово', 'завершить', 'ввод', 'enter', 'стоп', 'выход'],
+        plus: ['плюс', 'добавить', 'сохранить', 'записать', 'добавление', 'сохранение'],
+        start: ['начать', 'старт', 'запустить', 'поехали', 'новый', 'ввод']
+    },
+    zh: {
+        inventory: ['库存', '存货', '清单', '列表', '商品', '产品', '存货清单'],
+        end: ['结束', '完成', '输入', '确定', 'enter', '停止', '退出'],
+        plus: ['加', '添加', '保存', '记录', '新增', '存储'],
+        start: ['开始', '启动', '录音', '说', '新', '输入']
+    },
+    es: {
+        inventory: ['inventario', 'stock', 'lista', 'existencias', 'productos', 'almacén', 'depósito'],
+        end: ['fin', 'hecho', 'terminar', 'entrar', 'enter', 'parar', 'salir'],
+        plus: ['más', 'añadir', 'guardar', 'agregar', 'sumar', 'registrar'],
+        start: ['empezar', 'comenzar', 'iniciar', 'grabar', 'nuevo', 'entrada']
+    },
+    pt: {
+        inventory: ['inventário', 'estoque', 'lista', 'produtos', 'suprimentos', 'armazém', 'mercadorias'],
+        end: ['fim', 'pronto', 'terminar', 'entrar', 'enter', 'parar', 'sair'],
+        plus: ['mais', 'adicionar', 'salvar', 'incluir', 'add', 'registrar'],
+        start: ['começar', 'iniciar', 'gravar', 'start', 'novo', 'entrada']
+    },
+    fr: {
+        inventory: ['inventaire', 'stock', 'liste', 'produits', 'marchandises', 'entrepôt', 'réserves'],
+        end: ['fin', 'terminé', 'terminer', 'entrée', 'enter', 'arrêter', 'sortir'],
+        plus: ['plus', 'ajouter', 'enregistrer', 'sauvegarder', 'add', 'enregistrement'],
+        start: ['commencer', 'démarrer', 'enregistrer', 'début', 'nouveau', 'entrée']
+    }
+};
+
+// ============================================
+// FUNKCIJE ZA JEZIK
+// ============================================
+
+function getVoiceCommands() {
+    return VOICE_COMMANDS[currentLang] || VOICE_COMMANDS['sr'];
+}
+
+function updateVoiceLanguage(langCode) {
+    currentLang = langCode || 'sr';
+    
+    const speechLangMap = {
+        sr: 'sr-RS', en: 'en-US', de: 'de-DE', hu: 'hu-HU',
+        uk: 'uk-UA', ru: 'ru-RU', zh: 'zh-CN', es: 'es-ES',
+        pt: 'pt-PT', fr: 'fr-FR'
+    };
+    
+    currentVoiceLang = speechLangMap[currentLang] || 'sr-RS';
+    console.log('🌐 Voice jezik ažuriran na:', currentVoiceLang);
+    
+    const cmds = getVoiceCommands();
+    console.log('📋 Komande za inventar:', cmds.inventory.join(', '));
+    console.log('📦 Komande za kraj:', cmds.end.join(', '));
+    console.log('✅ Komande za unos:', cmds.plus.join(', '));
+    
+    if (recognition) {
+        stopVoiceRecognition();
+        setTimeout(() => startVoiceRecognition(), 500);
+    }
+}
+
+// ============================================
+// POMOĆNE FUNKCIJE
 // ============================================
 
 function hideVoiceMenu() {
@@ -36,29 +136,110 @@ function showVoiceStatus(text, color) {
 }
 
 // ============================================
-// 2. BROJEVI NA SRPSKOM
+// BROJEVI NA VIŠE JEZIKA
 // ============================================
 
 const NUMBER_WORDS = {
-    'nula': '0',
-    'jedan': '1', 'jedna': '1', 'jedno': '1',
-    'dva': '2', 'dve': '2',
-    'tri': '3',
-    'četiri': '4', 'cetiri': '4',
-    'pet': '5',
-    'šest': '6', 'sest': '6',
-    'sedam': '7',
-    'osam': '8',
-    'devet': '9',
-    'deset': '10',
-    'jedanaest': '11', 'dvanaest': '12',
-    'trinaest': '13', 'četrnaest': '14', 'cetrnaest': '14',
-    'petnaest': '15', 'šesnaest': '16', 'sesnaest': '16',
-    'sedamnaest': '17', 'osamnaest': '18', 'devetnaest': '19',
+    // Srpski
+    'nula': '0', 'jedan': '1', 'jedna': '1', 'jedno': '1',
+    'dva': '2', 'dve': '2', 'tri': '3', 'četiri': '4', 'cetiri': '4',
+    'pet': '5', 'šest': '6', 'sest': '6', 'sedam': '7', 'osam': '8',
+    'devet': '9', 'deset': '10',
+    'jedanaest': '11', 'dvanaest': '12', 'trinaest': '13',
+    'četrnaest': '14', 'cetrnaest': '14', 'petnaest': '15',
+    'šesnaest': '16', 'sesnaest': '16', 'sedamnaest': '17',
+    'osamnaest': '18', 'devetnaest': '19',
     'dvadeset': '20', 'trideset': '30', 'četrdeset': '40',
     'cetrdeset': '40', 'pedeset': '50', 'šezdeset': '60',
     'sezdeset': '60', 'sedamdeset': '70', 'osamdeset': '80',
-    'devedeset': '90', 'sto': '100'
+    'devedeset': '90', 'sto': '100',
+    
+    // Engleski
+    'zero': '0', 'one': '1', 'two': '2', 'three': '3', 'four': '4',
+    'five': '5', 'six': '6', 'seven': '7', 'eight': '8', 'nine': '9',
+    'ten': '10', 'eleven': '11', 'twelve': '12', 'thirteen': '13',
+    'fourteen': '14', 'fifteen': '15', 'sixteen': '16', 'seventeen': '17',
+    'eighteen': '18', 'nineteen': '19', 'twenty': '20', 'thirty': '30',
+    'forty': '40', 'fifty': '50', 'sixty': '60', 'seventy': '70',
+    'eighty': '80', 'ninety': '90', 'hundred': '100',
+    
+    // Nemački
+    'null': '0', 'eins': '1', 'zwei': '2', 'drei': '3', 'vier': '4',
+    'fünf': '5', 'funf': '5', 'sechs': '6', 'sieben': '7', 'acht': '8',
+    'neun': '9', 'zehn': '10', 'elf': '11', 'zwölf': '12', 'z wol f': '12',
+    'dreizehn': '13', 'vierzehn': '14', 'fünfzehn': '15', 'funfzehn': '15',
+    'sechzehn': '16', 'siebzehn': '17', 'achtzehn': '18', 'neunzehn': '19',
+    'zwanzig': '20', 'dreißig': '30', 'dreissig': '30', 'vierzig': '40',
+    'fünfzig': '50', 'funfzig': '50', 'sechzig': '60', 'siebzig': '70',
+    'achtzig': '80', 'neunzig': '90', 'hundert': '100',
+    
+    // Mađarski
+    'nulla': '0', 'egy': '1', 'kettő': '2', 'ketto': '2', 'három': '3', 'harom': '3',
+    'négy': '4', 'negy': '4', 'öt': '5', 'ot': '5', 'hat': '6', 'hét': '7', 'het': '7',
+    'nyolc': '8', 'kilenc': '9', 'tíz': '10', 'tiz': '10', 'tizenegy': '11',
+    'tizenkettő': '12', 'tizenketto': '12', 'tizenhárom': '13', 'tizenharom': '13',
+    'tizennégy': '14', 'tizenegy': '14', 'tizenöt': '15', 'tizenot': '15',
+    'tizenhat': '16', 'tizenhét': '17', 'tizenhet': '17', 'tizennyolc': '18',
+    'tizenkilenc': '19', 'húsz': '20', 'husz': '20', 'harminc': '30',
+    'negyven': '40', 'ötven': '50', 'otven': '50', 'hatvan': '60',
+    'hetven': '70', 'nyolcvan': '80', 'kilencven': '90', 'száz': '100', 'szaz': '100',
+    
+    // Ukrajinski
+    'нуль': '0', 'один': '1', 'два': '2', 'три': '3', 'чотири': '4',
+    'пять': '5', 'шість': '6', 'сім': '7', 'вісім': '8', 'девять': '9',
+    'десять': '10', 'одинадцять': '11', 'дванадцять': '12', 'тринадцять': '13',
+    'чотирнадцять': '14', 'пятнадцять': '15', 'шістнадцять': '16',
+    'сімнадцять': '17', 'вісімнадцять': '18', 'девятнадцять': '19',
+    'двадцять': '20', 'тридцять': '30', 'сорок': '40', 'пятдесят': '50',
+    'шістдесят': '60', 'сімдесят': '70', 'вісімдесят': '80', 'девяносто': '90',
+    'сто': '100',
+    
+    // Ruski
+    'ноль': '0', 'один': '1', 'два': '2', 'три': '3', 'четыре': '4',
+    'пять': '5', 'шесть': '6', 'семь': '7', 'восемь': '8', 'девять': '9',
+    'десять': '10', 'одиннадцать': '11', 'двенадцать': '12', 'тринадцать': '13',
+    'четырнадцать': '14', 'пятнадцать': '15', 'шестнадцать': '16',
+    'семнадцать': '17', 'восемнадцать': '18', 'девятнадцать': '19',
+    'двадцать': '20', 'тридцать': '30', 'сорок': '40', 'пятьдесят': '50',
+    'шестьдесят': '60', 'семьдесят': '70', 'восемьдесят': '80', 'девяносто': '90',
+    'сто': '100',
+    
+    // Kineski (pinyin)
+    'ling': '0', 'yi': '1', 'er': '2', 'san': '3', 'si': '4',
+    'wu': '5', 'liu': '6', 'qi': '7', 'ba': '8', 'jiu': '9',
+    'shi': '10', 'shiyi': '11', 'shier': '12', 'shisan': '13',
+    'shisi': '14', 'shiwu': '15', 'shiliu': '16', 'shiqi': '17',
+    'shiba': '18', 'shijiu': '19', 'ershi': '20', 'sanshi': '30',
+    'sishi': '40', 'wushi': '50', 'liushi': '60', 'qishi': '70',
+    'bashi': '80', 'jiushi': '90', 'yibai': '100',
+    
+    // Španski
+    'cero': '0', 'uno': '1', 'dos': '2', 'tres': '3', 'cuatro': '4',
+    'cinco': '5', 'seis': '6', 'siete': '7', 'ocho': '8', 'nueve': '9',
+    'diez': '10', 'once': '11', 'doce': '12', 'trece': '13',
+    'catorce': '14', 'quince': '15', 'dieciséis': '16', 'diecisies': '16',
+    'diecisiete': '17', 'dieciocho': '18', 'diecinueve': '19',
+    'veinte': '20', 'treinta': '30', 'cuarenta': '40', 'cincuenta': '50',
+    'sesenta': '60', 'setenta': '70', 'ochenta': '80', 'noventa': '90',
+    'cien': '100',
+    
+    // Portugalski
+    'zero': '0', 'um': '1', 'dois': '2', 'três': '3', 'tres': '3',
+    'quatro': '4', 'cinco': '5', 'seis': '6', 'sete': '7', 'oito': '8',
+    'nove': '9', 'dez': '10', 'onze': '11', 'doze': '12', 'treze': '13',
+    'catorze': '14', 'quinze': '15', 'dezesseis': '16', 'dezessete': '17',
+    'dezoito': '18', 'dezenove': '19', 'vinte': '20', 'trinta': '30',
+    'quarenta': '40', 'cinquenta': '50', 'sessenta': '60', 'setenta': '70',
+    'oitenta': '80', 'noventa': '90', 'cem': '100',
+    
+    // Francuski
+    'zéro': '0', 'zero': '0', 'un': '1', 'deux': '2', 'trois': '3',
+    'quatre': '4', 'cinq': '5', 'six': '6', 'sept': '7', 'huit': '8',
+    'neuf': '9', 'dix': '10', 'onze': '11', 'douze': '12', 'treize': '13',
+    'quatorze': '14', 'quinze': '15', 'seize': '16', 'dix-sept': '17',
+    'dix-huit': '18', 'dix-neuf': '19', 'vingt': '20', 'trente': '30',
+    'quarante': '40', 'cinquante': '50', 'soixante': '60', 'soixante-dix': '70',
+    'quatre-vingt': '80', 'quatre-vingt-dix': '90', 'cent': '100'
 };
 
 function getNumber(word) {
@@ -69,7 +250,7 @@ function getNumber(word) {
 }
 
 // ============================================
-// 3. JEDINICE I SKLADIŠTA
+// JEDINICE I SKLADIŠTA
 // ============================================
 
 const UNIT_MAP = {
@@ -104,7 +285,7 @@ function getStorage(word) {
 }
 
 // ============================================
-// 4. PARSIRANJE
+// PARSIRANJE
 // ============================================
 
 function parseVoiceDataEntry(command) {
@@ -219,41 +400,28 @@ function parseVoiceDataEntry(command) {
         }
     }
     
-    // ============================================
-    // KORAK 5: NAZIV PROIZVODA
-    // ============================================
-    
     result.product_name = nameParts.join(' ').trim() || 'Proizvod';
     
-    // ============================================
-// KORAK 6: JEDINICA I SKLADIŠTE - POPRAVLJENO
-// ============================================
-
-// ⭐ PRVO PROVERI DA LI JE "g" U TEKSTU (pre svega ostalog!)
-if (text.includes('gram') || text.includes('grama') || text.includes('g ') || text.includes('g)')) {
-    result.unit = 'g';
-    console.log('🔍 Pronađeno "gram" -> jedinica = g');
-} else if (foundUnit) {
-    result.unit = foundUnit;
-    console.log('🔍 Pronađena jedinica iz reči:', foundUnit);
-} else if (text.includes('kilogram') || text.includes('kg')) {
-    result.unit = 'kg';
-    console.log('🔍 Pronađeno "kilogram" -> jedinica = kg');
-} else if (text.includes('litar') || text.includes('l ')) {
-    result.unit = 'l';
-    console.log('🔍 Pronađeno "litar" -> jedinica = l');
-} else if (text.includes('komad') || text.includes('kom')) {
-    result.unit = 'kom';
-    console.log('🔍 Pronađeno "komad" -> jedinica = kom');
-}
-
-if (foundStorage) {
-    result.storage = foundStorage;
-}
+    if (text.includes('gram') || text.includes('grama') || text.includes('g ') || text.includes('g)')) {
+        result.unit = 'g';
+        console.log('🔍 Pronađeno "gram" -> jedinica = g');
+    } else if (foundUnit) {
+        result.unit = foundUnit;
+        console.log('🔍 Pronađena jedinica iz reči:', foundUnit);
+    } else if (text.includes('kilogram') || text.includes('kg')) {
+        result.unit = 'kg';
+        console.log('🔍 Pronađeno "kilogram" -> jedinica = kg');
+    } else if (text.includes('litar') || text.includes('l ')) {
+        result.unit = 'l';
+        console.log('🔍 Pronađeno "litar" -> jedinica = l');
+    } else if (text.includes('komad') || text.includes('kom')) {
+        result.unit = 'kom';
+        console.log('🔍 Pronađeno "komad" -> jedinica = kom');
+    }
     
-    // ============================================
-    // KORAK 7: POPRAVKA ZA "500 GRAMA"
-    // ============================================
+    if (foundStorage) {
+        result.storage = foundStorage;
+    }
     
     let gramMatches = text.match(/\b(500|700|800|900|1000)\b/);
     if (gramMatches) {
@@ -275,7 +443,7 @@ if (foundStorage) {
 }
 
 // ============================================
-// 5. POPUNJAVANJE FORME
+// POPUNJAVANJE FORME
 // ============================================
 
 function popuniFormuPodacima(data) {
@@ -341,7 +509,7 @@ function popuniFormuPodacima(data) {
 }
 
 // ============================================
-// 6. ČUVANJE PODATAKA
+// ČUVANJE PODATAKA
 // ============================================
 
 function sacuvajPodatke(data) {
@@ -350,7 +518,6 @@ function sacuvajPodatke(data) {
     isVoiceInput = true;
     window._isVoiceInput = true;
     
-    // ⛔ UGASI SVE POPUP-OVE
     const originalShowModernAlert = window.showModernAlert;
     window.showModernAlert = function() {
         console.log('⛔ POP-UP ZABRANJEN (voice input)');
@@ -426,7 +593,6 @@ function sacuvajPodatke(data) {
         }
     }
     
-    // Vrati originalne funkcije
     setTimeout(() => {
         window.showModernAlert = originalShowModernAlert;
         window.alert = originalAlert;
@@ -466,13 +632,12 @@ function sacuvajPodatke(data) {
 }
 
 // ============================================
-// 7. OTVARANJE ZALIHA
+// OTVARANJE ZALIHA
 // ============================================
 
 function otvoriZaliheEkran() {
     console.log('📦 Otvaram ekran zaliha...');
     
-    // Osveži podatke
     if (typeof refreshInventoryData === 'function') {
         try { refreshInventoryData(); } catch(e) {}
     }
@@ -515,7 +680,7 @@ function otvoriZaliheEkran() {
 }
 
 // ============================================
-// 8. OBRADA I ČUVANJE
+// OBRADA I ČUVANJE
 // ============================================
 
 function processAndSaveItem(command) {
@@ -549,7 +714,7 @@ function processAndSaveItem(command) {
 }
 
 // ============================================
-// 9. START VOICE RECOGNITION
+// START VOICE RECOGNITION
 // ============================================
 
 function startVoiceRecognition() {
@@ -567,13 +732,7 @@ function startVoiceRecognition() {
     }
 
     recognition = new SpeechRecognition();
-    const langCode = typeof currentLang !== 'undefined' ? currentLang : 'sr';
-    const speechLangMap = {
-        sr: 'sr-RS', en: 'en-US', de: 'de-DE', hu: 'hu-HU',
-        uk: 'uk-UA', ru: 'ru-RU', zh: 'zh-CN', es: 'es-ES',
-        pt: 'pt-PT', fr: 'fr-FR'
-    };
-    recognition.lang = speechLangMap[langCode] || 'sr-RS';
+    recognition.lang = currentVoiceLang;
     recognition.continuous = true;
     recognition.interimResults = true;
     recognition.maxAlternatives = 1;
@@ -613,24 +772,78 @@ function startVoiceRecognition() {
         
         if (isProcessingCommand) return;
         
+        const commands = getVoiceCommands();
         const lowerFull = activeBuffer.toLowerCase();
         console.log('🔍 PROVERAVAM CELI BAFER:', lowerFull);
         
         // ============================================
-        // 1. "END" - OTVARA ZALIHE
+        // 1. "INVENTORY/SPISAK" - OTVARA INVENTAR
         // ============================================
-        if (lowerFull.includes('end') || 
-            lowerFull.includes('kraj') || 
-            lowerFull.includes('gotovo') ||
-            lowerFull.includes('enter') ||
-            lowerFull.includes('friend')) {
+        const inventoryKeywords = commands.inventory || ['zalihe', 'inventar', 'spisak'];
+        if (inventoryKeywords.some(keyword => lowerFull.includes(keyword))) {
+            console.log('📋 SPISAK/INVENTAR DETEKTOVAN - otvaram inventar!');
+            isProcessingCommand = true;
+            
+            let itemText = activeBuffer;
+            for (let word of inventoryKeywords) {
+                if (itemText.toLowerCase().includes(word)) {
+                    const parts = itemText.split(new RegExp(word, 'i'));
+                    itemText = parts[0].trim();
+                    break;
+                }
+            }
+            
+            if (itemText.length > 2) {
+                processAndSaveItem(itemText);
+            }
+            
+            activeBuffer = '';
+            
+            setTimeout(() => {
+                stopVoiceRecognition();
+                setTimeout(() => {
+                    if (typeof refreshInventoryData === 'function') {
+                        try { refreshInventoryData(); } catch(e) {}
+                    }
+                    if (typeof prikaziSveUnose === 'function') {
+                        try { prikaziSveUnose(); } catch(e) {}
+                    }
+                    if (typeof renderInventory === 'function') {
+                        try { renderInventory(); } catch(e) {}
+                    }
+                    
+                    if (typeof openInventoryAndShowHighlight === 'function') {
+                        try { openInventoryAndShowHighlight(); } catch(e) {}
+                    } else if (typeof showScreen === 'function') {
+                        try { showScreen('inventoryScreen'); } catch(e) {}
+                    } else {
+                        const inv = document.getElementById('inventoryScreen');
+                        const main = document.getElementById('mainScreen');
+                        if (inv) {
+                            if (main) main.style.display = 'none';
+                            inv.style.display = 'flex';
+                            inv.classList.add('active');
+                        }
+                    }
+                    console.log('✅ Inventar otvoren');
+                    showVoiceStatus('📋 Spisak otvoren', '#4CAF50');
+                }, 500);
+            }, 300);
+            
+            return;
+        }
+        
+        // ============================================
+        // 2. "END" - OTVARA ZALIHE
+        // ============================================
+        const endKeywords = commands.end || ['end', 'kraj', 'gotovo', 'enter'];
+        if (endKeywords.some(keyword => lowerFull.includes(keyword))) {
             console.log('🏁 END DETEKTOVAN - otvaram zalihe!');
             isProcessingCommand = true;
             END_AKTIVAN = true;
             
             let itemText = activeBuffer;
-            const endWords = ['end', 'kraj', 'gotovo', 'enter', 'friend'];
-            for (let word of endWords) {
+            for (let word of endKeywords) {
                 if (itemText.toLowerCase().includes(word)) {
                     const parts = itemText.split(new RegExp(word, 'i'));
                     itemText = parts[0].trim();
@@ -662,13 +875,14 @@ function startVoiceRecognition() {
         }
         
         // ============================================
-        // 2. "PLUS" - ZAVRŠAVA UNOS
+        // 3. "PLUS" - ZAVRŠAVA UNOS (NE otvara zalihe)
         // ============================================
-        if (lowerFull.includes('plus')) {
+        const plusKeywords = commands.plus || ['plus', 'dodaj', 'unesi'];
+        if (plusKeywords.some(keyword => lowerFull.includes(keyword))) {
             console.log('✅ PLUS DETEKTOVAN - završavam unos (NE otvaram zalihe)');
             isProcessingCommand = true;
             
-            let parts = activeBuffer.split(/\bplus\b/i);
+            let parts = activeBuffer.split(new RegExp(plusKeywords.join('|'), 'i'));
             let itemText = parts[0].trim();
             
             if (itemText.length > 2) {
@@ -694,10 +908,10 @@ function startVoiceRecognition() {
         }
         
         // ============================================
-        // 3. "UNOS" - OTVARA DATA ENTRY
+        // 4. "START/UNOS" - OTVARA DATA ENTRY
         // ============================================
-        const dataEntryKeywords = ['unos', 'unesi', 'dodaj', 'novi', 'add'];
-        if (dataEntryKeywords.some(k => lowerFull.includes(k))) {
+        const startKeywords = commands.start || ['unos', 'unesi', 'dodaj', 'novi'];
+        if (startKeywords.some(keyword => lowerFull.includes(keyword))) {
             console.log('📝 UNOS DETEKTOVAN - otvaram data entry');
             hideVoiceMenu();
             const mainScreen = document.getElementById('mainScreen');
@@ -709,7 +923,7 @@ function startVoiceRecognition() {
             const words = activeBuffer.split(/\s+/);
             const filtered = words.filter(w => {
                 const lower = w.toLowerCase();
-                return !dataEntryKeywords.some(k => lower === k);
+                return !startKeywords.some(k => lower === k);
             });
             activeBuffer = filtered.join(' ');
         }
@@ -721,6 +935,8 @@ function startVoiceRecognition() {
             showVoiceStatus('❌ Dozvolite pristup mikrofonu.', '#f44336');
         } else if (event.error === 'no-speech') {
             showVoiceStatus('⚠️ Nisam čuo govor. Pokušajte ponovo.', '#FF9800');
+        } else if (event.error === 'network') {
+            showVoiceStatus('⚠️ Mrežna greška. Pokušajte ponovo.', '#FF9800');
         }
         isProcessingCommand = false;
     };
@@ -741,7 +957,7 @@ function startVoiceRecognition() {
 }
 
 // ============================================
-// 10. ZAUSTAVI PREPOZNAVANJE
+// ZAUSTAVI PREPOZNAVANJE
 // ============================================
 
 function stopVoiceRecognition() {
@@ -757,7 +973,7 @@ function stopVoiceRecognition() {
 }
 
 // ============================================
-// 10.1 RESTART MIKROFONA
+// RESTART MIKROFONA
 // ============================================
 
 function restartMicrophone() {
@@ -769,7 +985,7 @@ function restartMicrophone() {
 }
 
 // ============================================
-// 11. POVRATAK NA PREĐAŠNJI EKRAN
+// POVRATAK NA PREĐAŠNJI EKRAN
 // ============================================
 
 function goBackFromVoice() {
@@ -796,7 +1012,7 @@ function goBackFromVoice() {
 }
 
 // ============================================
-// 12. SELEKTOVANJE VOICE MODE
+// SELEKTOVANJE VOICE MODE
 // ============================================
 
 function selectVoiceMode() {
@@ -821,87 +1037,7 @@ function selectVoiceMode() {
 }
 
 // ============================================
-// 13. PREUZIMANJE KONTROLE
-// ============================================
-
-window._voiceCommandsStart = startVoiceRecognition;
-window._voiceCommandsStop = stopVoiceRecognition;
-window._voiceCommandsProcess = processAndSaveItem;
-window._voiceCommandsParse = parseVoiceDataEntry;
-window._voiceCommandsOpenZalihe = otvoriZaliheEkran;
-
-window.startVoiceRecognition = function() {
-    console.log('🎤 startVoiceRecognition -> VOICE COMMANDS');
-    return window._voiceCommandsStart();
-};
-
-window.stopVoiceRecognition = function() {
-    console.log('🛑 stopVoiceRecognition -> VOICE COMMANDS');
-    return window._voiceCommandsStop();
-};
-
-window.processVoiceCommand = function(command) {
-    console.log('🎤 processVoiceCommand (pregažen):', command);
-    
-    if (!command) return false;
-    const lower = command.toLowerCase();
-    
-    if (lower.includes('plus')) {
-        console.log('✅ PLUS - završavam unos (NE otvaram zalihe)');
-        const itemText = command.replace(/plus/i, '').trim();
-        if (itemText && typeof window._voiceCommandsProcess === 'function') {
-            window._voiceCommandsProcess(itemText);
-        }
-        return true;
-    }
-    
-    if (lower.includes('end') || lower.includes('kraj') || lower.includes('gotovo') || lower.includes('enter')) {
-        console.log('🏁 END - otvaram zalihe');
-        const itemText = command.replace(/end|kraj|gotovo|enter/i, '').trim();
-        if (itemText && typeof window._voiceCommandsProcess === 'function') {
-            window._voiceCommandsProcess(itemText);
-        }
-        setTimeout(() => {
-            if (typeof window._voiceCommandsOpenZalihe === 'function') {
-                window._voiceCommandsOpenZalihe();
-            }
-        }, 500);
-        return true;
-    }
-    
-    if (lower.includes('unos') || lower.includes('unesi') || lower.includes('dodaj')) {
-        console.log('📝 UNOS - otvaram data entry');
-        const itemText = command.replace(/unos|unesi|dodaj|novi|add/i, '').trim();
-        hideVoiceMenu();
-        const mainScreen = document.getElementById('mainScreen');
-        if (mainScreen) {
-            mainScreen.style.display = 'flex';
-            mainScreen.classList.add('active');
-            if (typeof renderDataEntry === 'function') renderDataEntry('');
-        }
-        if (itemText && typeof window._voiceCommandsProcess === 'function') {
-            setTimeout(() => {
-                window._voiceCommandsProcess(itemText);
-            }, 500);
-        }
-        return true;
-    }
-    
-    return false;
-};
-
-window.voiceCommand = function(command) {
-    console.log('🎤 voiceCommand -> processVoiceCommand');
-    return window.processVoiceCommand(command);
-};
-
-window.selectVoiceMode = selectVoiceMode;
-window.goBackFromVoice = goBackFromVoice;
-window.hideVoiceMenu = hideVoiceMenu;
-window.restartMicrophone = restartMicrophone;
-
-// ============================================
-// 14. ZABRANA OTVARANJA ZALIHA IZ renderInventory
+// ZABRANA OTVARANJA ZALIHA IZ VOICE KOMANDI
 // ============================================
 
 (function() {
@@ -913,6 +1049,14 @@ window.restartMicrophone = restartMicrophone;
     
     window.renderInventory = function() {
         const stack = new Error().stack || '';
+        const allowed = ['goBackFromVoice', 'selectVoiceMode', 'otvoriZaliheEkran', 'startVoiceRecognition'];
+        if (allowed.some(fn => stack.includes(fn))) {
+            console.log('✅ DOZVOLJENO: renderInventory iz voice komande');
+            if (typeof originalRenderInventory === 'function') {
+                return originalRenderInventory.apply(this, arguments);
+            }
+        }
+        
         const blocked = ['sacuvajPodatke', 'processAndSaveItem', 'processVoiceCommand', 'saveProduct', 'handleFormSubmit', 'addProduct'];
         const isBlocked = blocked.some(fn => stack.includes(fn));
         
@@ -928,8 +1072,15 @@ window.restartMicrophone = restartMicrophone;
     
     window.showScreen = function(screenId) {
         const stack = new Error().stack || '';
-        const blocked = ['sacuvajPodatke', 'processAndSaveItem', 'processVoiceCommand'];
+        const allowed = ['goBackFromVoice', 'selectVoiceMode', 'otvoriZaliheEkran', 'startVoiceRecognition'];
+        if (allowed.some(fn => stack.includes(fn))) {
+            console.log('✅ DOZVOLJENO: showScreen(' + screenId + ') iz voice komande');
+            if (typeof originalShowScreen === 'function') {
+                return originalShowScreen.apply(this, arguments);
+            }
+        }
         
+        const blocked = ['sacuvajPodatke', 'processAndSaveItem', 'processVoiceCommand'];
         if (blocked.some(fn => stack.includes(fn)) && 
             (screenId === 'inventoryScreen' || screenId === 'mainScreen')) {
             console.log('⛔ BLOKIRANO: showScreen(' + screenId + ') iz voice komande');
@@ -943,6 +1094,14 @@ window.restartMicrophone = restartMicrophone;
     
     window.openInventoryAndShowHighlight = function() {
         const stack = new Error().stack || '';
+        const allowed = ['goBackFromVoice', 'selectVoiceMode', 'otvoriZaliheEkran', 'startVoiceRecognition'];
+        if (allowed.some(fn => stack.includes(fn))) {
+            console.log('✅ DOZVOLJENO: openInventoryAndShowHighlight iz voice komande');
+            if (typeof originalOpenInventory === 'function') {
+                return originalOpenInventory.apply(this, arguments);
+            }
+        }
+        
         if (stack.includes('sacuvajPodatke')) {
             console.log('⛔ BLOKIRANO: openInventoryAndShowHighlight iz voice komande');
             return;
@@ -956,11 +1115,12 @@ window.restartMicrophone = restartMicrophone;
     console.log('✅ Otvaranje zaliha BLOKIRANO za voice komande!');
     console.log('⛔ Plus NE otvara zalihe!');
     console.log('✅ End otvara zalihe!');
+    console.log('✅ Spisak/Inventar otvara inventar!');
     console.log('✅ 4. ekran (voiceMenuScreen) radi!');
 })();
 
 // ============================================
-// 15. IZVOZ SVIH FUNKCIJA
+// IZVOZ SVIH FUNKCIJA
 // ============================================
 
 window.startVoiceRecognition = startVoiceRecognition;
@@ -975,29 +1135,52 @@ window.sacuvajPodatke = sacuvajPodatke;
 window.processAndSaveItem = processAndSaveItem;
 window.selectVoiceMode = selectVoiceMode;
 window.restartMicrophone = restartMicrophone;
-
-console.log('✅ VOICE COMMANDS - KONAČNA VERZIJA UČITANA!');
-console.log('🎤 "unos" → diktiraj → "plus" (samo završava) → "end" (otvara zalihe)');
-console.log('⛔ PLUS NE otvara zalihe!');
-console.log('📦 END otvara zalihe!');
-console.log('📝 Pravilno parsiranje: 1. broj=komad, 2. broj=količina');
-console.log('🔄 restartMicrophone dostupan!');
+window.updateVoiceLanguage = updateVoiceLanguage;
+window.getVoiceCommands = getVoiceCommands;
+window.VOICE_COMMANDS = VOICE_COMMANDS;
+window.currentLang = currentLang;
 
 // ============================================
-// TEST END - Ručno otvaranje zaliha
+// TEST FUNKCIJA ZA SVE JEZIKE
 // ============================================
 
-window.forceOpenInventory = function() {
-    console.log('🔓 FORSIRAM otvaranje zaliha!');
-    if (typeof prikaziSveUnose === 'function') {
-        try { prikaziSveUnose(); } catch(e) {}
-    }
-    if (typeof renderInventory === 'function') {
-        try { renderInventory(); } catch(e) {}
-    }
-    if (typeof openInventoryAndShowHighlight === 'function') {
-        try { openInventoryAndShowHighlight(); } catch(e) {}
-    } else if (typeof showScreen === 'function') {
-        try { showScreen('inventoryScreen'); } catch(e) {}
-    }
-    console.log('✅ Zalihe otvorene');
+window.testVoiceCommands = function() {
+    console.log('🧪 TESTIRAM VOICE KOMANDE ZA SVE JEZIKE:');
+    const langs = ['sr', 'en', 'de', 'hu', 'uk', 'ru', 'zh', 'es', 'pt', 'fr'];
+    const langNames = {
+        sr: 'Srpski', en: 'English', de: 'Deutsch', hu: 'Magyar',
+        uk: 'Українська', ru: 'Русский', zh: '中文', es: 'Español',
+        pt: 'Português', fr: 'Français'
+    };
+    
+    langs.forEach(lang => {
+        const cmds = VOICE_COMMANDS[lang];
+        console.log(`\n📌 ${langNames[lang]} (${lang}):`);
+        console.log(`   📋 Spisak/Inventar: ${cmds.inventory.join(', ')}`);
+        console.log(`   📦 Zalihe/End: ${cmds.end.join(', ')}`);
+        console.log(`   ✅ Plus/Dodaj: ${cmds.plus.join(', ')}`);
+        console.log(`   🎤 Start/Unos: ${cmds.start.join(', ')}`);
+    });
+    
+    console.log('\n✅ Test završen!');
+    console.log('💡 Da biste promenili jezik, pozovite: updateVoiceLanguage("en")');
+};
+
+// ============================================
+// AUTO-START NA UČITAVANJE
+// ============================================
+
+console.log('✅ VOICE COMMANDS - POTPUNO NOVA VERZIJA UČITANA!');
+console.log('🎤 Podržani jezici: sr, en, de, hu, uk, ru, zh, es, pt, fr');
+console.log('📋 "spisak" ili "inventar" → otvara inventar (na svim jezicima)');
+console.log('📦 "end" ili "kraj" → otvara zalihe (na svim jezicima)');
+console.log('✅ "plus" ili "dodaj" → samo završava unos (NE otvara zalihe)');
+console.log('🧪 Pozovite testVoiceCommands() za pregled svih jezika');
+
+// Automatski test
+setTimeout(() => {
+    console.log('🌐 Trenutni jezik:', currentLang);
+    console.log('🔊 Voice jezik:', currentVoiceLang);
+    const cmds = getVoiceCommands();
+    console.log('📋 Komande za inventar:', cmds.inventory.join(', '));
+}, 1000);
