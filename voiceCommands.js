@@ -111,22 +111,26 @@ function getVoiceCommands() {
 }
 
 function detectVoiceCommand(text) {
+    if (!text) return null;
     const commands = getVoiceCommands();
     const lower = text.toLowerCase().trim();
     
-    if (lower.includes('exit')) return 'close';
+    // 1. Prvo proveri sve ključne reči za zatvaranje (exit, izlaz, itd.)
+    if (commands.close && commands.close.some(k => lower.includes(k.toLowerCase()))) {
+        return 'close';
+    }
     
+    // 2. Proveri ostale komande (add, list, stock)
     for (let [action, keywords] of Object.entries(commands)) {
         if (action === 'close') continue;
         for (let keyword of keywords) {
             if (lower.includes(keyword.toLowerCase())) {
-                return action;
+                return action; // Vraća 'add' za "unos", "dodaj", "unesi"...
             }
         }
     }
     return null;
 }
-
 function showVoiceStatus(text, color = '#2196F3') {
     const statusEl = document.getElementById('voiceStatus');
     if (statusEl) {
