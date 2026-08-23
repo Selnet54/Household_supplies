@@ -2,14 +2,31 @@
 // VOICE COMMANDS - POTPUNO NOVA VERZIJA
 // ============================================
 
-let activeBuffer = ''; 
-let recognition = null;
-let lastSavedData = null;
-let isProcessingCommand = false;
-let END_AKTIVAN = false;
-let isVoiceInput = false;
-let currentVoiceLang = 'sr-RS';
-let currentLang = 'sr';
+// Proveri da li već postoji pre nego što deklarišeš
+if (typeof activeBuffer === 'undefined') {
+    var activeBuffer = '';
+}
+if (typeof recognition === 'undefined') {
+    var recognition = null;
+}
+if (typeof lastSavedData === 'undefined') {
+    var lastSavedData = null;
+}
+if (typeof isProcessingCommand === 'undefined') {
+    var isProcessingCommand = false;
+}
+if (typeof END_AKTIVAN === 'undefined') {
+    var END_AKTIVAN = false;
+}
+if (typeof isVoiceInput === 'undefined') {
+    var isVoiceInput = false;
+}
+if (typeof currentVoiceLang === 'undefined') {
+    var currentVoiceLang = 'sr-RS';
+}
+
+// NE deklariši currentLang ovde - koristi onaj iz glavnog skripta
+// Samo ga referenciraj
 
 // ============================================
 // REČNIK ZA VOICE KOMANDE NA SVIH 10 JEZIKA
@@ -83,19 +100,19 @@ const VOICE_COMMANDS = {
 // ============================================
 
 function getVoiceCommands() {
-    return VOICE_COMMANDS[currentLang] || VOICE_COMMANDS['sr'];
+    // Koristi currentLang iz globalnog skopa
+    const lang = typeof currentLang !== 'undefined' ? currentLang : 'sr';
+    return VOICE_COMMANDS[lang] || VOICE_COMMANDS['sr'];
 }
 
 function updateVoiceLanguage(langCode) {
-    currentLang = langCode || 'sr';
-    
     const speechLangMap = {
         sr: 'sr-RS', en: 'en-US', de: 'de-DE', hu: 'hu-HU',
         uk: 'uk-UA', ru: 'ru-RU', zh: 'zh-CN', es: 'es-ES',
         pt: 'pt-PT', fr: 'fr-FR'
     };
     
-    currentVoiceLang = speechLangMap[currentLang] || 'sr-RS';
+    currentVoiceLang = speechLangMap[langCode] || 'sr-RS';
     console.log('🌐 Voice jezik ažuriran na:', currentVoiceLang);
     
     const cmds = getVoiceCommands();
@@ -776,9 +793,7 @@ function startVoiceRecognition() {
         const lowerFull = activeBuffer.toLowerCase();
         console.log('🔍 PROVERAVAM CELI BAFER:', lowerFull);
         
-        // ============================================
-        // 1. "INVENTORY/SPISAK" - OTVARA INVENTAR
-        // ============================================
+        // INVENTORY/SPISAK
         const inventoryKeywords = commands.inventory || ['zalihe', 'inventar', 'spisak'];
         if (inventoryKeywords.some(keyword => lowerFull.includes(keyword))) {
             console.log('📋 SPISAK/INVENTAR DETEKTOVAN - otvaram inventar!');
@@ -833,9 +848,7 @@ function startVoiceRecognition() {
             return;
         }
         
-        // ============================================
-        // 2. "END" - OTVARA ZALIHE
-        // ============================================
+        // END - OTVARA ZALIHE
         const endKeywords = commands.end || ['end', 'kraj', 'gotovo', 'enter'];
         if (endKeywords.some(keyword => lowerFull.includes(keyword))) {
             console.log('🏁 END DETEKTOVAN - otvaram zalihe!');
@@ -874,9 +887,7 @@ function startVoiceRecognition() {
             return;
         }
         
-        // ============================================
-        // 3. "PLUS" - ZAVRŠAVA UNOS (NE otvara zalihe)
-        // ============================================
+        // PLUS - ZAVRŠAVA UNOS (NE otvara zalihe)
         const plusKeywords = commands.plus || ['plus', 'dodaj', 'unesi'];
         if (plusKeywords.some(keyword => lowerFull.includes(keyword))) {
             console.log('✅ PLUS DETEKTOVAN - završavam unos (NE otvaram zalihe)');
@@ -907,9 +918,7 @@ function startVoiceRecognition() {
             return;
         }
         
-        // ============================================
-        // 4. "START/UNOS" - OTVARA DATA ENTRY
-        // ============================================
+        // START/UNOS - OTVARA DATA ENTRY
         const startKeywords = commands.start || ['unos', 'unesi', 'dodaj', 'novi'];
         if (startKeywords.some(keyword => lowerFull.includes(keyword))) {
             console.log('📝 UNOS DETEKTOVAN - otvaram data entry');
@@ -1120,7 +1129,7 @@ function selectVoiceMode() {
 })();
 
 // ============================================
-// IZVOZ SVIH FUNKCIJA
+// IZVOZ SVIH FUNKCIJA U GLOBALNI SKOP
 // ============================================
 
 window.startVoiceRecognition = startVoiceRecognition;
@@ -1138,10 +1147,9 @@ window.restartMicrophone = restartMicrophone;
 window.updateVoiceLanguage = updateVoiceLanguage;
 window.getVoiceCommands = getVoiceCommands;
 window.VOICE_COMMANDS = VOICE_COMMANDS;
-window.currentLang = currentLang;
 
 // ============================================
-// TEST FUNKCIJA ZA SVE JEZIKE
+// TEST FUNKCIJA
 // ============================================
 
 window.testVoiceCommands = function() {
@@ -1177,10 +1185,6 @@ console.log('📦 "end" ili "kraj" → otvara zalihe (na svim jezicima)');
 console.log('✅ "plus" ili "dodaj" → samo završava unos (NE otvara zalihe)');
 console.log('🧪 Pozovite testVoiceCommands() za pregled svih jezika');
 
-// Automatski test
-setTimeout(() => {
-    console.log('🌐 Trenutni jezik:', currentLang);
-    console.log('🔊 Voice jezik:', currentVoiceLang);
-    const cmds = getVoiceCommands();
-    console.log('📋 Komande za inventar:', cmds.inventory.join(', '));
-}, 1000);
+// Obavesti da je sve spremno
+console.log('🎤 Sve funkcije su izvezene globalno!');
+console.log('📞 Pozovite startVoiceRecognition() da pokrenete mikrofon');
