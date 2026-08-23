@@ -1,5 +1,5 @@
 // ============================================
-// VOICE COMMANDS - NOVA VERZIJA SA 4 OPCIJE
+// VOICE COMMANDS - ISPRAVLJENA VERZIJA
 // ============================================
 
 let activeBuffer = ''; 
@@ -42,44 +42,44 @@ const VOICE_COMMANDS = {
 
 const VOICE_MESSAGES = {
     sr: {
-        welcome: '🎤 Izaberite: "unos", "spisak", "zalihe" ili "exit"',
-        listening: '🎤 Slušam...',
-        add_mode: '📝 Unesite podatke o proizvodu',
-        list_mode: '📋 Otvaram spisak...',
-        stock_mode: '📦 Otvaram zalihe...',
-        closing: '🔚 Zatvaram glasovni meni...',
-        not_recognized: '❌ Nisam prepoznao komandu',
-        saving: '✅ Sačuvano: '
+        welcome: 'Izaberite: "unos", "spisak", "zalihe" ili "exit"',
+        listening: 'Slušam...',
+        add_mode: 'Unesite podatke o proizvodu',
+        list_mode: 'Otvaram spisak...',
+        stock_mode: 'Otvaram zalihe...',
+        closing: 'Zatvaram glasovni meni...',
+        not_recognized: 'Nisam prepoznao komandu',
+        saving: 'Sačuvano: '
     },
     en: {
-        welcome: '🎤 Choose: "add", "list", "stock" or "exit"',
-        listening: '🎤 Listening...',
-        add_mode: '📝 Enter product data',
-        list_mode: '📋 Opening list...',
-        stock_mode: '📦 Opening stock...',
-        closing: '🔚 Closing voice menu...',
-        not_recognized: '❌ Command not recognized',
-        saving: '✅ Saved: '
+        welcome: 'Choose: "add", "list", "stock" or "exit"',
+        listening: 'Listening...',
+        add_mode: 'Enter product data',
+        list_mode: 'Opening list...',
+        stock_mode: 'Opening stock...',
+        closing: 'Closing voice menu...',
+        not_recognized: 'Command not recognized',
+        saving: 'Saved: '
     },
     de: {
-        welcome: '🎤 Wählen Sie: "hinzufügen", "liste", "bestand" oder "exit"',
-        listening: '🎤 Höre zu...',
-        add_mode: '📝 Produktdaten eingeben',
-        list_mode: '📋 Öffne Liste...',
-        stock_mode: '📦 Öffne Bestand...',
-        closing: '🔚 Sprachmenü schließen...',
-        not_recognized: '❌ Befehl nicht erkannt',
-        saving: '✅ Gespeichert: '
+        welcome: 'Wählen Sie: "hinzufügen", "liste", "bestand" oder "exit"',
+        listening: 'Höre zu...',
+        add_mode: 'Produktdaten eingeben',
+        list_mode: 'Öffne Liste...',
+        stock_mode: 'Öffne Bestand...',
+        closing: 'Sprachmenü schließen...',
+        not_recognized: 'Befehl nicht erkannt',
+        saving: 'Gespeichert: '
     },
     hu: {
-        welcome: '🎤 Válasszon: "hozzáad", "lista", "készlet" vagy "exit"',
-        listening: '🎤 Hallgatom...',
-        add_mode: '📝 Termék adatok bevitele',
-        list_mode: '📋 Lista megnyitása...',
-        stock_mode: '📦 Készlet megnyitása...',
-        closing: '🔚 Hangmenü bezárása...',
-        not_recognized: '❌ Parancs nem felismerhető',
-        saving: '✅ Mentve: '
+        welcome: 'Válasszon: "hozzáad", "lista", "készlet" vagy "exit"',
+        listening: 'Hallgatom...',
+        add_mode: 'Termék adatok bevitele',
+        list_mode: 'Lista megnyitása...',
+        stock_mode: 'Készlet megnyitása...',
+        closing: 'Hangmenü bezárása...',
+        not_recognized: 'Parancs nem felismerhető',
+        saving: 'Mentve: '
     }
 };
 
@@ -89,7 +89,12 @@ function getCurrentLang() {
 
 function getMessage(key) {
     const lang = getCurrentLang();
-    return VOICE_MESSAGES[lang]?.[key] || VOICE_MESSAGES.sr[key];
+    const messages = VOICE_MESSAGES[lang];
+    if (!messages) {
+        console.warn('⚠️ Nema poruka za jezik:', lang);
+        return VOICE_MESSAGES.sr[key] || key || '';
+    }
+    return messages[key] || VOICE_MESSAGES.sr[key] || key || '';
 }
 
 function detectVoiceCommand(text) {
@@ -106,7 +111,7 @@ function detectVoiceCommand(text) {
     for (let [action, keywords] of Object.entries(commands)) {
         if (action === 'close') continue;
         for (let keyword of keywords) {
-            if (lower.includes(keyword)) {
+            if (lower.includes(keyword.toLowerCase())) {
                 return action;
             }
         }
@@ -147,7 +152,7 @@ function voiceCommand(action) {
     
     switch(action) {
         case 'add':
-            showVoiceStatus(msg.add_mode, '#4CAF50');
+            showVoiceStatus('📝 ' + getMessage('add_mode'), '#4CAF50');
             hideVoiceMenu();
             const mainScreen = document.getElementById('mainScreen');
             if (mainScreen) {
@@ -157,31 +162,29 @@ function voiceCommand(action) {
             if (typeof renderDataEntry === 'function') {
                 try { renderDataEntry(''); } catch(e) {}
             }
-            // Reset buffer za unos
             activeBuffer = '';
-            // Nastavi slušanje
             break;
             
         case 'list':
-            showVoiceStatus(msg.list_mode, '#4CAF50');
+            showVoiceStatus('📋 ' + getMessage('list_mode'), '#4CAF50');
             stopVoiceRecognition();
             setTimeout(() => otvoriSpisakEkran(), 300);
             break;
             
         case 'stock':
-            showVoiceStatus(msg.stock_mode, '#4CAF50');
+            showVoiceStatus('📦 ' + getMessage('stock_mode'), '#4CAF50');
             stopVoiceRecognition();
             setTimeout(() => otvoriZaliheEkran(), 300);
             break;
             
         case 'close':
-            showVoiceStatus(msg.closing, '#FF9800');
+            showVoiceStatus('🔚 ' + getMessage('closing'), '#FF9800');
             stopVoiceRecognition();
             setTimeout(() => goBackFromVoice(), 300);
             break;
             
         default:
-            showVoiceStatus(msg.not_recognized, '#f44336');
+            showVoiceStatus('❌ ' + getMessage('not_recognized'), '#f44336');
     }
 }
 
@@ -466,7 +469,7 @@ function popuniFormuPodacima(data) {
             try { updateExpiryDate(); } catch(e) {}
         }
         
-        showVoiceStatus(`${getMessage('saving')} ${data.product_name} (${data.quantity} ${data.unit})`, '#4CAF50');
+        showVoiceStatus('✅ ' + getMessage('saving') + ' ' + data.product_name + ' (' + data.quantity + ' ' + data.unit + ')', '#4CAF50');
     }, 300);
 }
 
@@ -561,7 +564,7 @@ function sacuvajPodatke(data) {
     }, 1000);
     
     if (saved) {
-        showVoiceStatus(`${getMessage('saving')} ${data.product_name}`, '#4CAF50');
+        showVoiceStatus('✅ ' + getMessage('saving') + ' ' + data.product_name, '#4CAF50');
         console.log('✅ Podaci sačuvani!');
         
         setTimeout(() => {
@@ -712,7 +715,7 @@ function processAndSaveItem(command) {
 }
 
 // ============================================
-// 11. START VOICE RECOGNITION - NOVA VERZIJA
+// 11. START VOICE RECOGNITION - ISPRAVLJENA VERZIJA
 // ============================================
 
 function startVoiceRecognition() {
@@ -746,8 +749,8 @@ function startVoiceRecognition() {
 
     recognition.onstart = function() {
         console.log('🎤 MIKROFON AKTIVAN!');
-        const msg = getMessage();
-        showVoiceStatus(msg.welcome, '#2196F3');
+        const msg = getMessage('welcome');
+        showVoiceStatus('🎤 ' + msg, '#2196F3');
         activeBuffer = '';
         isProcessingCommand = false;
         END_AKTIVAN = false;
@@ -773,7 +776,8 @@ function startVoiceRecognition() {
         }
         
         const currentDisplay = activeBuffer + (interimText ? ' ' + interimText : '');
-        showVoiceStatus(`🎤 ${getMessage('listening')} "${currentDisplay}"`, '#FFD700');
+        const listeningMsg = getMessage('listening');
+        showVoiceStatus('🎤 ' + listeningMsg + ' "' + currentDisplay + '"', '#FFD700');
         
         if (isProcessingCommand) return;
         
@@ -826,7 +830,7 @@ function startVoiceRecognition() {
         }
         
         // ============================================
-        // "PLUS" - ZAVRŠAVA UNOS (kao pre)
+        // "PLUS" - ZAVRŠAVA UNOS
         // ============================================
         if (lowerFull.includes('plus')) {
             console.log('✅ PLUS DETEKTOVAN - završavam unos');
@@ -876,8 +880,8 @@ function startVoiceRecognition() {
     try {
         recognition.start();
         console.log('✅ Mikrofon pokrenut!');
-        const msg = getMessage();
-        showVoiceStatus(msg.welcome, '#2196F3');
+        const msg = getMessage('welcome');
+        showVoiceStatus('🎤 ' + msg, '#2196F3');
     } catch(e) {
         console.error('❌ Greška pri pokretanju:', e);
         showVoiceStatus('❌ Greška pri pokretanju mikrofona', '#f44336');
@@ -1068,7 +1072,7 @@ window.getMessage = getMessage;
 window.VOICE_COMMANDS = VOICE_COMMANDS;
 window.VOICE_MESSAGES = VOICE_MESSAGES;
 
-console.log('✅ VOICE COMMANDS - NOVA VERZIJA SA 4 OPCIJE UČITANA!');
+console.log('✅ VOICE COMMANDS - ISPRAVLJENA VERZIJA SA 4 OPCIJE UČITANA!');
 console.log('🎤 4 opcije: "unos" (add), "spisak" (list), "zalihe" (stock), "exit" (close)');
 console.log('🌍 "exit" je univerzalan na svim jezicima!');
 console.log('📝 "unos" → diktiraj podatke → "plus" za čuvanje');
