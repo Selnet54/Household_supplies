@@ -768,7 +768,7 @@ function voiceCommand(action) {
 }
 
 // ============================================
-// 12. OBRADA I ČUVANJE
+// 12. OBRADA I ČUVANJE - ISPRAVLJENO
 // ============================================
 
 function processAndSaveItem(command) {
@@ -783,19 +783,28 @@ function processAndSaveItem(command) {
     lastSavedData = data;
     currentVoiceItem = data;
     
-    // Popuni formu
+    // 1. PRVO POPUNI FORMU
     popuniFormuPodacima(data);
     
-    // Sačuvaj podatke
+    // 2. TEK ONDA SAČUVAJ
     sacuvajPodatke(data);
     
-    // Pripremi za sledeći unos - OČISTI FORMU
+    // 3. SAČEKAJ DA SE PODACI SAČUVAJU, TEK ONDA OČISTI FORMU
     setTimeout(() => {
+        // Osveži prikaze
+        if (typeof prikaziSveUnose === 'function') {
+            try { prikaziSveUnose(); } catch(e) {}
+        }
+        if (typeof renderInventory === 'function') {
+            try { renderInventory(); } catch(e) {}
+        }
+        
+        // OČISTI FORMU TEK NAKON ŠTO SU PODACI SAČUVANI I PRIKAZANI
         clearForm();
         isWaitingForNewEntry = true;
         showVoiceStatus('✅ ' + getMessage('saving') + ' ' + data.product_name + '. ' + getMessage('new_entry'), '#4CAF50');
         activeBuffer = '';
-    }, 500);
+    }, 800);
 
     return true;
 }
@@ -868,7 +877,7 @@ function selectVoiceMode() {
 }
 
 // ============================================
-// 16. START VOICE RECOGNITION
+// 16. START VOICE RECOGNITION - ISPRAVLJEN
 // ============================================
 
 function startVoiceRecognition() {
@@ -981,7 +990,7 @@ function startVoiceRecognition() {
         }
         
         // ============================================
-        // PLUS - ZAVRŠAVA UNOS, ČISTI FORMU ZA SLEDEĆI
+        // PLUS - ZAVRŠAVA UNOS - ISPRAVLJEN
         // ============================================
         if (lowerFull.includes('plus')) {
             console.log('✅ PLUS DETEKTOVAN');
@@ -991,7 +1000,29 @@ function startVoiceRecognition() {
             let itemText = parts[0].trim();
             
             if (itemText.length > 2) {
-                processAndSaveItem(itemText);
+                // OBRADI I SAČUVAJ - forma ostaje popunjena
+                let data = parseVoiceDataEntry(itemText);
+                if (data.product_name && data.product_name !== 'Proizvod' && data.product_name.length >= 2) {
+                    // Popuni formu
+                    popuniFormuPodacima(data);
+                    // Sačuvaj
+                    sacuvajPodatke(data);
+                    // Osveži prikaze
+                    setTimeout(() => {
+                        if (typeof prikaziSveUnose === 'function') {
+                            try { prikaziSveUnose(); } catch(e) {}
+                        }
+                        if (typeof renderInventory === 'function') {
+                            try { renderInventory(); } catch(e) {}
+                        }
+                        // Tek SAD očisti formu za sledeći unos
+                        setTimeout(() => {
+                            clearForm();
+                            showVoiceStatus('✅ Sačuvano: ' + data.product_name + '. Unesite sledeći proizvod...', '#4CAF50');
+                            activeBuffer = '';
+                        }, 300);
+                    }, 200);
+                }
             } else {
                 showVoiceStatus('⚠️ Nema podataka za čuvanje. Izgovorite naziv proizvoda.', '#FF9800');
                 isProcessingCommand = false;
@@ -1000,7 +1031,6 @@ function startVoiceRecognition() {
             }
             
             activeBuffer = '';
-            
             setTimeout(() => {
                 isProcessingCommand = false;
             }, 500);
@@ -1008,7 +1038,7 @@ function startVoiceRecognition() {
         }
         
         // ============================================
-        // END - OTVARA ZALIHE
+        // END - OTVARA ZALIHE - ISPRAVLJEN
         // ============================================
         if (lowerFull.includes('end') || lowerFull.includes('kraj') || lowerFull.includes('gotovo')) {
             console.log('🏁 END DETEKTOVAN');
@@ -1025,7 +1055,11 @@ function startVoiceRecognition() {
             }
             
             if (itemText.length > 2) {
-                processAndSaveItem(itemText);
+                let data = parseVoiceDataEntry(itemText);
+                if (data.product_name && data.product_name !== 'Proizvod' && data.product_name.length >= 2) {
+                    popuniFormuPodacima(data);
+                    sacuvajPodatke(data);
+                }
             }
             
             activeBuffer = '';
@@ -1164,7 +1198,7 @@ function restartMicrophone() {
 })();
 
 // ============================================
-// 19. IZVOZ
+// 19. IZVOZ SVIH FUNKCIJA
 // ============================================
 
 window.startVoiceRecognition = startVoiceRecognition;
@@ -1190,3 +1224,6 @@ window.clearForm = clearForm;
 window.showDataEntry = showDataEntry;
 
 console.log('✅ VOICE COMMANDS - ISPRAVLJENA VERZIJA!');
+console.log('🎤 4 opcije: "DODAJ", "SPISAK", "ZALIHE", "EXIT"');
+console.log('📝 DODAJ → unos podataka → PLUS za čuvanje');
+console.log('🏁 END → otvara zalihe');
