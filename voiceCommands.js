@@ -1,5 +1,5 @@
 // ============================================
-// VOICE COMMANDS - KOMPLETAN RADNI KOD
+// VOICE COMMANDS - KOMPLETAN RADNI KOD (ISPRAVLJEN)
 // ============================================
 
 let activeBuffer = ''; 
@@ -348,6 +348,7 @@ function parseVoiceDataEntry(command) {
     console.log('🔍 PARSIRAM:', command);
     
     let text = command
+        .replace(/^šta\s*/i, '')
         .replace(/^start\s*/i, '')
         .replace(/^dodaj\s*/i, '')
         .replace(/^unos\s*/i, '')
@@ -655,7 +656,7 @@ function sacuvajPodatke(data) {
 }
 
 // ============================================
-// 8. PRIKAZ DATA ENTRY - POJEDNOSTAVLJEN
+// 8. PRIKAZ DATA ENTRY - BEZ NEPOTREBNOG SAKRIVANJA
 // ============================================
 
 function showDataEntry() {
@@ -665,19 +666,19 @@ function showDataEntry() {
         const dataEntryScreen = document.getElementById('dataEntryScreen');
         const mainScreen = document.getElementById('mainScreen');
         
+        // SAMO ako nije već prikazan, prikaži ga
         if (dataEntryScreen && dataEntryScreen.style.display !== 'flex') {
-            document.querySelectorAll('.screen').forEach(s => {
-                s.style.display = 'none';
-                s.classList.remove('active');
-            });
+            // Sakrij SAMO inventory screen ako je prikazan
+            const inventoryScreen = document.getElementById('inventoryScreen');
+            if (inventoryScreen) {
+                inventoryScreen.style.display = 'none';
+                inventoryScreen.classList.remove('active');
+            }
+            
             dataEntryScreen.style.display = 'flex';
             dataEntryScreen.classList.add('active');
             console.log('✅ Data entry screen prikazan');
         } else if (mainScreen && mainScreen.style.display !== 'flex') {
-            document.querySelectorAll('.screen').forEach(s => {
-                s.style.display = 'none';
-                s.classList.remove('active');
-            });
             mainScreen.style.display = 'flex';
             mainScreen.classList.add('active');
             console.log('✅ Main screen prikazan');
@@ -727,13 +728,14 @@ function otvoriSpisakEkran() {
 }
 
 // ============================================
-// 10. OTVARANJE ZALIHA
+// 10. OTVARANJE ZALIHA - BEZ NEPOTREBNOG OSVEŽAVANJA
 // ============================================
 
 function otvoriZaliheEkran() {
     console.log('📦 Otvaram zalihe...');
     
     try {
+        // Sakrij SVE ekrane
         document.querySelectorAll('.screen').forEach(s => {
             s.style.display = 'none';
             s.classList.remove('active');
@@ -745,14 +747,13 @@ function otvoriZaliheEkran() {
             inventoryScreen.classList.add('active');
         }
         
-        if (typeof refreshInventoryData === 'function') {
-            try { refreshInventoryData(); } catch(e) {}
-        }
-        
+        // Osveži samo jednom
         setTimeout(() => {
-            refreshDisplay();
-            if (typeof updateInventory === 'function') {
-                try { updateInventory(); } catch(e) {}
+            if (typeof prikaziSveUnose === 'function') {
+                try { prikaziSveUnose(); } catch(e) {}
+            }
+            if (typeof renderInventory === 'function') {
+                try { renderInventory(); } catch(e) {}
             }
             showVoiceStatus('📦 Zalihe otvorene', '#4CAF50');
         }, 200);
@@ -841,7 +842,7 @@ function processAndSaveItem(command) {
 }
 
 // ============================================
-// 13. HANDLER ZA PLUS - POTPUNO NOVI PRISTUP
+// 13. HANDLER ZA PLUS - BEZ NEPOTREBNIH POZIVA
 // ============================================
 
 function handlePlusCommand(buffer) {
@@ -866,7 +867,7 @@ function handlePlusCommand(buffer) {
         
         if (data.product_name && data.product_name !== 'Proizvod' && data.product_name.length >= 2) {
             
-            // 1. SAČUVAJ PODATKE DIREKTNO U INVENTORY
+            // 1. SAČUVAJ PODATKE
             if (typeof window.inventory === 'undefined' || !Array.isArray(window.inventory)) {
                 window.inventory = [];
                 console.log('📦 Inventory inicijalizovan');
@@ -918,29 +919,26 @@ function handlePlusCommand(buffer) {
                 showVoiceStatus('✅ Sačuvano: ' + data.product_name, '#4CAF50');
             }
             
-            // 2. POPUNI FORMU
+            // 2. POPUNI FORMU (DA BI KORISNIK VIDEO PODATKE)
             popuniFormuPodacima(data);
             
-            // 3. OSVEŽI PRIKAZE
+            // 3. OSVEŽI PREGLED UNOSA (SAMO JEDNOM)
             setTimeout(() => {
                 if (typeof prikaziSveUnose === 'function') {
                     try { prikaziSveUnose(); } catch(e) { console.warn('prikaziSveUnose greška:', e); }
                 }
-                if (typeof renderInventory === 'function') {
-                    try { renderInventory(); } catch(e) { console.warn('renderInventory greška:', e); }
-                }
-                console.log('✅ Prikazi osveženi');
-            }, 200);
+                console.log('✅ Pregled unosa osvežen');
+            }, 300);
             
-            // 4. OČISTI FORMU ZA SLEDEĆI UNOS
+            // 4. OČISTI FORMU ZA SLEDEĆI UNOS (TEK NAKON ŠTO JE KORISNIK VIDEO PODATKE)
             setTimeout(() => {
                 clearForm();
                 showVoiceStatus('✅ Sačuvano: ' + data.product_name + '. Unesite sledeći proizvod...', '#4CAF50');
                 activeBuffer = '';
                 isProcessingCommand = false;
                 isProcessingPlus = false;
-                showDataEntry();
-            }, 600);
+                // NE POZIVAJ showDataEntry() OVDE - već je prikazan!
+            }, 800);
             
         } else {
             showVoiceStatus('❌ Nisam prepoznao proizvod: "' + itemText + '"', '#f44336');
@@ -959,7 +957,7 @@ function handlePlusCommand(buffer) {
 }
 
 // ============================================
-// 14. HANDLER ZA END
+// 14. HANDLER ZA END - BEZ NEPOTREBNIH POZIVA
 // ============================================
 
 function handleEndCommand(buffer) {
@@ -988,6 +986,7 @@ function handleEndCommand(buffer) {
     
     activeBuffer = '';
     
+    // Zaustavi recognition i otvori zalihe
     setTimeout(() => {
         if (recognition) {
             try {
@@ -995,7 +994,6 @@ function handleEndCommand(buffer) {
                 recognition = null;
             } catch(e) {}
         }
-        refreshDisplay();
         otvoriZaliheEkran();
         isProcessingCommand = false;
     }, 400);
@@ -1152,7 +1150,7 @@ function selectVoiceMode() {
 }
 
 // ============================================
-// 19. START VOICE RECOGNITION
+// 19. START VOICE RECOGNITION - ISPRAVLJEN
 // ============================================
 
 function startVoiceRecognition() {
@@ -1258,16 +1256,16 @@ function startVoiceRecognition() {
         
         if ((dataEntryScreen && dataEntryScreen.style.display === 'flex') ||
             (mainScreen && mainScreen.style.display === 'flex')) {
-            if (!isProcessingPlus && !isProcessingCommand) {
-                console.log('🔄 Restartujem recognition za 1 sekundu...');
+            if (!isProcessingPlus && !isProcessingCommand && !recognition) {
+                console.log('🔄 Restartujem recognition za 2 sekunde...');
                 setTimeout(() => {
                     if (!recognition && !isProcessingPlus) {
                         startVoiceRecognition();
                     }
-                }, 1000);
+                }, 2000);
             }
         }
-    };
+    };  // ⭐ ZATVARANJE ZA onend
 
     try {
         recognition.start();
@@ -1279,7 +1277,7 @@ function startVoiceRecognition() {
         showVoiceStatus('❌ Greška pri pokretanju mikrofona', '#f44336');
         recognition = null;
     }
-}
+}  // ⭐ ZATVARANJE ZA startVoiceRecognition()
 
 // ============================================
 // 20. RESTART MIKROFONA
@@ -1318,7 +1316,7 @@ function restartMicrophone() {
     
     window.renderInventory = function() {
         const stack = new Error().stack || '';
-        const allowed = ['goBackFromVoice', 'selectVoiceMode', 'otvoriZaliheEkran', 'otvoriSpisakEkran', 'startVoiceRecognition', 'voiceCommand', 'refreshDisplay'];
+        const allowed = ['goBackFromVoice', 'selectVoiceMode', 'otvoriZaliheEkran', 'otvoriSpisakEkran', 'startVoiceRecognition', 'voiceCommand', 'refreshDisplay', 'prikaziSveUnose'];
         if (allowed.some(fn => stack.includes(fn))) {
             console.log('✅ DOZVOLJENO: renderInventory iz voice komande');
             if (typeof originalRenderInventory === 'function') {
@@ -1405,7 +1403,7 @@ function ensureMicrophoneRunning() {
 
 setInterval(() => {
     ensureMicrophoneRunning();
-}, 5000);
+}, 8000);
 
 // ============================================
 // 23. IZVOZ SVIH FUNKCIJA
@@ -1438,7 +1436,7 @@ window.handleEndCommand = handleEndCommand;
 window.processVoiceInput = processVoiceInput;
 window.ensureMicrophoneRunning = ensureMicrophoneRunning;
 
-console.log('✅ VOICE COMMANDS - KOMPLETAN RADNI KOD!');
+console.log('✅ VOICE COMMANDS - KOMPLETAN RADNI KOD (ISPRAVLJEN)!');
 console.log('🎤 4 opcije: "DODAJ", "SPISAK", "ZALIHE", "EXIT"');
 console.log('📝 DODAJ → unos podataka → PLUS za čuvanje (ostaje na ekranu)');
 console.log('🏁 END → čuva podatke i otvara zalihe');
