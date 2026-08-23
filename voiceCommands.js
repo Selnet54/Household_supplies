@@ -840,7 +840,7 @@ function processAndSaveItem(command) {
 }
 
 // ============================================
-// 13. HANDLER ZA PLUS
+// 13. HANDLER ZA PLUS - ISPRAVLJEN
 // ============================================
 
 function handlePlusCommand(buffer) {
@@ -853,16 +853,32 @@ function handlePlusCommand(buffer) {
     if (itemText.length > 2) {
         const data = parseVoiceDataEntry(itemText);
         if (data.product_name && data.product_name !== 'Proizvod' && data.product_name.length >= 2) {
+            // 1. Popuni formu
             popuniFormuPodacima(data);
+            
+            // 2. Sačuvaj podatke
             sacuvajPodatke(data);
             
+            // 3. Osveži prikaze i ostani na data entry
             setTimeout(() => {
                 refreshDisplay();
+                
+                // 4. Očisti formu za sledeći unos
                 setTimeout(() => {
                     clearForm();
                     showVoiceStatus('✅ Sačuvano: ' + data.product_name + '. Unesite sledeći proizvod...', '#4CAF50');
+                    
+                    // 5. OBAVEZNO: ostani na data entry ekranu
                     showDataEntry();
                     activeBuffer = '';
+                    
+                    // 6. Proveri da li mikrofon još radi
+                    if (!recognition) {
+                        console.log('🔄 Mikrofon nije aktivan, restartujem...');
+                        setTimeout(() => {
+                            startVoiceRecognition();
+                        }, 300);
+                    }
                 }, 300);
             }, 200);
         } else {
@@ -883,7 +899,7 @@ function handlePlusCommand(buffer) {
 }
 
 // ============================================
-// 14. HANDLER ZA END
+// 14. HANDLER ZA END - ISPRAVLJEN
 // ============================================
 
 function handleEndCommand(buffer) {
@@ -920,7 +936,7 @@ function handleEndCommand(buffer) {
 }
 
 // ============================================
-// 15. PROCESIRANJE VOICE INPUTA
+// 15. PROCESIRANJE VOICE INPUTA - ISPRAVLJENO
 // ============================================
 
 function processVoiceInput(buffer) {
@@ -929,6 +945,7 @@ function processVoiceInput(buffer) {
     const lowerFull = buffer.toLowerCase();
     console.log('🔍 PROCESIRAM:', lowerFull);
     
+    // Prvo proveri da li je komanda
     const command = detectVoiceCommand(buffer);
     
     if (command) {
@@ -967,11 +984,13 @@ function processVoiceInput(buffer) {
         return;
     }
     
+    // Proveri PLUS (završava unos, ostaje na data entry)
     if (lowerFull.includes('plus')) {
         handlePlusCommand(buffer);
         return;
     }
     
+    // Proveri END (završava unos, otvara zalihe)
     if (lowerFull.includes('end') || lowerFull.includes('kraj') || lowerFull.includes('gotovo')) {
         handleEndCommand(buffer);
         return;
@@ -979,15 +998,19 @@ function processVoiceInput(buffer) {
 }
 
 // ============================================
-// 16. STOP VOICE RECOGNITION
+// 16. STOP VOICE RECOGNITION - ISPRAVLJEN
 // ============================================
 
 function stopVoiceRecognition() {
+    console.log('⏹️ Zaustavljam voice recognition...');
     if (recognition) {
         try {
             recognition.stop();
-            recognition = null;
-        } catch(e) {}
+            // Ne postavljamo recognition = null odmah
+            // Pustićemo onend da to uradi
+        } catch(e) {
+            console.warn('stopVoiceRecognition greška:', e);
+        }
     }
     if (speechTimeout) {
         clearTimeout(speechTimeout);
@@ -1004,6 +1027,14 @@ function stopVoiceRecognition() {
 function goBackFromVoice() {
     console.log('◀ goBackFromVoice POZVAN!');
     stopVoiceRecognition();
+    
+    // Postavi recognition na null
+    if (recognition) {
+        try {
+            recognition.stop();
+        } catch(e) {}
+        recognition = null;
+    }
     
     try {
         document.querySelectorAll('.screen').forEach(s => {
@@ -1058,7 +1089,7 @@ function selectVoiceMode() {
 }
 
 // ============================================
-// 19. START VOICE RECOGNITION - KOMPLETAN
+// 19. START VOICE RECOGNITION - ISPRAVLJEN
 // ============================================
 
 function startVoiceRecognition() {
@@ -1070,8 +1101,13 @@ function startVoiceRecognition() {
         return;
     }
 
+    // Ako recognition već postoji i aktivan je, nemoj ga restartovati
     if (recognition) {
-        try { recognition.stop(); } catch(e) {}
+        console.log('🎤 Recognition već postoji, proveravam da li je aktivan...');
+        try {
+            // Pokušaj da zaustaviš postojeći
+            recognition.stop();
+        } catch(e) {}
         recognition = null;
     }
 
@@ -1145,6 +1181,11 @@ function startVoiceRecognition() {
             showVoiceStatus('❌ Dozvolite pristup mikrofonu.', '#f44336');
         } else if (event.error === 'no-speech') {
             showVoiceStatus('⚠️ Nisam čuo govor. Pokušajte ponovo.', '#FF9800');
+        } else if (event.error === 'audio-capture') {
+            console.warn('⚠️ Problem sa mikrofonom, pokušavam restart...');
+            setTimeout(() => {
+                restartMicrophone();
+            }, 1000);
         }
         isProcessingCommand = false;
     };
@@ -1156,6 +1197,24 @@ function startVoiceRecognition() {
             clearTimeout(speechTimeout);
             speechTimeout = null;
         }
+        
+        // Proveri da li smo i dalje na voice ekranu
+        const voiceMenu = document.getElementById('voiceMenuScreen');
+        const dataEntryScreen = document.getElementById('dataEntryScreen');
+        const mainScreen = document.getElementById('mainScreen');
+        
+        // Ako smo na voice ekranu ili data entry, restartuj recognition
+        if ((voiceMenu && voiceMenu.style.display === 'flex') ||
+            (dataEntryScreen && dataEntryScreen.style.display === 'flex') ||
+            (mainScreen && mainScreen.style.display === 'flex')) {
+            console.log('🔄 Restartujem recognition jer smo na aktivnom ekranu...');
+            setTimeout(() => {
+                // Samo ako nije već pokrenut
+                if (!recognition) {
+                    startVoiceRecognition();
+                }
+            }, 500);
+        }
     };
 
     try {
@@ -1166,104 +1225,51 @@ function startVoiceRecognition() {
     } catch(e) {
         console.error('❌ Greška pri pokretanju:', e);
         showVoiceStatus('❌ Greška pri pokretanju mikrofona', '#f44336');
+        recognition = null;
     }
 }
 
 // ============================================
-// 20. RESTART MIKROFONA
+// 20. RESTART MIKROFONA - POBOLJŠAN
 // ============================================
 
 function restartMicrophone() {
     console.log('🔄 Restartujem mikrofon...');
-    stopVoiceRecognition();
+    if (recognition) {
+        try {
+            recognition.stop();
+        } catch(e) {}
+        recognition = null;
+    }
+    activeBuffer = '';
+    isProcessingCommand = false;
+    if (speechTimeout) {
+        clearTimeout(speechTimeout);
+        speechTimeout = null;
+    }
     setTimeout(() => {
         startVoiceRecognition();
     }, 500);
 }
 
 // ============================================
-// 21. BLOKIRANJE
+// 21. DODATNO: PROVERA MIKROFONA
 // ============================================
 
-(function() {
-    console.log('🔥 BLOKIRAM OTVARANJE ZALIHA IZ VOICE KOMANDI!');
-    
-    const originalRenderInventory = window.renderInventory;
-    const originalShowScreen = window.showScreen;
-    const originalOpenInventory = window.openInventoryAndShowHighlight;
-    
-    window.renderInventory = function() {
-        const stack = new Error().stack || '';
-        const allowed = ['goBackFromVoice', 'selectVoiceMode', 'otvoriZaliheEkran', 'otvoriSpisakEkran', 'startVoiceRecognition', 'voiceCommand', 'refreshDisplay'];
-        if (allowed.some(fn => stack.includes(fn))) {
-            console.log('✅ DOZVOLJENO: renderInventory iz voice komande');
-            if (typeof originalRenderInventory === 'function') {
-                return originalRenderInventory.apply(this, arguments);
-            }
-        }
-        
-        const blocked = ['sacuvajPodatke', 'processAndSaveItem', 'handlePlusCommand', 'handleEndCommand', 'processVoiceInput'];
-        const isBlocked = blocked.some(fn => stack.includes(fn));
-        
-        if (isBlocked) {
-            console.log('⛔ BLOKIRANO: renderInventory iz voice komande');
-            return;
-        }
-        
-        if (typeof originalRenderInventory === 'function') {
-            return originalRenderInventory.apply(this, arguments);
-        }
-    };
-    
-    window.showScreen = function(screenId) {
-        const stack = new Error().stack || '';
-        const allowed = ['goBackFromVoice', 'selectVoiceMode', 'otvoriZaliheEkran', 'otvoriSpisakEkran', 'startVoiceRecognition', 'voiceCommand', 'showDataEntry'];
-        if (allowed.some(fn => stack.includes(fn))) {
-            console.log('✅ DOZVOLJENO: showScreen(' + screenId + ') iz voice komande');
-            if (typeof originalShowScreen === 'function') {
-                return originalShowScreen.apply(this, arguments);
-            }
-        }
-        
-        const blocked = ['sacuvajPodatke', 'processAndSaveItem', 'handlePlusCommand', 'handleEndCommand'];
-        if (blocked.some(fn => stack.includes(fn)) && 
-            (screenId === 'inventoryScreen' || screenId === 'mainScreen')) {
-            console.log('⛔ BLOKIRANO: showScreen(' + screenId + ') iz voice komande');
-            return;
-        }
-        
-        if (typeof originalShowScreen === 'function') {
-            return originalShowScreen.apply(this, arguments);
-        }
-    };
-    
-    window.openInventoryAndShowHighlight = function() {
-        const stack = new Error().stack || '';
-        const allowed = ['goBackFromVoice', 'selectVoiceMode', 'otvoriZaliheEkran', 'otvoriSpisakEkran', 'startVoiceRecognition', 'voiceCommand'];
-        if (allowed.some(fn => stack.includes(fn))) {
-            console.log('✅ DOZVOLJENO: openInventoryAndShowHighlight iz voice komande');
-            if (typeof originalOpenInventory === 'function') {
-                return originalOpenInventory.apply(this, arguments);
-            }
-        }
-        
-        if (stack.includes('sacuvajPodatke') || stack.includes('handlePlusCommand') || stack.includes('handleEndCommand')) {
-            console.log('⛔ BLOKIRANO: openInventoryAndShowHighlight iz voice komande');
-            return;
-        }
-        
-        if (typeof originalOpenInventory === 'function') {
-            return originalOpenInventory.apply(this, arguments);
-        }
-    };
-    
-    console.log('✅ Otvaranje zaliha BLOKIRANO za voice komande!');
-})();
+function checkMicrophoneStatus() {
+    if (!recognition) {
+        console.log('⚠️ Mikrofon nije aktivan, restartujem...');
+        startVoiceRecognition();
+        return true;
+    }
+    return false;
+}
 
 // ============================================
-// 22. IZVOZ SVIH FUNKCIJA
+// 22. IZVOZ NOVIH FUNKCIJA
 // ============================================
 
+window.checkMicrophoneStatus = checkMicrophoneStatus;
 window.startVoiceRecognition = startVoiceRecognition;
 window.stopVoiceRecognition = stopVoiceRecognition;
 window.goBackFromVoice = goBackFromVoice;
