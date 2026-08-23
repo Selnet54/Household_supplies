@@ -1,6 +1,6 @@
 // ============================================
 // VOICE COMMANDS - PROFESIONALNA VERZIJA
-// Arhitektura: Modularna, Testabilna, Održiva
+// Prilagođena za vaš postojeći HTML
 // ============================================
 
 // ============================================
@@ -108,8 +108,7 @@ class LanguageManager {
           new_entry: 'Enter next product...',
           error: 'An error occurred. Please try again.'
         }
-      },
-      // Dodajte ostale jezike po potrebi...
+      }
     };
   }
 
@@ -120,6 +119,7 @@ class LanguageManager {
   setLang(lang) {
     if (this.dictionaries[lang]) {
       this.currentLang = lang;
+      localStorage.setItem('voiceLang', lang);
       logger.info(`Jezik promenjen na: ${lang}`);
       return true;
     }
@@ -202,11 +202,9 @@ class VoiceParser {
       return null;
     }
 
-    // Normalizuj tekst
     let normalized = this.normalizeText(text);
     const words = normalized.split(/\s+/).filter(Boolean);
     
-    // Inicijalizuj rezultat
     const result = {
       productName: '',
       piece: CONFIG.defaults.piece,
@@ -216,13 +214,9 @@ class VoiceParser {
       storage: CONFIG.defaults.storage
     };
 
-    // Ekstraktuj podatke
     const extracted = this.extractData(words);
-    
-    // Popuni rezultat
     Object.assign(result, extracted);
     
-    // Validacija
     if (!this.validateResult(result)) {
       logger.warn('Parsiranje neuspešno:', result);
       return null;
@@ -242,16 +236,6 @@ class VoiceParser {
       .replace(/^add\s*/i, '')
       .replace(/^new\s*/i, '')
       .replace(/^enter\s*/i, '')
-      .replace(/^adatbevitel\s*/i, '')
-      .replace(/^hinzufügen\s*/i, '')
-      .replace(/^neu\s*/i, '')
-      .replace(/^einfügen\s*/i, '')
-      .replace(/^додати\s*/i, '')
-      .replace(/^добавить\s*/i, '')
-      .replace(/^添加\s*/i, '')
-      .replace(/^añadir\s*/i, '')
-      .replace(/^adicionar\s*/i, '')
-      .replace(/^ajouter\s*/i, '')
       .replace(/^grile\s*/i, 'grill ')
       .replace(/^gril\s*/i, 'grill ')
       .replace(/\bGreen\b/gi, 'grill ')
@@ -274,7 +258,6 @@ class VoiceParser {
     let storageIndex = -1;
     let unitIndex = -1;
 
-    // Prvo pronađi jedinice i skladišta
     words.forEach((word, index) => {
       const storage = this.extractStorage(word);
       if (storage) {
@@ -289,10 +272,8 @@ class VoiceParser {
       }
     });
 
-    // Postavi skladište
     data.storage = foundStorage || CONFIG.defaults.storage;
 
-    // Ekstraktuj brojeve i naziv
     const nameParts = [];
     const numbers = [];
 
@@ -308,17 +289,14 @@ class VoiceParser {
       }
     });
 
-    // Rasporedi brojeve
     this.assignNumbers(numbers, data, words);
 
-    // Postavi jedinicu
     if (foundUnit) {
       data.unit = foundUnit;
     } else {
       data.unit = this.detectUnit(words) || CONFIG.defaults.unit;
     }
 
-    // Postavi naziv proizvoda
     data.productName = nameParts.join(' ').trim() || 'Proizvod';
 
     return data;
@@ -371,7 +349,6 @@ class VoiceParser {
     }
 
     if (numbers.length === 2) {
-      // Proveri da li je drugi broj rok trajanja
       if (parseFloat(numbers[1]) > 3 && !text.includes('kilogram') && !text.includes('kg')) {
         data.piece = numbers[0];
         data.quantity = numbers[0];
@@ -388,10 +365,8 @@ class VoiceParser {
       data.quantity = numbers[0];
     }
 
-    // Detektuj rok trajanja
     let shelfLifeFound = false;
     
-    // Proveri "šest", "6", "6 meseci"
     if (text.includes('šest') || text.includes('sest') || /\b6\b/.test(text)) {
       data.shelfLife = '6';
       shelfLifeFound = true;
@@ -421,12 +396,10 @@ class VoiceParser {
     const commands = languageManager.getCommands();
     const lower = text.toLowerCase().trim();
 
-    // Prvo proveri EXIT
     if (lower.includes('exit')) {
       return 'close';
     }
 
-    // Proveri ostale komande
     for (let [action, keywords] of Object.entries(commands)) {
       if (action === 'close') continue;
       for (let keyword of keywords) {
@@ -598,7 +571,7 @@ class InventoryManager {
 const inventoryManager = new InventoryManager();
 
 // ============================================
-// 6. UI MANAGER
+// 6. UI MANAGER - PRILAGOĐEN VAŠEM HTML-U
 // ============================================
 
 class UIManager {
@@ -611,24 +584,29 @@ class UIManager {
   cacheElements() {
     const ids = [
       'voiceStatus', 'voiceMenuScreen', 'dataEntryScreen', 
-      'mainScreen', 'inventoryScreen', 'choiceScreen',
+      'mainScreen', 'choiceScreen',
       'productInput', 'pieceInput', 'quantityInput', 
-      'shelfLifeInput', 'unitSelect', 'storageSelect'
+      'shelfLifeInput', 'unitSelect', 'storageSelect',
+      'inventoryList', 'entriesContainer', 'entryList', 'productList'
     ];
     
     ids.forEach(id => {
-      this.cache[id] = document.getElementById(id);
+      const el = document.getElementById(id);
+      if (el) {
+        this.cache[id] = el;
+      }
     });
 
-    // Dodatni kontejneri
-    this.cache.entriesContainer = document.getElementById('entriesContainer') || 
-      document.getElementById('entryList') || 
-      document.getElementById('productList') || 
-      document.getElementById('inventoryList');
+    // Pronađi bilo koji kontejner za inventory
+    this.cache.inventoryContainer = 
+      this.cache.inventoryList || 
+      this.cache.entriesContainer || 
+      this.cache.entryList || 
+      this.cache.productList || 
+      document.getElementById('inventoryContainer');
   }
 
   setupEventListeners() {
-    // Slušaj na promene u inventaru
     inventoryManager.addListener((event, data) => {
       if (event === 'added' || event === 'merged' || event === 'cleared') {
         this.refreshAll();
@@ -677,8 +655,22 @@ class UIManager {
   }
 
   showInventory() {
-    this.showScreen('inventoryScreen');
-    this.renderInventory();
+    logger.debug('Prikazivanje inventara...');
+    
+    // Pokušaj da prikažeš inventory screen
+    const inventoryScreen = document.getElementById('inventoryScreen');
+    if (inventoryScreen) {
+      this.showScreen('inventoryScreen');
+    } else {
+      // Ako nema inventoryScreen, prikaži dataEntryScreen sa listom
+      this.showScreen('dataEntryScreen');
+    }
+    
+    // Osveži prikaz
+    setTimeout(() => {
+      this.renderInventory();
+      this.refreshAll();
+    }, 100);
   }
 
   showMain() {
@@ -706,7 +698,6 @@ class UIManager {
       }
     });
 
-    // Resetuj select-ove
     const unitSelect = this.cache.unitSelect;
     if (unitSelect) {
       for (let option of unitSelect.options) {
@@ -749,7 +740,6 @@ class UIManager {
       }
     });
 
-    // Postavi jedinicu
     if (data.unit) {
       const unitSelect = this.cache.unitSelect;
       if (unitSelect) {
@@ -763,7 +753,6 @@ class UIManager {
       }
     }
 
-    // Postavi skladište
     if (data.storage) {
       const storageSelect = this.cache.storageSelect;
       if (storageSelect) {
@@ -777,7 +766,6 @@ class UIManager {
       }
     }
 
-    // Update expiry date
     if (typeof updateExpiryDate === 'function') {
       try { updateExpiryDate(); } catch(e) {}
     }
@@ -791,9 +779,23 @@ class UIManager {
   }
 
   renderInventory() {
-    const container = this.cache.entriesContainer || 
-                     document.getElementById('inventoryContainer') ||
-                     document.getElementById('inventoryList');
+    logger.debug('Renderovanje inventara...');
+    
+    // Pronađi kontejner
+    let container = this.cache.inventoryContainer;
+    
+    // Ako nema kontejnera, kreiraj ga
+    if (!container) {
+      const dataEntryScreen = document.getElementById('dataEntryScreen');
+      if (dataEntryScreen) {
+        container = document.createElement('div');
+        container.id = 'inventoryContainer';
+        container.style.cssText = 'padding: 10px; max-height: 400px; overflow-y: auto; background: #1a1a2e; border-radius: 8px; margin: 10px 0;';
+        dataEntryScreen.appendChild(container);
+        this.cache.inventoryContainer = container;
+        logger.debug('Kreiran inventory kontejner');
+      }
+    }
 
     if (!container) {
       logger.warn('Nema kontejnera za prikaz zaliha');
@@ -804,7 +806,7 @@ class UIManager {
     
     if (items.length === 0) {
       container.innerHTML = `
-        <div style="color: #888; text-align: center; padding: 20px;">
+        <div style="color: #888; text-align: center; padding: 20px; background: #1a1a2e; border-radius: 8px;">
           📭 Nema zaliha
         </div>
       `;
@@ -812,7 +814,7 @@ class UIManager {
     }
 
     let html = `
-      <div style="font-size: 0.9rem;">
+      <div style="font-size: 0.9rem; background: #1a1a2e; padding: 10px; border-radius: 8px;">
         <div style="color: #FF9800; font-weight: bold; padding: 8px; border-bottom: 2px solid #FF9800; margin-bottom: 8px;">
           📦 Zalihe (${items.length} proizvoda)
         </div>
@@ -820,7 +822,7 @@ class UIManager {
 
     items.forEach(item => {
       html += `
-        <div style="border-bottom: 1px solid #333; padding: 8px 0; display: flex; justify-content: space-between; align-items: center;">
+        <div style="border-bottom: 1px solid #333; padding: 8px 0; display: flex; justify-content: space-between; align-items: center; background: #1a1a2e;">
           <div>
             <strong style="color: #fff;">${item.productName}</strong>
             <span style="color: #aaa; font-size: 0.85rem; margin-left: 8px;">
@@ -840,15 +842,15 @@ class UIManager {
 
     html += '</div>';
     container.innerHTML = html;
+    logger.debug('Inventar prikazan');
   }
 
   refreshAll() {
     logger.debug('Osvežavanje svih prikaza...');
     
-    // Osveži inventory
     this.renderInventory();
     
-    // Pozovi i druge funkcije ako postoje
+    // Pozovi originalne funkcije ako postoje
     if (typeof prikaziSveUnose === 'function') {
       try { prikaziSveUnose(); } catch(e) {}
     }
@@ -860,7 +862,6 @@ class UIManager {
     }
   }
 
-  // Pomoćne metode za navigaciju
   goBack() {
     logger.debug('Povratak na prethodni ekran');
     this.showChoice();
@@ -944,7 +945,6 @@ class VoiceRecognitionManager {
       
       if (this.isProcessing || this.isProcessingPlus) return;
       
-      // Odloži procesiranje za tišinu
       this.clearTimeout();
       this.timeoutId = setTimeout(() => {
         this.processInput(this.activeBuffer);
@@ -971,7 +971,6 @@ class VoiceRecognitionManager {
       logger.info('🎤 Prepoznavanje završeno');
       this.clearTimeout();
       
-      // Automatski restart ako smo na odgovarajućem ekranu
       const dataEntryScreen = document.getElementById('dataEntryScreen');
       const mainScreen = document.getElementById('mainScreen');
       
@@ -1007,7 +1006,6 @@ class VoiceRecognitionManager {
       uiManager.showVoiceStatus('❌ Greška pri pokretanju mikrofona', '#f44336');
       this.recognition = null;
       
-      // Pokušaj ponovo
       setTimeout(() => this.start(), 2000);
     }
   }
@@ -1053,26 +1051,22 @@ class VoiceRecognitionManager {
     const lowerFull = buffer.toLowerCase();
     logger.debug(`Procesiranje: "${lowerFull}"`);
 
-    // 1. DETEKTUJ "PLUS"
     if (/\bplus\b/i.test(lowerFull)) {
       this.handlePlusCommand(buffer);
       return;
     }
 
-    // 2. DETEKTUJ "END"
     if (/\b(end|kraj|gotovo)\b/i.test(lowerFull)) {
       this.handleEndCommand(buffer);
       return;
     }
 
-    // 3. DETEKTUJ KOMANDU
     const command = parser.detectCommand(buffer);
     if (command) {
       this.handleCommand(command, buffer);
       return;
     }
 
-    // 4. POKUŠAJ DA PARSIRAŠ KAO UNOS
     if (buffer.length > 5) {
       this.handleAddCommand(buffer);
     } else {
@@ -1117,7 +1111,6 @@ class VoiceRecognitionManager {
   handleAddCommand(buffer) {
     this.isProcessing = true;
     
-    // Izdvoji tekst komande
     let itemText = buffer;
     const commands = languageManager.getCommands();
     
@@ -1212,25 +1205,19 @@ class VoiceRecognitionManager {
 
     logger.info('Čuvanje podataka:', data);
 
-    // Sačuvaj u inventory
     const result = inventoryManager.addItem(data);
-    
-    // Popuni formu
     uiManager.populateForm(data);
     
-    // Osveži prikaze
     setTimeout(() => {
       uiManager.refreshAll();
     }, CONFIG.ui.refreshDelay);
 
-    // Prikaži status
     const message = result.action === 'merged' ? 
       `✅ Sabrano: ${data.productName} (ukupno ${result.item.quantity} ${data.unit})` :
       `✅ ${languageManager.getMessage('saving')} ${data.productName}`;
     
     uiManager.showVoiceStatus(message, '#4CAF50');
 
-    // Očisti formu za sledeći unos
     setTimeout(() => {
       uiManager.clearForm();
       uiManager.showVoiceStatus(
@@ -1262,11 +1249,9 @@ class VoiceApp {
     logger.info('🚀 Pokretanje Voice App...');
     this.initialized = true;
     
-    // Postavi jezik
     const savedLang = localStorage.getItem('voiceLang') || 'sr';
     languageManager.setLang(savedLang);
     
-    // Pokreni periodicnu proveru
     setInterval(() => {
       this.ensureMicrophoneRunning();
     }, 8000);
@@ -1275,7 +1260,6 @@ class VoiceApp {
   }
 
   setupGlobalHandlers() {
-    // Eksponiraj funkcije za HTML
     window.selectVoiceMode = this.selectVoiceMode.bind(this);
     window.goBackFromVoice = () => {
       voiceManager.stop();
@@ -1283,7 +1267,6 @@ class VoiceApp {
     };
     window.restartMicrophone = () => voiceManager.restart();
     
-    // Eksponiraj za debug
     if (CONFIG.debug) {
       window.__voiceApp = this;
       window.__voiceManager = voiceManager;
@@ -1316,7 +1299,6 @@ class VoiceApp {
     return false;
   }
 
-  // Pomoćne metode za HTML
   startVoiceRecognition() {
     voiceManager.start();
   }
@@ -1338,12 +1320,10 @@ class VoiceApp {
 // 9. INICIJALIZACIJA
 // ============================================
 
-// Sačekaj da se DOM učita
 document.addEventListener('DOMContentLoaded', () => {
   const app = new VoiceApp();
   app.init();
   
-  // Eksponiraj globalno za pozive iz HTML-a
   window.voiceApp = app;
   window.voiceManager = voiceManager;
   window.uiManager = uiManager;
@@ -1356,22 +1336,5 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ============================================
-// 10. IZVOZ ZA TESTIRANJE (opciono)
-// ============================================
-
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = {
-    CONFIG,
-    Logger,
-    LanguageManager,
-    VoiceParser,
-    InventoryManager,
-    UIManager,
-    VoiceRecognitionManager,
-    VoiceApp
-  };
-}
-
-// ============================================
-// KRAJ - PROFESIONALNA VERZIJA
+// KRAJ
 // ============================================
