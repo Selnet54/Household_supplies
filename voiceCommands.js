@@ -1,7 +1,6 @@
-// ============================================================
-// VOICE COMMANDS - MOBILNA VERZIJA
-// Sa podrškom za Android, iOS, tablete i desktop
-// ============================================================
+// ============================================
+// VOICE COMMANDS - RADNA VERZIJA
+// ============================================
 
 let activeBuffer = ''; 
 let recognition = null;
@@ -10,10 +9,6 @@ let isProcessingCommand = false;
 let END_AKTIVAN = false;
 let isVoiceInput = false;
 let ALLOW_INVENTORY_OPEN = false;
-let micRestartTimer = null;
-let isUserStopped = false;
-let isRecognitionStarting = false;
-let micActive = false;
 
 // ============================================
 // 1. POMOĆNE FUNKCIJE
@@ -39,10 +34,6 @@ function showVoiceStatus(text, color) {
         if (color) statusEl.style.color = color;
     }
     console.log('[VOICE]', text);
-}
-
-function isMobileDevice() {
-    return /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 }
 
 // ============================================
@@ -107,7 +98,7 @@ function getStorage(word) {
 }
 
 // ============================================
-// 4. PARSIRANJE
+// 4. PARSIRANJE - POPRAVLJENO ZA 800g
 // ============================================
 
 function parseVoiceDataEntry(command) {
@@ -149,18 +140,17 @@ function parseVoiceDataEntry(command) {
         if (storageMatch) {
             foundStorage = storageMatch;
             storageIndex = i;
-            console.log('🏠 Pronađeno skladište:', foundStorage);
         }
         
         let unitMatch = getUnit(w);
         if (unitMatch) {
             foundUnit = unitMatch;
             unitIndex = i;
-            console.log('📏 Pronađena jedinica:', foundUnit);
         }
     }
     
-    if (text.includes('gram') || text.includes('grama')) {
+    // ⭐ SPECIJALNI SLUČAJEVI ZA JEDINICE
+    if (text.includes('gram') || text.includes('grama') || text.includes('g ')) {
         foundUnit = 'g';
         console.log('🔍 Spec. slučaj: gram -> jedinica = g');
     } else if (text.includes('kilogram') || text.includes('kg')) {
@@ -186,7 +176,6 @@ function parseVoiceDataEntry(command) {
         let numVal = getNumber(w);
         if (numVal !== null) {
             numbers.push(numVal);
-            console.log('🔢 Broj pronađen:', numVal);
             continue;
         }
         
@@ -196,69 +185,75 @@ function parseVoiceDataEntry(command) {
     console.log('📊 Brojevi:', numbers);
     console.log('📊 Naziv delovi:', nameParts);
     
-    if (foundUnit === 'kg' || foundUnit === 'g') {
+    // ⭐ RASPORED BROJEVA ZA KG/G
+    if (foundUnit === 'g') {
+        if (numbers.length >= 1) {
+            result.quantity = String(numbers[0]);
+            result.piece = '0';
+            console.log('📦 grami: količina=' + numbers[0] + 'g');
+        }
+    } else if (foundUnit === 'kg') {
         if (numbers.length >= 2) {
-            result.piece = numbers[0];
-            result.quantity = numbers[1];
+            result.piece = String(numbers[0]);
+            result.quantity = String(numbers[1]);
+            console.log('📦 kg: komad=' + numbers[0] + ', količina=' + numbers[1] + 'kg');
         } else if (numbers.length === 1) {
             result.piece = '0';
-            result.quantity = numbers[0];
+            result.quantity = String(numbers[0]);
+            console.log('📦 kg: komad=0, količina=' + numbers[0] + 'kg');
         }
     } else if (foundUnit === 'l') {
         if (numbers.length >= 2) {
-            result.piece = numbers[0];
-            result.quantity = numbers[1];
+            result.piece = String(numbers[0]);
+            result.quantity = String(numbers[1]);
         } else if (numbers.length === 1) {
             result.piece = '0';
-            result.quantity = numbers[0];
+            result.quantity = String(numbers[0]);
         }
     } else {
         if (numbers.length >= 2) {
-            result.piece = numbers[0];
-            result.quantity = numbers[1];
+            result.piece = String(numbers[0]);
+            result.quantity = String(numbers[1]);
         } else if (numbers.length === 1) {
-            result.piece = numbers[0];
-            result.quantity = numbers[0];
+            result.piece = String(numbers[0]);
+            result.quantity = String(numbers[0]);
         }
     }
     
+    // ⭐ ROK TRAJANJA
     let rokPronadjen = false;
-    
     let meseciMatch = text.match(/(\d+)\s*(meseci|months)/i);
     if (meseciMatch) {
         result.shelf_life = meseciMatch[1];
         rokPronadjen = true;
     }
-    
     if (!rokPronadjen && numbers.length >= 3) {
-        result.shelf_life = numbers[2];
+        result.shelf_life = String(numbers[2]);
+        rokPronadjen = true;
+    }
+    if (!rokPronadjen && text.includes('šest')) {
+        result.shelf_life = '6';
         rokPronadjen = true;
     }
     
+    // ⭐ NAZIV
     let cleanNameParts = nameParts.filter(part => {
         return !/^\d+$/.test(part);
     });
     result.product_name = cleanNameParts.join(' ').trim() || 'Proizvod';
     
+    // ⭐ JEDINICA
     if (foundUnit) {
         result.unit = foundUnit;
     } else {
         result.unit = 'kom';
     }
     
+    // ⭐ SKLADIŠTE
     if (foundStorage) {
         result.storage = foundStorage;
     } else {
         result.storage = 'Zamrzivač 1';
-    }
-    
-    let gramMatches = text.match(/\b(500|700|800|900|1000)\b/);
-    if (gramMatches && (text.includes('gram') || text.includes('grama'))) {
-        result.unit = 'g';
-        result.quantity = gramMatches[1];
-        if (result.piece === '1' || result.piece === '0') {
-            result.piece = '0';
-        }
     }
     
     console.log('✅ PARSIRANO:', result);
@@ -515,84 +510,11 @@ function otvoriZaliheEkran() {
 }
 
 // ============================================
-// 9. RESTART MIKROFONA - ZA MOBILNE
-// ============================================
-
-function restartMicrophone() {
-    console.log('🔄 Restartujem mikrofon...');
-    showVoiceStatus('🔄 Ponovno pokrećem mikrofon...', '#FF9800');
-    
-    // Prvo traži dozvolu za mikrofon (važno za mobilne)
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        navigator.mediaDevices.getUserMedia({ audio: true })
-            .then(function(stream) {
-                console.log('✅ Dozvola za mikrofon odobrena');
-                stream.getTracks().forEach(track => track.stop());
-                // Zaustavi i pokreni ponovo
-                stopVoiceRecognition();
-                setTimeout(function() {
-                    startVoiceRecognition();
-                }, 500);
-            })
-            .catch(function(err) {
-                console.error('❌ Greška pri dozvoli za mikrofon:', err);
-                showVoiceStatus('❌ Dozvolite pristup mikrofonu!', '#f44336');
-                alert('Da biste koristili glasovni unos, potrebno je dozvoliti pristup mikrofonu u podešavanjima browsera.');
-            });
-    } else {
-        // Ako nema mediaDevices, pokreni direktno
-        stopVoiceRecognition();
-        setTimeout(function() {
-            startVoiceRecognition();
-        }, 500);
-    }
-}
-
-// ============================================
-// 10. START VOICE RECOGNITION - SA PODRŠKOM ZA MOBILNE
+// 9. START VOICE RECOGNITION - RADNA VERZIJA
 // ============================================
 
 function startVoiceRecognition() {
     console.log('🎤 startVoiceRecognition POZVAN!');
-    console.log('📱 Mobilni uređaj:', isMobileDevice());
-    
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-        showVoiceStatus('❌ Browser ne podržava glasovno prepoznavanje.', '#f44336');
-        if (isMobileDevice()) {
-            alert('Vaš mobilni browser ne podržava glasovni unos. Preporučujemo Chrome na Androidu.');
-        }
-        return;
-    }
-
-    // ⭐ ZA MOBILNE: Prvo traži dozvolu za mikrofon
-    if (isMobileDevice() && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        showVoiceStatus('🎤 Tražim dozvolu za mikrofon...', '#FF9800');
-        
-        navigator.mediaDevices.getUserMedia({ audio: true })
-            .then(function(stream) {
-                console.log('✅ Dozvola za mikrofon odobrena');
-                stream.getTracks().forEach(track => track.stop());
-                // Pokreni recognition engine
-                startRecognitionEngine();
-            })
-            .catch(function(err) {
-                console.error('❌ Greška pri dozvoli za mikrofon:', err);
-                showVoiceStatus('❌ Dozvolite pristup mikrofonu!', '#f44336');
-                alert('Da biste koristili glasovni unos na mobilnom, dozvolite pristup mikrofonu.');
-            });
-    } else {
-        // Na desktopu pokreni direktno
-        startRecognitionEngine();
-    }
-}
-
-// ============================================
-// 11. RECOGNITION ENGINE (Zajednički za sve)
-// ============================================
-
-function startRecognitionEngine() {
-    console.log('🎤 Pokrećem recognition engine...');
     
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
@@ -605,25 +527,14 @@ function startRecognitionEngine() {
         recognition = null;
     }
 
-    try {
-        recognition = new SpeechRecognition();
-    } catch(e) {
-        console.error('❌ Greška pri kreiranju recognition:', e);
-        showVoiceStatus('❌ Greška pri pokretanju mikrofona', '#f44336');
-        return;
-    }
-    
+    recognition = new SpeechRecognition();
     const langCode = typeof currentLang !== 'undefined' ? currentLang : 'sr';
     const speechLangMap = {
         sr: 'sr-RS', en: 'en-US', de: 'de-DE', hu: 'hu-HU',
         uk: 'uk-UA', ru: 'ru-RU', zh: 'zh-CN', es: 'es-ES',
         pt: 'pt-PT', fr: 'fr-FR'
     };
-    recognition.lang = speechLangMap[langCode] || 'en-US';
-    
-    console.log('🌐 Jezik za prepoznavanje:', recognition.lang);
-    showVoiceStatus(`🌐 Jezik: ${recognition.lang}`, '#2196F3');
-    
+    recognition.lang = speechLangMap[langCode] || 'sr-RS';
     recognition.continuous = true;
     recognition.interimResults = true;
     recognition.maxAlternatives = 1;
@@ -634,7 +545,6 @@ function startRecognitionEngine() {
 
     recognition.onstart = function() {
         console.log('🎤 MIKROFON AKTIVAN!');
-        micActive = true;
         showVoiceStatus('🎤 Slušam... Recite "start" pa podatke', '#2196F3');
         activeBuffer = '';
         isProcessingCommand = false;
@@ -777,18 +687,7 @@ function startRecognitionEngine() {
 
     recognition.onend = function() {
         console.log('🎤 Glasovno prepoznavanje završeno.');
-        micActive = false;
         isProcessingCommand = false;
-        
-        // ⭐ Na mobilnim, ako nije korisnik zaustavio, restartuj
-        if (!isUserStopped && !END_AKTIVAN) {
-            console.log('🔄 Automatski restartujem mikrofon...');
-            setTimeout(function() {
-                if (!isUserStopped && !recognition) {
-                    startVoiceRecognition();
-                }
-            }, 1500);
-        }
     };
 
     try {
@@ -802,13 +701,10 @@ function startRecognitionEngine() {
 }
 
 // ============================================
-// 12. ZAUSTAVI PREPOZNAVANJE
+// 10. ZAUSTAVI PREPOZNAVANJE
 // ============================================
 
 function stopVoiceRecognition() {
-    isUserStopped = true;
-    micActive = false;
-    
     if (recognition) {
         try {
             recognition.stop();
@@ -821,12 +717,47 @@ function stopVoiceRecognition() {
 }
 
 // ============================================
-// 13. POVRATAK NA PREĐAŠNJI EKRAN
+// 11. RESTART MIKROFONA (ZA MOBILNE)
+// ============================================
+
+function restartMicrophone() {
+    console.log('🔄 Restartujem mikrofon...');
+    showVoiceStatus('🔄 Ponovno pokrećem mikrofon...', '#FF9800');
+    
+    // ⭐ ZA MOBILNE: Traži dozvolu za mikrofon
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(function(stream) {
+                console.log('✅ Dozvola za mikrofon odobrena');
+                stream.getTracks().forEach(track => track.stop());
+                stopVoiceRecognition();
+                setTimeout(function() {
+                    startVoiceRecognition();
+                }, 500);
+            })
+            .catch(function(err) {
+                console.error('❌ Greška pri dozvoli za mikrofon:', err);
+                showVoiceStatus('❌ Dozvolite pristup mikrofonu!', '#f44336');
+                // Pokušaj bez dozvole (možda već ima)
+                stopVoiceRecognition();
+                setTimeout(function() {
+                    startVoiceRecognition();
+                }, 500);
+            });
+    } else {
+        stopVoiceRecognition();
+        setTimeout(function() {
+            startVoiceRecognition();
+        }, 500);
+    }
+}
+
+// ============================================
+// 12. POVRATAK NA PREĐAŠNJI EKRAN
 // ============================================
 
 function goBackFromVoice() {
     console.log('◀ goBackFromVoice POZVAN!');
-    isUserStopped = true;
     stopVoiceRecognition();
     
     document.querySelectorAll('.screen').forEach(s => {
@@ -849,12 +780,11 @@ function goBackFromVoice() {
 }
 
 // ============================================
-// 14. SELEKTOVANJE VOICE MODE
+// 13. SELEKTOVANJE VOICE MODE
 // ============================================
 
 window.selectVoiceMode = function() {
     console.log('🎤 selectVoiceMode (PREGAŽEN) - otvaram voice menu');
-    isUserStopped = false;
     
     document.querySelectorAll('.screen').forEach(s => {
         s.style.display = 'none';
@@ -869,13 +799,13 @@ window.selectVoiceMode = function() {
     }
     
     setTimeout(function() {
-        console.log('🎤 Pokrećem VOICE COMMANDS startVoiceRecognition...');
+        console.log('🎤 Pokrećem VOICE COMMANDS...');
         startVoiceRecognition();
     }, 500);
 };
 
 // ============================================
-// 15. PREUZIMANJE KONTROLE
+// 14. PREUZIMANJE KONTROLE
 // ============================================
 
 window._voiceCommandsStart = startVoiceRecognition;
@@ -958,7 +888,7 @@ window.hideVoiceMenu = hideVoiceMenu;
 window.restartMicrophone = restartMicrophone;
 
 // ============================================
-// 16. ZABRANA OTVARANJA ZALIHA IZ VOICE KOMANDI
+// 15. ZABRANA OTVARANJA ZALIHA
 // ============================================
 
 (function() {
@@ -1015,37 +945,9 @@ window.restartMicrophone = restartMicrophone;
     console.log('✅ End otvara zalihe!');
 })();
 
-// ============================================
-// 17. MONITORING MIKROFONA (ZA MOBILNE)
-// ============================================
-
-function startMicMonitoring() {
-    if (micRestartTimer) {
-        clearInterval(micRestartTimer);
-    }
-    
-    micRestartTimer = setInterval(function() {
-        if (!micActive && !isUserStopped && !END_AKTIVAN) {
-            console.log('🔄 Mikrofon nije aktivan, restartujem...');
-            startVoiceRecognition();
-        }
-    }, 30000); // Provera svakih 30 sekundi
-}
-
-function stopMicMonitoring() {
-    if (micRestartTimer) {
-        clearInterval(micRestartTimer);
-        micRestartTimer = null;
-    }
-}
-
-// Pokreni monitoring kada se aplikacija učita
-setTimeout(function() {
-    startMicMonitoring();
-    console.log('✅ Monitoring mikrofona pokrenut (provera svakih 30s)');
-}, 5000);
-
-console.log('📱 VOICE COMMANDS - MOBILNA VERZIJA UČITANA!');
-console.log('🎤 Podržani uređaji: Android, iOS, tableti, desktop');
-console.log('🔄 Automatsko održavanje veze sa mikrofonom');
-console.log('📝 Komande: "unos", "start", "plus", "end"');
+console.log('✅ VOICE COMMANDS - RADNA VERZIJA UČITANA!');
+console.log('🎤 "unos" → diktiraj → "plus" (samo završava) → "end" (otvara zalihe)');
+console.log('⛔ PLUS NE otvara zalihe!');
+console.log('📦 END otvara zalihe!');
+console.log('📝 Parsiranje: 800g = 800 grama');
+console.log('🔄 restartMicrophone dostupan za mobilne!');
