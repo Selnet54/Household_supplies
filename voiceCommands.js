@@ -306,66 +306,78 @@ function switchScreen(screenId) {
 // ============================================
 
 function showDataEntry() {
-    stopVoiceRecognition();
+    console.log('📝 showDataEntry POZVANA!');
+    // ⚠️ NE gasi mikrofon! Samo prebaci ekran
+    // stopVoiceRecognition();  ← UKLONI OVO!
+    
     // Koristi postojecu funkciju iz script1.js ako postoji
     if (typeof renderDataEntry === 'function') {
+        console.log('✅ renderDataEntry postoji, pozivam...');
         switchScreen('mainScreen');
         renderDataEntry();
-    } else {
-        // Fallback - prikazi formu
-        switchScreen('mainScreen');
-        const mainContent = document.getElementById('mainContent');
-        if (mainContent) {
-            mainContent.innerHTML = `
-                <h1 class="title">📝 ${getMessage('add_mode') || 'Unos proizvoda'}</h1>
-                <div id="dataEntryForm">
-                    <div class="row">
-                        <label for="productInput">Proizvod:</label>
-                        <input type="text" id="productInput" placeholder="Naziv proizvoda..." autofocus>
-                    </div>
-                    <div class="row">
-                        <label for="pieceInput">Komada:</label>
-                        <input type="number" id="pieceInput" value="1" min="1">
-                    </div>
-                    <div class="row">
-                        <label for="quantityInput">Količina:</label>
-                        <input type="number" id="quantityInput" value="1" min="0.01" step="0.01">
-                    </div>
-                    <div class="row">
-                        <label for="unitSelect">Jedinica:</label>
-                        <select id="unitSelect">
-                            <option value="kom">kom</option>
-                            <option value="kg">kg</option>
-                            <option value="g">g</option>
-                            <option value="l">l</option>
-                            <option value="pak">pak</option>
-                        </select>
-                    </div>
-                    <div class="row">
-                        <label for="shelfLifeInput">Rok (meseci):</label>
-                        <input type="number" id="shelfLifeInput" value="6" min="1" max="60">
-                    </div>
-                    <div class="row">
-                        <label for="storageSelect">Lokacija:</label>
-                        <select id="storageSelect">
-                            <option value="Zamrzivač 1">Zamrzivač 1</option>
-                            <option value="Zamrzivač 2">Zamrzivač 2</option>
-                            <option value="Zamrzivač 3">Zamrzivač 3</option>
-                            <option value="Frižider">Frižider</option>
-                            <option value="Ostava">Ostava</option>
-                        </select>
-                    </div>
-                    <div class="btn-group">
-                        <button class="btn-save" onclick="saveProduct()">💾 Sačuvaj</button>
-                        <button class="btn-cancel" onclick="cancelProduct()">✖ Otkaži</button>
-                    </div>
+        // Mikrofon i dalje radi u pozadini
+        showVoiceStatus('🎤 Mikrofon i dalje radi. Reci sledeći proizvod...', '#4CAF50');
+        return;
+    }
+    
+    // Fallback - prikazi formu
+    console.log('⚠️ renderDataEntry ne postoji, prikazujem ručno...');
+    switchScreen('mainScreen');
+    const mainContent = document.getElementById('mainContent');
+    if (mainContent) {
+        mainContent.innerHTML = `
+            <h1 class="title">📝 ${getMessage('add_mode') || 'Unos proizvoda'}</h1>
+            <div id="dataEntryForm">
+                <div class="row">
+                    <label for="productInput">Proizvod:</label>
+                    <input type="text" id="productInput" placeholder="Naziv proizvoda..." autofocus>
                 </div>
-            `;
-            const input = document.getElementById('productInput');
-            if (input) setTimeout(() => input.focus(), 300);
-        }
+                <div class="row">
+                    <label for="pieceInput">Komada:</label>
+                    <input type="number" id="pieceInput" value="1" min="1">
+                </div>
+                <div class="row">
+                    <label for="quantityInput">Količina:</label>
+                    <input type="number" id="quantityInput" value="1" min="0.01" step="0.01">
+                </div>
+                <div class="row">
+                    <label for="unitSelect">Jedinica:</label>
+                    <select id="unitSelect">
+                        <option value="kom">kom</option>
+                        <option value="kg">kg</option>
+                        <option value="g">g</option>
+                        <option value="l">l</option>
+                        <option value="pak">pak</option>
+                    </select>
+                </div>
+                <div class="row">
+                    <label for="shelfLifeInput">Rok (meseci):</label>
+                    <input type="number" id="shelfLifeInput" value="6" min="1" max="60">
+                </div>
+                <div class="row">
+                    <label for="storageSelect">Lokacija:</label>
+                    <select id="storageSelect">
+                        <option value="Zamrzivač 1">Zamrzivač 1</option>
+                        <option value="Zamrzivač 2">Zamrzivač 2</option>
+                        <option value="Zamrzivač 3">Zamrzivač 3</option>
+                        <option value="Frižider">Frižider</option>
+                        <option value="Ostava">Ostava</option>
+                    </select>
+                </div>
+                <div class="btn-group">
+                    <button class="btn-save" onclick="saveProduct()">💾 Sačuvaj</button>
+                    <button class="btn-cancel" onclick="cancelProduct()">✖ Otkaži</button>
+                </div>
+                <div id="voiceStatusInline" style="margin-top:20px; padding:15px; background:#f0f0f0; border-radius:12px; font-size:18px; text-align:center; color:#1a237e;">
+                    🎤 Mikrofon je i dalje aktivan! Reci naziv proizvoda...
+                </div>
+            </div>
+        `;
+        const input = document.getElementById('productInput');
+        if (input) setTimeout(() => input.focus(), 300);
     }
     clearForm();
+    console.log('✅ showDataEntry završena, mikrofon i dalje radi');
 }
 
 function saveProduct() {
@@ -406,27 +418,47 @@ function cancelProduct() {
 }
 
 function otvoriSpisakEkran() {
-    stopVoiceRecognition();
-    switchScreen('mainScreen');
+    console.log('📋 otvoriSpisakEkran POZVAN!');
+    // ⚠️ NE gasi mikrofon!
+    // stopVoiceRecognition();  ← UKLONI OVO!
+    
     if (typeof renderShoppingList === 'function') {
+        switchScreen('mainScreen');
         renderShoppingList();
     } else {
+        switchScreen('mainScreen');
         document.getElementById('mainContent').innerHTML = `
             <h1 class="title">🛒 Spisak</h1>
             <p style="text-align:center;font-size:20px;color:#999;padding:40px 0;">Spisak je prazan.</p>
+            <div style="text-align:center;margin-top:20px;">
+                <button class="btn btn-green" onclick="showDataEntry()" style="padding:15px 40px;font-size:20px;">➕ Dodaj proizvod</button>
+            </div>
+            <div style="text-align:center;margin-top:10px;color:#4CAF50;font-size:16px;">
+                🎤 Mikrofon i dalje radi
+            </div>
         `;
     }
 }
 
 function otvoriZaliheEkran() {
-    stopVoiceRecognition();
-    switchScreen('mainScreen');
+    console.log('📦 otvoriZaliheEkran POZVAN!');
+    // ⚠️ NE gasi mikrofon!
+    // stopVoiceRecognition();  ← UKLONI OVO!
+    
     if (typeof renderInventory === 'function') {
+        switchScreen('mainScreen');
         renderInventory();
     } else {
+        switchScreen('mainScreen');
         document.getElementById('mainContent').innerHTML = `
             <h1 class="title">📦 Zalihe</h1>
             <p style="text-align:center;font-size:20px;color:#999;padding:40px 0;">Zalihe su prazne.</p>
+            <div style="text-align:center;margin-top:20px;">
+                <button class="btn btn-green" onclick="showDataEntry()" style="padding:15px 40px;font-size:20px;">➕ Dodaj proizvod</button>
+            </div>
+            <div style="text-align:center;margin-top:10px;color:#4CAF50;font-size:16px;">
+                🎤 Mikrofon i dalje radi
+            </div>
         `;
     }
 }
@@ -461,8 +493,12 @@ function processVoiceInput(buffer) {
     
     const lower = buffer.toLowerCase().trim();
     VoiceState.isProcessing = true;
+    console.log('🎤 Procesiram:', buffer);
+    console.log('🎤 Mala slova:', lower);
     
+    // Proveri da li je komanda "plus"
     if (lower.includes('plus')) {
+        console.log('➕ Detektovana PLUS komanda');
         const parts = buffer.split(/\bplus\b/i);
         const data = parseVoiceDataEntry(parts[0]);
         if (data && sacuvajPodatke(data)) {
@@ -479,7 +515,9 @@ function processVoiceInput(buffer) {
         return;
     }
     
+    // Proveri da li je komanda za kraj
     if (lower.includes('end') || lower.includes('kraj') || lower.includes('gotovo')) {
+        console.log('🛑 Detektovana END komanda');
         const textToParse = buffer.replace(/\b(end|kraj|gotovo)\b/gi, '');
         const data = parseVoiceDataEntry(textToParse);
         if (data) sacuvajPodatke(data);
@@ -490,17 +528,29 @@ function processVoiceInput(buffer) {
         return;
     }
     
+    // Detektuj ostale komande
     const cmd = detectVoiceCommand(buffer);
+    console.log('🎤 Detektovana komanda:', cmd);
+    
     if (cmd) {
+        console.log('➡️ Izvršavam komandu:', cmd);
         if (cmd === 'add') {
+            console.log('📝 Pozivam showDataEntry()');
             showDataEntry();
         } else if (cmd === 'list') {
+            console.log('📋 Pozivam otvoriSpisakEkran()');
             otvoriSpisakEkran();
         } else if (cmd === 'stock') {
+            console.log('📦 Pozivam otvoriZaliheEkran()');
             otvoriZaliheEkran();
         } else if (cmd === 'close') {
+            console.log('🚪 Pozivam goBackFromVoice()');
             goBackFromVoice();
         }
+        showVoiceStatus('✅ Komanda: ' + cmd, '#4CAF50');
+    } else {
+        console.log('❌ Nije prepoznata komanda');
+        showVoiceStatus('❌ Nisam prepoznao: "' + buffer + '". Reci: UNOS, SPISAK, ZALIHE ili EXIT', '#f44336');
     }
     
     VoiceState.isProcessing = false;
