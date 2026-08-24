@@ -2138,8 +2138,5 @@ function selectManualMode() {
     }
 }
 
-// ⚠️ OBAVEZNO UKLONI OVU FUNKCIJU - KORISTI SE IZ voiceCommands.js!
-// goBackFromVoice je već definisana u voiceCommands.js
-
 // ===== KRAJ FAJLA =====
 // NEMA NIŠTA VIŠE POSLE OVOGA!
