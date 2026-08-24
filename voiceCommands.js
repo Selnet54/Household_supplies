@@ -1,5 +1,5 @@
 // ============================================
-// VOICE COMMANDS - ORIGINAL (RADIO JE)
+// VOICE COMMANDS - ISPRAVLJENO
 // ============================================
 
 // Singleton stanje za sprečavanje dupliranja mikrofona i utrke tajmera (Race Conditions)
@@ -115,12 +115,10 @@ function detectVoiceCommand(text) {
     const commands = getVoiceCommands();
     const lower = text.toLowerCase().trim();
     
-    // 1. Prvo proveri sve ključne reči za zatvaranje (exit, izlaz, itd.)
     if (commands.close && commands.close.some(k => lower.includes(k.toLowerCase()))) {
         return 'close';
     }
     
-    // 2. Proveri ostale komande (add, list, stock)
     for (let [action, keywords] of Object.entries(commands)) {
         if (action === 'close') continue;
         for (let keyword of keywords) {
@@ -209,7 +207,7 @@ function parseVoiceDataEntry(command) {
 }
 
 // ============================================
-// 4. CENTRALIZOVANO ČUVANJE U BAZU (SVE U JEDNOJ FUNKCIJI)
+// 4. CENTRALIZOVANO ČUVANJE U BAZU
 // ============================================
 
 function sacuvajPodatke(data) {
@@ -274,24 +272,193 @@ function clearForm() {
 }
 
 function refreshDisplay() {
-    if (typeof prikaziSveUnose === 'function') prikaziSveUnose();
     if (typeof renderInventory === 'function') renderInventory();
+    if (typeof renderShoppingList === 'function') renderShoppingList();
 }
 
 function switchScreen(screenId) {
-    document.querySelectorAll('.screen').forEach(s => {
+    const screens = document.querySelectorAll('.screen');
+    screens.forEach(s => {
         s.style.display = 'none';
         s.classList.remove('active');
     });
+    
     const target = document.getElementById(screenId);
     if (target) {
         target.style.display = 'flex';
         target.classList.add('active');
+        if (screenId === 'mainScreen') {
+            target.style.flexDirection = 'column';
+        }
+        console.log(`✅ Prikazan ekran: ${screenId}`);
+    } else {
+        console.error(`❌ Ekran sa ID "${screenId}" nije pronađen!`);
+        const firstScreen = document.querySelector('.screen');
+        if (firstScreen) {
+            firstScreen.style.display = 'flex';
+            firstScreen.classList.add('active');
+        }
     }
 }
 
 // ============================================
-// 5. MOTOR ZA GLASOVNE KOMANDE (SPEECH ENGINE)
+// 5. FUNKCIJE ZA PRIKAZ EKRANA
+// ============================================
+
+function showDataEntry() {
+    stopVoiceRecognition();
+    switchScreen('mainScreen');
+    
+    const mainContent = document.getElementById('mainContent');
+    if (mainContent) {
+        mainContent.innerHTML = `
+            <h1 class="title" id="formTitle">📝 ${getMessage('add_mode') || 'Unos proizvoda'}</h1>
+            <div id="dataEntryForm">
+                <div class="row">
+                    <label id="productLabel" for="productInput">Proizvod:</label>
+                    <input type="text" id="productInput" placeholder="Naziv proizvoda..." autofocus>
+                </div>
+                <div class="row">
+                    <label id="pieceLabel" for="pieceInput">Komada:</label>
+                    <input type="number" id="pieceInput" value="1" min="1">
+                </div>
+                <div class="row">
+                    <label id="quantityLabel" for="quantityInput">Količina:</label>
+                    <input type="number" id="quantityInput" value="1" min="0.01" step="0.01">
+                </div>
+                <div class="row">
+                    <label id="unitLabel" for="unitSelect">Jedinica:</label>
+                    <select id="unitSelect">
+                        <option value="kom">kom</option>
+                        <option value="kg">kg</option>
+                        <option value="g">g</option>
+                        <option value="l">l</option>
+                        <option value="pak">pak</option>
+                    </select>
+                </div>
+                <div class="row">
+                    <label id="shelfLifeLabel" for="shelfLifeInput">Rok (meseci):</label>
+                    <input type="number" id="shelfLifeInput" value="6" min="1" max="60">
+                </div>
+                <div class="row">
+                    <label id="storageLabel" for="storageSelect">Lokacija:</label>
+                    <select id="storageSelect">
+                        <option value="Zamrzivač 1">Zamrzivač 1</option>
+                        <option value="Zamrzivač 2">Zamrzivač 2</option>
+                        <option value="Zamrzivač 3">Zamrzivač 3</option>
+                        <option value="Frižider">Frižider</option>
+                        <option value="Ostava">Ostava</option>
+                    </select>
+                </div>
+                <div class="btn-group">
+                    <button class="btn-save" onclick="saveProduct()">💾 Sačuvaj</button>
+                    <button class="btn-cancel" onclick="cancelProduct()">✖ Otkaži</button>
+                </div>
+                <div id="voiceStatusInline" style="margin-top:15px; padding:15px; background:#f0f0f0; border-radius:12px; text-align:center; font-size:18px; color:#1a237e;">
+                    🎤 ${getMessage('new_entry') || 'Unesite proizvod...'}
+                </div>
+            </div>
+        `;
+        
+        const productInput = document.getElementById('productInput');
+        if (productInput) {
+            productInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    saveProduct();
+                }
+            });
+            setTimeout(() => productInput.focus(), 300);
+        }
+    }
+    clearForm();
+}
+
+function saveProduct() {
+    const productName = document.getElementById('productInput')?.value?.trim() || '';
+    const piece = parseFloat(document.getElementById('pieceInput')?.value) || 1;
+    const quantity = parseFloat(document.getElementById('quantityInput')?.value) || 1;
+    const unit = document.getElementById('unitSelect')?.value || 'kom';
+    const shelfLife = parseInt(document.getElementById('shelfLifeInput')?.value) || 6;
+    const storage = document.getElementById('storageSelect')?.value || 'Zamrzivač 1';
+    
+    if (!productName || productName === 'Proizvod') {
+        showModernAlert('⚠️', 'Greška', 'Molimo unesite naziv proizvoda.', '#f44336');
+        return;
+    }
+    
+    const data = {
+        product_name: productName,
+        piece: piece,
+        quantity: quantity,
+        unit: unit,
+        shelf_life: shelfLife,
+        storage: storage
+    };
+    
+    if (sacuvajPodatke(data)) {
+        showModernAlert('✅', 'Uspešno', `Sačuvan proizvod: ${productName}`, '#4CAF50');
+        clearForm();
+        setTimeout(() => {
+            const input = document.getElementById('productInput');
+            if (input) input.focus();
+        }, 300);
+    }
+}
+
+function cancelProduct() {
+    clearForm();
+    showDataEntry();
+}
+
+function otvoriSpisakEkran() {
+    stopVoiceRecognition();
+    switchScreen('mainScreen');
+    if (typeof renderShoppingList === 'function') {
+        renderShoppingList();
+    } else {
+        document.getElementById('mainContent').innerHTML = `
+            <h1 class="title">🛒 Spisak</h1>
+            <p style="text-align:center;font-size:20px;color:#999;padding:40px 0;">Spisak je prazan.</p>
+        `;
+    }
+}
+
+function otvoriZaliheEkran() {
+    stopVoiceRecognition();
+    switchScreen('mainScreen');
+    if (typeof renderInventory === 'function') {
+        renderInventory();
+    } else {
+        document.getElementById('mainContent').innerHTML = `
+            <h1 class="title">📦 Zalihe</h1>
+            <p style="text-align:center;font-size:20px;color:#999;padding:40px 0;">Zalihe su prazne.</p>
+        `;
+    }
+}
+
+function goBackFromVoice() {
+    stopVoiceRecognition();
+    switchScreen('choiceScreen');
+}
+
+function showModernAlert(icon, title, message, color = '#1a237e') {
+    const alertEl = document.getElementById('modernAlert');
+    if (!alertEl) return;
+    document.getElementById('alertIcon').textContent = icon || '📢';
+    document.getElementById('alertTitle').textContent = title || 'Obaveštenje';
+    document.getElementById('alertMessage').textContent = message || '';
+    const btn = alertEl.querySelector('.alert-btn');
+    if (btn && color) btn.style.background = color;
+    alertEl.style.display = 'flex';
+}
+
+function closeModernAlert() {
+    const alertEl = document.getElementById('modernAlert');
+    if (alertEl) alertEl.style.display = 'none';
+}
+
+// ============================================
+// 6. MOTOR ZA GLASOVNE KOMANDE
 // ============================================
 
 function processVoiceInput(buffer) {
@@ -300,7 +467,6 @@ function processVoiceInput(buffer) {
     const lower = buffer.toLowerCase().trim();
     VoiceState.isProcessing = true;
     
-    // 1. Obrada komande PLUS
     if (lower.includes('plus')) {
         const parts = buffer.split(/\bplus\b/i);
         const data = parseVoiceDataEntry(parts[0]);
@@ -318,7 +484,6 @@ function processVoiceInput(buffer) {
         return;
     }
     
-    // 2. Obrada komande END / KRAJ / GOTOVO
     if (lower.includes('end') || lower.includes('kraj') || lower.includes('gotovo')) {
         const textToParse = buffer.replace(/\b(end|kraj|gotovo)\b/gi, '');
         const data = parseVoiceDataEntry(textToParse);
@@ -330,7 +495,6 @@ function processVoiceInput(buffer) {
         return;
     }
     
-    // 3. Detekcija ostalih navigacionih komandi
     const cmd = detectVoiceCommand(buffer);
     if (cmd) {
         if (cmd === 'add') {
@@ -419,196 +583,9 @@ function stopVoiceRecognition() {
 }
 
 // ============================================
-// 6. EKRANI I EXPORT (ISPRAVLJENO ZA TVOJ HTML)
+// 7. GLOBALNI IZVOZ
 // ============================================
 
-function showDataEntry() {
-    stopVoiceRecognition();
-    
-    // Prikaži glavni ekran
-    switchScreen('mainScreen');
-    
-    // Popuni glavni sadržaj sa formom za unos
-    const mainContent = document.getElementById('mainContent');
-    if (mainContent) {
-        mainContent.innerHTML = `
-            <h1 class="title" id="formTitle">📝 ${getMessage('add_mode') || 'Unos proizvoda'}</h1>
-            <div id="dataEntryForm">
-                <div class="row">
-                    <label id="productLabel" for="productInput">Proizvod:</label>
-                    <input type="text" id="productInput" placeholder="Naziv proizvoda..." autofocus>
-                </div>
-                <div class="row">
-                    <label id="pieceLabel" for="pieceInput">Komada:</label>
-                    <input type="number" id="pieceInput" value="1" min="1">
-                </div>
-                <div class="row">
-                    <label id="quantityLabel" for="quantityInput">Količina:</label>
-                    <input type="number" id="quantityInput" value="1" min="0.01" step="0.01">
-                </div>
-                <div class="row">
-                    <label id="unitLabel" for="unitSelect">Jedinica:</label>
-                    <select id="unitSelect">
-                        <option value="kom">kom</option>
-                        <option value="kg">kg</option>
-                        <option value="g">g</option>
-                        <option value="l">l</option>
-                        <option value="pak">pak</option>
-                    </select>
-                </div>
-                <div class="row">
-                    <label id="shelfLifeLabel" for="shelfLifeInput">Rok (meseci):</label>
-                    <input type="number" id="shelfLifeInput" value="6" min="1" max="60">
-                </div>
-                <div class="row">
-                    <label id="storageLabel" for="storageSelect">Lokacija:</label>
-                    <select id="storageSelect">
-                        <option value="Zamrzivač 1">Zamrzivač 1</option>
-                        <option value="Zamrzivač 2">Zamrzivač 2</option>
-                        <option value="Zamrzivač 3">Zamrzivač 3</option>
-                        <option value="Frižider">Frižider</option>
-                        <option value="Ostava">Ostava</option>
-                    </select>
-                </div>
-                <div class="btn-group">
-                    <button class="btn-save" onclick="saveProduct()">💾 Sačuvaj</button>
-                    <button class="btn-cancel" onclick="cancelProduct()">✖ Otkaži</button>
-                </div>
-                <div id="voiceStatusInline" style="margin-top:15px; padding:15px; background:#f0f0f0; border-radius:12px; text-align:center; font-size:18px; color:#1a237e;">
-                    🎤 ${getMessage('new_entry') || 'Unesite proizvod...'}
-                </div>
-            </div>
-        `;
-        
-        // Poveži event listenere za automatsko čuvanje
-        const productInput = document.getElementById('productInput');
-        if (productInput) {
-            productInput.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') {
-                    saveProduct();
-                }
-            });
-        }
-        
-        // Fokusiraj na polje za proizvod
-        setTimeout(() => {
-            if (productInput) productInput.focus();
-        }, 300);
-    }
-    
-    clearForm();
-}
-
-// Funkcija za čuvanje proizvoda iz forme
-function saveProduct() {
-    const productName = document.getElementById('productInput')?.value?.trim() || '';
-    const piece = parseFloat(document.getElementById('pieceInput')?.value) || 1;
-    const quantity = parseFloat(document.getElementById('quantityInput')?.value) || 1;
-    const unit = document.getElementById('unitSelect')?.value || 'kom';
-    const shelfLife = parseInt(document.getElementById('shelfLifeInput')?.value) || 6;
-    const storage = document.getElementById('storageSelect')?.value || 'Zamrzivač 1';
-    
-    if (!productName || productName === 'Proizvod') {
-        showModernAlert('⚠️', 'Greška', 'Molimo unesite naziv proizvoda.', '#f44336');
-        return;
-    }
-    
-    const data = {
-        product_name: productName,
-        piece: piece,
-        quantity: quantity,
-        unit: unit,
-        shelf_life: shelfLife,
-        storage: storage
-    };
-    
-    if (sacuvajPodatke(data)) {
-        showModernAlert('✅', 'Uspešno', `Sačuvan proizvod: ${productName}`, '#4CAF50');
-        clearForm();
-        // Fokusiraj ponovo
-        setTimeout(() => {
-            const input = document.getElementById('productInput');
-            if (input) input.focus();
-        }, 300);
-    }
-}
-
-function cancelProduct() {
-    clearForm();
-    showDataEntry(); // Resetuj formu
-}
-
-function otvoriSpisakEkran() {
-    stopVoiceRecognition();
-    switchScreen('mainScreen');
-    renderShoppingList();
-}
-
-function otvoriZaliheEkran() {
-    stopVoiceRecognition();
-    switchScreen('mainScreen');
-    renderInventory();
-}
-
-function goBackFromVoice() {
-    stopVoiceRecognition();
-    // Vrati se na ekran sa izborom
-    switchScreen('choiceScreen');
-}
-
-// Poboljšana switchScreen funkcija
-function switchScreen(screenId) {
-    // Sakrij sve ekrane
-    const screens = document.querySelectorAll('.screen');
-    screens.forEach(s => {
-        s.style.display = 'none';
-        s.classList.remove('active');
-    });
-    
-    // Pokaži traženi ekran
-    const target = document.getElementById(screenId);
-    if (target) {
-        target.style.display = screenId === 'mainScreen' ? 'flex' : 'flex';
-        target.style.flexDirection = screenId === 'mainScreen' ? 'column' : 'column';
-        target.classList.add('active');
-        console.log(`✅ Prikazan ekran: ${screenId}`);
-    } else {
-        console.error(`❌ Ekran sa ID "${screenId}" nije pronađen!`);
-        // Pokaži prvi dostupni ekran
-        const firstScreen = document.querySelector('.screen');
-        if (firstScreen) {
-            firstScreen.style.display = 'flex';
-            firstScreen.classList.add('active');
-        }
-    }
-}
-
-// Funkcija za prikaz modernog alerta
-function showModernAlert(icon, title, message, color = '#1a237e') {
-    const alertEl = document.getElementById('modernAlert');
-    if (!alertEl) return;
-    
-    document.getElementById('alertIcon').textContent = icon || '📢';
-    document.getElementById('alertTitle').textContent = title || 'Obaveštenje';
-    document.getElementById('alertMessage').textContent = message || '';
-    
-    // Promeni boju dugmeta
-    const btn = alertEl.querySelector('.alert-btn');
-    if (btn && color) {
-        btn.style.background = color;
-    }
-    
-    alertEl.style.display = 'flex';
-}
-
-function closeModernAlert() {
-    const alertEl = document.getElementById('modernAlert');
-    if (alertEl) {
-        alertEl.style.display = 'none';
-    }
-}
-
-// Globalni izvoz za eksterne skripte
 window.startVoiceRecognition = startVoiceRecognition;
 window.stopVoiceRecognition = stopVoiceRecognition;
 window.goBackFromVoice = goBackFromVoice;
