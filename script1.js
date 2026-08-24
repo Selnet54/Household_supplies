@@ -2014,6 +2014,88 @@ function updateInterfaceLanguage() {
         }
     }
 }
+// ============================================
+// FUNKCIJE ZA PRIKAZ ZALIHA I SPISKA (ISPRAVLJENO)
+// ============================================
+
+function renderInventory() {
+    const mainContent = document.getElementById('mainContent');
+    if (!mainContent) return;
+    
+    if (!window.inventory || window.inventory.length === 0) {
+        mainContent.innerHTML = `
+            <h1 class="title">📦 ${getMessage ? getMessage('stock') : 'Zalihe'}</h1>
+            <p style="text-align:center;font-size:20px;color:#999;padding:40px 0;">Nema proizvoda u zalihama.</p>
+            <div style="text-align:center;margin-top:20px;">
+                <button class="btn btn-green" onclick="showDataEntry()" style="padding:15px 40px;font-size:20px;">➕ Dodaj proizvod</button>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = `<h1 class="title">📦 ${getMessage ? getMessage('stock') : 'Zalihe'}</h1>`;
+    html += `<div class="table-container">`;
+    html += `<div class="table-title">📋 Lista proizvoda (${window.inventory.length})</div>`;
+    html += `<div class="table-row header-row">`;
+    html += `<div class="cell">Proizvod</div><div class="cell">Komada</div><div class="cell">Količina</div><div class="cell">Jedinica</div><div class="cell">Lokacija</div>`;
+    html += `</div>`;
+    
+    window.inventory.forEach(item => {
+        html += `<div class="table-row">`;
+        html += `<div class="cell">${item.productName || 'N/A'}</div>`;
+        html += `<div class="cell">${item.piece || 1}</div>`;
+        html += `<div class="cell">${item.quantity || 1}</div>`;
+        html += `<div class="cell">${item.unit || 'kom'}</div>`;
+        html += `<div class="cell">${item.storage || 'Zamrzivač 1'}</div>`;
+        html += `</div>`;
+    });
+    
+    html += `</div>`;
+    html += `<div style="text-align:center;margin-top:20px;">`;
+    html += `<button class="btn btn-green" onclick="showDataEntry()" style="padding:15px 40px;font-size:20px;">➕ Dodaj proizvod</button>`;
+    html += `</div>`;
+    
+    mainContent.innerHTML = html;
+}
+
+function renderShoppingList() {
+    const mainContent = document.getElementById('mainContent');
+    if (!mainContent) return;
+    
+    const shoppingList = window.shoppingList || [];
+    if (shoppingList.length === 0) {
+        mainContent.innerHTML = `
+            <h1 class="title">🛒 ${getMessage ? getMessage('list') : 'Spisak'}</h1>
+            <p style="text-align:center;font-size:20px;color:#999;padding:40px 0;">Spisak je prazan.</p>
+            <div style="text-align:center;margin-top:20px;">
+                <button class="btn btn-green" onclick="showDataEntry()" style="padding:15px 40px;font-size:20px;">➕ Dodaj proizvod</button>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = `<h1 class="title">🛒 ${getMessage ? getMessage('list') : 'Spisak'}</h1>`;
+    html += `<div class="table-container">`;
+    html += `<div class="table-title">📋 Shopping lista (${shoppingList.length})</div>`;
+    html += `<div class="table-row header-row">`;
+    html += `<div class="cell">Proizvod</div><div class="cell">Količina</div><div class="cell">Status</div>`;
+    html += `</div>`;
+    
+    shoppingList.forEach(item => {
+        html += `<div class="table-row">`;
+        html += `<div class="cell">${item.productName || item || 'N/A'}</div>`;
+        html += `<div class="cell">${item.quantity || item || 1}</div>`;
+        html += `<div class="cell">${item.status || '⏳ Na čekanju'}</div>`;
+        html += `</div>`;
+    });
+    
+    html += `</div>`;
+    html += `<div style="text-align:center;margin-top:20px;">`;
+    html += `<button class="btn btn-green" onclick="showDataEntry()" style="padding:15px 40px;font-size:20px;">➕ Dodaj proizvod</button>`;
+    html += `</div>`;
+    
+    mainContent.innerHTML = html;
+}
 
 // ============================================
 // GLOBALNE FUNKCIJE ZA VOICE ADDON
@@ -2026,7 +2108,7 @@ window.showScreen = showScreen;
 window.exitApp = exitApp;
 window.t = t;
 window.currentLang = currentLang;
-window.updateInterfaceLanguage = updateInterfaceLanguage; // Dodato i za globalni pristup
+window.updateInterfaceLanguage = updateInterfaceLanguage;
 
 console.log('✅ Originalne funkcije izvezene!');
 
@@ -2038,24 +2120,26 @@ function selectVoiceMode() {
     console.log('🎤 Izabran zvučni unos');
     showScreen('voiceMenuScreen');
     setTimeout(function() {
-        startVoiceRecognition();
+        if (typeof startVoiceRecognition === 'function') {
+            startVoiceRecognition();
+        } else {
+            console.warn('⚠️ startVoiceRecognition nije definisana');
+        }
     }, 500);
 }
 
 function selectManualMode() {
     console.log('✍️ Izabran ručni unos');
     showScreen('mainScreen');
-    renderCategories();
+    if (typeof renderCategories === 'function') {
+        renderCategories();
+    } else {
+        renderInventory();
+    }
 }
 
-function goBackFromVoice() {
-    console.log('◀ Povratak sa glasovnog menija');
-    if (recognition) {
-        try { recognition.stop(); } catch(e) {}
-        recognition = null;
-    }
-    showScreen('choiceScreen');
-}
+// ⚠️ OBAVEZNO UKLONI OVU FUNKCIJU - KORISTI SE IZ voiceCommands.js!
+// goBackFromVoice je već definisana u voiceCommands.js
 
 // ===== KRAJ FAJLA =====
 // NEMA NIŠTA VIŠE POSLE OVOGA!
