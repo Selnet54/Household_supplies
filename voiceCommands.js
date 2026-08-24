@@ -400,24 +400,25 @@ function showDataEntry() {
     console.log('📝 showDataEntry() POZVAN!');
     console.log('📝 Trenutni ekran:', document.querySelector('.screen.active')?.id);
     
-    // DIREKTNO MENJAJ EKRAN
-    switchScreen('dataEntryScreen');
+    // DIREKTNO - ZAOBIĐI switchScreen
+    const target = document.getElementById('dataEntryScreen');
     
-    // DODATNA PROVERA - da li je ekran zaista prikazan
-    setTimeout(() => {
-        const active = document.querySelector('.screen.active');
-        console.log('📝 Aktivni ekran nakon switch:', active?.id);
-        if (active?.id !== 'dataEntryScreen') {
-            console.warn('⚠️ dataEntryScreen nije aktivan! Pokušavam ponovo...');
-            // DIREKTNO postavi
-            const target = document.getElementById('dataEntryScreen');
-            if (target) {
-                target.style.display = 'flex';
-                target.classList.add('active');
-                console.log('✅ dataEntryScreen forsirano prikazan');
-            }
-        }
-    }, 100);
+    if (target) {
+        // Sakrij sve ekrane
+        document.querySelectorAll('.screen').forEach(s => {
+            s.style.display = 'none';
+            s.classList.remove('active');
+        });
+        
+        // Prikaži dataEntryScreen
+        target.style.display = 'flex';
+        target.classList.add('active');
+        console.log('✅ dataEntryScreen DIREKTNO prikazan');
+    } else {
+        console.error('❌ dataEntryScreen ne postoji!');
+        // Pokušaj preko switchScreen kao fallback
+        switchScreen('dataEntryScreen');
+    }
     
     // OČISTI FORMU
     clearForm();
@@ -431,6 +432,30 @@ function showDataEntry() {
         stopVoiceRecognition();
     }
 }
+
+function otvoriSpisakEkran() {
+    console.log('📋 otvoriSpisakEkran() POZVAN!');
+    stopVoiceRecognition();
+    switchScreen('inventoryScreen');
+    refreshDisplay();
+    showVoiceStatus('📋 Spisak proizvoda', '#2196F3');
+}
+
+function otvoriZaliheEkran() {
+    console.log('📦 otvoriZaliheEkran() POZVAN!');
+    stopVoiceRecognition();
+    switchScreen('inventoryScreen');
+    refreshDisplay();
+    showVoiceStatus('📦 Stanje zaliha', '#2196F3');
+}
+
+function goBackFromVoice() {
+    console.log('🚪 goBackFromVoice() POZVAN!');
+    stopVoiceRecognition();
+    switchScreen('choiceScreen');
+    showVoiceStatus('👋 Vraćam se na početni ekran', '#2196F3');
+}
+
 // Globalni izvoz za eksterne skripte
 window.startVoiceRecognition = startVoiceRecognition;
 window.stopVoiceRecognition = stopVoiceRecognition;
