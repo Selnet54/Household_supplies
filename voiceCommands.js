@@ -1,8 +1,8 @@
 // ============================================
-// VOICE COMMANDS - ISPRAVLJENO
+// VOICE COMMANDS - ISPRAVLJENO ZA TVOJ HTML
 // ============================================
 
-// Singleton stanje za sprečavanje dupliranja mikrofona i utrke tajmera (Race Conditions)
+// Singleton stanje za sprečavanje dupliranja mikrofona i utrke tajmera
 const VoiceState = {
     activeBuffer: '',
     recognition: null,
@@ -13,7 +13,7 @@ const VoiceState = {
 };
 
 // ============================================
-// 1. SVI JEZICI (KOMPLETNE MAPE)
+// 1. SVI JEZICI
 // ============================================
 
 const SUPPORTED_LANGUAGES = ['sr', 'en', 'de', 'hu', 'uk', 'ru', 'zh', 'es', 'pt', 'fr'];
@@ -45,10 +45,10 @@ const BUTTON_LABELS = {
 };
 
 const VOICE_MESSAGES = {
-    sr: { welcome: 'Izgovorite: "DODAJ", "SPISAK", "ZALIHE" ili "EXIT"', listening: 'Slušam...', add_mode: 'Otvaram unos... Izgovorite naziv proizvoda', list_mode: 'Otvaram spisak...', stock_mode: 'Otvaram zalihe...', closing: 'Zatvaram glasovni meni...', not_recognized: 'Nisam prepoznao. Izgovorite: DODAJ, SPISAK, ZALIHE ili EXIT', saving: 'Sačuvano: ', new_entry: 'Unesite sledeći proizvod...' },
-    en: { welcome: 'Say: "ADD", "LIST", "STOCK" or "EXIT"', listening: 'Listening...', add_mode: 'Opening entry... Say product name', list_mode: 'Opening list...', stock_mode: 'Opening stock...', closing: 'Closing voice menu...', not_recognized: 'Not recognized. Say: ADD, LIST, STOCK or EXIT', saving: 'Saved: ', new_entry: 'Enter next product...' },
-    de: { welcome: 'Sagen Sie: "HINZUFÜGEN", "LISTE", "BESTAND" oder "EXIT"', listening: 'Höre zu...', add_mode: 'Öffne Eingabe... Sagen Sie Produktname', list_mode: 'Öffne Liste...', stock_mode: 'Öffne Bestand...', closing: 'Sprachmenü schließen...', not_recognized: 'Nicht erkannt.', saving: 'Gespeichert: ', new_entry: 'Nächstes Produkt eingeben...' },
-    hu: { welcome: 'Mondja: "ADATBEVITEL", "LISTA", "KÉSZLET" vagy "EXIT"', listening: 'Hallgatom...', add_mode: 'Bevitel nyitása... Mondja a termék nevét', list_mode: 'Lista megnyitása...', stock_mode: 'Készlet megnyitása...', closing: 'Hangmenü bezárása...', not_recognized: 'Nem ismert.', saving: 'Mentve: ', new_entry: 'Következő termék megadása...' },
+    sr: { welcome: 'Izgovorite: "DODAJ", "SPISAK", "ZALIHE" ili "EXIT"', listening: 'Slušam...', add_mode: 'Otvaram unos... Izgovorite naziv proizvoda', list_mode: 'Otvaram spisak...', stock_mode: 'Otvaram zalihe...', closing: 'Zatvaram glasovni meni...', not_recognized: 'Nisam prepoznao.', saving: 'Sačuvano: ', new_entry: 'Unesite sledeći proizvod...' },
+    en: { welcome: 'Say: "ADD", "LIST", "STOCK" or "EXIT"', listening: 'Listening...', add_mode: 'Opening entry... Say product name', list_mode: 'Opening list...', stock_mode: 'Opening stock...', closing: 'Closing voice menu...', not_recognized: 'Not recognized.', saving: 'Saved: ', new_entry: 'Enter next product...' },
+    de: { welcome: 'Sagen Sie: "HINZUFÜGEN", "LISTE", "BESTAND" oder "EXIT"', listening: 'Höre zu...', add_mode: 'Öffne Eingabe...', list_mode: 'Öffne Liste...', stock_mode: 'Öffne Bestand...', closing: 'Sprachmenü schließen...', not_recognized: 'Nicht erkannt.', saving: 'Gespeichert: ', new_entry: 'Nächstes Produkt...' },
+    hu: { welcome: 'Mondja: "ADATBEVITEL", "LISTA", "KÉSZLET" vagy "EXIT"', listening: 'Hallgatom...', add_mode: 'Bevitel nyitása...', list_mode: 'Lista megnyitása...', stock_mode: 'Készlet megnyitása...', closing: 'Hangmenü bezárása...', not_recognized: 'Nem ismert.', saving: 'Mentve: ', new_entry: 'Következő termék...' },
     uk: { welcome: 'Скажіть: "ДОДАТИ", "СПИСОК", "ЗАПАСИ" або "EXIT"', listening: 'Слухаю...', add_mode: 'Відкриваю введення...', list_mode: 'Відкриваю список...', stock_mode: 'Відкриваю запаси...', closing: 'Закриваю голосове меню...', not_recognized: 'Не розпізнано.', saving: 'Збережено: ', new_entry: 'Введіть наступний продукт...' },
     ru: { welcome: 'Скажите: "ДОБАВИТЬ", "СПИСОК", "ЗАПАСЫ" или "EXIT"', listening: 'Слушаю...', add_mode: 'Открываю ввод...', list_mode: 'Открываю список...', stock_mode: 'Открываю запасы...', closing: 'Закрываю голосовое меню...', not_recognized: 'Не распознано.', saving: 'Сохранено: ', new_entry: 'Введите следующий продукт...' },
     zh: { welcome: '请说："添加", "列表", "库存" 或 "EXIT"', listening: '正在听...', add_mode: '打开输入...', list_mode: '打开列表...', stock_mode: '打开库存...', closing: '关闭语音菜单...', not_recognized: '无法识别。', saving: '已保存：', new_entry: '输入下一个产品...' },
@@ -88,7 +88,7 @@ const SPEECH_LANG_MAP = {
 };
 
 // ============================================
-// 2. POMOĆNE JEZIČKE FUNKCIJE
+// 2. POMOĆNE FUNKCIJE
 // ============================================
 
 function getCurrentLang() {
@@ -147,7 +147,7 @@ function getNumber(word) {
 }
 
 // ============================================
-// 3. OPTIMIZOVANO PARSIRANJE
+// 3. PARSIRANJE
 // ============================================
 
 function parseVoiceDataEntry(command) {
@@ -207,7 +207,7 @@ function parseVoiceDataEntry(command) {
 }
 
 // ============================================
-// 4. CENTRALIZOVANO ČUVANJE U BAZU
+// 4. ČUVANJE PODATAKA
 // ============================================
 
 function sacuvajPodatke(data) {
@@ -302,72 +302,67 @@ function switchScreen(screenId) {
 }
 
 // ============================================
-// 5. FUNKCIJE ZA PRIKAZ EKRANA
+// 5. EKRANI ZA VOICE
 // ============================================
 
 function showDataEntry() {
     stopVoiceRecognition();
-    switchScreen('mainScreen');
-    
-    const mainContent = document.getElementById('mainContent');
-    if (mainContent) {
-        mainContent.innerHTML = `
-            <h1 class="title" id="formTitle">📝 ${getMessage('add_mode') || 'Unos proizvoda'}</h1>
-            <div id="dataEntryForm">
-                <div class="row">
-                    <label id="productLabel" for="productInput">Proizvod:</label>
-                    <input type="text" id="productInput" placeholder="Naziv proizvoda..." autofocus>
+    // Koristi postojecu funkciju iz script1.js ako postoji
+    if (typeof renderDataEntry === 'function') {
+        switchScreen('mainScreen');
+        renderDataEntry();
+    } else {
+        // Fallback - prikazi formu
+        switchScreen('mainScreen');
+        const mainContent = document.getElementById('mainContent');
+        if (mainContent) {
+            mainContent.innerHTML = `
+                <h1 class="title">📝 ${getMessage('add_mode') || 'Unos proizvoda'}</h1>
+                <div id="dataEntryForm">
+                    <div class="row">
+                        <label for="productInput">Proizvod:</label>
+                        <input type="text" id="productInput" placeholder="Naziv proizvoda..." autofocus>
+                    </div>
+                    <div class="row">
+                        <label for="pieceInput">Komada:</label>
+                        <input type="number" id="pieceInput" value="1" min="1">
+                    </div>
+                    <div class="row">
+                        <label for="quantityInput">Količina:</label>
+                        <input type="number" id="quantityInput" value="1" min="0.01" step="0.01">
+                    </div>
+                    <div class="row">
+                        <label for="unitSelect">Jedinica:</label>
+                        <select id="unitSelect">
+                            <option value="kom">kom</option>
+                            <option value="kg">kg</option>
+                            <option value="g">g</option>
+                            <option value="l">l</option>
+                            <option value="pak">pak</option>
+                        </select>
+                    </div>
+                    <div class="row">
+                        <label for="shelfLifeInput">Rok (meseci):</label>
+                        <input type="number" id="shelfLifeInput" value="6" min="1" max="60">
+                    </div>
+                    <div class="row">
+                        <label for="storageSelect">Lokacija:</label>
+                        <select id="storageSelect">
+                            <option value="Zamrzivač 1">Zamrzivač 1</option>
+                            <option value="Zamrzivač 2">Zamrzivač 2</option>
+                            <option value="Zamrzivač 3">Zamrzivač 3</option>
+                            <option value="Frižider">Frižider</option>
+                            <option value="Ostava">Ostava</option>
+                        </select>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn-save" onclick="saveProduct()">💾 Sačuvaj</button>
+                        <button class="btn-cancel" onclick="cancelProduct()">✖ Otkaži</button>
+                    </div>
                 </div>
-                <div class="row">
-                    <label id="pieceLabel" for="pieceInput">Komada:</label>
-                    <input type="number" id="pieceInput" value="1" min="1">
-                </div>
-                <div class="row">
-                    <label id="quantityLabel" for="quantityInput">Količina:</label>
-                    <input type="number" id="quantityInput" value="1" min="0.01" step="0.01">
-                </div>
-                <div class="row">
-                    <label id="unitLabel" for="unitSelect">Jedinica:</label>
-                    <select id="unitSelect">
-                        <option value="kom">kom</option>
-                        <option value="kg">kg</option>
-                        <option value="g">g</option>
-                        <option value="l">l</option>
-                        <option value="pak">pak</option>
-                    </select>
-                </div>
-                <div class="row">
-                    <label id="shelfLifeLabel" for="shelfLifeInput">Rok (meseci):</label>
-                    <input type="number" id="shelfLifeInput" value="6" min="1" max="60">
-                </div>
-                <div class="row">
-                    <label id="storageLabel" for="storageSelect">Lokacija:</label>
-                    <select id="storageSelect">
-                        <option value="Zamrzivač 1">Zamrzivač 1</option>
-                        <option value="Zamrzivač 2">Zamrzivač 2</option>
-                        <option value="Zamrzivač 3">Zamrzivač 3</option>
-                        <option value="Frižider">Frižider</option>
-                        <option value="Ostava">Ostava</option>
-                    </select>
-                </div>
-                <div class="btn-group">
-                    <button class="btn-save" onclick="saveProduct()">💾 Sačuvaj</button>
-                    <button class="btn-cancel" onclick="cancelProduct()">✖ Otkaži</button>
-                </div>
-                <div id="voiceStatusInline" style="margin-top:15px; padding:15px; background:#f0f0f0; border-radius:12px; text-align:center; font-size:18px; color:#1a237e;">
-                    🎤 ${getMessage('new_entry') || 'Unesite proizvod...'}
-                </div>
-            </div>
-        `;
-        
-        const productInput = document.getElementById('productInput');
-        if (productInput) {
-            productInput.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') {
-                    saveProduct();
-                }
-            });
-            setTimeout(() => productInput.focus(), 300);
+            `;
+            const input = document.getElementById('productInput');
+            if (input) setTimeout(() => input.focus(), 300);
         }
     }
     clearForm();
@@ -604,3 +599,5 @@ window.switchScreen = switchScreen;
 window.VOICE_COMMANDS = VOICE_COMMANDS;
 window.VOICE_MESSAGES = VOICE_MESSAGES;
 window.BUTTON_LABELS = BUTTON_LABELS;
+
+console.log('✅ Voice Commands učitane!');
