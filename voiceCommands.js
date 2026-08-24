@@ -107,7 +107,9 @@ function getButtonLabel(action) {
 
 function getVoiceCommands() {
     const lang = getCurrentLang();
-    return VOICE_COMMANDS[lang] || VOICE_COMMANDS.sr;
+    const commands = VOICE_COMMANDS[lang] || VOICE_COMMANDS.sr;
+    console.log(`🌍 Jezici: ${lang}, Komande:`, commands);
+    return commands;
 }
 
 function detectVoiceCommand(text) {
@@ -115,8 +117,11 @@ function detectVoiceCommand(text) {
     const commands = getVoiceCommands();
     const lower = text.toLowerCase().trim();
     
+    console.log('🔍 Detekcija komande:', lower);
+    
     // 1. Prvo proveri sve ključne reči za zatvaranje (exit, izlaz, itd.)
     if (commands.close && commands.close.some(k => lower.includes(k.toLowerCase()))) {
+        console.log('✅ Detektovano: close');
         return 'close';
     }
     
@@ -125,10 +130,13 @@ function detectVoiceCommand(text) {
         if (action === 'close') continue;
         for (let keyword of keywords) {
             if (lower.includes(keyword.toLowerCase())) {
-                return action; // Vraća 'add' za "unos", "dodaj", "unesi"...
+                console.log(`✅ Detektovano: ${action} (ključna reč: "${keyword}")`);
+                return action;
             }
         }
     }
+    
+    console.log('❌ Nije detektovana komanda');
     return null;
 }
 function showVoiceStatus(text, color = '#2196F3') {
@@ -278,48 +286,151 @@ function refreshDisplay() {
 }
 
 function switchScreen(screenId) {
-    document.querySelectorAll('.screen').forEach(s => {
+    console.log('🔄 switchScreen() pozvan za:', screenId);
+    console.log('🔄 Trenutno aktivni ekran:', document.querySelector('.screen.active')?.id);
+    
+    // SAKRIJ SVE EKRANE
+    const allScreens = document.querySelectorAll('.screen');
+    console.log('📱 Ukupno ekrana:', allScreens.length);
+    
+    allScreens.forEach((s, index) => {
         s.style.display = 'none';
         s.classList.remove('active');
+        console.log(`  ${index+1}. ${s.id} -> sakriven`);
     });
+    
+    // PRIKAŽI TRAŽENI EKRAN
     const target = document.getElementById(screenId);
     if (target) {
         target.style.display = 'flex';
         target.classList.add('active');
+        console.log('✅ Ekran prikazan:', screenId);
+        console.log('  display:', target.style.display);
+        console.log('  classes:', target.className);
+    } else {
+        console.error('❌ Ekran NE POSTOJI:', screenId);
+        console.log('📋 Dostupni ekrani:', Array.from(document.querySelectorAll('.screen')).map(s => s.id));
     }
 }
-
 // ============================================
 // 5. MOTOR ZA GLASOVNE KOMANDE (SPEECH ENGINE)
 // ============================================
 
 function processVoiceInput(buffer) {
+    if (!buffer || VoiceState.isProcessing) return;
+    
+    const lower = buffer.toLowerCase().trim();
+    VoiceState.isProcessing = true;
+    
+    console.log('🎤 Procesiram:', buffer);
+    console.log('🎤 Mala slova:', lower);
+    
+    // 1. Obrada komande PLUS
+    if (lower.includes('plus')) {
+        const parts = buffer.split(/\bplus\b/i);
+        const data = parseVoiceDataEntry(parts[0]);
+        if (data && sacuvajPodatke(data)) {
+            popuniFormuPodacima(data);
+            setTimeout(() => {
+                clearForm();
+                showVoiceStatus(`✅ ${getMessage('saving')} ${data.product_name}. ${getMessage('new_entry')}`, '#4CAF50');
+                VoiceState.isProcessing = false;
+            }, 800);
+        } else {
+            VoiceState.isProcessing = false;
+        }
+        VoiceState.activeBuffer = '';
+        return;
+    }
+    
+    // 2. Obrada komande END / KRAJ / GOTOVO
+    if (lower.includes('end') || lower.includes('kraj') || lower.includes('gotovo')) {
+        const textToParse = buffer.replace(/\b(end|kraj|gotovo)\b/gi, '');
+        const data = parseVoiceDataEntry(textToParse);
+        if (data) sacuvajPodatke(data);
+        stopVoiceRecognition();
+        otvoriZaliheEkran();
+        VoiceState.isProcessing = false;
+        VoiceState.activeBuffer = '';
+        return;
+    }
+    
+    // 3. Detekcija ostalih navigacionih komandi - OVDE JE BIO PROBLEM!
+    const cmd = detectVoiceCommand(buffer);
+    console.log('🎯 Detektovana komanda:', cmd);
+    
+    if (cmd) {
+        if (cmd === 'add') {
+            console.log('📝 Pozivam showDataEntry()...');
+            showDataEntry(); // Ovo treba da radi
+        } else if (cmd === 'list') {
+            console.log('📋 Pozivam otvoriSpisakEkran()...');
+            otvoriSpisakEkran();
+        } else if (cmd === 'stock') {
+            console.log('📦 Pozivam otvoriZaliheEkran()...');
+            otvoriZaliheEkran();
+        } else if (cmd === 'close') {
+            console.log('🚪 Pozivam goBackFromVoice()...');
+            goBackFromVoice();
+        }
+    } else {
+        // Ako nije detektovana komanda, možda je unos proizvoda
+        console.log('ℹ️ Nije komanda, pokušavam kao unos proizvoda...');
+        const data = parseVoiceDataEntry(buffer);
+        if (data && data.product_name !== 'Proizvod') {
+            console.log('📦 Čuvam proizvod:', data);
+            sacuvajPodatke(data);
+            popuniFormuPodacima(data);
+            setTimeout(() => {
+                clearForm();
+                showVoiceStatus(`✅ ${getMessage('saving')} ${data.product_name}`, '#4CAF50');
+                VoiceState.isProcessing = false;
+            }, 800);
+        }
+    }
+    
+    VoiceState.isProcessing = false;
+    VoiceState.activeBuffer = '';
+}
 // ============================================
 // 6. EKRANI I EXPORT
 // ============================================
 
 function showDataEntry() {
+    console.log('📝 showDataEntry() POZVAN!');
+    console.log('📝 Trenutni ekran:', document.querySelector('.screen.active')?.id);
+    
+    // DIREKTNO MENJAJ EKRAN
     switchScreen('dataEntryScreen');
+    
+    // DODATNA PROVERA - da li je ekran zaista prikazan
+    setTimeout(() => {
+        const active = document.querySelector('.screen.active');
+        console.log('📝 Aktivni ekran nakon switch:', active?.id);
+        if (active?.id !== 'dataEntryScreen') {
+            console.warn('⚠️ dataEntryScreen nije aktivan! Pokušavam ponovo...');
+            // DIREKTNO postavi
+            const target = document.getElementById('dataEntryScreen');
+            if (target) {
+                target.style.display = 'flex';
+                target.classList.add('active');
+                console.log('✅ dataEntryScreen forsirano prikazan');
+            }
+        }
+    }, 100);
+    
+    // OČISTI FORMU
     clearForm();
+    
+    // POSTAVI STATUS
+    showVoiceStatus('📝 Unesite podatke o proizvodu', '#2196F3');
+    
+    // AKO JE GLASOVNI UNOS AKTIVAN, ZAUSTAVI GA
+    if (VoiceState.isVoiceInput) {
+        console.log('🔇 Zaustavljam voice recognition');
+        stopVoiceRecognition();
+    }
 }
-
-function otvoriSpisakEkran() {
-    stopVoiceRecognition();
-    switchScreen('inventoryScreen');
-    refreshDisplay();
-}
-
-function otvoriZaliheEkran() {
-    stopVoiceRecognition();
-    switchScreen('inventoryScreen');
-    refreshDisplay();
-}
-
-function goBackFromVoice() {
-    stopVoiceRecognition();
-    switchScreen('choiceScreen');
-}
-
 // Globalni izvoz za eksterne skripte
 window.startVoiceRecognition = startVoiceRecognition;
 window.stopVoiceRecognition = stopVoiceRecognition;
