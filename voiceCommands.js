@@ -1,5 +1,5 @@
 // ============================================
-// VOICE COMMANDS - TEŽINSKA VERZIJA
+// VOICE COMMANDS - POPRAVLJENA VERZIJA
 // ============================================
 
 let activeBuffer = '';
@@ -51,19 +51,14 @@ const NUMBER_WORDS = {
     'sedamdeset': '70', 'osamdeset': '80', 'devedeset': '90', 'sto': '100'
 };
 
-// MAPIRANJE JEDINICA
 const UNIT_MAP = {
-    // TEŽINSKE JEDINICE (piece će biti 0)
     'kilogram': 'kg', 'kilograma': 'kg', 'kg': 'kg', 'kilogrami': 'kg',
     'gram': 'g', 'grama': 'g', 'g': 'g', 'grami': 'g',
     'litar': 'l', 'litara': 'l', 'l': 'l', 'litri': 'l',
-    
-    // KOMADNE JEDINICE (piece će biti broj)
     'komad': 'kom', 'komada': 'kom', 'kom': 'kom', 'komadi': 'kom',
     'paket': 'pak', 'paketa': 'pak', 'pak': 'pak'
 };
 
-// TEŽINSKE JEDINICE - OVO JE KLJUČNO ZA VAŠ PROBLEM!
 const WEIGHT_UNITS = ['kg', 'g', 'l'];
 
 const STORAGE_MAP = {
@@ -87,22 +82,37 @@ function getNumber(word) {
     return null;
 }
 
-// GLAVNA FUNKCIJA ZA PARSIRANJE
+// GLAVNA FUNKCIJA ZA PARSIRANJE - POPRAVLJENA
 function parseVoiceDataEntry(command) {
+    console.log('📝 Originalni tekst:', command);
+    
+    // 1. PRVO UKLONI SVE POZNATE KOMANDE
     let text = command
-        .replace(/^unos\s*/i, '')
-        .replace(/^start\s*/i, '')
-        .replace(/^dodaj\s*/i, '')
+        .replace(/^unos\s*/i, '')        // ukloni "unos" na početku
+        .replace(/^start\s*/i, '')       // ukloni "start" na početku
+        .replace(/^dodaj\s*/i, '')       // ukloni "dodaj" na početku
+        .replace(/\bend\b/gi, '')        // ukloni "end"
+        .replace(/\band\b/gi, '')        // ukloni "and"
+        .replace(/\bplus\b/gi, '')       // ukloni "plus"
+        .replace(/\bkraj\b/gi, '')       // ukloni "kraj"
+        .replace(/\bgotovo\b/gi, '')     // ukloni "gotovo"
         .trim();
     
-    let words = text.split(/\s+/).map(s => s.trim()).filter(Boolean);
+    console.log('📝 Tekst nakon uklanjanja komandi:', text);
     
-    console.log('🔍 Parsiram:', words);
+    // 2. PROVERI DA LI IMA SMISLA
+    if (text.length < 2) {
+        console.warn('⚠️ Tekst je prekratak nakon uklanjanja komandi');
+        return null;
+    }
+    
+    let words = text.split(/\s+/).map(s => s.trim()).filter(Boolean);
+    console.log('🔍 Reči za parsiranje:', words);
     
     // Podrazumevane vrednosti
     let result = {
         product_name: '',
-        piece: '0',      // PODRAZUMEVANO 0 ZA TEŽINSKE
+        piece: '0',
         quantity: '1',
         unit: 'kom',
         shelf_life: '12',
@@ -113,7 +123,6 @@ function parseVoiceDataEntry(command) {
     let numberPositions = [];
     let unitFound = null;
     let storageFound = null;
-    let nameParts = [];
     
     let skipWords = ['u', 'za', 'rok', 'trajanje', 'na', 'mesec', 'meseci', 'i', 'od', 'do', 'sa'];
     
@@ -141,18 +150,15 @@ function parseVoiceDataEntry(command) {
     if (unitFound) result.unit = unitFound;
     if (storageFound) result.storage = storageFound;
 
-    // RASPOREDI BROJEVE - KLJUČNI DEO!
+    // RASPOREDI BROJEVE
     if (numbers.length >= 1) {
-        // Proveri da li je težinska jedinica
         const isWeightUnit = WEIGHT_UNITS.includes(result.unit);
         
         if (isWeightUnit) {
-            // TEŽINSKI PROIZVODI: piece = 0, quantity = broj
             result.piece = '0';
             result.quantity = numbers[0].value;
             console.log(`⚖️ Težinski: piece=0, quantity=${result.quantity}, unit=${result.unit}`);
         } else {
-            // KOMADNI PROIZVODI: piece = broj, quantity = 1
             result.piece = numbers[0].value;
             result.quantity = '1';
             console.log(`📦 Komadni: piece=${result.piece}, quantity=${result.quantity}`);
@@ -176,10 +182,16 @@ function parseVoiceDataEntry(command) {
 }
 
 // ============================================
-// 3. FUNKCIJA ZA ČUVANJE PODATAKA
+// 3. FUNKCIJA ZA ČUVANJE
 // ============================================
 
 function sacuvajPodatke(data) {
+    if (!data) {
+        console.error('❌ Podaci su null ili undefined');
+        showVoiceStatus('❌ Greška: nema podataka za čuvanje', '#f44336');
+        return;
+    }
+    
     console.log('💾 ČUVAM PODATKE:', data);
     
     let poruka = '';
@@ -226,7 +238,7 @@ function otvoriZaliheEkran() {
 }
 
 // ============================================
-// 5. PREPOZNAVANJE GOVORA
+// 5. PREPOZNAVANJE GOVORA - POPRAVLJENO
 // ============================================
 
 function startVoiceRecognition() {
@@ -253,7 +265,7 @@ function startVoiceRecognition() {
 
     recognition.onstart = function() {
         console.log('🎤 MIKROFON AKTIVAN!');
-        showVoiceStatus('🎤 Slušam... Recite komandu', '#2196F3');
+        showVoiceStatus('🎤 Slušam... Recite "unos" pa podatke', '#2196F3');
         activeBuffer = '';
         isProcessingCommand = false;
     };
@@ -275,26 +287,47 @@ function startVoiceRecognition() {
             activeBuffer += (activeBuffer ? ' ' : '') + finalChunk;
         }
         
-        const lowerFull = (activeBuffer + ' ' + interimText).toLowerCase().trim();
+        const fullText = activeBuffer + ' ' + interimText;
+        const lowerFull = fullText.toLowerCase().trim();
+        
+        console.log('🎤 Celokupni tekst:', lowerFull);
         showVoiceStatus(`🎤: "${lowerFull}"`, '#FFD700');
 
         if (isProcessingCommand) return;
 
-        // KOMANDA: END
-        if (lowerFull.includes('end') || lowerFull.includes('and') || lowerFull.includes('kraj') || lowerFull.includes('gotovo')) {
-            console.log('🏁 END detektovan!');
+        // PRVO PROVERI DA LI SADRŽI REČ "UNOS"
+        const hasUnos = lowerFull.includes('unos');
+        console.log('🔍 Sadrži "unos"?', hasUnos);
+        
+        if (!hasUnos) {
+            // Ako nema "unos", samo prikaži status ali ne obrađuj
+            showVoiceStatus('🎤 Recite "unos" pa podatke...', '#FFA500');
+            return;
+        }
+
+        // KOMANDA: END - ali samo ako je rečeno "unos" pre toga
+        if ((lowerFull.includes('end') || lowerFull.includes('and') || lowerFull.includes('kraj') || lowerFull.includes('gotovo')) && hasUnos) {
+            console.log('🏁 END detektovan sa UNOS!');
             isProcessingCommand = true;
 
+            // Ukloni sve komande iz teksta
             let itemText = activeBuffer
-                .replace(/\bend\b/gi, '')
-                .replace(/\band\b/gi, '')
-                .replace(/\bkraj\b/gi, '')
-                .replace(/\bgotovo\b/gi, '')
+                .replace(/\bunos\b/gi, '')      // ukloni "unos"
+                .replace(/\bend\b/gi, '')        // ukloni "end"
+                .replace(/\band\b/gi, '')        // ukloni "and"
+                .replace(/\bkraj\b/gi, '')       // ukloni "kraj"
+                .replace(/\bgotovo\b/gi, '')     // ukloni "gotovo"
                 .trim();
+            
+            console.log('📝 Tekst za parsiranje (bez komandi):', itemText);
             
             if (itemText.length > 2) {
                 const parsedData = parseVoiceDataEntry(itemText);
-                sacuvajPodatke(parsedData);
+                if (parsedData) {
+                    sacuvajPodatke(parsedData);
+                } else {
+                    showVoiceStatus('❌ Greška pri parsiranju podataka', '#f44336');
+                }
             } else {
                 showVoiceStatus('⚠️ Prekratak unos, pokušajte ponovo', '#FF9800');
             }
@@ -308,17 +341,26 @@ function startVoiceRecognition() {
             return;
         }
 
-        // KOMANDA: PLUS
-        if (lowerFull.includes('plus')) {
-            console.log('✅ PLUS detektovan!');
+        // KOMANDA: PLUS - ali samo ako je rečeno "unos" pre toga
+        if (lowerFull.includes('plus') && hasUnos) {
+            console.log('✅ PLUS detektovan sa UNOS!');
             isProcessingCommand = true;
 
-            let itemText = activeBuffer.replace(/\bplus\b/gi, '').trim();
+            let itemText = activeBuffer
+                .replace(/\bunos\b/gi, '')      // ukloni "unos"
+                .replace(/\bplus\b/gi, '')       // ukloni "plus"
+                .trim();
+            
+            console.log('📝 Tekst za parsiranje (bez komandi):', itemText);
             
             if (itemText.length > 2) {
                 const parsedData = parseVoiceDataEntry(itemText);
-                sacuvajPodatke(parsedData);
-                showVoiceStatus('✅ Sačuvano. Recite sledeći ili "end" za kraj.', '#4CAF50');
+                if (parsedData) {
+                    sacuvajPodatke(parsedData);
+                    showVoiceStatus('✅ Sačuvano. Recite sledeći ili "end" za kraj.', '#4CAF50');
+                } else {
+                    showVoiceStatus('❌ Greška pri parsiranju podataka', '#f44336');
+                }
             } else {
                 showVoiceStatus('⚠️ Prekratak unos, pokušajte ponovo', '#FF9800');
             }
@@ -376,6 +418,9 @@ window.sacuvajPodatke = sacuvajPodatke;
 window.parseVoiceDataEntry = parseVoiceDataEntry;
 
 console.log('✅ VoiceCommands.js USPEŠNO UČITAN!');
-console.log('📝 Primeri:');
-console.log('  "2 kilograma jabuka end" → piece:0, quantity:2, unit:kg');
-console.log('  "3 paketa testenine plus" → piece:3, quantity:1, unit:pak');
+console.log('📝 Kako koristiti:');
+console.log('   1. Kažite: "unos 2 kilograma jabuka end"');
+console.log('   2. Ili: "unos 3 paketa testenine plus"');
+console.log('📊 Rezultat:');
+console.log('   "unos 2 kg jabuka end" → piece:0, quantity:2, unit:kg');
+console.log('   "unos 3 paketa testenine plus" → piece:3, quantity:1, unit:pak');
