@@ -724,13 +724,13 @@ function startVoiceRecognition() {
     ALLOW_INVENTORY_OPEN = false;
 
     recognition.onstart = function() {
-        console.log('🎤 MIKROFON AKTIVAN!');
-        showVoiceStatus('🎤 Slušam... Recite "start" pa podatke', '#2196F3');
-        activeBuffer = '';
-        isProcessingCommand = false;
-        END_AKTIVAN = false;
-        ALLOW_INVENTORY_OPEN = false;
-    };
+    console.log('🎤 MIKROFON AKTIVAN!');
+    showVoiceStatus('🎤 Slušam... Recite komandu ili podatke', '#2196F3');
+    
+    activeBuffer = '';
+    isProcessingCommand = false;
+    // Uklonjene su promenljive END_AKTIVAN i ALLOW_INVENTORY_OPEN koje su blokirale otvaranje zaliha
+};
 
     recognition.onresult = function(event) {
         let interimText = '';
