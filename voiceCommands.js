@@ -1216,6 +1216,8 @@ window.startMicMonitoring = startMicMonitoring;
 window.stopMicMonitoring = stopMicMonitoring;
 window.autoRestartMic = autoRestartMic;
 window.monitorMicStatus = monitorMicStatus;
+window.processVoiceCommand = window._voiceCommandsProcess;
+window.voiceCommand = window._voiceCommandsProcess;
 
 console.log('🔄 Monitoring mikrofona aktiviran - restartuje se svakih 30 sekundi');
 console.log('✅ VoiceCommands.js ORIGINALNI RADNI KOD sa dodatkom za script1.js');
