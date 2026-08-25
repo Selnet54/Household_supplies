@@ -2,13 +2,6 @@
 // POPRAVKA - VRATI ORIGINALNI KOD
 // ZAMENITE CEO voiceCommands.js SA OVIM:
 // ============================================
-
-// ============================================
-// VOICE COMMANDS - ORIGINALNI RADNI KOD v2.0
-// SA DODATKOM ZA script1.js
-// ============================================
-
-let activeBuffer = ''; 
 let recognition = null;
 let lastSavedData = null;
 let isProcessingCommand = false;
@@ -1222,6 +1215,99 @@ window.voiceCommand = window._voiceCommandsProcess;
 console.log('🔄 Monitoring mikrofona aktiviran - restartuje se svakih 30 sekundi');
 console.log('✅ VoiceCommands.js ORIGINALNI RADNI KOD sa dodatkom za script1.js');
 
+// ============================================
+// DODAJTE OVO NA KRAJ VAŠEG voiceCommands.js
+// POPRAVKA ZA PRIKAZ POLJA
+// ============================================
+
+// Ovo nadjačava processVoiceCommand da prvo prikaže polja
+const originalProcessVoiceCommand = window.processVoiceCommand;
+
+window.processVoiceCommand = function(command) {
+    console.log('🎤 processVoiceCommand prima:', command);
+    
+    if (!command) return false;
+    const lower = command.toLowerCase().trim();
+    
+    // UNOS - prvo prikaži polja pa onda obradi
+    if (lower.includes('unos') || lower.includes('unesi') || lower.includes('dodaj')) {
+        console.log('📝 UNOS - otvaram ekran i prikazujem polja');
+        
+        // 1. Otvori ekran
+        ensureFormVisible();
+        
+        // 2. DIREKTNO prikaži sva polja (ovo je ključno!)
+        setTimeout(function() {
+            const polja = ['productInput', 'pieceInput', 'quantityInput', 'shelfLifeInput'];
+            polja.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.style.display = 'block';
+                    el.style.visibility = 'visible';
+                    el.style.opacity = '1';
+                    el.style.width = '100%';
+                    el.style.padding = '10px';
+                    el.style.border = '2px solid #ddd';
+                    el.style.borderRadius = '8px';
+                    el.style.fontSize = '16px';
+                    el.style.boxSizing = 'border-box';
+                    console.log('✅ Polje', id, 'prikazano');
+                }
+            });
+            
+            const selects = ['unitSelect', 'storageSelect'];
+            selects.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.style.display = 'block';
+                    el.style.visibility = 'visible';
+                    el.style.opacity = '1';
+                    el.style.width = '100%';
+                    el.style.padding = '10px';
+                    el.style.border = '2px solid #ddd';
+                    el.style.borderRadius = '8px';
+                    el.style.fontSize = '16px';
+                    el.style.boxSizing = 'border-box';
+                    console.log('✅ Select', id, 'prikazan');
+                }
+            });
+            
+            // Prikaži i dataEntryScreen ponovo
+            const dataEntry = document.getElementById('dataEntryScreen');
+            if (dataEntry) {
+                dataEntry.style.display = 'block';
+                dataEntry.style.visibility = 'visible';
+                dataEntry.style.opacity = '1';
+                dataEntry.style.padding = '30px';
+                dataEntry.style.background = 'white';
+                dataEntry.style.borderRadius = '15px';
+                dataEntry.style.boxShadow = '0 10px 40px rgba(0,0,0,0.3)';
+                console.log('✅ dataEntryScreen ponovo prikazan');
+            }
+            
+            showVoiceStatus('📝 Unesite podatke', '#4CAF50');
+        }, 200);
+        
+        // 3. Ako ima teksta nakon "unos", popuni formu
+        const itemText = command.replace(/unos|unesi|dodaj|novi|add/gi, '').trim();
+        if (itemText && typeof window._voiceCommandsProcess === 'function') {
+            setTimeout(function() {
+                window._voiceCommandsProcess(itemText);
+            }, 500);
+        }
+        
+        return true;
+    }
+    
+    // Ostale komande - END, PLUS
+    if (typeof originalProcessVoiceCommand === 'function') {
+        return originalProcessVoiceCommand(command);
+    }
+    
+    return false;
+};
+
+console.log('✅ POPRAVKA ZA PRIKAZ POLJA DODATA!');
 // ============================================
 // KRAJ FAJLA
 // ============================================
