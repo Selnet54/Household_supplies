@@ -2137,7 +2137,7 @@ function selectManualMode() {
         renderInventory();
     }
 }
-    console.log('✅ getMessage dodata na kraj script1.js');
-}
+
+console.log('✅ getMessage dodata na kraj script1.js');
 // ===== KRAJ FAJLA =====
 // NEMA NIŠTA VIŠE POSLE OVOGA!
