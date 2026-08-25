@@ -1,5 +1,5 @@
 // ============================================
-// VOICE COMMANDS - ORIGINAL (RADIO JE)
+// VOICE COMMANDS - ORIGINAL (RADIO JE) - ISPRAVLJEN ZA TVOJ HTML
 // ============================================
 
 // Singleton stanje za sprečavanje dupliranja mikrofona i utrke tajmera (Race Conditions)
@@ -276,18 +276,6 @@ function refreshDisplay() {
     if (typeof renderInventory === 'function') renderInventory();
 }
 
-function switchScreen(screenId) {
-    document.querySelectorAll('.screen').forEach(s => {
-        s.style.display = 'none';
-        s.classList.remove('active');
-    });
-    const target = document.getElementById(screenId);
-    if (target) {
-        target.style.display = 'flex';
-        target.classList.add('active');
-    }
-}
-
 // ============================================
 // 5. MOTOR ZA GLASOVNE KOMANDE (SPEECH ENGINE)
 // ============================================
@@ -417,29 +405,60 @@ function stopVoiceRecognition() {
 }
 
 // ============================================
-// 6. EKRANI I EXPORT
+// 6. EKRANI I EXPORT (ISPRAVLJENO)
 // ============================================
 
 function showDataEntry() {
-    switchScreen('dataEntryScreen');
+    // Prikaži glavni ekran
+    showScreen('mainScreen');
+    // Pozovi tvoju originalnu renderDataEntry (ako postoji)
+    if (typeof renderDataEntry === 'function') {
+        renderDataEntry('');
+    } else {
+        // Fallback ako nema – ali ti imaš, pa neće biti potreban
+        const mainContent = document.getElementById('mainContent');
+        if (mainContent) {
+            mainContent.innerHTML = `<h1 class="title">📝 Unos proizvoda</h1><p style="text-align:center;padding:40px;">Koristite originalni interfejs.</p>`;
+        }
+    }
     clearForm();
+    showVoiceStatus('📝 Unos otvoren', '#4CAF50');
 }
 
 function otvoriSpisakEkran() {
     stopVoiceRecognition();
-    switchScreen('inventoryScreen');
-    refreshDisplay();
+    showScreen('mainScreen');
+    if (typeof renderShoppingList === 'function') {
+        renderShoppingList();
+    } else {
+        const mainContent = document.getElementById('mainContent');
+        if (mainContent) {
+            mainContent.innerHTML = `<h1 class="title">🛒 Spisak</h1><p style="text-align:center;font-size:20px;color:#999;padding:40px 0;">Spisak je prazan.</p>`;
+        }
+    }
+    showVoiceStatus('📋 Spisak otvoren', '#4CAF50');
 }
 
 function otvoriZaliheEkran() {
     stopVoiceRecognition();
-    switchScreen('inventoryScreen');
-    refreshDisplay();
+    showScreen('mainScreen');
+    if (typeof renderInventory === 'function') {
+        renderInventory();
+    } else {
+        const mainContent = document.getElementById('mainContent');
+        if (mainContent) {
+            mainContent.innerHTML = `<h1 class="title">📦 Zalihe</h1><p style="text-align:center;font-size:20px;color:#999;padding:40px 0;">Zalihe su prazne.</p>`;
+        }
+    }
+    showVoiceStatus('📦 Zalihe otvorene', '#4CAF50');
 }
 
 function goBackFromVoice() {
     stopVoiceRecognition();
-    switchScreen('choiceScreen');
+    showScreen('choiceScreen');
+    if (typeof updateHeaderLanguage === 'function') updateHeaderLanguage();
+    if (typeof updateInterfaceLanguage === 'function') updateInterfaceLanguage();
+    showVoiceStatus('⏹️ Povratak', '#aaa');
 }
 
 // ============================================
@@ -470,7 +489,7 @@ window.otvoriZaliheEkran = otvoriZaliheEkran;
 window.otvoriSpisakEkran = otvoriSpisakEkran;
 window.getCurrentLang = getCurrentLang;
 window.getMessage = getMessage;
-window.voiceCommand = voiceCommand; // DODATO
+window.voiceCommand = voiceCommand;
 window.VOICE_COMMANDS = VOICE_COMMANDS;
 window.VOICE_MESSAGES = VOICE_MESSAGES;
 window.BUTTON_LABELS = BUTTON_LABELS;
