@@ -1101,13 +1101,28 @@ window.stopVoiceRecognition = function() {
 };
 
 window.processVoiceCommand = function(command) {
-    console.log('🎤 processVoiceCommand (pregažen):', command);
+    console.log('🎤 processVoiceCommand (obrada):', command);
     
     if (!command) return false;
     const lower = command.toLowerCase();
     
+    if (lower.includes('zalihe') || lower.includes('zaliha') || lower.includes('stock')) {
+        otvoriZaliheGlasovno();
+        return true;
+    }
+    
+    if (lower.includes('spisak') || lower.includes('lista') || lower.includes('shopping') || lower.includes('list')) {
+        otvoriSpisakGlasovno();
+        return true;
+    }
+
+    if (lower.includes('izlaz') || lower.includes('exit') || lower.includes('close') || lower.includes('povratak')) {
+        izlazGlasovno();
+        return true;
+    }
+
     if (lower.includes('plus')) {
-        console.log('✅ PLUS - završavam unos (NE otvaram zalihe)');
+        console.log('✅ PLUS - završavam unos');
         const itemText = command.replace(/plus/i, '').trim();
         if (itemText && typeof window._voiceCommandsProcess === 'function') {
             window._voiceCommandsProcess(itemText);
@@ -1122,38 +1137,14 @@ window.processVoiceCommand = function(command) {
             window._voiceCommandsProcess(itemText);
         }
         setTimeout(() => {
-            if (typeof window._voiceCommandsOpenZalihe === 'function') {
-                ALLOW_INVENTORY_OPEN = true;
-                window._voiceCommandsOpenZalihe();
-                setTimeout(() => {
-                    ALLOW_INVENTORY_OPEN = false;
-                }, 1000);
-            }
+            ALLOW_INVENTORY_OPEN = true;
+            otvoriZaliheGlasovno();
         }, 500);
         return true;
     }
-    
-    if (lower.includes('unos') || lower.includes('unesi') || lower.includes('dodaj')) {
-        console.log('📝 UNOS - otvaram data entry');
-        const itemText = command.replace(/unos|unesi|dodaj|novi|add/i, '').trim();
-        hideVoiceMenu();
-        const mainScreen = document.getElementById('mainScreen');
-        if (mainScreen) {
-            mainScreen.style.display = 'flex';
-            mainScreen.classList.add('active');
-            if (typeof renderDataEntry === 'function') renderDataEntry('');
-        }
-        if (itemText && typeof window._voiceCommandsProcess === 'function') {
-            setTimeout(() => {
-                window._voiceCommandsProcess(itemText);
-            }, 500);
-        }
-        return true;
-    }
-    
+
     return false;
 };
-
 window.voiceCommand = function(command) {
     console.log('🎤 voiceCommand -> processVoiceCommand');
     return window.processVoiceCommand(command);
@@ -1368,18 +1359,19 @@ window.monitorMicStatus = monitorMicStatus;
 
 console.log('🔄 Monitoring mikrofona aktiviran - restartuje se svakih 30 sekundi');
 // ============================================
-// 21. GLASOVNE KOMANDE: ZALIHE, SPISAK, IZLAZ
+// 21. GLASOVNE KOMANDE: ZALIHE, SPISAK, IZLAZ (POPRAVLJENO)
 // ============================================
 
 function otvoriZaliheGlasovno() {
     console.log('📦 Glasovna komanda: ZALIHE');
-    stopVoiceRecognition();
+    
+    // Dozvoli otvaranje zaliha preko glasovne komande
+    ALLOW_INVENTORY_OPEN = true;
     
     // Otvori ekran zaliha
     if (typeof showScreen === 'function') {
         showScreen('inventoryScreen');
     } else {
-        // Fallback - direktno prikaži
         document.querySelectorAll('.screen').forEach(s => {
             s.style.display = 'none';
             s.classList.remove('active');
@@ -1392,21 +1384,19 @@ function otvoriZaliheGlasovno() {
     }
     
     // Osveži podatke
-    if (typeof renderInventory === 'function') {
-        setTimeout(() => renderInventory(), 100);
-    }
-    if (typeof loadInventory === 'function') {
-        setTimeout(() => loadInventory(), 150);
-    }
+    if (typeof renderInventory === 'function') setTimeout(() => renderInventory(), 100);
+    if (typeof loadInventory === 'function') setTimeout(() => loadInventory(), 150);
+    if (typeof refreshInventoryData === 'function') setTimeout(() => refreshInventoryData(), 200);
     
     showVoiceStatus('📦 Zalihe otvorene', '#4CAF50');
+    
+    // Resetuj zastavicu nakon otvaranja
+    setTimeout(() => { ALLOW_INVENTORY_OPEN = false; }, 1000);
 }
 
 function otvoriSpisakGlasovno() {
     console.log('📋 Glasovna komanda: SPISAK');
-    stopVoiceRecognition();
     
-    // Otvori ekran spiska
     if (typeof showScreen === 'function') {
         showScreen('shoppingScreen');
     } else {
@@ -1421,19 +1411,14 @@ function otvoriSpisakGlasovno() {
         }
     }
     
-    // Osveži podatke
-    if (typeof renderShoppingList === 'function') {
-        setTimeout(() => renderShoppingList(), 100);
-    }
+    if (typeof renderShoppingList === 'function') setTimeout(() => renderShoppingList(), 100);
     
     showVoiceStatus('📋 Spisak otvoren', '#4CAF50');
 }
 
 function izlazGlasovno() {
     console.log('🚪 Glasovna komanda: IZLAZ');
-    stopVoiceRecognition();
     
-    // Vrati na početni ekran
     document.querySelectorAll('.screen').forEach(s => {
         s.style.display = 'none';
         s.classList.remove('active');
@@ -1445,16 +1430,11 @@ function izlazGlasovno() {
         choiceScreen.classList.add('active');
     }
     
-    if (typeof updateHeaderLanguage === 'function') {
-        updateHeaderLanguage();
-    }
-    if (typeof updateInterfaceLanguage === 'function') {
-        updateInterfaceLanguage();
-    }
+    if (typeof updateHeaderLanguage === 'function') updateHeaderLanguage();
+    if (typeof updateInterfaceLanguage === 'function') updateInterfaceLanguage();
     
     showVoiceStatus('🚪 Povratak na početni ekran', '#aaa');
 }
-
 // ============================================
 // 22. DETEKCIJA KOMANDI U processVoiceInput
 // ============================================
