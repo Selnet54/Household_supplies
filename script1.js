@@ -2137,6 +2137,28 @@ function selectManualMode() {
         renderInventory();
     }
 }
+// ... sav tvoj postojeći kod ...
 
+// ============================================
+// SIGURNA getMessage FUNKCIJA (dodata na kraj)
+// ============================================
+
+if (typeof window.getMessage !== 'function') {
+    window.getMessage = function(key) {
+        const fallback = {
+            'welcome': 'Izgovorite komandu',
+            'listening': 'Slušam...',
+            'add_mode': 'Otvaram unos...',
+            'list_mode': 'Otvaram spisak...',
+            'stock_mode': 'Otvaram zalihe...',
+            'closing': 'Zatvaram...',
+            'not_recognized': 'Nisam prepoznao.',
+            'saving': 'Sačuvano: ',
+            'new_entry': 'Unesite sledeći...'
+        };
+        return fallback[key] || key;
+    };
+    console.log('✅ getMessage dodata na kraj script1.js');
+}
 // ===== KRAJ FAJLA =====
 // NEMA NIŠTA VIŠE POSLE OVOGA!
