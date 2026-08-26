@@ -1,5 +1,5 @@
 // ============================================
-// VOICE COMMANDS - UNIVERSAL MULTI-LANG v5.0
+// VOICE COMMANDS - UNIVERSAL MULTI-LANG v5.1
 // Podrška za 10 jezika + automatska detekcija
 // ============================================
 
@@ -26,18 +26,23 @@
 
     // Višejezični rečnik za okidače komandi
     const COMMAND_KEYWORDS = {
-        ENTRY: ['unos', 'unesi', 'dodaj', 'start', 'unus', 'unest', 'novi', 'add', 'entry', 'input', 'neue', 'eingabe'],
-        EXIT: ['izlaz', 'kraj', 'exit', 'end', 'close', 'ende', 'ausgang'],
+        ENTRY: ['unos', 'unesi', 'dodaj', 'start', 'unus', 'unest', 'novi', 'add', 'entry', 'input', 'neue', 'eingabe', 'data'],
+        EXIT: ['izlaz', 'kraj', 'exit', 'end', 'close', 'ende', 'ausgang', 'nazad', 'back'],
         PLUS: ['plus', 'weiter', 'next', 'sledec', 'sledeće']
     };
 
     function getCurrentLanguageCode() {
         let appLang = 'sr';
-        if (typeof window.currentLang !== 'undefined' && window.currentLang) {
+        
+        // Funkcija `getCurrentLang` iz script1.js ima prioritet ako postoji
+        if (typeof window.getCurrentLang === 'function') {
+            appLang = window.getCurrentLang() || 'sr';
+        } else if (typeof window.currentLang !== 'undefined' && window.currentLang) {
             appLang = window.currentLang;
         } else if (typeof currentLang !== 'undefined' && currentLang) {
             appLang = currentLang;
         }
+        
         return LANG_MAP[appLang] || 'sr-RS';
     }
 
@@ -101,6 +106,22 @@
             try { window.renderDataEntry(''); } catch(e) {}
         }
     }
+
+    // EXPLICIT HANDLER KOJI JE NEDOSTAJAO ZA INLINE ONCLICK DOGAĐAJE
+    window.voiceCommand = function(cmd) {
+        console.log('🖱️ Ručno pozvana voiceCommand sa komandom:', cmd);
+        if (!cmd) return;
+        
+        const commandLower = String(cmd).toLowerCase().trim();
+
+        if (COMMAND_KEYWORDS.ENTRY.some(k => commandLower.includes(k))) {
+            openDataEntryScreen();
+        } else if (COMMAND_KEYWORDS.EXIT.some(k => commandLower.includes(k))) {
+            window.goBack();
+        } else {
+            console.warn('⚠️ Nepoznata inline glasovna komanda:', cmd);
+        }
+    };
 
     // Engine glasovnog prepoznavanja
     function startVoiceRecognition() {
@@ -207,5 +228,5 @@
         setTimeout(startVoiceRecognition, 300);
     };
 
-    console.log('✅ voiceCommands.js v5.0 (Multi-Lang Engine) uspešno učitan!');
+    console.log('✅ voiceCommands.js v5.1 (Multi-Lang Engine) uspešno učitan sa voiceCommand rešenjem!');
 })();
