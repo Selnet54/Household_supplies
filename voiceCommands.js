@@ -1,56 +1,47 @@
 // ============================================
-// VOICE COMMANDS - FINAL BRIDGE (v3.0)
+// VOICE COMMANDS - INTEGRACIJA SA SCRIPT1.JS
 // ============================================
 
 (function() {
     'use strict';
 
-    // 1. Zaseban opseg (Sprečava pucanje zbog 'recognition' promenljive)
-    let localRecognition = null;
-    let activeBuffer = '';
-    let isProcessingCommand = false;
-
-    // 2. Otvaranje forme i polja za unos
-    function ensureFormVisible() {
-        const screensToHide = ['voiceMenuScreen', 'choiceScreen', 'languageScreen', 'loginScreen'];
-        screensToHide.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) {
-                el.style.display = 'none';
-                el.classList.remove('active');
-            }
-        });
-
-        const mainScreen = document.getElementById('mainScreen');
-        if (mainScreen) {
-            mainScreen.style.display = 'flex';
-            mainScreen.classList.add('active');
-        }
-
-        const dataEntry = document.getElementById('dataEntryScreen');
-        if (dataEntry) {
-            dataEntry.style.display = 'block';
-            dataEntry.style.visibility = 'visible';
-            dataEntry.style.opacity = '1';
-            dataEntry.classList.add('active');
-        }
-    }
-
-    // 3. Glavni most za script1.js komande
     function handleVoiceCommand(command) {
         if (!command) return true;
         
         const lowerCmd = command.toLowerCase().trim();
-        console.log('🎤 Obrada glasovne komande:', lowerCmd);
+        console.log('🎤 Glasovna komanda primljena:', lowerCmd);
 
-        // Komanda UNOS / UNESI / DODAJ
+        // 1. KOMANDA: UNOS / UNESI / DODAJ
         if (lowerCmd.includes('unos') || lowerCmd.includes('unesi') || lowerCmd.includes('dodaj')) {
-            console.log('✅ Komanda UNOS prepoznata - otvaram formu');
-            ensureFormVisible();
-            return true; // Sprečava lažni pop-up alert iz script1.js
+            console.log('✅ Otvaram ekran za unos preko sistemske funkcije');
+            
+            // Sakrivanje menija glasovnih komandi
+            if (typeof window.hideVoiceMenu === 'function') {
+                window.hideVoiceMenu();
+            } else {
+                const voiceMenu = document.getElementById('voiceMenuScreen');
+                if (voiceMenu) voiceMenu.style.display = 'none';
+            }
+
+            // Prikaz glavnog ekrana
+            const mainScreen = document.getElementById('mainScreen');
+            if (mainScreen) {
+                mainScreen.style.display = 'flex';
+                mainScreen.classList.add('active');
+            }
+
+            // Pozivanje sistemskog renderovanja unosa iz script1.js
+            if (typeof window.renderDataEntry === 'function') {
+                window.renderDataEntry('');
+            } else {
+                const dataEntry = document.getElementById('dataEntryScreen');
+                if (dataEntry) dataEntry.style.display = 'block';
+            }
+
+            return true; // Blokira lažni alert
         }
 
-        // Komanda ZALIHE
+        // 2. KOMANDA: ZALIHE
         if (lowerCmd.includes('zalihe')) {
             if (typeof window.renderInventory === 'function') {
                 window.renderInventory();
@@ -58,7 +49,7 @@
             return true;
         }
 
-        // Komanda SPISAK
+        // 3. KOMANDA: SPISAK
         if (lowerCmd.includes('spisak')) {
             if (typeof window.renderShoppingList === 'function') {
                 window.renderShoppingList();
@@ -69,25 +60,18 @@
         return false;
     }
 
-    // 4. Definisanje globalnih funkcija koje script1.js i HTML traže
+    // Povezivanje sa script1.js okruženjem
     window.voiceCommand = handleVoiceCommand;
-    
-    window.processVoiceCommand = function(cmd) {
-        return handleVoiceCommand(cmd);
-    };
+    window.processVoiceCommand = handleVoiceCommand;
 
-    // Popravka za dugme Nazad u HTML-u (goBack is not defined)
+    // Popravka za dugme Nazad u HTML-u
     window.goBack = function() {
-        console.log('⬅ Kliknuto goBack()');
         if (typeof window.goBackFromVoice === 'function') {
             window.goBackFromVoice();
-        } else {
-            const main = document.getElementById('mainScreen');
-            if (main) main.style.display = 'none';
-            const choice = document.getElementById('choiceScreen');
-            if (choice) choice.style.display = 'flex';
+        } else if (typeof window.renderCategories === 'function') {
+            window.renderCategories();
         }
     };
 
-    console.log('✅ voiceCommands.js uspešno učitan i povezan sa script1.js!');
+    console.log('✅ voiceCommands.js uspešno povezan sa renderDataEntry!');
 })();
