@@ -1,11 +1,10 @@
 // ============================================
-// VOICE COMMANDS - SAMOSTALNI MODUL (BEZ MENJANJA SCRIPT1.JS)
+// VOICE COMMANDS - AUTOMATSKO RESTARTVANJE MIKROFONA
 // ============================================
 
 (function () {
     console.log('🎙️ voiceCommands.js se učitava...');
 
-    // Pomoćni objekti za konverziju reči u brojeve i jedinice
     const NUMBER_WORDS = {
         'nula': '0', 'jedan': '1', 'jedna': '1', 'jedno': '1', 'dva': '2', 'dve': '2',
         'tri': '3', 'četiri': '4', 'cetiri': '4', 'pet': '5', 'šest': '6', 'sest': '6',
@@ -41,7 +40,6 @@
         return null;
     }
 
-    // Parsiranje izgovorenog teksta u objekte forme
     function parseVoiceDataEntry(command) {
         let text = command.replace(/^(unos|unesi|dodaj)\s*/i, '').trim();
         let words = text.split(/\s+/).map(s => s.trim()).filter(Boolean);
@@ -97,7 +95,6 @@
         return result;
     }
 
-    // Automatska popuna i čuvanje bez otvaranja praznih ekrana
     function sacuvajIzgovoreno(data) {
         const setVal = (id, val) => {
             const el = document.getElementById(id);
@@ -122,7 +119,19 @@
         }, 200);
     }
 
-    // Glavni procesor koji `script1.js` poziva preko window.voiceCommand / window.processVoiceCommand
+    // Pomoćna funkcija koja drži mikrofon uključenim
+    function keepMicAlive() {
+        setTimeout(() => {
+            console.log('🔄 Ponovo pokrećem mikrofon za diktiranje artikla...');
+            const micBtn = document.getElementById('micButton') || document.querySelector('.mic-btn') || document.querySelector('[onclick*="Voice"]');
+            if (micBtn) {
+                micBtn.click();
+            } else if (typeof window.startVoiceRecognition === 'function') {
+                window.startVoiceRecognition();
+            }
+        }, 400);
+    }
+
     function processVoiceCommand(command) {
         if (!command) return false;
         console.log('🎤 Glasovna komanda primljena:', command);
@@ -130,7 +139,6 @@
         const lower = command.toLowerCase().trim();
         const lang = typeof window.currentLang !== 'undefined' ? window.currentLang : 'sr';
 
-        // Navigacija
         if (lower === 'zalihe' || lower === 'otvori zalihe') {
             if (typeof window.renderInventory === 'function') window.renderInventory(lang);
             return true;
@@ -141,12 +149,16 @@
             return true;
         }
 
+        // KADA ČUJE "UNOS": Otvara ekran I FORSIRA MIKROFON DA NASTAVI SLUŠANJE
         if (lower === 'unos' || lower === 'unesi') {
-            if (typeof window.renderDataEntry === 'function') window.renderDataEntry('');
+            if (typeof window.renderDataEntry === 'function') {
+                window.renderDataEntry('');
+            }
+            keepMicAlive();
             return true;
         }
 
-        // Diktiranje artikla (npr. "svinjsko meso 2 kg")
+        // Diktiranje artikla
         if (lower.length > 3) {
             let parsed = parseVoiceDataEntry(command);
             sacuvajIzgovoreno(parsed);
@@ -155,6 +167,8 @@
                 setTimeout(() => {
                     if (typeof window.renderInventory === 'function') window.renderInventory(lang);
                 }, 500);
+            } else if (lower.includes('plus')) {
+                keepMicAlive();
             }
             return true;
         }
@@ -162,7 +176,6 @@
         return false;
     }
 
-    // Rešenje za dugme Nazad sa ekrana
     window.goBack = function() {
         const lang = typeof window.currentLang !== 'undefined' ? window.currentLang : 'sr';
         if (typeof window.renderCategories === 'function') {
@@ -172,9 +185,8 @@
         }
     };
 
-    // Povezivanje sa script1.js bez menjanja script1.js
     window.processVoiceCommand = processVoiceCommand;
     window.voiceCommand = processVoiceCommand;
 
-    console.log('✅ voiceCommands.js spreman i povezan sa script1.js!');
+    console.log('✅ voiceCommands.js spreman i automatski restart mikrofona je aktiviran!');
 })();
