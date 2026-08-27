@@ -170,16 +170,50 @@
     }
 
     window.goBack = function() {
-        const lang = typeof window.currentLang !== 'undefined' ? window.currentLang : 'sr';
-        if (typeof window.renderCategories === 'function') {
-            window.renderCategories(lang);
-        } else if (typeof window.showScreen === 'function') {
-            window.showScreen('categories');
+    const lang = typeof window.currentLang !== 'undefined' ? window.currentLang : 'sr';
+    const currentScreen = window.currentScreen || 'categories';
+    
+    console.log('⬅️ goBack pozvan, trenutni ekran:', currentScreen);
+    
+    // Pamti istoriju ekrana
+    if (!window.screenHistory) {
+        window.screenHistory = [];
+    }
+    
+    // Ako imamo istoriju, vrati se na prethodni ekran
+    if (window.screenHistory.length > 0) {
+        const previousScreen = window.screenHistory.pop();
+        console.log('📜 Vraćam se na:', previousScreen);
+        
+        switch(previousScreen) {
+            case 'inventory':
+                if (typeof window.renderInventory === 'function') {
+                    window.renderInventory(lang);
+                }
+                break;
+            case 'dataEntry':
+                if (typeof window.renderDataEntry === 'function') {
+                    window.renderDataEntry('');
+                }
+                break;
+            case 'shoppingList':
+                if (typeof window.renderShoppingList === 'function') {
+                    window.renderShoppingList(lang);
+                }
+                break;
+            default:
+                if (typeof window.renderCategories === 'function') {
+                    window.renderCategories(lang);
+                }
         }
-    };
-
-    window.processVoiceCommand = processVoiceCommand;
-    window.voiceCommand = processVoiceCommand;
-
-    console.log('✅ voiceCommands.js spreman (popravljeno bljeskanje ekrana)!');
-})();
+        return;
+    }
+    
+    // Ako nema istorije, idi na kategorije
+    console.log('🏠 Nema istorije, idem na kategorije');
+    if (typeof window.renderCategories === 'function') {
+        window.renderCategories(lang);
+    } else if (typeof window.showScreen === 'function') {
+        window.showScreen('categories');
+    }
+};
