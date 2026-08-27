@@ -169,13 +169,13 @@
         return false;
     }
 
-    window.goBack = function() {
+    // ===== GO BACK SA ISTORIJOM (ZAMENI postojecu) =====
+window.goBack = function() {
     const lang = typeof window.currentLang !== 'undefined' ? window.currentLang : 'sr';
     const currentScreen = window.currentScreen || 'categories';
     
     console.log('⬅️ goBack pozvan, trenutni ekran:', currentScreen);
     
-    // Pamti istoriju ekrana
     if (!window.screenHistory) {
         window.screenHistory = [];
     }
@@ -184,6 +184,7 @@
     if (window.screenHistory.length > 0) {
         const previousScreen = window.screenHistory.pop();
         console.log('📜 Vraćam se na:', previousScreen);
+        window.currentScreen = previousScreen;
         
         switch(previousScreen) {
             case 'inventory':
@@ -204,6 +205,7 @@
             default:
                 if (typeof window.renderCategories === 'function') {
                     window.renderCategories(lang);
+                    window.currentScreen = 'categories';
                 }
         }
         return;
@@ -213,7 +215,9 @@
     console.log('🏠 Nema istorije, idem na kategorije');
     if (typeof window.renderCategories === 'function') {
         window.renderCategories(lang);
+        window.currentScreen = 'categories';
     } else if (typeof window.showScreen === 'function') {
         window.showScreen('categories');
+        window.currentScreen = 'categories';
     }
 };
