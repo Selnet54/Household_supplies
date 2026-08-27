@@ -1286,16 +1286,6 @@ function saveProductSilent() {
     
     prikaziSveUnose();
 }
-
-// ===== SAČUVAJ PROIZVOD =====
-function saveProduct() {
-    const product = document.getElementById('productInput')?.value.trim();
-    const piece = document.getElementById('pieceInput')?.value.trim();
-    const quantity = document.getElementById('quantityInput')?.value.trim();
-    const shelfLife = document.getElementById('shelfLifeInput')?.value.trim();
-    
-    // ... ostatak postojećeg koda ...
-}
 function saveProduct() {
     const product = document.getElementById('productInput')?.value.trim();
     const piece = document.getElementById('pieceInput')?.value.trim();
@@ -1841,7 +1831,7 @@ function updateHeaderLanguage() {
     const headerTranslations = {
         'sr': {
             'nazad': '◀ Nazad',
-            'stanje': '📦 Stanje',
+            'stanje': '📦 Zalihe',
             'spisak': '🛒 Spisak',
             'odustani': '✖ Odustani',
             'unos_podataka': '✏️ Unos podataka',
