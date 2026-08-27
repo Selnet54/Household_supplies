@@ -1,5 +1,5 @@
 // ============================================
-// VOICE COMMANDS - POPRAVLJENA VERZIJA
+// VOICE COMMANDS - JEDNOSTAVNA RADNA VERZIJA
 // ============================================
 
 (function () {
@@ -117,12 +117,10 @@
         setVal('quantityInput', data.quantity);
         setVal('shelfLifeInput', data.shelf_life);
 
-        // SAČUVAJ PROIZVOD BEZ POPUP-a
         setTimeout(function() {
             if (typeof window.saveProductSilent === 'function') {
                 window.saveProductSilent();
             } else if (typeof window.saveProduct === 'function') {
-                // Sačuvaj bez prikazivanja alerta
                 const originalAlert = window.showModernAlert;
                 window.showModernAlert = function() {};
                 window.saveProduct();
@@ -221,17 +219,6 @@
         
         if (!window.screenHistory) {
             window.screenHistory = [];
-        }
-        
-        // Ako smo na dataEntry i fromChoiceScreen je true, vrati se na choiceScreen
-        if (currentScreen === 'dataEntry' && window.fromChoiceScreen === true) {
-            console.log('📱 Vraćam se na choiceScreen');
-            window.screenHistory = [];
-            window.currentScreen = 'choice';
-            if (typeof window.showScreen === 'function') {
-                window.showScreen('choiceScreen');
-            }
-            return;
         }
         
         if (window.screenHistory.length > 0) {
