@@ -1872,6 +1872,7 @@ function obrisiSaSpiska(index) {
     renderShoppingList();
 }
 // ===== GLAVNA FUNKCIJA ZA NAZAD / ODUSTANI =====
+// ===== GLAVNA FUNKCIJA ZA NAZAD / ODUSTANI =====
 function handleBackAction() {
     console.log('⬅️ Trenutni ekran stanje:', currentScreenState);
     console.log('📌 currentCategory:', currentCategory);
@@ -1879,34 +1880,36 @@ function handleBackAction() {
     console.log('📌 currentProductPart:', currentProductPart);
     console.log('📌 fromChoiceScreen:', fromChoiceScreen);
     
+    // Prvo proveri da li imamo screenHistory
+    if (window.screenHistory && window.screenHistory.length > 0) {
+        if (typeof window.goBack === 'function') {
+            window.goBack();
+            return;
+        }
+    }
+    
     if (currentScreenState === 'dataEntry') {
-        // Ako smo došli direktno sa choiceScreen-a (klik na "Unos podataka")
+        // Ako smo došli direktno sa choiceScreen-a
         if (fromChoiceScreen) {
-            // Vrati se na choiceScreen
             showScreen('choiceScreen');
-            fromChoiceScreen = false; // Resetuj flag
+            fromChoiceScreen = false;
             if (typeof updateHeaderLanguage === 'function') {
                 updateHeaderLanguage();
-            }
-            if (typeof updateInterfaceLanguage === 'function') {
-                updateInterfaceLanguage();
             }
             return;
         }
         
         // Inače, vrati se na prethodni ekran
-        if (currentSubcategory) {
+        if (currentProductPart) {
             renderProductParts(currentSubcategory);
+        } else if (currentSubcategory) {
+            renderSubcategories(currentCategory);
         } else if (currentCategory) {
             renderSubcategories(currentCategory);
         } else {
-            // Ako nema kategorije, vrati se na choiceScreen
             showScreen('choiceScreen');
             if (typeof updateHeaderLanguage === 'function') {
                 updateHeaderLanguage();
-            }
-            if (typeof updateInterfaceLanguage === 'function') {
-                updateInterfaceLanguage();
             }
         }
     } else if (currentScreenState === 'productParts') {
@@ -1922,15 +1925,9 @@ function handleBackAction() {
         if (typeof updateHeaderLanguage === 'function') {
             updateHeaderLanguage();
         }
-        if (typeof updateInterfaceLanguage === 'function') {
-            updateInterfaceLanguage();
-        }
     } else if (currentScreenState === 'shopping' || currentScreenState === 'inventory') {
-        // Sa shopping ili inventory ekrana vrati se na kategorije
-        showScreen('mainScreen');
         renderCategories();
     } else {
-        showScreen('mainScreen');
         renderCategories();
     }
 }
@@ -2763,3 +2760,69 @@ window.deleteItem = deleteItem;
 
 console.log('✅ Sve dodatne funkcije izvezene globalno!');
 console.log('✅ startVoiceRecognition, stopVoiceRecognition, getCurrentLang, t, switchLanguage, setupBackButton, showVoiceMenu, openDataEntry, deleteItem');
+// ============================================
+// IZVEZI FUNKCIJE GLOBALNO (VAŽNO!)
+// ============================================
+window.startVoiceRecognition = startVoiceRecognition;
+window.stopVoiceRecognition = stopVoiceRecognition;
+window.getCurrentLang = getCurrentLang;
+window.t = t;
+window.switchLanguage = switchLanguage;
+window.setupBackButton = setupBackButton;
+window.showVoiceMenu = showVoiceMenu;
+window.openDataEntry = openDataEntry;
+window.deleteItem = deleteItem;
+
+// ===== DODAJ OVO OVDE (PRE console.log) =====
+window.goBack = function() {
+    const lang = currentLang || 'sr';
+    const currentScreen = window.currentScreen || 'categories';
+    
+    console.log('⬅️ goBack pozvan, trenutni ekran:', currentScreen);
+    
+    if (!window.screenHistory) {
+        window.screenHistory = [];
+    }
+    
+    if (window.screenHistory.length > 0) {
+        const previousScreen = window.screenHistory.pop();
+        console.log('📜 Vraćam se na:', previousScreen);
+        window.currentScreen = previousScreen;
+        
+        switch(previousScreen) {
+            case 'inventory':
+                if (typeof renderInventory === 'function') {
+                    renderInventory(lang);
+                }
+                break;
+            case 'dataEntry':
+                if (typeof renderDataEntry === 'function') {
+                    renderDataEntry('');
+                }
+                break;
+            case 'shoppingList':
+                if (typeof renderShoppingList === 'function') {
+                    renderShoppingList(lang);
+                }
+                break;
+            default:
+                if (typeof renderCategories === 'function') {
+                    renderCategories(lang);
+                    window.currentScreen = 'categories';
+                }
+        }
+        return;
+    }
+    
+    console.log('🏠 Nema istorije, idem na kategorije');
+    if (typeof renderCategories === 'function') {
+        renderCategories(lang);
+        window.currentScreen = 'categories';
+    } else if (typeof showScreen === 'function') {
+        showScreen('mainScreen');
+        window.currentScreen = 'categories';
+    }
+};
+
+console.log('✅ Sve dodatne funkcije izvezene globalno!');
+console.log('✅ startVoiceRecognition, stopVoiceRecognition, getCurrentLang, t, switchLanguage, setupBackButton, showVoiceMenu, openDataEntry, deleteItem, goBack');
