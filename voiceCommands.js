@@ -117,11 +117,16 @@
         setVal('quantityInput', data.quantity);
         setVal('shelfLifeInput', data.shelf_life);
 
-        setTimeout(() => {
-            if (typeof window.saveProduct === 'function') {
+        // SAČUVAJ PROIZVOD BEZ POPUP-a
+        setTimeout(function() {
+            if (typeof window.saveProductSilent === 'function') {
+                window.saveProductSilent();
+            } else if (typeof window.saveProduct === 'function') {
+                // Sačuvaj bez prikazivanja alerta
+                const originalAlert = window.showModernAlert;
+                window.showModernAlert = function() {};
                 window.saveProduct();
-            } else if (typeof window.handleFormSubmit === 'function') {
-                window.handleFormSubmit();
+                window.showModernAlert = originalAlert;
             }
         }, 200);
     }
@@ -145,8 +150,9 @@
             isProcessing = false; 
         }, 1500);
 
-        // NAVIGACIJA: ZALIHE
-        if (lower === 'zalihe' || lower === 'otvori zalihe') {
+        // ===== KOMANDA: END =====
+        if (lower === 'end' || lower === 'kraj') {
+            console.log('🏁 Kraj unosa, otvaram zalihe...');
             if (typeof window.renderInventory === 'function') {
                 window.renderInventory(lang);
                 if (!window.screenHistory) window.screenHistory = [];
@@ -156,8 +162,19 @@
             return true;
         }
 
-        // NAVIGACIJA: SPISAK
-        if (lower === 'spisak' || lower === 'otvori spisak') {
+        // ===== KOMANDA: ZALIHE =====
+        if (lower === 'zalihe' || lower === 'otvori zalihe' || lower === 'stanje') {
+            if (typeof window.renderInventory === 'function') {
+                window.renderInventory(lang);
+                if (!window.screenHistory) window.screenHistory = [];
+                window.screenHistory.push('inventory');
+                window.currentScreen = 'inventory';
+            }
+            return true;
+        }
+
+        // ===== KOMANDA: SPISAK =====
+        if (lower === 'spisak' || lower === 'otvori spisak' || lower === 'potrebe') {
             if (typeof window.renderShoppingList === 'function') {
                 window.renderShoppingList(lang);
                 if (!window.screenHistory) window.screenHistory = [];
@@ -167,7 +184,7 @@
             return true;
         }
 
-        // UNOS EKRAN
+        // ===== KOMANDA: UNOS =====
         if (lower === 'unos' || lower === 'unesi' || lower === 'add') {
             console.log('📝 Otvaram ekran za unos...');
             if (typeof window.renderDataEntry === 'function') {
@@ -185,7 +202,7 @@
             return true;
         }
 
-        // DIKTIRANJE ARTIKLA
+        // ===== DIKTIRANJE ARTIKLA =====
         if (window.currentScreen === 'dataEntry' && lower.length > 3) {
             var parsed = parseVoiceDataEntry(command);
             sacuvajIzgovoreno(parsed);
@@ -204,6 +221,17 @@
         
         if (!window.screenHistory) {
             window.screenHistory = [];
+        }
+        
+        // Ako smo na dataEntry i fromChoiceScreen je true, vrati se na choiceScreen
+        if (currentScreen === 'dataEntry' && window.fromChoiceScreen === true) {
+            console.log('📱 Vraćam se na choiceScreen');
+            window.screenHistory = [];
+            window.currentScreen = 'choice';
+            if (typeof window.showScreen === 'function') {
+                window.showScreen('choiceScreen');
+            }
+            return;
         }
         
         if (window.screenHistory.length > 0) {
@@ -251,4 +279,4 @@
     window.voiceCommand = processVoiceCommand;
 
     console.log('✅ voiceCommands.js spreman (popravljeno)!');
-})(); // <-- OVAJ ZATVARAČ JE BIO PROBLEM!
+})();
