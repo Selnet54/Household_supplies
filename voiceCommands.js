@@ -1,5 +1,5 @@
 // ============================================
-// VOICE COMMANDS - FINALNA RADNA VERZIJA
+// VOICE COMMANDS - RADNA VERZIJA
 // ============================================
 
 (function () {
@@ -8,6 +8,7 @@
     let isProcessing = false;
     let lastCommandTime = 0;
     let lastCommand = '';
+    let isDataEntryMode = false;  // <- PRATI DA LI SMO NA DATA ENTRY
 
     const NUMBER_WORDS = {
         'nula': '0', 'jedan': '1', 'jedna': '1', 'jedno': '1', 'dva': '2', 'dve': '2',
@@ -182,6 +183,7 @@
         // ===== KOMANDA: END =====
         if (lower === 'end' || lower === 'kraj') {
             console.log('🏁 Kraj unosa, otvaram zalihe...');
+            isDataEntryMode = false;
             if (typeof window.renderInventory === 'function') {
                 window.renderInventory(lang);
             }
@@ -190,6 +192,7 @@
 
         // ===== KOMANDA: ZALIHE =====
         if (lower === 'zalihe' || lower === 'otvori zalihe' || lower === 'stanje') {
+            isDataEntryMode = false;
             if (typeof window.renderInventory === 'function') {
                 window.renderInventory(lang);
             }
@@ -198,6 +201,7 @@
 
         // ===== KOMANDA: SPISAK =====
         if (lower === 'spisak' || lower === 'otvori spisak' || lower === 'potrebe') {
+            isDataEntryMode = false;
             if (typeof window.renderShoppingList === 'function') {
                 window.renderShoppingList(lang);
             }
@@ -207,14 +211,16 @@
         // ===== KOMANDA: UNOS =====
         if (lower === 'unos' || lower === 'unesi' || lower === 'add') {
             console.log('📝 Otvaram ekran za unos...');
+            isDataEntryMode = true;  // <- UKLJUČUJEMO REŽIM UNOSA
             if (typeof window.renderDataEntry === 'function') {
                 window.renderDataEntry('');
             }
             return true;
         }
 
-        // ===== DIKTIRANJE ARTIKLA =====
-        if (lower.length > 2) {
+        // ===== DIKTIRANJE ARTIKLA - SAMO AKO SMO U REŽIMU UNOSA =====
+        if (isDataEntryMode && lower.length > 2) {
+            console.log('📝 REŽIM UNOSA - diktiranje:', command);
             const cleanCommand = command.replace(/^(start|kreni|počni|go|begin)\s*/i, '').trim();
             if (cleanCommand.length > 2) {
                 var parsed = parseVoiceDataEntry(cleanCommand);
@@ -228,7 +234,7 @@
         return false;
     }
 
-    // GO BACK - vraća na choiceScreen ako je dataEntry
+    // GO BACK
     window.goBack = function() {
         var lang = typeof window.currentLang !== 'undefined' ? window.currentLang : 'sr';
         var currentScreen = window.currentScreen || 'categories';
@@ -238,6 +244,7 @@
         // Ako smo na dataEntry, vrati se na choiceScreen
         if (currentScreen === 'dataEntry') {
             console.log('📱 Vraćam se na choiceScreen');
+            isDataEntryMode = false;
             window.screenHistory = [];
             window.currentScreen = 'choice';
             if (typeof window.showScreen === 'function') {
