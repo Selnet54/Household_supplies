@@ -358,7 +358,7 @@
                     <div style="font-size:40px;">➕</div>
                     <div id="addMenuText" style="font-size:20px; font-weight:bold;">Add Product</div>
                 </button>
-                <button class="voice-btn voice-btn-exit" onclick="exitApp()">   <!-- <-- OVO PROMENI -->
+               <button class="voice-btn voice-btn-exit" onclick="exitApp()">
                     <div style="font-size:40px;">🚪</div>
                     <div id="exitMenuText" style="font-size:20px; font-weight:bold;">EXIT</div>
                 </button>
@@ -366,9 +366,9 @@
             <div id="voiceStatus" style="margin-top:20px; padding:15px; background:rgba(255,255,255,0.1); border-radius:12px; color:#aaa; font-size:16px;">
                 🎤 Say commands
             </div>
-            <button id="backFromVoiceBtn" class="btn btn-orange" style="margin-top:15px;" onclick="goBackFromVoice()">
-                <span id="backVoiceText">◀ Back</span>
-            </button>
+                <button id="backFromVoiceBtn" class="btn btn-red" style="margin-top:15px;" onclick="exitApp()">
+                    <span id="backVoiceText">🚪 EXIT</span>
+                </button>
         </div>
     </div>
 </div>
