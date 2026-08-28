@@ -2076,11 +2076,10 @@ function speakText(text) {
     }
 }
 // ===== startVoiceRecognition - KORISTI VOICE COMMANDS =====
-function startVoiceRecognition() {
+unction startVoiceRecognition() {
     console.log('🎤 startVoiceRecognition -> VOICE COMMANDS');
     if (typeof window._voiceCommandsStart === 'function') {
-        window._voiceCommandsStart();  // <-- SAMO POZOVI, BEZ return
-        return;
+        return window._voiceCommandsStart();
     }
     console.warn('⚠️ voiceCommands nije učitan!');
 }
