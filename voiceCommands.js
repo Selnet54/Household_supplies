@@ -148,6 +148,79 @@
         }
     }
 
+    // ===== START VOICE RECOGNITION =====
+    function startVoiceRecognition() {
+        console.log('🎤 startVoiceRecognition POZVAN!');
+        
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            console.error('❌ Speech recognition nije podržan!');
+            return;
+        }
+
+        if (window.recognition) {
+            try { window.recognition.stop(); } catch(e) {}
+            window.recognition = null;
+        }
+
+        const recognition = new SpeechRecognition();
+        window.recognition = recognition;
+        
+        const lang = typeof currentLang !== 'undefined' ? currentLang : 'sr';
+        const speechLangMap = {
+            sr: 'sr-RS', en: 'en-US', de: 'de-DE', hu: 'hu-HU',
+            uk: 'uk-UA', ru: 'ru-RU', zh: 'zh-CN', es: 'es-ES',
+            pt: 'pt-PT', fr: 'fr-FR'
+        };
+        recognition.lang = speechLangMap[lang] || 'sr-RS';
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.maxAlternatives = 1;
+
+        recognition.onstart = function() {
+            console.log('🎤 MIKROFON AKTIVAN!');
+        };
+
+        recognition.onresult = function(event) {
+            let finalText = '';
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                if (event.results[i].isFinal) {
+                    finalText += event.results[i][0].transcript;
+                }
+            }
+            if (finalText) {
+                console.log('🗣️ Prepoznato:', finalText);
+                processVoiceCommand(finalText);
+            }
+        };
+
+        recognition.onerror = function(event) {
+            console.error('⚠️ Greška:', event.error);
+        };
+
+        recognition.onend = function() {
+            console.log('🎤 Prepoznavanje završeno.');
+        };
+
+        try {
+            recognition.start();
+            console.log('✅ Mikrofon pokrenut!');
+        } catch(e) {
+            console.error('❌ Greška:', e);
+        }
+    }
+
+    // ===== STOP VOICE RECOGNITION =====
+    function stopVoiceRecognition() {
+        console.log('🛑 stopVoiceRecognition POZVAN!');
+        if (window.recognition) {
+            try {
+                window.recognition.stop();
+                window.recognition = null;
+            } catch(e) {}
+        }
+    }
+
     function processVoiceCommand(command) {
         if (!command || isProcessing) return false;
         
@@ -161,53 +234,44 @@
         const lower = command.toLowerCase().trim();
         const lang = typeof window.currentLang !== 'undefined' ? window.currentLang : 'sr';
 
-        // SPREČI DUPLIRANJE ISTE KOMANDE
         if (lower === lastCommand && now - lastCommandTime < 3000) {
-            console.log('⏭️ Duplikat komande, ignorišem:', lower);
+            console.log('⏭️ Duplikat, ignorišem:', lower);
             return false;
         }
         lastCommand = lower;
         lastCommandTime = now;
 
         isProcessing = true;
-        setTimeout(function() { 
-            isProcessing = false; 
-        }, 1500);
+        setTimeout(function() { isProcessing = false; }, 1500);
 
-        // ===== REZERVISANE REČI =====
+        // REZERVISANE REČI
         const reservedWords = ['start', 'kreni', 'počni', 'go', 'begin'];
         if (reservedWords.includes(lower)) {
             console.log('⏭️ Rezervisana reč, ignorišem:', lower);
             return true;
         }
 
-        // ===== 1. KOMANDA: ZALIHE =====
+        // ZALIHE
         if (lower === 'zalihe' || lower === 'otvori zalihe' || lower === 'stanje') {
             console.log('📦 ZALIHE - otvaram');
             isDataEntryMode = false;
             if (typeof window.renderInventory === 'function') {
                 window.renderInventory(lang);
-                if (!window.screenHistory) window.screenHistory = [];
-                window.screenHistory.push('inventory');
-                window.currentScreen = 'inventory';
             }
             return true;
         }
 
-        // ===== 2. KOMANDA: SPISAK =====
+        // SPISAK
         if (lower === 'spisak' || lower === 'otvori spisak' || lower === 'potrebe') {
             console.log('🛒 SPISAK - otvaram');
             isDataEntryMode = false;
             if (typeof window.renderShoppingList === 'function') {
                 window.renderShoppingList(lang);
-                if (!window.screenHistory) window.screenHistory = [];
-                window.screenHistory.push('shoppingList');
-                window.currentScreen = 'shoppingList';
             }
             return true;
         }
 
-        // ===== 3. KOMANDA: EXIT =====
+        // EXIT
         if (lower === 'exit' || lower === 'izlaz' || lower === 'napusti') {
             console.log('🚪 EXIT - gasim aplikaciju');
             isDataEntryMode = false;
@@ -217,33 +281,27 @@
             return true;
         }
 
-        // ===== 4. KOMANDA: END =====
+        // END
         if (lower === 'end' || lower === 'kraj') {
-            console.log('🏁 END - završavam unos, otvaram zalihe');
+            console.log('🏁 END - otvaram zalihe');
             isDataEntryMode = false;
             if (typeof window.renderInventory === 'function') {
                 window.renderInventory(lang);
-                if (!window.screenHistory) window.screenHistory = [];
-                window.screenHistory.push('inventory');
-                window.currentScreen = 'inventory';
             }
             return true;
         }
 
-        // ===== 5. KOMANDA: UNOS =====
+        // UNOS
         if (lower === 'unos' || lower === 'unesi' || lower === 'add') {
             console.log('📝 UNOS - otvaram data entry');
             isDataEntryMode = true;
             if (typeof window.renderDataEntry === 'function') {
                 window.renderDataEntry('');
-                if (!window.screenHistory) window.screenHistory = [];
-                window.screenHistory.push('dataEntry');
-                window.currentScreen = 'dataEntry';
             }
             return true;
         }
 
-        // ===== 6. DIKTIRANJE ARTIKLA =====
+        // DIKTIRANJE
         if (isDataEntryMode && lower.length > 2) {
             console.log('📝 Diktiranje:', command);
             const cleanCommand = command.replace(/^(start|kreni|počni|go|begin)\s*/i, '').trim();
@@ -256,10 +314,9 @@
             }
         }
 
-        // ===== 7. PLUS - KRAJ JEDNOG, POČETAK NOVOG =====
+        // PLUS
         if (lower === 'plus' || lower === 'sledeći' || lower === 'sledeci') {
-            console.log('➕ PLUS - završavam trenutni unos, počinjem novi');
-            // Samo resetujemo buffer, diktiranje nastavlja
+            console.log('➕ PLUS - sledeći unos');
             return true;
         }
 
@@ -325,10 +382,15 @@
         }
     };
 
-    // ===== IZVEZI FUNKCIJE =====
+    // ===== IZVOZ =====
+    window.startVoiceRecognition = startVoiceRecognition;
+    window.stopVoiceRecognition = stopVoiceRecognition;
     window.processVoiceCommand = processVoiceCommand;
     window.voiceCommand = processVoiceCommand;
-    window.goBack = window.goBack;
+
+    // ZA SCRIPT1.JS
+    window._voiceCommandsStart = startVoiceRecognition;
+    window._voiceCommandsStop = stopVoiceRecognition;
 
     console.log('✅ voiceCommands.js spreman!');
     console.log('📖 KOMANDE: unos, zalihe, spisak, exit, end, plus');
