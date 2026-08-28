@@ -4,7 +4,6 @@
 // ============================================
 
 let activeBuffer = ''; 
-let recognition = null;
 let lastSavedData = null;
 let isProcessingCommand = false;
 let END_AKTIVAN = false;
