@@ -1,5 +1,6 @@
 // ============================================
-// VOICE COMMANDS - JEDNOSTAVNA RADNA VERZIJA
+// VOICE COMMANDS - RADNA VERZIJA
+// MIKROFON OSTAJE UKLJUČEN NAKON "unos"
 // ============================================
 
 (function () {
@@ -104,6 +105,8 @@
     }
 
     function sacuvajIzgovoreno(data) {
+        console.log('💾 Čuvam podatke:', data);
+        
         const setVal = (id, val) => {
             const el = document.getElementById(id);
             if (el) {
@@ -118,16 +121,31 @@
         setVal('quantityInput', data.quantity);
         setVal('shelfLifeInput', data.shelf_life);
 
-        setTimeout(function() {
-            if (typeof window.saveProductSilent === 'function') {
-                window.saveProductSilent();
-            } else if (typeof window.saveProduct === 'function') {
-                const originalAlert = window.showModernAlert;
-                window.showModernAlert = function() {};
-                window.saveProduct();
-                window.showModernAlert = originalAlert;
-            }
-        }, 200);
+        // Sačuvaj direktno u localStorage (bez popup-a)
+        const productData = {
+            id: Date.now(),
+            product_name: data.product_name,
+            description: document.getElementById('descriptionInput')?.value.trim() || '',
+            piece: data.piece,
+            quantity: parseFloat(data.quantity),
+            unit: data.unit,
+            entry_date: new Date().toISOString().split('T')[0],
+            shelf_life_months: parseInt(data.shelf_life),
+            storage_location: data.storage
+        };
+        
+        let zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
+        zalihe.push(productData);
+        localStorage.setItem('zalihe', JSON.stringify(zalihe));
+        
+        console.log('✅ Proizvod sačuvan:', productData.product_name);
+        
+        // Osveži pregled unosa
+        if (typeof prikaziSveUnose === 'function') {
+            setTimeout(function() {
+                prikaziSveUnose();
+            }, 200);
+        }
     }
 
     function processVoiceCommand(command) {
@@ -198,17 +216,13 @@
                 if (!window.screenHistory) window.screenHistory = [];
                 window.screenHistory.push('dataEntry');
                 window.currentScreen = 'dataEntry';
-                
-                setTimeout(function() {
-                    if (typeof window.startVoiceRecognition === 'function') {
-                        window.startVoiceRecognition('dataEntry');
-                    }
-                }, 300);
             }
+            // NE GASIMO MIKROFON - nastavlja da sluša
             return true;
         }
 
         // ===== DIKTIRANJE ARTIKLA =====
+        // Samo ako smo na dataEntry ekranu
         if (window.currentScreen === 'dataEntry' && lower.length > 2) {
             const cleanCommand = command.replace(/^(start|kreni|počni|go|begin)\s*/i, '').trim();
             if (cleanCommand.length > 2) {
@@ -278,5 +292,5 @@
     window.processVoiceCommand = processVoiceCommand;
     window.voiceCommand = processVoiceCommand;
 
-    console.log('✅ voiceCommands.js spreman (popravljeno)!');
+    console.log('✅ voiceCommands.js spreman (mikrofon ostaje uključen)!');
 })();
