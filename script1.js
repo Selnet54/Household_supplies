@@ -1276,7 +1276,6 @@ function saveProductSilent() {
     
     console.log('✅ Proizvod sačuvan tiho:', productData.product_name);
     
-    // Resetuj polja (osim productName)
     document.getElementById('pieceInput').value = '';
     document.getElementById('quantityInput').value = '';
     document.getElementById('shelfLifeInput').value = '';
