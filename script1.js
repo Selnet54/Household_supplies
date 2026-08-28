@@ -2076,7 +2076,7 @@ function speakText(text) {
     }
 }
 // ===== startVoiceRecognition - KORISTI VOICE COMMANDS =====
-unction startVoiceRecognition() {
+function startVoiceRecognition() {   // <--- DODATO "f"
     console.log('🎤 startVoiceRecognition -> VOICE COMMANDS');
     if (typeof window._voiceCommandsStart === 'function') {
         return window._voiceCommandsStart();
