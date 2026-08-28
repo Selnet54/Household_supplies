@@ -2076,15 +2076,13 @@ function speakText(text) {
     }
 }
 // ===== startVoiceRecognition - KORISTI VOICE COMMANDS =====
-function startVoiceRecognition() {   // <--- DODATO "f"
+function startVoiceRecognition() {
     console.log('🎤 startVoiceRecognition -> VOICE COMMANDS');
-    if (typeof window._voiceCommandsStart === 'function') {
-        return window._voiceCommandsStart();
+    if (typeof window.startVoiceRecognition === 'function') {
+        return window.startVoiceRecognition();
     }
     console.warn('⚠️ voiceCommands nije učitan!');
 }
-function processVoiceCommand(command) {
-    console.log('🎤 processVoiceCommand prima:', command);
     
     // PROSLEDI KOMANDU voiceCommands.js
     if (typeof window.voiceCommand === 'function') {
