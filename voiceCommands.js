@@ -301,15 +301,31 @@
         return true;
     }
 
-    // ===== DIKTIRANJE - SAKUPLJA CEO IZRAZ =====
-    if (isDataEntryMode && lower.length > 2) {
+    // ===== DIKTIRANJE - SAMO AKO SMO U REŽIMU UNOSA I IMA SMAISLA =====
+    if (isDataEntryMode && lower.length > 5) {
         console.log('📝 Diktiranje:', command);
         
-        // Ako je "plus" u komandi - kraj unosa
+        // OČISTI KOMANDU
+        let cleanCommand = command
+            .replace(/^(start|kreni|počni|go|begin)\s*/i, '')
+            .replace(/\b(plus|end|kraj)\b.*$/i, '')  // Ukloni plus/end i sve posle
+            .trim();
+        
+        if (cleanCommand.length > 3) {
+            console.log('🔍 Parsiram:', cleanCommand);
+            var parsed = parseVoiceDataEntry(cleanCommand);
+            if (parsed.product_name && parsed.product_name !== 'Proizvod' && parsed.product_name.length > 1) {
+                console.log('✅ Čuvam:', parsed.product_name);
+                sacuvajIzgovoreno(parsed);
+                return true;
+            }
+        }
+        
+        // Ako je "plus" u komandi, sačuvaj i nastavi
         if (lower.includes('plus')) {
             console.log('➕ PLUS - završavam unos');
             const beforePlus = command.split(/plus/i)[0].trim();
-            if (beforePlus.length > 2) {
+            if (beforePlus.length > 3) {
                 var parsed = parseVoiceDataEntry(beforePlus);
                 if (parsed.product_name && parsed.product_name !== 'Proizvod' && parsed.product_name.length > 1) {
                     sacuvajIzgovoreno(parsed);
@@ -318,11 +334,11 @@
             return true;
         }
         
-        // Ako je "end" u komandi - kraj svih unosa
+        // Ako je "end" u komandi
         if (lower.includes('end')) {
             console.log('🏁 END - završavam sve');
             const beforeEnd = command.split(/end/i)[0].trim();
-            if (beforeEnd.length > 2) {
+            if (beforeEnd.length > 3) {
                 var parsed = parseVoiceDataEntry(beforeEnd);
                 if (parsed.product_name && parsed.product_name !== 'Proizvod' && parsed.product_name.length > 1) {
                     sacuvajIzgovoreno(parsed);
@@ -334,16 +350,6 @@
             }
             return true;
         }
-        
-        // Inače sačuvaj celu komandu
-        const cleanCommand = command.replace(/^(start|kreni|počni|go|begin)\s*/i, '').trim();
-        if (cleanCommand.length > 3) {
-            var parsed = parseVoiceDataEntry(cleanCommand);
-            if (parsed.product_name && parsed.product_name !== 'Proizvod' && parsed.product_name.length > 1) {
-                sacuvajIzgovoreno(parsed);
-            }
-        }
-        return true;
     }
 
     return false;
