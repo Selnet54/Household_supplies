@@ -129,6 +129,79 @@
         }, 200);
     }
 
+    // ===== START VOICE RECOGNITION =====
+    function startVoiceRecognition() {
+        console.log('🎤 startVoiceRecognition POZVAN!');
+        
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            console.error('❌ Speech recognition nije podržan!');
+            return;
+        }
+
+        if (window.recognition) {
+            try { window.recognition.stop(); } catch(e) {}
+            window.recognition = null;
+        }
+
+        const recognition = new SpeechRecognition();
+        window.recognition = recognition;
+        
+        const lang = typeof currentLang !== 'undefined' ? currentLang : 'sr';
+        const speechLangMap = {
+            sr: 'sr-RS', en: 'en-US', de: 'de-DE', hu: 'hu-HU',
+            uk: 'uk-UA', ru: 'ru-RU', zh: 'zh-CN', es: 'es-ES',
+            pt: 'pt-PT', fr: 'fr-FR'
+        };
+        recognition.lang = speechLangMap[lang] || 'sr-RS';
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.maxAlternatives = 1;
+
+        recognition.onstart = function() {
+            console.log('🎤 MIKROFON AKTIVAN!');
+        };
+
+        recognition.onresult = function(event) {
+            let finalText = '';
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                if (event.results[i].isFinal) {
+                    finalText += event.results[i][0].transcript;
+                }
+            }
+            if (finalText) {
+                console.log('🗣️ Prepoznato:', finalText);
+                processVoiceCommand(finalText);
+            }
+        };
+
+        recognition.onerror = function(event) {
+            console.error('⚠️ Greška:', event.error);
+        };
+
+        recognition.onend = function() {
+            console.log('🎤 Prepoznavanje završeno.');
+        };
+
+        try {
+            recognition.start();
+            console.log('✅ Mikrofon pokrenut!');
+        } catch(e) {
+            console.error('❌ Greška:', e);
+        }
+    }
+
+    // ===== STOP VOICE RECOGNITION =====
+    function stopVoiceRecognition() {
+        console.log('🛑 stopVoiceRecognition POZVAN!');
+        if (window.recognition) {
+            try {
+                window.recognition.stop();
+                window.recognition = null;
+            } catch(e) {}
+        }
+    }
+
     function processVoiceCommand(command) {
         if (!command || isProcessing) return false;
         
@@ -249,22 +322,11 @@
         }
     };
 
-    // IZVOZ
+    // ===== IZVOZ =====
+    window.startVoiceRecognition = startVoiceRecognition;
+    window.stopVoiceRecognition = stopVoiceRecognition;
     window.processVoiceCommand = processVoiceCommand;
     window.voiceCommand = processVoiceCommand;
-    window._voiceCommandsStart = function() {
-        console.log('🎤 _voiceCommandsStart -> startVoiceRecognition');
-        if (typeof startVoiceRecognition === 'function') {
-            return startVoiceRecognition();
-        }
-        console.warn('⚠️ startVoiceRecognition nije definisan u voiceCommands.js');
-    };
-    window._voiceCommandsStop = function() {
-        console.log('🛑 _voiceCommandsStop -> stopVoiceRecognition');
-        if (typeof stopVoiceRecognition === 'function') {
-            return stopVoiceRecognition();
-        }
-    };
 
     console.log('✅ voiceCommands.js spreman!');
 })();
