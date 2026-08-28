@@ -2091,7 +2091,7 @@ function startVoiceRecognition() {
 
     recognition = new SpeechRecognition();
     recognition.lang = speechLangMap[currentLang] || 'en-US';
-    recognition.continuous = false;
+    recognition.continuous = true; 
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
 
@@ -2107,6 +2107,9 @@ function startVoiceRecognition() {
         if (statusEl) {
             statusEl.textContent = '🎤 Slušam...';
             statusEl.style.color = '#2196F3';
+        }
+         if (recognition) {
+            recognition.continuous = true;
         }
     };
 
