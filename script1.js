@@ -2079,7 +2079,8 @@ function speakText(text) {
 function startVoiceRecognition() {
     console.log('🎤 startVoiceRecognition -> VOICE COMMANDS');
     if (typeof window._voiceCommandsStart === 'function') {
-        return window._voiceCommandsStart();
+        window._voiceCommandsStart();  // <-- SAMO POZOVI, BEZ return
+        return;
     }
     console.warn('⚠️ voiceCommands nije učitan!');
 }
