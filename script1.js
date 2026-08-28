@@ -1112,6 +1112,19 @@ function renderProductParts(subcategory) {
 }
 
 function renderDataEntry(productName) {
+    // ===== PRIKAŽI MAINSCREEN =====
+    const mainScreen = document.getElementById('mainScreen');
+    if (mainScreen && mainScreen.style.display !== 'flex') {
+        document.querySelectorAll('.screen').forEach(s => {
+            s.style.display = 'none';
+            s.classList.remove('active');
+        });
+        mainScreen.style.display = 'flex';
+        mainScreen.classList.add('active');
+        console.log('✅ mainScreen prikazan iz renderDataEntry');
+    }
+    // ===== KRAJ =====
+    
     // Automatska detekcija odakle smo došli
     if (!currentCategory && !currentSubcategory && !productName) {
         fromChoiceScreen = true;
