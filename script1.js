@@ -2171,23 +2171,9 @@ function handleHeaderBack() {
 // ============================================
 // IZVEZI FUNKCIJE GLOBALNO
 // ============================================
-// PRVO SAČUVAJ ORIGINALNU startVoiceRecognition IZ voiceCommands.js
-if (typeof window._voiceCommandsStart === 'undefined' && typeof window.startVoiceRecognition === 'function') {
-    window._voiceCommandsStart = window.startVoiceRecognition;
-}
 
-// ONDA PREVEZI DA UVEK POZIVA voiceCommands.js
-window.startVoiceRecognition = function() {
-    console.log('🎤 Pozivam voiceCommands.js preko window._voiceCommandsStart');
-    if (typeof window._voiceCommandsStart === 'function') {
-        return window._voiceCommandsStart();
-    }
-    // Fallback - pozovi original
-    if (typeof window._originalStartVoice === 'function') {
-        return window._originalStartVoice();
-    }
-    console.warn('⚠️ voiceCommands nije dostupan!');
-};
+// NE PREVEZUJEMO startVoiceRecognition - PUSTIMO ORIGINAL
+// Samo izvozimo sve funkcije
 
 window.stopVoiceRecognition = stopVoiceRecognition;
 window.getCurrentLang = getCurrentLang;
@@ -2206,6 +2192,69 @@ window.renderCategories = renderCategories;
 window.renderDataEntry = renderDataEntry;
 window.processVoiceCommand = processVoiceCommand;
 window.voiceCommand = processVoiceCommand;
+window.exitApp = exitApp;
+window.showModernAlert = showModernAlert;
+window.closeModernAlert = closeModernAlert;
+window.showModernConfirm = showModernConfirm;
+window.closeModernConfirm = closeModernConfirm;
+window.handleConfirmYes = handleConfirmYes;
+window.handleConfirmNo = handleConfirmNo;
+window.triggerLogin = triggerLogin;
+window.handleBackAction = handleBackAction;
+window.saveProduct = saveProduct;
+window.saveProductSilent = saveProductSilent;
+window.prikaziSveUnose = prikaziSveUnose;
+window.updateExpiryDate = updateExpiryDate;
+window.renderLanguages = renderLanguages;
+window.selectLanguage = selectLanguage;
+window.renderCategories = renderCategories;
+window.renderSubcategories = renderSubcategories;
+window.renderSubcategoryGroup = renderSubcategoryGroup;
+window.renderProductParts = renderProductParts;
+window.renderInventory = renderInventory;
+window.renderShoppingList = renderShoppingList;
+window.azurirajZalihe = azurirajZalihe;
+window.obrisiZalihe = obrisiZalihe;
+window.toggleAllCheckboxes = toggleAllCheckboxes;
+window.obrisiOznacenoShopping = obrisiOznacenoShopping;
+window.kopirajShopping = kopirajShopping;
+window.oznaciSveShopping = oznaciSveShopping;
+window.selectVoiceMode = selectVoiceMode;
+window.selectManualMode = selectManualMode;
+window.goBackFromVoice = goBackFromVoice;
+window.speakText = speakText;
 
 console.log('✅ Sve dodatne funkcije izvezene globalno!');
-console.log('✅ startVoiceRecognition, stopVoiceRecognition, getCurrentLang, t, switchLanguage, showScreen, openDataEntry, saveProductSilent, deleteItem, goBack, processVoiceCommand');
+console.log('✅ stopVoiceRecognition, getCurrentLang, t, switchLanguage, showScreen, openDataEntry, saveProductSilent, deleteItem, goBack, processVoiceCommand');
+
+// ===== DIREKTNO POVEZIVANJE SA voiceCommands.js =====
+// Ovo omogućava da startVoiceRecognition iz script1.js pozove voiceCommands.js
+// BEZ BESKONAČNE PETLJE
+
+// Sačuvaj originalnu funkciju iz voiceCommands.js ako postoji
+if (typeof window._voiceCommandsStart === 'undefined' && typeof window.startVoiceRecognition === 'function') {
+    window._voiceCommandsStart = window.startVoiceRecognition;
+}
+
+// Prevezi samo ako nije već prevezano
+if (typeof window.startVoiceRecognition === 'function' && window.startVoiceRecognition.toString().includes('_voiceCommandsStart')) {
+    // Već je prevezao neko drugi, ne radi ništa
+    console.log('✅ startVoiceRecognition je već prevezao');
+} else {
+    // Sačuvaj original
+    const originalStart = window.startVoiceRecognition;
+    
+    // Prevezi
+    window.startVoiceRecognition = function() {
+        console.log('🎤 Pozivam voiceCommands.js');
+        if (typeof window._voiceCommandsStart === 'function') {
+            return window._voiceCommandsStart();
+        }
+        if (typeof originalStart === 'function' && originalStart !== window.startVoiceRecognition) {
+            return originalStart();
+        }
+        console.warn('⚠️ voiceCommands nije dostupan!');
+    };
+}
+
+console.log('✅ startVoiceRecognition prevezao na voiceCommands.js');
