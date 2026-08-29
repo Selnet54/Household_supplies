@@ -5,13 +5,11 @@
 (function() {
     console.log('🎙️ voiceCommands.js se učitava...');
 
-    // ===== LOKALNE VARIJABLE (samo za voiceCommands) =====
     let isProcessing = false;
     let lastCommandTime = 0;
     let dictationTimeout = null;
     let pendingText = '';
 
-    // ===== REČNICI ZA PREPOZNAVANJE =====
     const NUMBER_WORDS = {
         'nula': '0', 'jedan': '1', 'jedna': '1', 'jedno': '1', 'dva': '2', 'dve': '2',
         'tri': '3', 'četiri': '4', 'cetiri': '4', 'pet': '5', 'šest': '6', 'sest': '6',
@@ -40,7 +38,6 @@
         'ostava': 'Ostava', 'špajz': 'Ostava'
     };
 
-    // ===== POMOĆNE FUNKCIJE =====
     function getNumber(word) {
         const w = word.toLowerCase().trim();
         if (NUMBER_WORDS[w] !== undefined) return NUMBER_WORDS[w];
@@ -52,7 +49,6 @@
         return typeof window.currentLang !== 'undefined' ? window.currentLang : 'sr';
     }
 
-    // ===== PARSIRANJE GLASOVNOG UNOSA =====
     function parseVoiceDataEntry(command) {
         let text = command.replace(/^(unos|unesi|dodaj|add)\s*/i, '').trim();
         let words = text.split(/\s+/).map(s => s.trim()).filter(Boolean);
@@ -139,7 +135,6 @@
         }, 200);
     }
 
-    // ===== START VOICE RECOGNITION =====
     function startVoiceRecognition() {
         console.log('🎤 startVoiceRecognition POZVAN!');
         
@@ -212,7 +207,6 @@
         }
     }
 
-    // ===== STOP VOICE RECOGNITION =====
     function stopVoiceRecognition() {
         console.log('🛑 stopVoiceRecognition POZVAN!');
         if (window.recognition) {
@@ -227,7 +221,6 @@
         }
     }
 
-    // ===== PROCESS VOICE COMMAND =====
     function processVoiceCommand(command) {
         if (!command || isProcessing) return false;
         
@@ -247,14 +240,12 @@
             isProcessing = false; 
         }, 1500);
 
-        // REZERVISANE REČI
         const reservedWords = ['start', 'kreni', 'počni', 'go', 'begin'];
         if (reservedWords.includes(lower)) {
             console.log('⏭️ Rezervisana reč, ignorišem:', lower);
             return true;
         }
 
-        // EXIT
         if (lower === 'exit' || lower === 'kraj' || lower === 'izlaz' || lower === 'quit' || lower === 'end' || lower === 'close') {
             console.log('🚪 IZLAZ - zatvaram aplikaciju');
             if (typeof window.exitApp === 'function') {
@@ -263,7 +254,6 @@
             return true;
         }
 
-        // ZALIHE
         if (lower === 'zalihe' || lower === 'otvori zalihe' || lower === 'stanje' || lower === 'inventory') {
             console.log('📦 ZALIHE - otvaram');
             if (typeof window.renderInventory === 'function') {
@@ -272,7 +262,6 @@
             return true;
         }
 
-        // SPISAK
         if (lower === 'spisak' || lower === 'otvori spisak' || lower === 'potrebe' || lower === 'shopping') {
             console.log('🛒 SPISAK - otvaram');
             if (typeof window.renderShoppingList === 'function') {
@@ -281,7 +270,6 @@
             return true;
         }
 
-        // UNOS
         if (lower === 'unos' || lower === 'unesi' || lower === 'add' || lower === 'dodaj') {
             console.log('📝 Otvaram ekran za unos...');
             if (typeof window.renderDataEntry === 'function') {
@@ -290,7 +278,6 @@
             return true;
         }
 
-        // DIKTIRANJE
         const isDataEntry = window.currentScreen === 'dataEntry' || 
                             window.currentScreenState === 'dataEntry' || 
                             document.getElementById('productInput') !== null;
@@ -309,7 +296,6 @@
         return false;
     }
 
-    // ===== IZVOZ (SAMO VOICE COMMANDS FUNKCIJE) =====
     window.startVoiceRecognition = startVoiceRecognition;
     window.stopVoiceRecognition = stopVoiceRecognition;
     window.processVoiceCommand = processVoiceCommand;
