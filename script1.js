@@ -2078,8 +2078,8 @@ function speakText(text) {
 // ===== startVoiceRecognition - KORISTI VOICE COMMANDS =====
 function startVoiceRecognition() {
     console.log('🎤 startVoiceRecognition -> VOICE COMMANDS');
-    if (typeof window._voiceCommandsStart === 'function') {
-        return window._voiceCommandsStart();
+    if (typeof window.startVoiceRecognition === 'function') {
+        return window.startVoiceRecognition();
     }
     console.warn('⚠️ voiceCommands nije učitan!');
 }
@@ -2096,16 +2096,19 @@ function processVoiceCommand(command) {
     // FALLBACK - direktna obrada
     const cmd = command.toLowerCase().trim();
     
-    // ===== DODATE KOMANDE =====
-    if (cmd === 'zalihe' || cmd === 'otvori zalihe' || cmd === 'stanje' || 
-        cmd === 'inventory' || cmd === 'open inventory') {
+    if (cmd === 'unos' || cmd === 'unesi' || cmd === 'add') {
+        console.log('📝 UNOS - otvaram data entry');
+        renderDataEntry('');
+        return;
+    }
+    
+    if (cmd === 'zalihe' || cmd === 'otvori zalihe' || cmd === 'stanje') {
         console.log('📦 ZALIHE - otvaram');
         renderInventory();
         return;
     }
     
-    if (cmd === 'spisak' || cmd === 'otvori spisak' || cmd === 'potrebe' ||
-        cmd === 'shopping' || cmd === 'shopping list' || cmd === 'open shopping') {
+    if (cmd === 'spisak' || cmd === 'otvori spisak' || cmd === 'potrebe') {
         console.log('🛒 SPISAK - otvaram');
         renderShoppingList();
         return;
@@ -2115,14 +2118,6 @@ function processVoiceCommand(command) {
         cmd === 'end' || cmd === 'close') {
         console.log('🚪 IZLAZ - zatvaram aplikaciju');
         exitApp();
-        return;
-    }
-    // ===== KRAJ DODATIH KOMANDI =====
-    
-    // OSTALE KOMANDE (UNOS PODATAKA - NETAKNUT)
-    if (cmd === 'unos' || cmd === 'unesi' || cmd === 'add' || cmd === 'dodaj') {
-        console.log('📝 UNOS - otvaram data entry');
-        renderDataEntry('');
         return;
     }
     
