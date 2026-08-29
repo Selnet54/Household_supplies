@@ -306,7 +306,8 @@ function sacuvajIzgovoreno(data) {
             isProcessing = false; 
         }, 1500);
 
-        const reservedWords = ['start', 'kreni', 'počni', 'go', 'begin'];
+                // REZERVISANE REČI (ignorišu se)
+        const reservedWords = ['start', 'go'];
         if (reservedWords.includes(lower)) {
             console.log('⏭️ Rezervisana reč, ignorišem:', lower);
             return true;
@@ -344,12 +345,17 @@ function sacuvajIzgovoreno(data) {
             return true;
         }
 
+        // DIKTIRANJE - obrada podataka za unos
         const isDataEntry = window.currentScreen === 'dataEntry' || 
                             window.currentScreenState === 'dataEntry' || 
                             document.getElementById('productInput') !== null;
 
         if (isDataEntry && command.length > 3) {
-            const cleanCommand = command.replace(/^(start|kreni|počni|go|begin)\s*/i, '').trim();
+            // Ukloni "start" ili "go" sa početka
+            let cleanCommand = command.replace(/^(start|go)\s*/i, '').trim();
+            
+            console.log('🧹 Očišćena komanda za unos:', cleanCommand);
+            
             if (cleanCommand.length > 2) {
                 var parsed = parseVoiceDataEntry(cleanCommand);
                 if (parsed.product_name && parsed.product_name !== 'Proizvod' && parsed.product_name.length > 1) {
@@ -358,9 +364,6 @@ function sacuvajIzgovoreno(data) {
                 }
             }
         }
-
-        return false;
-    }
 
     window.startVoiceRecognition = startVoiceRecognition;
     window.stopVoiceRecognition = stopVoiceRecognition;
