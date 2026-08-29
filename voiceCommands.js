@@ -459,7 +459,7 @@
         return false;
     }
 
-    // ===== IZVOZ =====
+        // ===== IZVOZ =====
     window.startVoiceRecognition = startVoiceRecognition;
     window.stopVoiceRecognition = stopVoiceRecognition;
     window.processVoiceCommand = processVoiceCommand;
@@ -467,6 +467,12 @@
     window.prikaziPodatkeUPoljima = prikaziPodatkeUPoljima;
     window.sacuvajTrenutniProizvod = sacuvajTrenutniProizvod;
     window.ocistiPolja = ocistiPolja;
+
+    // ===== DODAJ OVDE =====
+    window.resetCurrentProductData = function() {
+        currentProductData = null;
+        console.log('🔄 Resetovani trenutni podaci u voiceCommands');
+    };
 
     console.log('✅ voiceCommands.js spreman!');
 })();
