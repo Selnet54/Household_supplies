@@ -2078,11 +2078,14 @@ function speakText(text) {
 // ===== startVoiceRecognition - KORISTI VOICE COMMANDS =====
 function startVoiceRecognition() {
     console.log('🎤 startVoiceRecognition -> VOICE COMMANDS');
-    if (typeof window.startVoiceRecognition === 'function') {
-        return window.startVoiceRecognition();
+    if (typeof window._voiceCommandsStart === 'function') {
+        return window._voiceCommandsStart();
     }
     console.warn('⚠️ voiceCommands nije učitan!');
 }
+
+function processVoiceCommand(command) {
+    console.log('🎤 processVoiceCommand prima:', command);
     
     // PROSLEDI KOMANDU voiceCommands.js
     if (typeof window.voiceCommand === 'function') {
@@ -2093,32 +2096,39 @@ function startVoiceRecognition() {
     // FALLBACK - direktna obrada
     const cmd = command.toLowerCase().trim();
     
-    if (cmd === 'unos' || cmd === 'unesi' || cmd === 'add') {
-        console.log('📝 UNOS - otvaram data entry');
-        renderDataEntry('');
-        return;
-    }
-    
-    if (cmd === 'zalihe' || cmd === 'otvori zalihe' || cmd === 'stanje') {
+    // ===== DODATE KOMANDE =====
+    if (cmd === 'zalihe' || cmd === 'otvori zalihe' || cmd === 'stanje' || 
+        cmd === 'inventory' || cmd === 'open inventory') {
         console.log('📦 ZALIHE - otvaram');
         renderInventory();
         return;
     }
     
-    if (cmd === 'spisak' || cmd === 'otvori spisak' || cmd === 'potrebe') {
+    if (cmd === 'spisak' || cmd === 'otvori spisak' || cmd === 'potrebe' ||
+        cmd === 'shopping' || cmd === 'shopping list' || cmd === 'open shopping') {
         console.log('🛒 SPISAK - otvaram');
         renderShoppingList();
         return;
     }
     
-    if (cmd === 'end' || cmd === 'kraj') {
-        console.log('🏁 END - otvaram zalihe');
-        renderInventory();
+    if (cmd === 'exit' || cmd === 'kraj' || cmd === 'izlaz' || cmd === 'quit' || 
+        cmd === 'end' || cmd === 'close') {
+        console.log('🚪 IZLAZ - zatvaram aplikaciju');
+        exitApp();
+        return;
+    }
+    // ===== KRAJ DODATIH KOMANDI =====
+    
+    // OSTALE KOMANDE (UNOS PODATAKA - NETAKNUT)
+    if (cmd === 'unos' || cmd === 'unesi' || cmd === 'add' || cmd === 'dodaj') {
+        console.log('📝 UNOS - otvaram data entry');
+        renderDataEntry('');
         return;
     }
     
     showModernAlert('Nepoznata komanda', `Nije prepoznato: "${command}"`, '❓');
 }
+
 function stopVoiceRecognition() {
     if (recognition) {
         try {
