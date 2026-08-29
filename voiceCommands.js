@@ -24,14 +24,15 @@ console.log('✅ Script.js je učitan!');
 })();
 
 // ===== TRENUTNO STANJE =====
-let currentLang = 'en';
-let currentCategory = '';
-let currentSubcategory = '';
-let currentProductPart = '';
-let currentScreenState = 'languages';
-let fromChoiceScreen = false;
-let screenHistory = [];
-let currentScreen = 'languages';
+// Ove varijable su već deklarisane u script1.js
+// let currentLang = 'en';
+// let currentCategory = '';
+// let currentSubcategory = '';
+// let currentProductPart = '';
+// let currentScreenState = 'languages';
+// let fromChoiceScreen = false;
+// let screenHistory = [];
+// let currentScreen = 'languages';
 
 // ===== 0. EXIT FUNKCIJA =====
 function exitApp() {
@@ -2171,14 +2172,15 @@ function handleHeaderBack() {
 // ============================================
 // IZVEZI FUNKCIJE GLOBALNO
 // ============================================
-window.startVoiceRecognition = startVoiceRecognition;
+
+// GLAVNE FUNKCIJE IZ script1.js
 window.stopVoiceRecognition = stopVoiceRecognition;
 window.getCurrentLang = getCurrentLang;
 window.t = t;
 window.switchLanguage = selectLanguage;
 window.showScreen = showScreen;
 window.openDataEntry = renderDataEntry;
-window.saveProductSilent = saveProductSilent;   // <--- SAMO OVO DODAJ
+window.saveProductSilent = saveProductSilent;
 window.deleteItem = function(itemId) {
     // ...
 };
@@ -2187,6 +2189,55 @@ window.renderInventory = renderInventory;
 window.renderShoppingList = renderShoppingList;
 window.renderCategories = renderCategories;
 window.renderDataEntry = renderDataEntry;
+window.handleBackAction = handleBackAction;
+window.triggerLogin = triggerLogin;
+window.exitApp = exitApp;
+window.showModernAlert = showModernAlert;
+window.saveProduct = saveProduct;
+window.prikaziSveUnose = prikaziSveUnose;
+window.updateExpiryDate = updateExpiryDate;
+window.renderLanguages = renderLanguages;
+window.selectLanguage = selectLanguage;
+window.renderSubcategories = renderSubcategories;
+window.renderSubcategoryGroup = renderSubcategoryGroup;
+window.renderProductParts = renderProductParts;
+window.azurirajZalihe = azurirajZalihe;
+window.obrisiZalihe = obrisiZalihe;
+window.toggleAllCheckboxes = toggleAllCheckboxes;
+window.obrisiOznacenoShopping = obrisiOznacenoShopping;
+window.kopirajShopping = kopirajShopping;
+window.oznaciSveShopping = oznaciSveShopping;
+window.selectVoiceMode = selectVoiceMode;
+window.selectManualMode = selectManualMode;
+window.goBackFromVoice = goBackFromVoice;
+window.speakText = speakText;
 
-console.log('✅ Sve dodatne funkcije izvezene globalno!');
-console.log('✅ startVoiceRecognition, stopVoiceRecognition, getCurrentLang, t, switchLanguage, showScreen, openDataEntry, saveProductSilent, deleteItem, goBack');  // <--- DODAJ I OVDE
+// VOICE COMMANDS SPECIFIČNE FUNKCIJE (NE DUPLIRAJ startVoiceRecognition)
+window.processVoiceCommand = processVoiceCommand;
+window.voiceCommand = processVoiceCommand;
+
+console.log('✅ Sve funkcije izvezene globalno!');
+// ===== POVEZIVANJE SA voiceCommands.js =====
+// Sačuvaj originalnu startVoiceRecognition iz voiceCommands.js
+if (typeof window._voiceCommandsStart === 'undefined' && typeof window.startVoiceRecognition === 'function') {
+    window._voiceCommandsStart = window.startVoiceRecognition;
+}
+
+// Ako startVoiceRecognition nije prevezao, prevezi ga
+if (!window.startVoiceRecognition || window.startVoiceRecognition.toString().includes('_voiceCommandsStart')) {
+    // Već je prevezao
+    console.log('✅ startVoiceRecognition je već prevezao');
+} else {
+    const originalStart = window.startVoiceRecognition;
+    window.startVoiceRecognition = function() {
+        console.log('🎤 Pozivam voiceCommands.js');
+        if (typeof window._voiceCommandsStart === 'function') {
+            return window._voiceCommandsStart();
+        }
+        if (typeof originalStart === 'function' && originalStart !== window.startVoiceRecognition) {
+            return originalStart();
+        }
+        console.warn('⚠️ voiceCommands nije dostupan!');
+    };
+    console.log('✅ startVoiceRecognition prevezao na voiceCommands.js');
+}
