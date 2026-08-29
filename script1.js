@@ -2078,11 +2078,13 @@ function speakText(text) {
 // ===== startVoiceRecognition - KORISTI VOICE COMMANDS =====
 function startVoiceRecognition() {
     console.log('🎤 startVoiceRecognition -> VOICE COMMANDS');
-    if (typeof window.startVoiceRecognition === 'function') {
-        return window.startVoiceRecognition();
+    if (typeof window._voiceCommandsStart === 'function') {
+        return window._voiceCommandsStart();
     }
     console.warn('⚠️ voiceCommands nije učitan!');
 }
+function processVoiceCommand(command) {
+    console.log('🎤 processVoiceCommand prima:', command);
     
     // PROSLEDI KOMANDU voiceCommands.js
     if (typeof window.voiceCommand === 'function') {
