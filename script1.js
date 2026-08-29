@@ -2181,7 +2181,7 @@ window.t = t;
 window.switchLanguage = selectLanguage;
 window.showScreen = showScreen;
 window.openDataEntry = renderDataEntry;
-window.saveProductSilent = saveProductSilent;   // <--- SAMO OVO DODAJ
+window.saveProductSilent = saveProductSilent;
 window.deleteItem = function(itemId) {
     // ...
 };
@@ -2192,4 +2192,31 @@ window.renderCategories = renderCategories;
 window.renderDataEntry = renderDataEntry;
 
 console.log('✅ Sve dodatne funkcije izvezene globalno!');
-console.log('✅ startVoiceRecognition, stopVoiceRecognition, getCurrentLang, t, switchLanguage, showScreen, openDataEntry, saveProductSilent, deleteItem, goBack');  // <--- DODAJ I OVDE
+console.log('✅ startVoiceRecognition, stopVoiceRecognition, getCurrentLang, t, switchLanguage, showScreen, openDataEntry, saveProductSilent, deleteItem, goBack');
+
+// ===== POPRAVKA ZA BACK DUGME U HEDERU =====
+// Ovo se izvršava odmah nakon što se DOM učita
+(function fixBackButton() {
+    setTimeout(function() {
+        const backBtn = document.getElementById('backBtn');
+        if (backBtn) {
+            // Ukloni sve stare event listenere
+            const newBackBtn = backBtn.cloneNode(true);
+            backBtn.parentNode.replaceChild(newBackBtn, backBtn);
+            
+            newBackBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('⬅ Back dugme - vraćam na prethodni ekran');
+                if (typeof goBack === 'function') {
+                    goBack();
+                } else {
+                    handleBackAction();
+                }
+            });
+            console.log('✅ Back dugme popravljeno!');
+        } else {
+            console.warn('⚠️ Back dugme nije pronađeno za popravku!');
+        }
+    }, 100);
+})();
