@@ -52,107 +52,126 @@
     }
 
     function parseVoiceDataEntry(command) {
-        // UKLONI SVE REZERVISANE REČI
-        let text = command.replace(/^(unos|unesi|dodaj|add|start|go|stop|end|kraj|plus|zalihe|stanje|spisak|potrebe|nazad|back|odustani|exit|izlaz)\s*/i, '').trim();
-        text = text.replace(/\s+(unos|unesi|dodaj|add|start|go|stop|end|kraj|plus|zalihe|stanje|spisak|potrebe|nazad|back|odustani|exit|izlaz)\s*/gi, ' ').trim();
-        
-        // Ako je tekst prazan ili samo "start", vrati null
-        if (!text || text === 'start' || text === 'go') {
-            return null;
-        }
-        
-        let words = text.split(/\s+/).map(s => s.trim()).filter(Boolean);
-
-        let result = {
-            product_name: '',
-            piece: '1',
-            quantity: '1',
-            unit: 'kom',
-            shelf_life: '12',
-            storage: 'Zamrzivač 1'
-        };
-
-        let foundStorage = null, foundUnit = null;
-        let unitIndex = -1, storageIndex = -1;
-        let numbers = [], nameParts = [];
-        let skipWords = ['u', 'za', 'rok', 'trajanje', 'na', 'mesec', 'meseca', 'meseci', 'mesecima', 'i'];
-
-        // PRVO PRONAĐI SKLADIŠTE I JEDINICU
-        for (let i = 0; i < words.length; i++) {
-            let w = words[i].toLowerCase();
-            for (let key in STORAGE_MAP) {
-                if (w === key || w.includes(key) || key.includes(w)) {
-                    foundStorage = STORAGE_MAP[key];
-                    storageIndex = i;
-                    break;
-                }
-            }
-            for (let key in UNIT_MAP) {
-                if (w === key || w.includes(key) || key.includes(w)) {
-                    foundUnit = UNIT_MAP[key];
-                    unitIndex = i;
-                    break;
-                }
-            }
-        }
-
-        // OBRADI REČI
-        for (let i = 0; i < words.length; i++) {
-            let w = words[i].toLowerCase();
-            if (i === storageIndex || i === unitIndex || skipWords.includes(w)) continue;
-
-            let isStorage = false;
-            for (let key in STORAGE_MAP) {
-                if (w === key || w.includes(key) || key.includes(w)) { isStorage = true; break; }
-            }
-            if (isStorage) continue;
-
-            let isUnit = false;
-            for (let key in UNIT_MAP) {
-                if (w === key || w.includes(key) || key.includes(w)) { isUnit = true; break; }
-            }
-            if (isUnit) continue;
-
-            let numVal = getNumber(w);
-            if (numVal !== null) {
-                numbers.push(numVal);
-            } else {
-                nameParts.push(words[i]);
-            }
-        }
-
-        // POSTAVI KOLIČINU I KOMAD
-        if (foundUnit === 'kg' || foundUnit === 'g' || foundUnit === 'l') {
-            if (numbers.length >= 2) {
-                result.piece = numbers[0];
-                result.quantity = numbers[1];
-            } else if (numbers.length === 1) {
-                result.piece = '0';
-                result.quantity = numbers[0];
-            }
-        } else {
-            if (numbers.length >= 1) {
-                result.piece = numbers[0];
-                result.quantity = numbers[0];
-            }
-        }
-
-        // ROK TRAJANJA
-        let usedNumbers = (foundUnit === 'kg' || foundUnit === 'g' || foundUnit === 'l') ? 2 : 1;
-        let meseciMatch = text.match(/(\d+)\s*meseci/);
-        if (meseciMatch) {
-            result.shelf_life = meseciMatch[1];
-        } else if (numbers.length > usedNumbers) {
-            result.shelf_life = numbers[usedNumbers];
-        }
-
-        result.product_name = nameParts.filter(p => !/^\d+$/.test(p)).join(' ').trim() || 'Proizvod';
-        if (foundUnit) result.unit = foundUnit;
-        if (foundStorage) result.storage = foundStorage;
-
-        console.log('📦 Parsirani podaci:', result);
-        return result;
+    console.log('🔍 Parsiram:', command);
+    
+    // UKLONI SVE REZERVISANE REČI
+    let text = command.replace(/^(unos|unesi|dodaj|add|start|go|stop|end|kraj|plus|zalihe|stanje|spisak|potrebe|nazad|back|odustani|exit|izlaz)\s*/i, '').trim();
+    text = text.replace(/\s+(unos|unesi|dodaj|add|start|go|stop|end|kraj|plus|zalihe|stanje|spisak|potrebe|nazad|back|odustani|exit|izlaz)\s*/gi, ' ').trim();
+    
+    if (!text || text === 'start' || text === 'go') {
+        return null;
     }
+    
+    let words = text.split(/\s+/).map(s => s.trim()).filter(Boolean);
+    console.log('📝 Reči:', words);
+
+    let result = {
+        product_name: '',
+        piece: '1',
+        quantity: '1',
+        unit: 'kom',
+        shelf_life: '12',
+        storage: 'Zamrzivač 1'
+    };
+
+    let foundStorage = null, foundUnit = null;
+    let unitIndex = -1, storageIndex = -1;
+    let numbers = [], nameParts = [];
+    let skipWords = ['u', 'za', 'rok', 'trajanje', 'na', 'mesec', 'meseca', 'meseci', 'mesecima', 'i'];
+
+    // PRONAĐI SKLADIŠTE I JEDINICU
+    for (let i = 0; i < words.length; i++) {
+        let w = words[i].toLowerCase();
+        for (let key in STORAGE_MAP) {
+            if (w === key || w.includes(key) || key.includes(w)) {
+                foundStorage = STORAGE_MAP[key];
+                storageIndex = i;
+                break;
+            }
+        }
+        for (let key in UNIT_MAP) {
+            if (w === key || w.includes(key) || key.includes(w)) {
+                foundUnit = UNIT_MAP[key];
+                unitIndex = i;
+                break;
+            }
+        }
+    }
+
+    console.log('🏷️ Pronađeno skladište:', foundStorage, 'jedinica:', foundUnit);
+
+    // OBRADI REČI - IZVOJI SVE BROJEVE
+    for (let i = 0; i < words.length; i++) {
+        let w = words[i].toLowerCase();
+        if (i === storageIndex || i === unitIndex || skipWords.includes(w)) continue;
+
+        let isStorage = false;
+        for (let key in STORAGE_MAP) {
+            if (w === key || w.includes(key) || key.includes(w)) { isStorage = true; break; }
+        }
+        if (isStorage) continue;
+
+        let isUnit = false;
+        for (let key in UNIT_MAP) {
+            if (w === key || w.includes(key) || key.includes(w)) { isUnit = true; break; }
+        }
+        if (isUnit) continue;
+
+        let numVal = getNumber(w);
+        if (numVal !== null) {
+            numbers.push(numVal);
+        } else {
+            nameParts.push(words[i]);
+        }
+    }
+
+    console.log('🔢 Brojevi:', numbers, 'Imena:', nameParts);
+
+    // ===== NOVA LOGIKA ZA PARSIRANJE =====
+    // Podržava: "pileći batak 5 800 g 5" → piece=5, quantity=800, shelf_life=5
+    
+    if (foundUnit === 'kg' || foundUnit === 'g' || foundUnit === 'l') {
+        // Ako imamo jedinicu mere (kg, g, l)
+        if (numbers.length >= 3) {
+            // 3 broja: piece, quantity, shelf_life
+            result.piece = numbers[0];
+            result.quantity = numbers[1];
+            result.shelf_life = numbers[2];
+        } else if (numbers.length === 2) {
+            // 2 broja: piece, quantity
+            result.piece = numbers[0];
+            result.quantity = numbers[1];
+        } else if (numbers.length === 1) {
+            // 1 broj: quantity
+            result.piece = '0';
+            result.quantity = numbers[0];
+        }
+    } else {
+        // Bez jedinice mere (kom, pak, itd.)
+        if (numbers.length >= 2) {
+            // 2 broja: piece/quantity, shelf_life
+            result.piece = numbers[0];
+            result.quantity = numbers[0];
+            result.shelf_life = numbers[1];
+        } else if (numbers.length === 1) {
+            result.piece = numbers[0];
+            result.quantity = numbers[0];
+        }
+    }
+
+    // IME PROIZVODA
+    if (nameParts.length > 0) {
+        result.product_name = nameParts.join(' ').trim();
+    } else {
+        result.product_name = 'Proizvod';
+    }
+
+    if (foundUnit) result.unit = foundUnit;
+    if (foundStorage) result.storage = foundStorage;
+
+    console.log('📦 Parsirani podaci:', result);
+    return result;
+}
 
     function prikaziPodatkeUPoljima(data) {
         const setVal = (id, val) => {
