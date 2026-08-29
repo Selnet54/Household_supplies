@@ -263,7 +263,7 @@
         }
 
         // DIKTIRANJE
-        if (window.currentScreen === 'dataEntry' && lower.length > 2) {
+        if ((window.currentScreen === 'dataEntry' || document.getElementById('productInput') !== null) && lower.length > 2) {
             const cleanCommand = command.replace(/^(start|kreni|počni|go|begin)\s*/i, '').trim();
             if (cleanCommand.length > 2) {
                 var parsed = parseVoiceDataEntry(cleanCommand);
