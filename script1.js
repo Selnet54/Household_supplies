@@ -2227,24 +2227,18 @@ window.speakText = speakText;
 console.log('✅ Sve dodatne funkcije izvezene globalno!');
 console.log('✅ stopVoiceRecognition, getCurrentLang, t, switchLanguage, showScreen, openDataEntry, saveProductSilent, deleteItem, goBack, processVoiceCommand');
 
-// ===== DIREKTNO POVEZIVANJE SA voiceCommands.js =====
-// Ovo omogućava da startVoiceRecognition iz script1.js pozove voiceCommands.js
-// BEZ BESKONAČNE PETLJE
+// ===== POVEZIVANJE SA voiceCommands.js =====
+// Ovo omogućava da glasovne komande rade BEZ BESKONAČNE PETLJE
 
-// Sačuvaj originalnu funkciju iz voiceCommands.js ako postoji
+// 1. Sačuvaj originalnu startVoiceRecognition iz voiceCommands.js
 if (typeof window._voiceCommandsStart === 'undefined' && typeof window.startVoiceRecognition === 'function') {
     window._voiceCommandsStart = window.startVoiceRecognition;
 }
 
-// Prevezi samo ako nije već prevezano
-if (typeof window.startVoiceRecognition === 'function' && window.startVoiceRecognition.toString().includes('_voiceCommandsStart')) {
-    // Već je prevezao neko drugi, ne radi ništa
-    console.log('✅ startVoiceRecognition je već prevezao');
-} else {
-    // Sačuvaj original
+// 2. Prevezi startVoiceRecognition da poziva voiceCommands.js
+if (typeof window.startVoiceRecognition === 'function' && !window.startVoiceRecognition.toString().includes('_voiceCommandsStart')) {
     const originalStart = window.startVoiceRecognition;
     
-    // Prevezi
     window.startVoiceRecognition = function() {
         console.log('🎤 Pozivam voiceCommands.js');
         if (typeof window._voiceCommandsStart === 'function') {
@@ -2255,6 +2249,9 @@ if (typeof window.startVoiceRecognition === 'function' && window.startVoiceRecog
         }
         console.warn('⚠️ voiceCommands nije dostupan!');
     };
+    console.log('✅ startVoiceRecognition prevezao na voiceCommands.js');
+} else {
+    console.log('✅ startVoiceRecognition je već prevezao');
 }
 
-console.log('✅ startVoiceRecognition prevezao na voiceCommands.js');
+console.log('✅ voiceCommands povezan!');
