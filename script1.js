@@ -1259,6 +1259,31 @@ function updateExpiryDate() {
         expiryDisplay.textContent = '-';
     }
 }
+
+// ===== ČUVANJE POSLEDNJIH UNETIH PROIZVODA ZA ISTICANJE =====
+function saveLastAddedProducts(product) {
+    try {
+        let lastAdded = JSON.parse(localStorage.getItem('lastAddedProducts') || '[]');
+        
+        // Dodaj novi proizvod na početak liste
+        lastAdded.unshift({
+            product_name: product.product_name,
+            entry_date: product.entry_date,
+            timestamp: Date.now()
+        });
+        
+        // Zadrži samo poslednjih 10 proizvoda
+        if (lastAdded.length > 10) {
+            lastAdded = lastAdded.slice(0, 10);
+        }
+        
+        localStorage.setItem('lastAddedProducts', JSON.stringify(lastAdded));
+        console.log('💾 Sačuvani poslednji uneti proizvodi:', lastAdded);
+    } catch (error) {
+        console.error('❌ Greška pri čuvanju poslednjih proizvoda:', error);
+    }
+}
+
 // ===== SAČUVAJ PROIZVOD BEZ POPUP-A (ZA GLASOVNI UNOS) =====
 function saveProductSilent() {
     const product = document.getElementById('productInput')?.value.trim();
@@ -1287,6 +1312,9 @@ function saveProductSilent() {
     zalihe.push(productData);
     localStorage.setItem('zalihe', JSON.stringify(zalihe));
     
+    // ===== DODAJ OVAJ POZIV =====
+    saveLastAddedProducts(productData);
+    
     console.log('✅ Proizvod sačuvan tiho:', productData.product_name);
     
     document.getElementById('pieceInput').value = '';
@@ -1298,6 +1326,7 @@ function saveProductSilent() {
     
     prikaziSveUnose();
 }
+
 function saveProduct() {
     const product = document.getElementById('productInput')?.value.trim();
     const piece = document.getElementById('pieceInput')?.value.trim();
@@ -1340,6 +1369,10 @@ function saveProduct() {
     let zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
     zalihe.push(productData);
     localStorage.setItem('zalihe', JSON.stringify(zalihe));
+    
+    // ===== DODAJ OVAJ POZIV =====
+    saveLastAddedProducts(productData);
+    
     prikaziSveUnose();
     
     document.getElementById('pieceInput').value = '';
@@ -1380,6 +1413,10 @@ function renderInventory(lang) {
     const zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
     const aktivneZalihe = zalihe.filter(p => p.quantity > 0);
     
+    // DOBAVI POSLEDNJE UNETE PROIZVODE (ZA ISTICANJE)
+    const lastAdded = JSON.parse(localStorage.getItem('lastAddedProducts') || '[]');
+    console.log('🆕 Poslednje uneti proizvodi:', lastAdded);
+    
     let html = `<div class="title">${t('stanje')}</div>`;
     html += `<div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;">`;
     html += `<button onclick="azurirajZalihe()" style="background:#4CAF50; color:white; border:none; padding:10px 20px; border-radius:8px; font-size:16px; cursor:pointer;">✅ ${t('azuriraj')}</button>`;
@@ -1404,15 +1441,31 @@ function renderInventory(lang) {
     if (aktivneZalihe.length === 0) {
         html += `<div class="table-row"><div class="cell" style="grid-column:span 8;padding:30px;color:#999;text-align:center;">${t('nema_proizvoda')}</div></div>`;
     } else {
-        aktivneZalihe.forEach((p) => {
+        aktivneZalihe.forEach((p, index) => {
             const originalIndex = zalihe.indexOf(p);
             const expiry = new Date(p.entry_date);
             expiry.setMonth(expiry.getMonth() + p.shelf_life_months);
             const expiryDisplay = expiry.toLocaleDateString('sr-RS', { month: '2-digit', year: '2-digit' });
             const isLow = (p.unit === 'g' && p.quantity < 400) || (p.unit === 'kg' && p.quantity < 0.4) || ((p.unit === 'kom' || p.unit === 'pcs') && p.quantity <= 2);
-            const bgColor = isLow ? '#F9AA65' : '';
             
-            html += `<div class="table-row" style="display:grid; grid-template-columns:40px 1.2fr 1.2fr 0.8fr 0.8fr 0.8fr 0.8fr 1fr; gap:2px; border-bottom:1px solid #eee; padding:5px 0; background:${bgColor};">`;
+            // PROVERI DA LI JE PROIZVOD NOVO DODAT
+            const isNew = lastAdded.some(la => la.product_name === p.product_name && la.entry_date === p.entry_date);
+            
+            // ODREĐIVANJE BOJE: prioritet - novo (svetloplava), zatim niska količina (narandžasta)
+            let bgColor = '';
+            let borderLeft = '';
+            let transition = '';
+            
+            if (isNew) {
+                bgColor = '#e3f2fd'; // Svetloplava
+                borderLeft = '4px solid #1976d2';
+                transition = 'background-color 0.5s ease';
+                console.log(`🆕 Novi proizvod istaknut: ${p.product_name}`);
+            } else if (isLow) {
+                bgColor = '#F9AA65'; // Narandžasta za niske količine
+            }
+            
+            html += `<div class="table-row" style="display:grid; grid-template-columns:40px 1.2fr 1.2fr 0.8fr 0.8fr 0.8fr 0.8fr 1fr; gap:2px; border-bottom:1px solid #eee; padding:5px 0; background:${bgColor}; border-left:${borderLeft}; transition:${transition};">`;
             html += `<div class="cell" style="text-align:center;"><input type="checkbox" class="row-checkbox" data-index="${originalIndex}"></div>`;
             html += `<div class="cell">${p.product_name}</div>`;
             html += `<div class="cell">${p.description || ''}</div>`;
@@ -1426,6 +1479,19 @@ function renderInventory(lang) {
     }
     html += `</div></div>`;
     content.innerHTML = html;
+    
+    // NAKON 5 SEKUNDI UKLONI ISTICANJE NOVIH PROIZVODA
+    setTimeout(function() {
+        const rows = document.querySelectorAll('.table-row');
+        rows.forEach(row => {
+            if (row.style.backgroundColor === '#e3f2fd') {
+                row.style.backgroundColor = '';
+                row.style.borderLeft = '';
+                row.style.transition = 'background-color 0.5s ease';
+            }
+        });
+        console.log('🔄 Isticanje novih proizvoda uklonjeno nakon 5 sekundi');
+    }, 5000);
 }
 
 function toggleAllCheckboxes() {
@@ -2172,9 +2238,6 @@ function handleHeaderBack() {
 // IZVEZI FUNKCIJE GLOBALNO
 // ============================================
 
-// NE PREVEZUJEMO startVoiceRecognition - PUSTIMO ORIGINAL
-// Samo izvozimo sve funkcije
-
 window.stopVoiceRecognition = stopVoiceRecognition;
 window.getCurrentLang = getCurrentLang;
 window.t = t;
@@ -2223,11 +2286,9 @@ window.selectVoiceMode = selectVoiceMode;
 window.selectManualMode = selectManualMode;
 window.goBackFromVoice = goBackFromVoice;
 window.speakText = speakText;
+window.saveLastAddedProducts = saveLastAddedProducts;
 
 console.log('✅ Sve dodatne funkcije izvezene globalno!');
-console.log('✅ stopVoiceRecognition, getCurrentLang, t, switchLanguage, showScreen, openDataEntry, saveProductSilent, deleteItem, goBack, processVoiceCommand');
-
-// ===== NEMA POSEBNOG POVEZIVANJA =====
-// voiceCommands.js će preuzeti startVoiceRecognition
+console.log('✅ stopVoiceRecognition, getCurrentLang, t, switchLanguage, showScreen, openDataEntry, saveProductSilent, deleteItem, goBack, processVoiceCommand, saveLastAddedProducts');
 
 console.log('✅ App spreman!');
