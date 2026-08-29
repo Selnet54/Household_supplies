@@ -1,5 +1,6 @@
 // ============================================
 // VOICE COMMANDS - KONAČNA RADNA VERZIJA
+// SA BRZIM PRIKAZOM I PARSIRANJEM
 // ============================================
 
 (function() {
@@ -10,8 +11,9 @@
     let accumulatedText = '';
     let accumulatedTimeout = null;
     let currentProductData = null;
+    let lastSavedData = null;
 
-    // PROŠIRENE REČI ZA BROJEVE - DODATI SRPSKI REDNI BROJEVI
+    // BROJEVI
     const NUMBER_WORDS = {
         'nula': '0', 'jedan': '1', 'jedna': '1', 'jedno': '1', 'dva': '2', 'dve': '2',
         'tri': '3', 'četiri': '4', 'cetiri': '4', 'pet': '5', 'šest': '6', 'sest': '6',
@@ -20,20 +22,10 @@
         'petnaest': '15', 'šesnaest': '16', 'sesnaest': '16', 'sedamnaest': '17',
         'osamnaest': '18', 'devetnaest': '19', 'dvadeset': '20', 'trideset': '30',
         'četrdeset': '40', 'cetrdeset': '40', 'pedeset': '50', 'šezdeset': '60',
-        'sezdeset': '60', 'sedamdeset': '70', 'osamdeset': '80', 'devedeset': '90', 'sto': '100',
-        // DODATO ZA REDNE BROJEVE
-        'prvi': '1', 'prva': '1', 'prvo': '1',
-        'drugi': '2', 'druga': '2', 'drugo': '2',
-        'treći': '3', 'treca': '3', 'trece': '3',
-        'cetvrti': '4', 'cetvrta': '4', 'cetvrto': '4',
-        'peti': '5', 'peta': '5', 'peto': '5',
-        'šesti': '6', 'sesti': '6', 'šesta': '6', 'sesta': '6',
-        'sedmi': '7', 'sedma': '7', 'sedmo': '7',
-        'osmi': '8', 'osma': '8', 'osmo': '8',
-        'deveti': '9', 'deveta': '9', 'deveto': '9',
-        'deseti': '10', 'deseta': '10', 'deseto': '10'
+        'sezdeset': '60', 'sedamdeset': '70', 'osamdeset': '80', 'devedeset': '90', 'sto': '100'
     };
 
+    // JEDINICE
     const UNIT_MAP = {
         'kilogram': 'kg', 'kilograma': 'kg', 'kg': 'kg', 'kilogrami': 'kg',
         'gram': 'g', 'grama': 'g', 'g': 'g', 'grami': 'g',
@@ -42,6 +34,7 @@
         'paket': 'pak', 'paketa': 'pak', 'pak': 'pak', 'paketi': 'pak'
     };
 
+    // SKLADIŠTA
     const STORAGE_MAP = {
         'zamrzivač': 'Zamrzivač 1', 'zamrzivac': 'Zamrzivač 1',
         'zamrzivač 1': 'Zamrzivač 1', 'zamrzivac 1': 'Zamrzivač 1',
@@ -54,8 +47,7 @@
     function getNumber(word) {
         const w = word.toLowerCase().trim();
         if (NUMBER_WORDS[w] !== undefined) return NUMBER_WORDS[w];
-        const match = w.match(/^(\d+(?:[.,]\d+)?)$/);
-        if (match) return match[1].replace(',', '.');
+        if (/^\d+(?:[.,]\d+)?$/.test(w)) return w.replace(',', '.');
         return null;
     }
 
@@ -63,6 +55,7 @@
         return typeof window.currentLang !== 'undefined' ? window.currentLang : 'sr';
     }
 
+    // ===== PARSIRANJE =====
     function parseVoiceDataEntry(command) {
         console.log('🔍 Parsiram:', command);
         
@@ -138,7 +131,7 @@
 
         console.log('🔢 Brojevi:', numbers, 'Imena:', nameParts);
 
-        // ===== PARSIRANJE =====
+        // ===== PARSIRANJE BROJEVA =====
         if (foundUnit === 'kg' || foundUnit === 'g' || foundUnit === 'l') {
             if (numbers.length >= 3) {
                 result.piece = numbers[0];
@@ -175,6 +168,7 @@
         return result;
     }
 
+    // ===== PRIKAZ PODATAKA U POLJIMA (BRZO) =====
     function prikaziPodatkeUPoljima(data) {
         console.log('📝 Prikazujem u poljima:', data);
         
@@ -183,34 +177,39 @@
             return;
         }
         
-        // DIREKTNO POSTAVI VREDNOSTI
+        // DIREKTNO POSTAVI VREDNOSTI - BEZ KAŠNJENJA
         const productInput = document.getElementById('productInput');
         const pieceInput = document.getElementById('pieceInput');
         const quantityInput = document.getElementById('quantityInput');
         const shelfLifeInput = document.getElementById('shelfLifeInput');
         const storageSelect = document.getElementById('storageSelect');
+        const unitSelect = document.getElementById('unitSelect');
         
         if (productInput) {
             productInput.value = data.product_name || '';
             productInput.dispatchEvent(new Event('input', { bubbles: true }));
+            productInput.dispatchEvent(new Event('change', { bubbles: true }));
             console.log('✅ productInput =', data.product_name);
         }
         
         if (pieceInput) {
             pieceInput.value = data.piece || '1';
             pieceInput.dispatchEvent(new Event('input', { bubbles: true }));
+            pieceInput.dispatchEvent(new Event('change', { bubbles: true }));
             console.log('✅ pieceInput =', data.piece);
         }
         
         if (quantityInput) {
             quantityInput.value = data.quantity || '1';
             quantityInput.dispatchEvent(new Event('input', { bubbles: true }));
+            quantityInput.dispatchEvent(new Event('change', { bubbles: true }));
             console.log('✅ quantityInput =', data.quantity);
         }
         
         if (shelfLifeInput) {
             shelfLifeInput.value = data.shelf_life || '12';
             shelfLifeInput.dispatchEvent(new Event('input', { bubbles: true }));
+            shelfLifeInput.dispatchEvent(new Event('change', { bubbles: true }));
             console.log('✅ shelfLifeInput =', data.shelf_life);
         }
 
@@ -218,13 +217,26 @@
             for (let i = 0; i < storageSelect.options.length; i++) {
                 if (storageSelect.options[i].value === data.storage) {
                     storageSelect.selectedIndex = i;
+                    storageSelect.dispatchEvent(new Event('change', { bubbles: true }));
                     break;
                 }
             }
             console.log('✅ storageSelect =', data.storage);
         }
         
+        if (unitSelect && data.unit) {
+            for (let i = 0; i < unitSelect.options.length; i++) {
+                if (unitSelect.options[i].value === data.unit) {
+                    unitSelect.selectedIndex = i;
+                    unitSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                    break;
+                }
+            }
+            console.log('✅ unitSelect =', data.unit);
+        }
+        
         currentProductData = data;
+        lastSavedData = data;
         
         // AŽURIRAJ PREGLED UNOSA
         if (typeof window.prikaziSveUnose === 'function') {
@@ -232,6 +244,7 @@
         }
     }
 
+    // ===== ČIŠĆENJE POLJA =====
     function ocistiPolja() {
         console.log('🧹 Čistim polja');
         ['productInput', 'pieceInput', 'quantityInput', 'shelfLifeInput', 'descriptionInput'].forEach(function(id) {
@@ -243,6 +256,7 @@
         currentProductData = null;
     }
 
+    // ===== START VOICE RECOGNITION =====
     function startVoiceRecognition() {
         console.log('🎤 startVoiceRecognition POZVAN!');
         
@@ -309,12 +323,19 @@
                     processVoiceCommand(accumulatedText);
                     accumulatedText = '';
                     accumulatedTimeout = null;
-                }, 1500);
+                }, 1200);
             }
         };
 
         recognition.onerror = function(event) {
             console.error('⚠️ Greška:', event.error);
+            if (event.error === 'not-allowed') {
+                const statusEl = document.getElementById('voiceStatus');
+                if (statusEl) {
+                    statusEl.textContent = '❌ Dozvolite mikrofon!';
+                    statusEl.style.color = '#f44336';
+                }
+            }
         };
 
         recognition.onend = function() {
@@ -333,6 +354,7 @@
         }
     }
 
+    // ===== STOP VOICE RECOGNITION =====
     function stopVoiceRecognition() {
         console.log('🛑 stopVoiceRecognition POZVAN!');
         if (window.recognition) {
@@ -348,6 +370,7 @@
         accumulatedText = '';
     }
 
+    // ===== PROCESS VOICE COMMAND =====
     function processVoiceCommand(command) {
         if (!command || isProcessing) return false;
         
@@ -365,6 +388,8 @@
         isProcessing = true;
         setTimeout(function() { isProcessing = false; }, 1000);
 
+        // ===== KOMANDE =====
+        
         // UNOS
         if (lower === 'unos' || lower === 'unesi' || lower === 'add' || lower === 'dodaj') {
             console.log('📝 Otvaram unos');
@@ -460,7 +485,7 @@
             return true;
         }
 
-        // DIKTIRANJE
+        // ===== DIKTIRANJE =====
         const isDataEntry = document.getElementById('productInput') !== null;
         
         if (isDataEntry && command.length > 2) {
@@ -492,9 +517,13 @@
     window.voiceCommand = processVoiceCommand;
     window.prikaziPodatkeUPoljima = prikaziPodatkeUPoljima;
     window.ocistiPolja = ocistiPolja;
+    window.parseVoiceDataEntry = parseVoiceDataEntry;
     window.resetCurrentProductData = function() {
         currentProductData = null;
         console.log('🔄 Resetovani trenutni podaci');
+    };
+    window.getCurrentProductData = function() {
+        return currentProductData;
     };
 
     console.log('✅ voiceCommands.js spreman!');
