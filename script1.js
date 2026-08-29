@@ -2227,31 +2227,7 @@ window.speakText = speakText;
 console.log('✅ Sve dodatne funkcije izvezene globalno!');
 console.log('✅ stopVoiceRecognition, getCurrentLang, t, switchLanguage, showScreen, openDataEntry, saveProductSilent, deleteItem, goBack, processVoiceCommand');
 
-// ===== POVEZIVANJE SA voiceCommands.js =====
-// Ovo omogućava da glasovne komande rade BEZ BESKONAČNE PETLJE
+// ===== NEMA POSEBNOG POVEZIVANJA =====
+// voiceCommands.js će preuzeti startVoiceRecognition
 
-// 1. Sačuvaj originalnu startVoiceRecognition iz voiceCommands.js
-if (typeof window._voiceCommandsStart === 'undefined' && typeof window.startVoiceRecognition === 'function') {
-    window._voiceCommandsStart = window.startVoiceRecognition;
-}
-
-// 2. Prevezi startVoiceRecognition da poziva voiceCommands.js
-if (typeof window.startVoiceRecognition === 'function' && !window.startVoiceRecognition.toString().includes('_voiceCommandsStart')) {
-    const originalStart = window.startVoiceRecognition;
-    
-    window.startVoiceRecognition = function() {
-        console.log('🎤 Pozivam voiceCommands.js');
-        if (typeof window._voiceCommandsStart === 'function') {
-            return window._voiceCommandsStart();
-        }
-        if (typeof originalStart === 'function' && originalStart !== window.startVoiceRecognition) {
-            return originalStart();
-        }
-        console.warn('⚠️ voiceCommands nije dostupan!');
-    };
-    console.log('✅ startVoiceRecognition prevezao na voiceCommands.js');
-} else {
-    console.log('✅ startVoiceRecognition je već prevezao');
-}
-
-console.log('✅ voiceCommands povezan!');
+console.log('✅ App spreman!');
