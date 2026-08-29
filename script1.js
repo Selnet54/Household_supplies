@@ -2171,14 +2171,31 @@ function handleHeaderBack() {
 // ============================================
 // IZVEZI FUNKCIJE GLOBALNO
 // ============================================
-window.startVoiceRecognition = startVoiceRecognition;
+// PRVO SAČUVAJ ORIGINALNU startVoiceRecognition IZ voiceCommands.js
+if (typeof window._voiceCommandsStart === 'undefined' && typeof window.startVoiceRecognition === 'function') {
+    window._voiceCommandsStart = window.startVoiceRecognition;
+}
+
+// ONDA PREVEZI DA UVEK POZIVA voiceCommands.js
+window.startVoiceRecognition = function() {
+    console.log('🎤 Pozivam voiceCommands.js preko window._voiceCommandsStart');
+    if (typeof window._voiceCommandsStart === 'function') {
+        return window._voiceCommandsStart();
+    }
+    // Fallback - pozovi original
+    if (typeof window._originalStartVoice === 'function') {
+        return window._originalStartVoice();
+    }
+    console.warn('⚠️ voiceCommands nije dostupan!');
+};
+
 window.stopVoiceRecognition = stopVoiceRecognition;
 window.getCurrentLang = getCurrentLang;
 window.t = t;
 window.switchLanguage = selectLanguage;
 window.showScreen = showScreen;
 window.openDataEntry = renderDataEntry;
-window.saveProductSilent = saveProductSilent;   // <--- SAMO OVO DODAJ
+window.saveProductSilent = saveProductSilent;
 window.deleteItem = function(itemId) {
     // ...
 };
@@ -2187,6 +2204,8 @@ window.renderInventory = renderInventory;
 window.renderShoppingList = renderShoppingList;
 window.renderCategories = renderCategories;
 window.renderDataEntry = renderDataEntry;
+window.processVoiceCommand = processVoiceCommand;
+window.voiceCommand = processVoiceCommand;
 
 console.log('✅ Sve dodatne funkcije izvezene globalno!');
-console.log('✅ startVoiceRecognition, stopVoiceRecognition, getCurrentLang, t, switchLanguage, showScreen, openDataEntry, saveProductSilent, deleteItem, goBack');  // <--- DODAJ I OVDE
+console.log('✅ startVoiceRecognition, stopVoiceRecognition, getCurrentLang, t, switchLanguage, showScreen, openDataEntry, saveProductSilent, deleteItem, goBack, processVoiceCommand');
