@@ -1,5 +1,5 @@
 // ============================================
-// VOICE COMMANDS - KONAČNA VERZIJA
+// VOICE COMMANDS - ISPRAVLJENA VERZIJA
 // ============================================
 
 (function() {
@@ -50,7 +50,8 @@
     }
 
     function parseVoiceDataEntry(command) {
-        let text = command.replace(/^(unos|unesi|dodaj|add)\s*/i, '').trim();
+        // UKLANJAMO "start" iz komande pre obrade
+        let text = command.replace(/^(unos|unesi|dodaj|add|start|go)\s*/i, '').trim();
         let words = text.split(/\s+/).map(s => s.trim()).filter(Boolean);
 
         let result = {
@@ -281,20 +282,17 @@
             isProcessing = false; 
         }, 1500);
 
-        // REZERVISANE REČI
-        const reservedWords = ['start', 'go'];
-        if (reservedWords.includes(lower)) {
-            console.log('⏭️ Rezervisana reč, ignorišem:', lower);
-            return true;
-        }
-
-        // PLUS - sačuvaj i očisti za novi unos
-        if (lower === 'plus') {
+        // ===== KOMANDE =====
+        
+        // 1. PLUS - sačuvaj i očisti za novi unos
+        if (lower === 'plus' || lower.includes(' plus')) {
             console.log('➕ Plus - čuvam podatke');
             if (typeof window.saveProductSilent === 'function') {
                 const productInput = document.getElementById('productInput');
                 if (productInput && productInput.value.trim() !== '') {
                     window.saveProductSilent();
+                    
+                    // OČISTI POLJA ZA NOVI UNOS
                     setTimeout(function() {
                         ['productInput', 'pieceInput', 'quantityInput', 'shelfLifeInput', 'descriptionInput'].forEach(function(id) {
                             const el = document.getElementById(id);
@@ -304,27 +302,42 @@
                         if (p) { p.focus(); p.select(); }
                         console.log('✅ Polja očišćena za novi unos');
                     }, 300);
+                } else {
+                    console.log('⚠️ Nema podataka za čuvanje');
                 }
             }
             return true;
         }
 
-        // END - završava unos i otvara zalihe
-        if (lower === 'end' || lower === 'kraj') {
+        // 2. END - završava unos i otvara zalihe
+        if (lower === 'end' || lower === 'kraj' || lower === 'završi') {
             console.log('🏁 End - završavam unos');
+            
+            // Prvo sačuvaj trenutni proizvod ako postoji
             if (typeof window.saveProductSilent === 'function') {
                 const productInput = document.getElementById('productInput');
                 if (productInput && productInput.value.trim() !== '') {
                     window.saveProductSilent();
+                    console.log('✅ Sačuvan poslednji proizvod');
                 }
             }
-            if (typeof window.renderInventory === 'function') {
-                window.renderInventory(lang);
-            }
+            
+            // Onda otvori zalihe
+            setTimeout(function() {
+                if (typeof window.renderInventory === 'function') {
+                    window.renderInventory(lang);
+                    
+                    // DODAJ SVETLOPLAVU PODLOGU NOVIM PROIZVODIMA
+                    setTimeout(function() {
+                        highlightNewProducts();
+                    }, 300);
+                }
+                console.log('📦 Zalihe prikazane');
+            }, 300);
             return true;
         }
 
-        // EXIT
+        // 3. EXIT
         if (lower === 'exit' || lower === 'izlaz') {
             console.log('🚪 IZLAZ');
             if (typeof window.exitApp === 'function') {
@@ -333,16 +346,19 @@
             return true;
         }
 
-        // ZALIHE
+        // 4. ZALIHE
         if (lower === 'zalihe' || lower === 'stanje' || lower === 'inventory') {
             console.log('📦 ZALIHE');
             if (typeof window.renderInventory === 'function') {
                 window.renderInventory(lang);
+                setTimeout(function() {
+                    highlightNewProducts();
+                }, 300);
             }
             return true;
         }
 
-        // SPISAK
+        // 5. SPISAK
         if (lower === 'spisak' || lower === 'potrebe' || lower === 'shopping') {
             console.log('🛒 SPISAK');
             if (typeof window.renderShoppingList === 'function') {
@@ -351,7 +367,7 @@
             return true;
         }
 
-        // UNOS
+        // 6. UNOS
         if (lower === 'unos' || lower === 'unesi' || lower === 'add') {
             console.log('📝 Otvaram ekran za unos...');
             if (typeof window.renderDataEntry === 'function') {
@@ -360,13 +376,15 @@
             return true;
         }
 
-        // DIKTIRANJE
+        // 7. DIKTIRANJE - obrada unosa proizvoda
+        // Proveravamo da li smo na ekranu za unos
         const isDataEntry = window.currentScreen === 'dataEntry' || 
                             window.currentScreenState === 'dataEntry' || 
                             document.getElementById('productInput') !== null;
 
         if (isDataEntry && command.length > 3) {
-            let cleanCommand = command.replace(/^(start|go)\s*/i, '').trim();
+            // Uklanjamo sve rezervisane reči iz komande
+            let cleanCommand = command.replace(/^(unos|unesi|dodaj|add|start|go)\s*/i, '').trim();
             cleanCommand = cleanCommand.replace(/\s+/g, ' ').trim();
             
             console.log('🧹 Očišćena komanda:', cleanCommand);
@@ -383,11 +401,34 @@
         return false;
     }
 
+    // ===== FUNKCIJA ZA ISTICANJE NOVIH PROIZVODA =====
+    function highlightNewProducts() {
+        // Dodajemo svetloplavu podlogu novim proizvodima
+        const items = document.querySelectorAll('.inventory-item');
+        const lastItems = Math.min(5, items.length); // Poslednjih 5 proizvoda
+        
+        for (let i = items.length - lastItems; i < items.length; i++) {
+            if (items[i]) {
+                items[i].style.backgroundColor = '#e3f2fd'; // Svetloplava
+                items[i].style.borderLeft = '4px solid #1976d2';
+                items[i].style.transition = 'background-color 0.5s';
+                
+                // Nakon 5 sekundi vrati normalnu boju
+                setTimeout(function(el) {
+                    el.style.backgroundColor = '';
+                    el.style.borderLeft = '';
+                }, 5000, items[i]);
+            }
+        }
+        console.log(`✨ Istaknuto ${Math.min(lastItems, items.length)} novih proizvoda`);
+    }
+
     // ===== IZVOZ =====
     window.startVoiceRecognition = startVoiceRecognition;
     window.stopVoiceRecognition = stopVoiceRecognition;
     window.processVoiceCommand = processVoiceCommand;
     window.voiceCommand = processVoiceCommand;
+    window.highlightNewProducts = highlightNewProducts;
 
     console.log('✅ voiceCommands.js spreman!');
 })();
