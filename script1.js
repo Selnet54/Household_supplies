@@ -651,8 +651,8 @@ function updateInterfaceLanguage() {
         'invMenuText': getTxt('stanje', 'Inventory'),
         'shopMenuText': getTxt('spisak', 'Shopping List'),
         'addMenuText': getTxt('unos_podataka', 'Add Product'),
-        'exitChoiceBtn': getTxt('odustani', 'EXIT'),
-        'exitMenuText': getTxt('nazad', 'EXIT')
+        'exitChoiceBtn': 'EXIT',
+        'exitMenuText': 'BACK'  
     };
 
     for (const [id, text] of Object.entries(texts)) {
