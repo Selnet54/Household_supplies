@@ -10,7 +10,6 @@ let END_AKTIVAN = false;
 let isVoiceInput = false;
 let ALLOW_INVENTORY_OPEN = false;
 let micRestartTimer = null;
-let recognition = null;
 
 // ============================================
 // 1. POMOĆNE FUNKCIJE
