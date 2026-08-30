@@ -22,7 +22,6 @@ console.log('✅ Script.js je učitan!');
     
     console.log('✅ Zaštita od preusmeravanja aktivirana!');
 })();
-
 // ===== TRENUTNO STANJE =====
 let currentLang = 'en';
 let currentCategory = '';
@@ -30,27 +29,28 @@ let currentSubcategory = '';
 let currentProductPart = '';
 let currentScreenState = 'languages';
 let fromChoiceScreen = false;
-let screenHistory = [];
+let screenHistory = ['languages'];  // 🔥 POČINJE SA JEZICIMA
 let currentScreen = 'languages';
+let previousScreen = null;  // 🔥 DODATO ZA PRAĆENJE PREĐAŠNJEG EKRANA
 
-// ===== 0. EXIT FUNKCIJA =====
 function exitApp() {
     console.log("🚪 Exit dugme kliknuto!");
     
     const loginScreen = document.getElementById('loginScreen');
     const languageScreen = document.getElementById('languageScreen');
+    const choiceScreen = document.getElementById('choiceScreen');
     
     const isLoginVisible = loginScreen && window.getComputedStyle(loginScreen).display === 'flex';
     const isLanguageVisible = languageScreen && window.getComputedStyle(languageScreen).display === 'flex';
+    const isChoiceVisible = choiceScreen && window.getComputedStyle(choiceScreen).display === 'flex';
     
     let poruka;
-    if (isLoginVisible || isLanguageVisible) {
+    if (isLoginVisible || isLanguageVisible || isChoiceVisible) {
         poruka = "Thanks for using this app! 👋";
     } else {
         poruka = translations[currentLang]?.exit_poruka || "Thanks for using this app! 👋";
     }
     
-    // DIREKTNO PRIKAŽI ZAHVALNI EKRAN - BEZ POPUP PROZORA
     document.body.innerHTML = '';
     document.body.style.background = '#1a237e';
     document.body.style.margin = '0';
@@ -74,7 +74,95 @@ function exitApp() {
         </div>
     `;
 }
+// ===== UPRAVLJANJE EKRANIMA SA ISTORIJOM =====
+function navigateTo(screenId, callback) {
+    if (currentScreen && currentScreen !== screenId) {
+        screenHistory.push(currentScreen);
+        previousScreen = currentScreen;
+    }
+    
+    console.log('🧭 Navigacija:', previousScreen, '→', screenId);
+    console.log('📜 Istorija:', screenHistory);
+    
+    document.querySelectorAll('.screen').forEach(s => {
+        s.style.display = 'none';
+        s.classList.remove('active');
+    });
+    
+    const screen = document.getElementById(screenId);
+    if (screen) {
+        screen.style.display = 'flex';
+        screen.classList.add('active');
+    }
+    
+    currentScreen = screenId;
+    currentScreenState = screenId;
+    
+    if (typeof callback === 'function') {
+        callback();
+    }
+    
+    if (typeof updateHeaderLanguage === 'function') {
+        updateHeaderLanguage();
+    }
+}
 
+function goBack() {
+    console.log('⬅️ goBack pozvan');
+    console.log('📜 Istorija pre back-a:', screenHistory);
+    console.log('📌 Trenutni ekran:', currentScreen);
+    
+    if (currentScreen === 'languages') {
+        console.log('🏠 Već ste na početnom ekranu');
+        return;
+    }
+    
+    if (currentScreen === 'choiceScreen') {
+        console.log('🔙 Vraćam na jezike');
+        navigateTo('languageScreen', function() {
+            if (typeof renderLanguages === 'function') {
+                renderLanguages();
+            }
+        });
+        return;
+    }
+    
+    if (screenHistory.length > 0) {
+        const previous = screenHistory.pop();
+        console.log('⬅️ Vraćam se na:', previous);
+        
+        navigateTo(previous, function() {
+            switch(previous) {
+                case 'languageScreen':
+                    if (typeof renderLanguages === 'function') renderLanguages();
+                    break;
+                case 'choiceScreen':
+                    break;
+                case 'categories':
+                    if (typeof renderCategories === 'function') renderCategories();
+                    break;
+                case 'dataEntry':
+                    if (typeof renderDataEntry === 'function') renderDataEntry('');
+                    break;
+                case 'inventory':
+                    if (typeof renderInventory === 'function') renderInventory();
+                    break;
+                case 'shoppingList':
+                    if (typeof renderShoppingList === 'function') renderShoppingList();
+                    break;
+                default:
+                    if (typeof renderLanguages === 'function') renderLanguages();
+            }
+        });
+    } else {
+        console.log('🏠 Nema istorije, vraćam na jezike');
+        navigateTo('languageScreen', function() {
+            if (typeof renderLanguages === 'function') {
+                renderLanguages();
+            }
+        });
+    }
+}
 // ===== MODERNI ALERT - DINAMIČKI KREIRAN =====
 function showModernAlert(title, message, icon = '📢') {
     console.log('🔔 Alert:', title, message);
@@ -947,15 +1035,19 @@ function selectLanguage(langCode) {
         updateInterfaceLanguage();
     }
 
-    showScreen('choiceScreen');
+    // 🔥 ZAMENI showScreen('choiceScreen') SA:
+    navigateTo('choiceScreen');
 }
 
 function renderCategories() {
     console.log('📂 renderCategories pozvan za jezik:', currentLang);
     
-    // RESETUJ ISTORIJU (početni ekran)
-    screenHistory = [];
+    // DODAJ U ISTORIJU
+    if (currentScreen !== 'categories') {
+        screenHistory.push(currentScreen);
+    }
     currentScreen = 'categories';
+    currentScreenState = 'categories';
     
     const mainScreen = document.getElementById('mainScreen');
     if (mainScreen && mainScreen.style.display !== 'flex') {
@@ -968,7 +1060,6 @@ function renderCategories() {
         console.log('✅ mainScreen prikazan iz renderCategories');
     }
     
-    currentScreenState = 'categories';
     const content = document.getElementById('mainContent');
     if (!content) return;
     
@@ -986,7 +1077,6 @@ function renderCategories() {
     html += `</div>`;
     content.innerHTML = html;
 }
-
 function renderSubcategories(category) {
     currentScreenState = 'subcategories';
     currentCategory = category;
@@ -1112,6 +1202,13 @@ function renderProductParts(subcategory) {
 }
 
 function renderDataEntry(productName) {
+    // DODAJ U ISTORIJU
+    if (currentScreen !== 'dataEntry') {
+        screenHistory.push(currentScreen);
+    }
+    currentScreen = 'dataEntry';
+    currentScreenState = 'dataEntry';
+    
     // ===== PRIKAŽI MAINSCREEN =====
     const mainScreen = document.getElementById('mainScreen');
     if (mainScreen && mainScreen.style.display !== 'flex') {
@@ -1125,17 +1222,13 @@ function renderDataEntry(productName) {
     }
     // ===== KRAJ =====
     
-    // Automatska detekcija odakle smo došli
+    // Automatska detekcija odakle smo došli  // 🔥 SAMO JEDNOM!
     if (!currentCategory && !currentSubcategory && !productName) {
         fromChoiceScreen = true;
     } else {
         fromChoiceScreen = false;
     }
-    
-    // DODAJ U ISTORIJU
-    screenHistory.push('dataEntry');
-    currentScreen = 'dataEntry';
-    
+
     currentScreenState = 'dataEntry';
     currentProductPart = productName;
     const content = document.getElementById('mainContent');
@@ -1385,12 +1478,14 @@ function saveProduct() {
 function renderInventory(lang) {
     console.log('📦 renderInventory pozvan za jezik:', lang || currentLang);
     
-    const currentLangLocal = lang || currentLang || 'sr';
-    
     // DODAJ U ISTORIJU
-    screenHistory.push('inventory');
+    if (currentScreen !== 'inventory') {
+        screenHistory.push(currentScreen);
+    }
     currentScreen = 'inventory';
-    console.log('📜 Trenutni ekran postavljen na: inventory');
+    currentScreenState = 'inventory';
+    
+    const currentLangLocal = lang || currentLang || 'sr';
     
     const mainScreen = document.getElementById('mainScreen');
     if (mainScreen && mainScreen.style.display !== 'flex') {
@@ -1403,10 +1498,9 @@ function renderInventory(lang) {
         console.log('✅ mainScreen prikazan iz renderInventory');
     }
     
-    currentScreenState = 'inventory';
     const content = document.getElementById('mainContent');
     if (!content) return;
-    
+        
     const zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
     const aktivneZalihe = zalihe.filter(p => p.quantity > 0);
     
@@ -1661,8 +1755,11 @@ function renderShoppingList() {
     console.log('🛒 renderShoppingList pozvan za jezik:', currentLang);
     
     // DODAJ U ISTORIJU
-    screenHistory.push('shoppingList');
+    if (currentScreen !== 'shoppingList') {
+        screenHistory.push(currentScreen);
+    }
     currentScreen = 'shoppingList';
+    currentScreenState = 'shopping';
     
     const mainScreen = document.getElementById('mainScreen');
     if (mainScreen && mainScreen.style.display !== 'flex') {
@@ -1675,7 +1772,6 @@ function renderShoppingList() {
         console.log('✅ mainScreen prikazan iz renderShoppingList');
     }
     
-    currentScreenState = 'shopping';
     const content = document.getElementById('mainContent');
     if (!content) return;
     
@@ -2183,29 +2279,41 @@ function hideAllScreens() {
 }
 
 function handleHeaderBack() {
-    console.log('⬅ Kliknuto dugme Nazad');
+    console.log('⬅️ Kliknuto dugme Back');
+    console.log('📌 Trenutni ekran:', currentScreen);
+    console.log('📜 Istorija:', screenHistory);
     
-    const choiceScreen = document.getElementById('choiceScreen');
     const voiceMenuScreen = document.getElementById('voiceMenuScreen');
-    
-    if (voiceMenuScreen && voiceMenuScreen.classList.contains('active') && typeof goBackFromVoice === 'function') {
-        goBackFromVoice();
-        return;
-    }
-    
-    hideAllScreens();
-    
-    if (choiceScreen) {
-        choiceScreen.style.display = 'flex';
-        choiceScreen.classList.add('active');
-    } else {
-        const login = document.getElementById('loginScreen');
-        if (login) {
-            login.style.display = 'flex';
-            login.classList.add('active');
+    if (voiceMenuScreen && voiceMenuScreen.classList.contains('active')) {
+        if (typeof goBackFromVoice === 'function') {
+            goBackFromVoice();
+            return;
         }
     }
+    
+    if (typeof goBack === 'function') {
+        goBack();
+    } else {
+        const choiceScreen = document.getElementById('choiceScreen');
+        const languageScreen = document.getElementById('languageScreen');
+        
+        if (choiceScreen) {
+            choiceScreen.style.display = 'none';
+            choiceScreen.classList.remove('active');
+        }
+        if (languageScreen) {
+            languageScreen.style.display = 'flex';
+            languageScreen.classList.add('active');
+            if (typeof renderLanguages === 'function') {
+                renderLanguages();
+            }
+        }
+        currentScreen = 'languages';
+        currentScreenState = 'languages';
+        screenHistory = ['languages'];
+    }
 }
+// ===== KRAJ handleHeaderBack =====
 
 // ============================================
 // IZVEZI FUNKCIJE GLOBALNO
