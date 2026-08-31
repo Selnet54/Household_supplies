@@ -2373,7 +2373,7 @@ console.log('✅ stopVoiceRecognition, getCurrentLang, t, switchLanguage, showSc
 // Potraži postojecu funkciju i zameni je sa ovom:
 
 function handleHeaderBack() {
-    console.log('⬅️ Kliknuto dugme Back');
+    console.log('⬅️ Kliknuto dugme Nazad');
     console.log('📌 Trenutni ekran:', currentScreen);
     console.log('📜 Istorija:', screenHistory);
     
@@ -2409,30 +2409,7 @@ function handleHeaderBack() {
         return;
     }
     
-    // 3. 🔥 Ako smo na categories, vrati na choiceScreen
-    if (currentScreen === 'categories') {
-        console.log('📂 Vraćam na choiceScreen');
-        const mainScreen = document.getElementById('mainScreen');
-        const choiceScreen = document.getElementById('choiceScreen');
-        
-        if (mainScreen) {
-            mainScreen.style.display = 'none';
-            mainScreen.classList.remove('active');
-        }
-        if (choiceScreen) {
-            choiceScreen.style.display = 'flex';
-            choiceScreen.classList.add('active');
-        }
-        currentScreen = 'choiceScreen';
-        currentScreenState = 'choiceScreen';
-        // DODAJ choiceScreen u istoriju ako nije već tu
-        if (!screenHistory.includes('choiceScreen')) {
-            screenHistory.push('choiceScreen');
-        }
-        return;
-    }
-    
-    // 4. 🔥 Ako imamo istoriju, vrati se na prethodni ekran
+    // 3. 🔥 KORISTI screenHistory ZA HIJERARHIJSKI NAZAD
     if (screenHistory.length > 0) {
         const previousScreen = screenHistory.pop();
         console.log('⬅️ Vraćam se na:', previousScreen);
@@ -2483,7 +2460,6 @@ function handleHeaderBack() {
                 }
                 break;
             default:
-                // Ako ne znamo ekran, vrati na jezike
                 const fallbackLang = document.getElementById('languageScreen');
                 if (fallbackLang) {
                     fallbackLang.style.display = 'flex';
@@ -2499,7 +2475,7 @@ function handleHeaderBack() {
         return;
     }
     
-    // 5. Fallback - vrati na jezike
+    // 4. Fallback - vrati na jezike
     console.log('🏠 Fallback - vraćam na jezike');
     const choiceScreen = document.getElementById('choiceScreen');
     const languageScreen = document.getElementById('languageScreen');
