@@ -2409,7 +2409,7 @@ function handleHeaderBack() {
         return;
     }
     
-    // 3. Ako smo na categories, vrati na choiceScreen
+    // 3. 🔥 Ako smo na categories, vrati na choiceScreen
     if (currentScreen === 'categories') {
         console.log('📂 Vraćam na choiceScreen');
         const mainScreen = document.getElementById('mainScreen');
@@ -2425,11 +2425,14 @@ function handleHeaderBack() {
         }
         currentScreen = 'choiceScreen';
         currentScreenState = 'choiceScreen';
-        screenHistory = ['languages', 'choiceScreen'];
+        // DODAJ choiceScreen u istoriju ako nije već tu
+        if (!screenHistory.includes('choiceScreen')) {
+            screenHistory.push('choiceScreen');
+        }
         return;
     }
     
-    // 4. Ako imamo istoriju, vrati se na prethodni ekran
+    // 4. 🔥 Ako imamo istoriju, vrati se na prethodni ekran
     if (screenHistory.length > 0) {
         const previousScreen = screenHistory.pop();
         console.log('⬅️ Vraćam se na:', previousScreen);
@@ -2480,6 +2483,7 @@ function handleHeaderBack() {
                 }
                 break;
             default:
+                // Ako ne znamo ekran, vrati na jezike
                 const fallbackLang = document.getElementById('languageScreen');
                 if (fallbackLang) {
                     fallbackLang.style.display = 'flex';
@@ -2515,9 +2519,7 @@ function handleHeaderBack() {
     currentScreenState = 'languages';
     screenHistory = ['languages'];
 }
-
 // ===== KRAJ handleHeaderBack =====
-
 
 // 2. POPRAVI DELEGIRANE KLIKOVE ZA exitChoiceBtn
 // Ovo dodaj u postojecu document.addEventListener('click', function(e) { ... })
