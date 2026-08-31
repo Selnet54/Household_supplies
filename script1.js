@@ -163,6 +163,26 @@ function goBack() {
         });
     }
 }
+function goBackFromChoice() {
+    console.log('🔙 Back - vraćam na jezike');
+    const choiceScreen = document.getElementById('choiceScreen');
+    const languageScreen = document.getElementById('languageScreen');
+    
+    if (choiceScreen) {
+        choiceScreen.style.display = 'none';
+        choiceScreen.classList.remove('active');
+    }
+    if (languageScreen) {
+        languageScreen.style.display = 'flex';
+        languageScreen.classList.add('active');
+        if (typeof renderLanguages === 'function') {
+            renderLanguages();
+        }
+    }
+    currentScreen = 'languages';
+    currentScreenState = 'languages';
+    screenHistory = ['languages'];
+}
 // ===== MODERNI ALERT - DINAMIČKI KREIRAN =====
 function showModernAlert(title, message, icon = '📢') {
     console.log('🔔 Alert:', title, message);
@@ -2322,6 +2342,7 @@ window.renderDataEntry = renderDataEntry;
 window.processVoiceCommand = processVoiceCommand;
 window.voiceCommand = processVoiceCommand;
 window.exitApp = exitApp;
+window.goBackFromChoice = goBackFromChoice;
 window.showModernAlert = showModernAlert;
 window.closeModernAlert = closeModernAlert;
 window.showModernConfirm = showModernConfirm;
