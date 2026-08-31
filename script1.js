@@ -2129,10 +2129,32 @@ document.addEventListener('click', function(e) {
 
     if (target.id === 'exitLoginBtn' || target.closest('#exitLoginBtn') ||
         target.id === 'exitLangBtn'  || target.closest('#exitLangBtn')  ||
-        target.id === 'exitMainBtn'  || target.closest('#exitMainBtn') ||
-        target.id === 'exitChoiceBtn' || target.closest('#exitChoiceBtn')) {
+        target.id === 'exitMainBtn'  || target.closest('#exitMainBtn')) {
         console.log('🚪 Exit dugme kliknuto');
         exitApp();
+    }
+
+    // 🔥 exitChoiceBtn - vraća na jezike (NE gasi aplikaciju)
+    if (target.id === 'exitChoiceBtn' || target.closest('#exitChoiceBtn')) {
+        console.log('🔙 Back dugme kliknuto - vraćam na jezike');
+        const choiceScreen = document.getElementById('choiceScreen');
+        const languageScreen = document.getElementById('languageScreen');
+        
+        if (choiceScreen) {
+            choiceScreen.style.display = 'none';
+            choiceScreen.classList.remove('active');
+        }
+        if (languageScreen) {
+            languageScreen.style.display = 'flex';
+            languageScreen.classList.add('active');
+            if (typeof renderLanguages === 'function') {
+                renderLanguages();
+            }
+        }
+        currentScreen = 'languages';
+        currentScreenState = 'languages';
+        screenHistory = ['languages'];
+        return;
     }
 
     if (target.id === 'backBtn' || target.closest('#backBtn') ||
@@ -2278,43 +2300,6 @@ function hideAllScreens() {
     });
 }
 
-function handleHeaderBack() {
-    console.log('⬅️ Kliknuto dugme Back');
-    console.log('📌 Trenutni ekran:', currentScreen);
-    console.log('📜 Istorija:', screenHistory);
-    
-    const voiceMenuScreen = document.getElementById('voiceMenuScreen');
-    if (voiceMenuScreen && voiceMenuScreen.classList.contains('active')) {
-        if (typeof goBackFromVoice === 'function') {
-            goBackFromVoice();
-            return;
-        }
-    }
-    
-    if (typeof goBack === 'function') {
-        goBack();
-    } else {
-        const choiceScreen = document.getElementById('choiceScreen');
-        const languageScreen = document.getElementById('languageScreen');
-        
-        if (choiceScreen) {
-            choiceScreen.style.display = 'none';
-            choiceScreen.classList.remove('active');
-        }
-        if (languageScreen) {
-            languageScreen.style.display = 'flex';
-            languageScreen.classList.add('active');
-            if (typeof renderLanguages === 'function') {
-                renderLanguages();
-            }
-        }
-        currentScreen = 'languages';
-        currentScreenState = 'languages';
-        screenHistory = ['languages'];
-    }
-}
-// ===== KRAJ handleHeaderBack =====
-
 // ============================================
 // IZVEZI FUNKCIJE GLOBALNO
 // ============================================
@@ -2380,5 +2365,203 @@ window.ocistiPolja = window.ocistiPolja || function() {
 
 console.log('✅ Sve dodatne funkcije izvezene globalno!');
 console.log('✅ stopVoiceRecognition, getCurrentLang, t, switchLanguage, showScreen, openDataEntry, saveProductSilent, deleteItem, goBack, processVoiceCommand, saveLastAddedProducts');
+// ============================================
+// POPRAVKA ZA BACK DUGME NA 4. EKRANU
+// ============================================
 
+// 1. POPRAVI handleHeaderBack - ZAMENI POSTOJEĆU FUNKCIJU
+// Potraži postojecu funkciju i zameni je sa ovom:
+
+function handleHeaderBack() {
+    console.log('⬅️ Kliknuto dugme Back');
+    console.log('📌 Trenutni ekran:', currentScreen);
+    console.log('📜 Istorija:', screenHistory);
+    
+    // 1. Ako smo na voice menu, vrati se na choiceScreen
+    const voiceMenuScreen = document.getElementById('voiceMenuScreen');
+    if (voiceMenuScreen && voiceMenuScreen.classList.contains('active')) {
+        if (typeof goBackFromVoice === 'function') {
+            goBackFromVoice();
+            return;
+        }
+    }
+    
+    // 2. Ako smo na choiceScreen (4. ekran), vrati na jezike
+    if (currentScreen === 'choiceScreen') {
+        console.log('🔙 Vraćam na jezike');
+        const choiceScreen = document.getElementById('choiceScreen');
+        const languageScreen = document.getElementById('languageScreen');
+        
+        if (choiceScreen) {
+            choiceScreen.style.display = 'none';
+            choiceScreen.classList.remove('active');
+        }
+        if (languageScreen) {
+            languageScreen.style.display = 'flex';
+            languageScreen.classList.add('active');
+            if (typeof renderLanguages === 'function') {
+                renderLanguages();
+            }
+        }
+        currentScreen = 'languages';
+        currentScreenState = 'languages';
+        screenHistory = ['languages'];
+        return;
+    }
+    
+    // 3. Ako smo na categories, vrati na choiceScreen
+    if (currentScreen === 'categories') {
+        console.log('📂 Vraćam na choiceScreen');
+        const mainScreen = document.getElementById('mainScreen');
+        const choiceScreen = document.getElementById('choiceScreen');
+        
+        if (mainScreen) {
+            mainScreen.style.display = 'none';
+            mainScreen.classList.remove('active');
+        }
+        if (choiceScreen) {
+            choiceScreen.style.display = 'flex';
+            choiceScreen.classList.add('active');
+        }
+        currentScreen = 'choiceScreen';
+        currentScreenState = 'choiceScreen';
+        screenHistory = ['languages', 'choiceScreen'];
+        return;
+    }
+    
+    // 4. Ako imamo istoriju, vrati se na prethodni ekran
+    if (screenHistory.length > 0) {
+        const previousScreen = screenHistory.pop();
+        console.log('⬅️ Vraćam se na:', previousScreen);
+        currentScreen = previousScreen;
+        
+        document.querySelectorAll('.screen').forEach(s => {
+            s.style.display = 'none';
+            s.classList.remove('active');
+        });
+        
+        switch(previousScreen) {
+            case 'languages':
+            case 'languageScreen':
+                const langScreen = document.getElementById('languageScreen');
+                if (langScreen) {
+                    langScreen.style.display = 'flex';
+                    langScreen.classList.add('active');
+                    if (typeof renderLanguages === 'function') {
+                        renderLanguages();
+                    }
+                }
+                break;
+            case 'choiceScreen':
+                const choiceScr = document.getElementById('choiceScreen');
+                if (choiceScr) {
+                    choiceScr.style.display = 'flex';
+                    choiceScr.classList.add('active');
+                }
+                break;
+            case 'categories':
+                if (typeof renderCategories === 'function') {
+                    renderCategories();
+                }
+                break;
+            case 'dataEntry':
+                if (typeof renderDataEntry === 'function') {
+                    renderDataEntry('');
+                }
+                break;
+            case 'inventory':
+                if (typeof renderInventory === 'function') {
+                    renderInventory();
+                }
+                break;
+            case 'shoppingList':
+                if (typeof renderShoppingList === 'function') {
+                    renderShoppingList();
+                }
+                break;
+            default:
+                const fallbackLang = document.getElementById('languageScreen');
+                if (fallbackLang) {
+                    fallbackLang.style.display = 'flex';
+                    fallbackLang.classList.add('active');
+                    if (typeof renderLanguages === 'function') {
+                        renderLanguages();
+                    }
+                }
+                currentScreen = 'languages';
+                currentScreenState = 'languages';
+                screenHistory = ['languages'];
+        }
+        return;
+    }
+    
+    // 5. Fallback - vrati na jezike
+    console.log('🏠 Fallback - vraćam na jezike');
+    const choiceScreen = document.getElementById('choiceScreen');
+    const languageScreen = document.getElementById('languageScreen');
+    
+    if (choiceScreen) {
+        choiceScreen.style.display = 'none';
+        choiceScreen.classList.remove('active');
+    }
+    if (languageScreen) {
+        languageScreen.style.display = 'flex';
+        languageScreen.classList.add('active');
+        if (typeof renderLanguages === 'function') {
+            renderLanguages();
+        }
+    }
+    currentScreen = 'languages';
+    currentScreenState = 'languages';
+    screenHistory = ['languages'];
+}
+
+// ===== KRAJ handleHeaderBack =====
+
+
+// 2. POPRAVI DELEGIRANE KLIKOVE ZA exitChoiceBtn
+// Ovo dodaj u postojecu document.addEventListener('click', function(e) { ... })
+
+// Pronađi deo gde piše:
+// if (target.id === 'exitLoginBtn' || target.closest('#exitLoginBtn') ||
+//     target.id === 'exitLangBtn'  || target.closest('#exitLangBtn')  ||
+//     target.id === 'exitMainBtn'  || target.closest('#exitMainBtn') ||
+//     target.id === 'exitChoiceBtn' || target.closest('#exitChoiceBtn')) {
+//     console.log('🚪 Exit dugme kliknuto');
+//     exitApp();
+// }
+
+/*
+// ZAMENI CEO BLOK SA:
+if (target.id === 'exitLoginBtn' || target.closest('#exitLoginBtn') ||
+    target.id === 'exitLangBtn'  || target.closest('#exitLangBtn')  ||
+    target.id === 'exitMainBtn'  || target.closest('#exitMainBtn')) {
+    console.log('🚪 Exit dugme kliknuto');
+    exitApp();
+}
+
+if (target.id === 'exitChoiceBtn' || target.closest('#exitChoiceBtn')) {
+    console.log('🔙 Back dugme kliknuto - vraćam na jezike');
+    const choiceScreen = document.getElementById('choiceScreen');
+    const languageScreen = document.getElementById('languageScreen');
+    
+    if (choiceScreen) {
+        choiceScreen.style.display = 'none';
+        choiceScreen.classList.remove('active');
+    }
+    if (languageScreen) {
+        languageScreen.style.display = 'flex';
+        languageScreen.classList.add('active');
+        if (typeof renderLanguages === 'function') {
+            renderLanguages();
+        }
+    }
+    currentScreen = 'languages';
+    currentScreenState = 'languages';
+    screenHistory = ['languages'];
+    return;
+}
+*/
+
+console.log('✅ Back dugme popravljeno - vraća na jezike sa 4. ekrana!');
 console.log('✅ App spreman!');
