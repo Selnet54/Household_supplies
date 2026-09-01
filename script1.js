@@ -2084,20 +2084,21 @@ document.addEventListener('DOMContentLoaded', function() {
         updateInterfaceLanguage();
     }
 
-   const backBtn = document.getElementById('backBtn');
-if (backBtn) {
-    backBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        console.log('⬅ Direktan klik na Back dugme');
-        handleHeaderBack();  // ✅ OVO JE ISPRAVNO
-    });
-}
+    // BACK DUGME
+    const backBtn = document.getElementById('backBtn');
+    if (backBtn) {
+        backBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('⬅ Direktan klik na Back dugme');
+            handleHeaderBack();
+        });
         console.log('✅ Back dugme direktno povezano');
-    else {
+    } else {
         console.warn('⚠️ Back dugme nije pronađeno!');
     }
 
+    // KEYDOWN DOGAĐAJI
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Enter') {
             const activeElement = document.activeElement;
@@ -2112,6 +2113,7 @@ if (backBtn) {
         }
     });
 
+    // CONFIRM DUGMAD - OVO JE JEDINO MESTO GDE TREBA DA BUDE!
     const yesBtn = document.getElementById('confirmYesBtn');
     const noBtn = document.getElementById('confirmNoBtn');
     
@@ -2136,9 +2138,11 @@ if (backBtn) {
     }
 
     console.log('✅ Svi događaji uspešno inicijalizovani!');
-});
+});  // 🔥 KRAJ DOMContentLoaded
 
-// ===== 2. DELEGIRANI KLIKOVI =====
+// ============================================
+// 2. DELEGIRANI KLIKOVI - OVO JE VAN DOMContentLoaded
+// ============================================
 document.addEventListener('click', function(e) {
     const target = e.target;
     
@@ -2177,64 +2181,7 @@ document.addEventListener('click', function(e) {
         screenHistory = ['languages'];
         return;
     }
-
-    if (target.id === 'backBtn' || target.closest('#backBtn') ||
-        target.closest('.btn-back') || target.closest('#headerBackBtn') ||
-        target.closest('.back-arrow') || target.closest('.header-back')) {
-        e.preventDefault();
-        console.log('⬅ Kliknuto dugme Nazad/Odustani');
-        handleBackAction();
-    }
-
-    if (target.id === 'inventoryBtn' || target.closest('#inventoryBtn')) {
-        console.log('📦 Inventory klik');
-        renderInventory();
-    }
-
-    if (target.id === 'shoppingBtn' || target.closest('#shoppingBtn')) {
-        console.log('🛒 Shopping klik');
-        renderShoppingList();
-    }
-}, true);
-
-// ============================================
-// FUNKCIJE ZA 3. EKRAN (IZBOR NAČINA UNOSA)
-// ============================================
-
-function selectVoiceMode() {
-    console.log('🎤 Izabran zvučni unos');
-    showScreen('voiceMenuScreen');
-    setTimeout(function() {
-        startVoiceRecognition();
-    }, 500);
-}
-
-function selectManualMode() {
-    console.log('✍️ Izabran ručni unos');
-    showScreen('mainScreen');
-    renderCategories();
-}
-
-function goBackFromChoice() {
-    console.log('🔙 Back - vraćam na jezike');
-    const choiceScreen = document.getElementById('choiceScreen');
-    const languageScreen = document.getElementById('languageScreen');
-    
-    if (choiceScreen) {
-        choiceScreen.style.display = 'none';
-        choiceScreen.classList.remove('active');
-    }
-    if (languageScreen) {
-        languageScreen.style.display = 'flex';
-        languageScreen.classList.add('active');
-        if (typeof renderLanguages === 'function') {
-            renderLanguages();
-        }
-    }
-    currentScreen = 'languages';
-    currentScreenState = 'languages';
-    screenHistory = ['languages'];
-}
+}, true); 
 // ============================================
 // GLASOVNA KONTROLA I MAPIRANJE JEZIKA
 // ============================================
