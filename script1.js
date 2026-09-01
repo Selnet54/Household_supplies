@@ -2189,25 +2189,37 @@ function processVoiceCommand(command) {
     // FALLBACK - direktna obrada
     const cmd = command.toLowerCase().trim();
     
-    if (cmd === 'unos' || cmd === 'unesi' || cmd === 'add') {
+    // UNOS
+    if (cmd === 'unos' || cmd === 'unesi' || cmd === 'add' || 
+        cmd === 'dodaj' || cmd === 'novi' || cmd === 'novo') {
         console.log('📝 UNOS - otvaram data entry');
         renderDataEntry('');
         return;
     }
     
-    if (cmd === 'zalihe' || cmd === 'otvori zalihe' || cmd === 'stanje') {
+    // ZALIHE
+    if (cmd === 'zalihe' || cmd === 'otvori zalihe' || cmd === 'stanje' ||
+        cmd === 'inventar' || cmd === 'pregled' || cmd === 'skladiste') {
         console.log('📦 ZALIHE - otvaram');
         renderInventory();
         return;
     }
     
-    if (cmd === 'spisak' || cmd === 'otvori spisak' || cmd === 'potrebe') {
+    // SPISAK
+    if (cmd === 'spisak' || cmd === 'otvori spisak' || cmd === 'potrebe' ||
+        cmd === 'lista' || cmd === 'shopping' || cmd === 'kupovina') {
         console.log('🛒 SPISAK - otvaram');
         renderShoppingList();
         return;
     }
     
-    if (cmd === 'end' || cmd === 'kraj') {
+    // 🔥 END - VIŠE VARIJANTI
+    const endVariants = ['end', 'and', 'ond', 'ent', 'en', 'ende', 'endi', 'ends',
+                         'kraj', 'kra', 'krajn', 'krajni', 'kraji', 
+                         'krajnji', 'krajnje', 'zavrsi', 'završetak',
+                         'stop', 'stp', 'stahp', 'stap', 'gotovo'];
+    
+    if (endVariants.includes(cmd) || cmd.includes('end') || cmd.includes('kraj')) {
         console.log('🏁 END - otvaram zalihe');
         renderInventory();
         return;
