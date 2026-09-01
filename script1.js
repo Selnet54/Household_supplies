@@ -1323,8 +1323,11 @@ function prikaziSveUnose() {
     const container = document.getElementById('entriesContainer');
     if (!container) return;
     const zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
+    
+    // 🔥 DODAT "naziv" U ZAGLAVLJE
     container.innerHTML = `
         <div class="table-row header-row">
+            <div class="cell">${t('naziv')}</div>
             <div class="cell">${t('komad')}</div>
             <div class="cell">${t('kolicina')}</div>
             <div class="cell">${t('jedinica_mere')}</div>
@@ -1332,21 +1335,26 @@ function prikaziSveUnose() {
             <div class="cell">${t('mesto_skladistenja')}</div>
         </div>
     `;
+    
     const aktivni = zalihe.filter(p => p.quantity > 0);
     if (aktivni.length === 0) {
         const row = document.createElement('div');
         row.className = 'table-row';
-        row.innerHTML = `<div class="cell" style="grid-column:span 5;padding:20px;color:#999;text-align:center;">${t('nema_proizvoda')}</div>`;
+        // 🔥 PROMENJENO span 5 → span 6 (zbog dodate kolone)
+        row.innerHTML = `<div class="cell" style="grid-column:span 6;padding:20px;color:#999;text-align:center;">${t('nema_proizvoda')}</div>`;
         container.appendChild(row);
         return;
     }
+    
     aktivni.forEach(p => {
         const expiry = new Date(p.entry_date);
         expiry.setMonth(expiry.getMonth() + p.shelf_life_months);
         const expiryDisplay = expiry.toLocaleDateString('sr-RS', { month: '2-digit', year: '2-digit' });
         const row = document.createElement('div');
         row.className = 'table-row';
+        // 🔥 DODAT RED ZA NAZIV PROIZVODA (product_name)
         row.innerHTML = `
+            <div class="cell" style="font-weight:bold; color:#1a237e;">${p.product_name || 'Nepoznat'}</div>
             <div class="cell">${p.piece || '-'}</div>
             <div class="cell">${p.quantity}</div>
             <div class="cell">${p.unit}</div>
