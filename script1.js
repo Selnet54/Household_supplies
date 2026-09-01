@@ -2141,48 +2141,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });  // 🔥 KRAJ DOMContentLoaded
 
 // ============================================
-// 2. DELEGIRANI KLIKOVI - OVO JE VAN DOMContentLoaded
-// ============================================
-document.addEventListener('click', function(e) {
-    const target = e.target;
-    
-    if (target.id === 'loginBtn' || target.closest('#loginBtn')) {
-        e.preventDefault();
-        console.log('🖱️ Klik na ENTER dugme');
-        triggerLogin();
-    }
-
-    if (target.id === 'exitLoginBtn' || target.closest('#exitLoginBtn') ||
-        target.id === 'exitLangBtn'  || target.closest('#exitLangBtn')  ||
-        target.id === 'exitMainBtn'  || target.closest('#exitMainBtn')) {
-        console.log('🚪 Exit dugme kliknuto');
-        exitApp();
-    }
-
-    // 🔥 exitChoiceBtn - vraća na jezike (NE gasi aplikaciju)
-    if (target.id === 'exitChoiceBtn' || target.closest('#exitChoiceBtn')) {
-        console.log('🔙 Back dugme kliknuto - vraćam na jezike');
-        const choiceScreen = document.getElementById('choiceScreen');
-        const languageScreen = document.getElementById('languageScreen');
-        
-        if (choiceScreen) {
-            choiceScreen.style.display = 'none';
-            choiceScreen.classList.remove('active');
-        }
-        if (languageScreen) {
-            languageScreen.style.display = 'flex';
-            languageScreen.classList.add('active');
-            if (typeof renderLanguages === 'function') {
-                renderLanguages();
-            }
-        }
-        currentScreen = 'languages';
-        currentScreenState = 'languages';
-        screenHistory = ['languages'];
-        return;
-    }
-}, true); 
-// ============================================
 // GLASOVNA KONTROLA I MAPIRANJE JEZIKA
 // ============================================
 
@@ -2532,4 +2490,79 @@ document.addEventListener('click', function(e) {
 }, true);
 
 console.log('✅ Back dugme popravljeno - vraća na jezike sa 4. ekrana!');
+// ============================================
+// FUNKCIJE ZA 3. EKRAN (IZBOR NAČINA UNOSA)
+// ============================================
+
+function selectVoiceMode() {
+    console.log('🎤 Izabran zvučni unos');
+    
+    const choiceScreen = document.getElementById('choiceScreen');
+    const voiceScreen = document.getElementById('voiceMenuScreen');
+    
+    if (choiceScreen) {
+        choiceScreen.style.display = 'none';
+        choiceScreen.classList.remove('active');
+    }
+    if (voiceScreen) {
+        voiceScreen.style.display = 'flex';
+        voiceScreen.classList.add('active');
+    }
+    
+    currentScreen = 'voiceMenuScreen';
+    currentScreenState = 'voiceMenuScreen';
+    screenHistory.push('choiceScreen');
+    
+    setTimeout(function() {
+        if (typeof startVoiceRecognition === 'function') {
+            startVoiceRecognition();
+        }
+    }, 500);
+}
+
+function selectManualMode() {
+    console.log('✍️ Izabran ručni unos');
+    
+    const choiceScreen = document.getElementById('choiceScreen');
+    const mainScreen = document.getElementById('mainScreen');
+    
+    if (choiceScreen) {
+        choiceScreen.style.display = 'none';
+        choiceScreen.classList.remove('active');
+    }
+    if (mainScreen) {
+        mainScreen.style.display = 'flex';
+        mainScreen.classList.add('active');
+    }
+    
+    currentScreen = 'categories';
+    currentScreenState = 'categories';
+    screenHistory.push('choiceScreen');
+    
+    renderCategories();
+}
+
+function goBackFromVoice() {
+    console.log('🔙 Vraćam se sa voiceMenu na choiceScreen');
+    
+    const voiceScreen = document.getElementById('voiceMenuScreen');
+    const choiceScreen = document.getElementById('choiceScreen');
+    
+    if (typeof stopVoiceRecognition === 'function') {
+        stopVoiceRecognition();
+    }
+    
+    if (voiceScreen) {
+        voiceScreen.style.display = 'none';
+        voiceScreen.classList.remove('active');
+    }
+    if (choiceScreen) {
+        choiceScreen.style.display = 'flex';
+        choiceScreen.classList.add('active');
+    }
+    
+    currentScreen = 'choiceScreen';
+    currentScreenState = 'choiceScreen';
+    screenHistory.pop();
+}
 console.log('✅ App spreman!');
