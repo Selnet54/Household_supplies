@@ -1293,6 +1293,33 @@ function renderDataEntry(productName) {
         <div class="row">
             <label>${t('mesto_skladistenja')}</label>
             <select id="storageSelect">
+                <option value="${t('zamrzivac_1')}">❄️ ${t('zamrzivac_1')}</option>
+                <option value="${t('zamrzivac_2')}">❄️ ${t('zamrzivac_2')}</option>
+                <option value="${t('zamrzivac_3')}">❄️ ${t('zamrzivac_3')}</option>
+                <option value="${t('frizider')}">🧊 ${t('frizider')}</option>
+                <option value="${t('ostava')}">🏠 ${t('ostava')}</option>
+                <option value="${t('Ostalo')}">📦 ${t('Ostalo')}</option>
+            </select>
+        </div>
+        <div class="btn-group">
+            <button class="btn-save" onclick="saveProduct()">✅ ${t('unesi')}</button>
+            <button class="btn-cancel" onclick="handleBackAction()">✖ ${t('odustani')}</button>
+        </div>
+        <div class="table-container">
+            <div class="table-title">📊 ${t('pregled_unosa')}</div>
+            <div id="entriesContainer"></div>
+        </div>
+    `;
+    document.getElementById('dateInput')?.addEventListener('change', updateExpiryDate);
+    document.getElementById('dateInput')?.addEventListener('input', updateExpiryDate);
+    document.getElementById('shelfLifeInput')?.addEventListener('change', updateExpiryDate);
+    document.getElementById('shelfLifeInput')?.addEventListener('input', updateExpiryDate);
+    document.getElementById('productInput')?.focus();
+    updateExpiryDate();
+    prikaziSveUnose();
+}  // ← OVO ZATVARA renderDataEntry()
+
+// ===== POSLE renderDataEntry() - PRIKAZ UNOSA =====
 function prikaziSveUnose() {
     const container = document.getElementById('entriesContainer');
     if (!container) return;
