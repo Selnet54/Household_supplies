@@ -2008,7 +2008,7 @@ function updateHeaderLanguage() {
             'nazad': '◀ Nazad',
             'stanje': '📦 Zalihe',
             'spisak': '🛒 Spisak',
-            'odustani': '✖ Odustani',
+            'odustani': '🚪 EXIT',  // ✅ PROMENJENO
             'unos_podataka': '✏️ Unos podataka',
             'glasovni_unos': '🎤 Glasovni unos',
             'rucni_unos': '⌨️ Ručni unos',
@@ -2024,7 +2024,7 @@ function updateHeaderLanguage() {
             'nazad': '◀ Back',
             'stanje': '📦 Inventory',
             'spisak': '🛒 Shopping List',
-            'odustani': '✖ Cancel',
+            'odustani': '🚪 EXIT',  // ✅ PROMENJENO
             'unos_podataka': '✏️ Data Entry',
             'glasovni_unos': '🎤 Voice Input',
             'rucni_unos': '⌨️ Manual Input',
