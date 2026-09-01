@@ -1,25 +1,23 @@
-<!-- EKRAN 1: LOGIN -->
-<div id="loginScreen" class="screen" style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; background:#1a237e; padding:20px;">
-    <div style="background:rgba(0,0,0,0.7); padding:30px; border-radius:12px; border:2px solid #FFD700; max-width:350px; width:100%;">
-        <div style="text-align:center; color:#FFD700; font-size:24px; font-weight:bold; margin-bottom:20px;">📱 Supplies App</div>
-        <div style="color:#aaa; font-size:14px; text-align:center; margin-bottom:20px;">Unesite broj telefona za prijavu</div>
-        <input type="tel" id="phoneInput" placeholder="061 270 2101" style="
-            width:100%; padding:12px; font-size:16px; border-radius:8px; 
-            border:2px solid #FFD700; background:#2a2a2a; 
-            color:#fff; text-align:center; outline:none; box-sizing:border-box;
-        ">
-        <button id="loginBtn" style="
-            width:100%; margin-top:15px; padding:12px; font-size:18px; 
-            background:#FFD700; color:#1a237e; border:none; border-radius:8px; 
-            font-weight:bold; cursor:pointer;
-        ">ENTER</button>
-        <button id="exitLoginBtn" style="
-            width:100%; margin-top:10px; padding:10px; font-size:16px; 
-            background:#B71C1C; color:#FFD700; border:2px solid #FFD700; 
-            border-radius:8px; font-weight:bold; cursor:pointer;
-        ">🚪 Izlaz</button>
+<!-- ===== EKRAN 1: LOGIN ===== -->
+<div id="loginScreen" class="screen">
+    <div class="login-container">
+        <div class="login-box">
+            <img src="icons/logo.png" alt="Zalihe" class="logo-img" id="logoImg" onerror="this.style.display='none'">
+            <div class="logo-text">SUPPLIES</div>
+            <div style="font-size:18px;color:#aaa;margin-bottom:15px;">Home inventory management</div>
+            <h2>Login</h2>
+            <input type="tel" id="phoneInput" placeholder="Enter phone number" maxlength="15">
+            <button id="loginBtn" class="btn btn-green">ENTER</button>
+            <button id="supportBtn" class="btn btn-orange" onclick="document.getElementById('supportDialog').style.display='flex'; document.getElementById('supportDialog').classList.add('active');">📧 Support</button>
+            <div class="login-limits">
+                <span>📱 4: Maximum number of phone numbers.</span>
+                <span>🔒 3: Maximum attempts</span>
+            </div>
+            <button id="exitLoginBtn" class="btn btn-red" onclick="exitApp();">✖ EXIT</button>
+        </div>
     </div>
 </div>
+
 <!-- ============================================ -->
 <!-- EKRAN 2: JEZICI -->
 <!-- ============================================ -->
