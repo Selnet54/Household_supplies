@@ -1292,7 +1292,8 @@ function renderDataEntry(productName) {
         </div>
         <div class="row">
             <label>${t('mesto_skladistenja')}</label>
-            <select id="storageSelect">function prikaziSveUnose() {
+            <select id="storageSelect">
+function prikaziSveUnose() {
     const container = document.getElementById('entriesContainer');
     if (!container) return;
     const zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
