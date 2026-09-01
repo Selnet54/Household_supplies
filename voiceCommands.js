@@ -776,14 +776,13 @@ function startVoiceRecognition() {
         
         // 2. NAZAD
         if (lowerFull.includes('nazad') || lowerFull.includes('back')) {
-            console.log('⬅️ NAZAD');
-            isProcessingCommand = true;
-            if (typeof window.handleBackAction === 'function') {
-                window.handleBackAction();
-            }
-            activeBuffer = '';
-            return;
-        }
+    console.log('⬅️ NAZAD');
+    isProcessingCommand = true;
+    // 🔥 DIREKTNO POZIVAM goBackFromVoice()
+    goBackFromVoice();
+    activeBuffer = '';
+    return;
+}
         
         // 3. SPISAK
         if (lowerFull.includes('spisak') || lowerFull.includes('potrebe') || lowerFull.includes('shopping')) {
@@ -1016,7 +1015,7 @@ function restartMicrophone() {
 // ============================================
 
 function goBackFromVoice() {
-    console.log('◀ goBackFromVoice POZVAN!');
+    console.log('◀ goBackFromVoice POZVAN - vraćam na JEZIKE!');
     stopVoiceRecognition();
     
     document.querySelectorAll('.screen').forEach(s => {
@@ -1024,10 +1023,20 @@ function goBackFromVoice() {
         s.classList.remove('active');
     });
     
-    const choiceScreen = document.getElementById('choiceScreen');
-    if (choiceScreen) {
-        choiceScreen.style.display = 'flex';
-        choiceScreen.classList.add('active');
+    // 🔥 VRAĆAM NA EKRAN SA JEZICIMA (languageScreen)
+    const languageScreen = document.getElementById('languageScreen');
+    if (languageScreen) {
+        languageScreen.style.display = 'flex';
+        languageScreen.classList.add('active');
+        console.log('✅ languageScreen prikazan');
+    } else {
+        console.warn('⚠️ languageScreen nije pronađen!');
+        // Fallback: ako nema languageScreen, idi na choiceScreen
+        const choiceScreen = document.getElementById('choiceScreen');
+        if (choiceScreen) {
+            choiceScreen.style.display = 'flex';
+            choiceScreen.classList.add('active');
+        }
     }
     
     if (typeof updateHeaderLanguage === 'function') {
