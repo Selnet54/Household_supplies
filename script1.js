@@ -1292,47 +1292,20 @@ function renderDataEntry(productName) {
         </div>
         <div class="row">
             <label>${t('mesto_skladistenja')}</label>
-            <select id="storageSelect">
-                <option value="${t('zamrzivac_1')}">❄️ ${t('zamrzivac_1')}</option>
-                <option value="${t('zamrzivac_2')}">❄️ ${t('zamrzivac_2')}</option>
-                <option value="${t('zamrzivac_3')}">❄️ ${t('zamrzivac_3')}</option>
-                <option value="${t('frizider')}">🧊 ${t('frizider')}</option>
-                <option value="${t('ostava')}">🏠 ${t('ostava')}</option>
-                <option value="${t('Ostalo')}">📦 ${t('Ostalo')}</option>
-            </select>
-        </div>
-        <div class="btn-group">
-            <button class="btn-save" onclick="saveProduct()">✅ ${t('unesi')}</button>
-            <button class="btn-cancel" onclick="handleBackAction()">✖ ${t('odustani')}</button>
-        </div>
-        <div class="table-container">
-            <div class="table-title">📊 ${t('pregled_unosa')}</div>
-            <div id="entriesContainer"></div>
-        </div>
-    `;
-    document.getElementById('dateInput')?.addEventListener('change', updateExpiryDate);
-    document.getElementById('dateInput')?.addEventListener('input', updateExpiryDate);
-    document.getElementById('shelfLifeInput')?.addEventListener('change', updateExpiryDate);
-    document.getElementById('shelfLifeInput')?.addEventListener('input', updateExpiryDate);
-    document.getElementById('productInput')?.focus();
-    updateExpiryDate();
-    prikaziSveUnose();
-}
-
-function prikaziSveUnose() {
+            <select id="storageSelect">function prikaziSveUnose() {
     const container = document.getElementById('entriesContainer');
     if (!container) return;
     const zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
     
-    // 🔥 DODAT "naziv" U ZAGLAVLJE
+    // 🔥 KOLONE: Naziv (1.5fr) | Komad (0.4fr) | Količina (0.4fr) | Jedinica (0.4fr) | Rok (0.4fr) | Skladište (1fr)
     container.innerHTML = `
-        <div class="table-row header-row">
-            <div class="cell">${t('naziv')}</div>
-            <div class="cell">${t('komad')}</div>
-            <div class="cell">${t('kolicina')}</div>
-            <div class="cell">${t('jedinica_mere')}</div>
-            <div class="cell">${t('rok_trajanja')}</div>
-            <div class="cell">${t('mesto_skladistenja')}</div>
+        <div class="table-row header-row" style="display:grid; grid-template-columns:1.5fr 0.4fr 0.4fr 0.4fr 0.4fr 1fr; gap:2px; background:#f0f0f0; font-weight:bold; border-bottom:2px solid #ccc; padding:5px 0;">
+            <div class="cell" style="text-align:left; padding-left:8px;">${t('naziv_proizvoda')}</div>
+            <div class="cell" style="text-align:center;">${t('komad')}</div>
+            <div class="cell" style="text-align:center;">${t('kolicina')}</div>
+            <div class="cell" style="text-align:center;">${t('jedinica_mere')}</div>
+            <div class="cell" style="text-align:center;">${t('rok_trajanja')}</div>
+            <div class="cell" style="text-align:center;">${t('mesto_skladistenja')}</div>
         </div>
     `;
     
@@ -1340,26 +1313,26 @@ function prikaziSveUnose() {
     if (aktivni.length === 0) {
         const row = document.createElement('div');
         row.className = 'table-row';
-        // 🔥 PROMENJENO span 5 → span 6 (zbog dodate kolone)
+        row.style.cssText = 'display:grid; grid-template-columns:1.5fr 0.4fr 0.4fr 0.4fr 0.4fr 1fr; gap:2px; padding:5px 0;';
         row.innerHTML = `<div class="cell" style="grid-column:span 6;padding:20px;color:#999;text-align:center;">${t('nema_proizvoda')}</div>`;
         container.appendChild(row);
         return;
     }
     
-    aktivni.forEach(p => {
+    aktivni.forEach((p) => {
         const expiry = new Date(p.entry_date);
         expiry.setMonth(expiry.getMonth() + p.shelf_life_months);
         const expiryDisplay = expiry.toLocaleDateString('sr-RS', { month: '2-digit', year: '2-digit' });
         const row = document.createElement('div');
         row.className = 'table-row';
-        // 🔥 DODAT RED ZA NAZIV PROIZVODA (product_name)
+        row.style.cssText = 'display:grid; grid-template-columns:1.5fr 0.4fr 0.4fr 0.4fr 0.4fr 1fr; gap:2px; border-bottom:1px solid #eee; padding:5px 0;';
         row.innerHTML = `
-            <div class="cell" style="font-weight:bold; color:#1a237e;">${p.product_name || 'Nepoznat'}</div>
-            <div class="cell">${p.piece || '-'}</div>
-            <div class="cell">${p.quantity}</div>
-            <div class="cell">${p.unit}</div>
-            <div class="cell">${expiryDisplay}</div>
-            <div class="cell">${p.storage_location}</div>
+            <div class="cell" style="font-weight:bold; color:#1a237e; text-align:left; padding-left:8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${p.product_name || 'Nepoznat'}</div>
+            <div class="cell" style="text-align:center; font-size:14px;">${p.piece || '-'}</div>
+            <div class="cell" style="text-align:center; font-size:14px;">${p.quantity}</div>
+            <div class="cell" style="text-align:center; font-size:14px;">${p.unit}</div>
+            <div class="cell" style="text-align:center; font-size:14px;">${expiryDisplay}</div>
+            <div class="cell" style="text-align:center; font-size:14px;">${p.storage_location}</div>
         `;
         container.appendChild(row);
     });
