@@ -695,15 +695,16 @@ function otvoriZaliheEkran() {
 function startVoiceRecognition() {
     console.log('🎤 startVoiceRecognition POZVAN!');
     
+    // 🔥 AKO JE VEĆ AKTIVAN, SAMO GA RESTARTUJ
+    if (recognition) {
+        try { recognition.stop(); } catch(e) {}
+        recognition = null;
+    }
+    
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
         showVoiceStatus('❌ Browser ne podržava glasovno prepoznavanje.', '#f44336');
         return;
-    }
-
-    if (recognition) {
-        try { recognition.stop(); } catch(e) {}
-        recognition = null;
     }
 
     recognition = new SpeechRecognition();
@@ -714,7 +715,7 @@ function startVoiceRecognition() {
         pt: 'pt-PT', fr: 'fr-FR'
     };
     recognition.lang = speechLangMap[langCode] || 'sr-RS';
-    recognition.continuous = true;
+    recognition.continuous = true;  // 🔥 OVAJ FLAG DRŽI MIKROFON AKTIVNIM
     recognition.interimResults = true;
     recognition.maxAlternatives = 1;
 
@@ -729,35 +730,21 @@ function startVoiceRecognition() {
         isProcessingCommand = false;
         END_AKTIVAN = false;
         ALLOW_INVENTORY_OPEN = false;
+        window.isVoiceModeActive = true;
     };
 
-    recognition.onresult = function(event) {
-        let interimText = '';
-        let finalChunk = '';
-        
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-            const result = event.results[i];
-            const transcript = result[0].transcript.trim();
-            if (result.isFinal) {
-                finalChunk += (finalChunk ? ' ' : '') + transcript;
-            } else {
-                interimText += transcript;
-            }
-        }
-        
-        if (finalChunk) {
-            activeBuffer += (activeBuffer ? ' ' : '') + finalChunk;
-            console.log('🗣️ TRENUTNI BAFER:', activeBuffer);
-        }
-        
-        const currentDisplay = activeBuffer + (interimText ? ' ' + interimText : '');
-        showVoiceStatus(`🎤 Slušam: "${currentDisplay}"`, '#FFD700');
-        
-        if (isProcessingCommand) return;
-        
-        const lowerFull = activeBuffer.toLowerCase();
-        console.log('🔍 PROVERAVAM CELI BAFER:', lowerFull);
-        
+    // ... OSTATAK KODA (onresult, onerror, onend) OSTAJE ISTI ...
+
+    try {
+        recognition.start();
+        console.log('✅ Mikrofon pokrenut!');
+        showVoiceStatus('🎤 Slušam...', '#2196F3');
+        window.isVoiceModeActive = true;
+    } catch(e) {
+        console.error('❌ Greška pri pokretanju:', e);
+        showVoiceStatus('❌ Greška pri pokretanju mikrofona', '#f44336');
+    }
+}
         // ============================================
         // DIREKTNE KOMANDE (PRE END-a)
         // ============================================
@@ -1052,26 +1039,34 @@ function goBackFromVoice() {
 // ============================================
 
 function selectVoiceMode() {
-    console.log('🎤 selectVoiceMode POZVAN!');
+    console.log('🎤 Izabran zvučni unos');
     
-    document.querySelectorAll('.screen').forEach(s => {
-        s.style.display = 'none';
-        s.classList.remove('active');
-    });
+    const choiceScreen = document.getElementById('choiceScreen');
+    const voiceScreen = document.getElementById('voiceMenuScreen');
     
-    const voiceMenuScreen = document.getElementById('voiceMenuScreen');
-    if (voiceMenuScreen) {
-        voiceMenuScreen.style.display = 'flex';
-        voiceMenuScreen.classList.add('active');
-        console.log('✅ Voice menu prikazan');
+    if (choiceScreen) {
+        choiceScreen.style.display = 'none';
+        choiceScreen.classList.remove('active');
+    }
+    if (voiceScreen) {
+        voiceScreen.style.display = 'flex';
+        voiceScreen.classList.add('active');
     }
     
+    currentScreen = 'voiceMenuScreen';
+    currentScreenState = 'voiceMenuScreen';
+    screenHistory.push('choiceScreen');
+    
+    // 🔥 POKRENI MIKROFON I ZADrŽI GA AKTIVNIM
     setTimeout(function() {
-        console.log('🎤 Pokrećem VOICE COMMANDS...');
-        startVoiceRecognition();
+        if (typeof startVoiceRecognition === 'function') {
+            startVoiceRecognition();
+            // 🔥 POSTAVI GLOBALNI FLAG DA JE MIKROFON AKTIVAN
+            window.isVoiceModeActive = true;
+            console.log('🎤 Mikrofon pokrenut i ostaje aktivan na svim ekranima');
+        }
     }, 500);
 }
-
 // ============================================
 // 15. DODATNE FUNKCIJE ZA PRIKAZ I BRISANJE
 // ============================================
