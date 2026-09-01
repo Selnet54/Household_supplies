@@ -315,7 +315,7 @@
     </div>
 </div>
 
-<!-- ===== EKRAN 3: IZBOR NAČINA UNOSA ===== -->
+<!-- ===== EKRAN 3: IZBOR NAČINA UNOSA (4. ekran) ===== -->
 <div id="choiceScreen" class="screen" style="display:none;">
     <div class="choice-container">
         <div class="choice-box">
@@ -334,38 +334,58 @@
                 <div id="manualDescText" style="font-size:16px; color:#aaa; margin-top:5px;">Type data manually</div>
             </button>
 
-            <!-- ✅ 4. ekran dugme - "Back" vraća na jezike -->
+            <!-- ✅ Back - vraća na jezike -->
             <button id="exitChoiceBtn" class="btn btn-red" style="margin-top:20px;" onclick="goBackFromChoice()">🔙 Back</button>
+            
+            <!-- ✅ EXIT - gasi aplikaciju -->
+            <button id="exitAppBtn" class="btn btn-red" style="margin-top:10px;" onclick="exitApp()">🚪 EXIT</button>
         </div>
     </div>
 </div>
 
-<!-- ===== EKRAN 4: IZBOR NAČINA UNOSA ===== -->
-<div id="choiceScreen" class="screen" style="display:none;">
-    <div class="choice-container">
-        <div class="choice-box">
-            <div class="logo-text" style="font-size:32px; margin-bottom:10px;">SUPPLIES</div>
-            <div id="choiceTitleText" style="font-size:18px; color:#aaa; margin-bottom:30px;">How do you want to enter data?</div>
-
-            <button id="voiceChoiceBtn" class="choice-btn choice-voice" onclick="selectVoiceMode(); return false;">
-                <div style="font-size:48px; margin-bottom:8px;">🎤</div>
-                <div id="voiceTitleText" style="font-size:24px; font-weight:bold;">Voice Input</div>
-                <div id="voiceDescText" style="font-size:16px; color:#aaa; margin-top:5px;">Speak and I will enter</div>
+<!-- ===== EKRAN 4: ZVUČNI UNOS - GLAVNI MENI ===== -->
+<div id="voiceMenuScreen" class="screen" style="display:none;">
+    <div class="voice-menu-container">
+        <div class="voice-menu-box">
+            <div id="voiceMenuTitleText" style="font-size:20px; color:#FFD700; margin-bottom:5px;">🎤 Voice Control</div>
+            <div id="voiceMenuPromptText" style="font-size:16px; color:#aaa; margin-bottom:25px;">Say what you want to do:</div>
+            <div class="voice-grid">
+                <button class="voice-btn" onclick="voiceCommand('inventory')">
+                    <div style="font-size:40px;">📦</div>
+                    <div id="invMenuText" style="font-size:20px; font-weight:bold;">Inventory</div>
+                </button>
+                <button class="voice-btn" onclick="voiceCommand('shopping')">
+                    <div style="font-size:40px;">🛒</div>
+                    <div id="shopMenuText" style="font-size:20px; font-weight:bold;">Shopping List</div>
+                </button>
+                <button class="voice-btn" onclick="voiceCommand('add')">
+                    <div style="font-size:40px;">➕</div>
+                    <div id="addMenuText" style="font-size:20px; font-weight:bold;">Add Product</div>
+                </button>
+                <button class="voice-btn voice-btn-exit" onclick="exitApp()">
+                    <div style="font-size:40px;">🚪</div>
+                    <div id="exitMenuText" style="font-size:20px; font-weight:bold;">EXIT</div>
+                </button>
+            </div>
+            <div id="voiceStatus" style="margin-top:20px; padding:15px; background:rgba(255,255,255,0.1); border-radius:12px; color:#aaa; font-size:16px;">
+                🎤 Say commands
+            </div>
+            <button id="backFromVoiceBtn" class="btn btn-red" style="margin-top:15px;" onclick="goBackFromVoice()">
+                <span id="backVoiceText">🔙 Back</span>
             </button>
-
-            <button id="manualChoiceBtn" class="choice-btn choice-manual" onclick="selectManualMode(); return false;">
-                <div style="font-size:48px; margin-bottom:8px;">✍️</div>
-                <div id="manualTitleText" style="font-size:24px; font-weight:bold;">Manual Input</div>
-                <div id="manualDescText" style="font-size:16px; color:#aaa; margin-top:5px;">Type data manually</div>
-            </button>
-
-            <!-- 🔥 "Back" - vraća na jezike -->
-            <button id="exitChoiceBtn" class="btn btn-red" style="margin-top:20px;" onclick="goBackFromChoice()">🔙 Back</button>
-            
-            <!-- 🔥 "EXIT" - gasi aplikaciju -->
-            <button id="exitAppBtn" class="btn btn-red" style="margin-top:10px;" onclick="exitApp()">🚪 EXIT</button>
         </div>
     </div>
+</div>
+
+<!-- ===== EKRAN 5: GLAVNI EKRAN ===== -->
+<div id="mainScreen" class="screen" style="display:none; flex-direction:column; background:#f5f5f5; min-height:100vh;">
+    <div class="header">
+        <!-- 🔥 DODAJ id="backBtn" -->
+        <button id="backBtn" class="btn-header btn-back" onclick="handleHeaderBack()"><span id="backText">Nazad</span></button>
+        <button class="btn-header btn-inventory" onclick="renderInventory()"><span id="invText">Zalihe</span></button>
+        <button class="btn-header btn-shopping" onclick="renderShoppingList()"><span id="shopText">Spisak</span></button>
+    </div>
+    <div id="mainContent" class="container"></div>
 </div>
 
 <!-- ===== MODERN CONFIRM ===== -->
