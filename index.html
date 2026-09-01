@@ -29,158 +29,379 @@
         .btn-orange { background: #FF9800; color: white; }
         .btn-red { background: #f44336; color: white; }
 
-        /* ===== OSTALI STILOVI ===== */
-        /* ... vaši ostali stilovi ... */
+        /* ===== JEZICI ===== */
+        .languages-container { width: 100%; max-width: 750px; padding: 25px; }
+        .languages-box { background: #3E4095; border-radius: 20px; padding: 40px 30px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
+        .languages-title { color: #FFD700; font-size: 16px; font-weight: bold; margin-bottom: 15px; line-height: 1.5; max-width: 600px; margin-left: auto; margin-right: auto; }
+        .languages-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr; gap: 15px; margin: 15px 0; }
+        .lang-btn-main { padding: 25px 12px; border: 3px solid #FFD700; border-radius: 16px; background: #3E4095; color: white; font-size: 22px; font-weight: bold; cursor: pointer; text-align: center; transition: all 0.3s; display: flex; flex-direction: column; align-items: center; gap: 10px; min-height: 140px; justify-content: center; }
+        .lang-btn-main:hover { background: #FFD700; color: #1a237e; transform: scale(1.05); }
+        .lang-btn-main img { width: 80px; height: 60px; border-radius: 8px; object-fit: cover; }
+        .lang-btn-main .lang-name { font-size: 18px; }
+
+        /* ===== HEADER ===== */
+        .header { display: flex; background: #e0e0e0; padding: 12px; gap: 6px; width: 100%; flex-wrap: wrap; }
+        .btn-header { flex: 1; padding: 16px 8px; border: none; border-radius: 8px; font-weight: bold; font-size: 22px; cursor: pointer; min-width: 80px; }
+        .btn-back { background: #90caf9; }
+        .btn-inventory { background: #81c784; }
+        .btn-shopping { background: #ffd54f; }
+        .btn-exit { background: #ef5350; color: white; }
+
+        /* ===== KONTEJNER ===== */
+        .container { max-width: 1000px; width: 95%; margin: 20px auto; background: white; border-radius: 16px; padding: 35px; box-shadow: 0 6px 25px rgba(0,0,0,0.4); flex: 1; overflow-y: auto; }
+        .title { color: #1a237e; font-size: 36px; font-weight: bold; text-align: center; margin-bottom: 30px; }
+
+        /* ===== KATEGORIJE ===== */
+        .categories-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 18px; width: 100%; }
+        .category-btn { padding: 45px 15px; border: none; border-radius: 16px; font-size: 26px; font-weight: bold; cursor: pointer; text-align: center; min-height: 140px; word-break: break-word; transition: transform 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.15); }
+        .category-btn:hover { transform: scale(1.05); }
+
+        /* ===== UNOS PODATAKA ===== */
+        .row { display: flex; align-items: center; margin-bottom: 15px; gap: 15px; flex-wrap: wrap; }
+        .row label { font-weight: bold; color: #1a237e; width: 160px; text-align: right; font-size: 22px; flex-shrink: 0; }
+        .row input, .row select { flex: 1; padding: 16px; border: 2px solid #ddd; border-radius: 12px; font-size: 24px; min-width: 100px; background: white; }
+        .row input:focus, .row select:focus { border-color: #1a237e; outline: none; }
+        .inline-group { display: flex; gap: 12px; flex: 1; flex-wrap: wrap; align-items: center; }
+        .inline-group label { width: auto; font-size: 18px; flex-shrink: 0; }
+        .inline-group input, .inline-group select { flex: 1; min-width: 50px; }
+
+        /* ===== ROK ISTIČE ===== */
+        #expiryDisplay { padding: 16px; background: #f0f0f0; border-radius: 12px; font-weight: bold; color: #1a237e; text-align: center; font-size: 24px; min-width: 120px; max-width: 200px; }
+
+        /* ===== DUGMAD ===== */
+        .btn-group { display: flex; gap: 20px; margin-top: 25px; justify-content: center; }
+        .btn-save { background: #4CAF50; color: white; border: none; padding: 18px 50px; border-radius: 12px; font-size: 26px; font-weight: bold; cursor: pointer; flex: 1; }
+        .btn-cancel { background: #f44336; color: white; border: none; padding: 18px 50px; border-radius: 12px; font-size: 26px; font-weight: bold; cursor: pointer; flex: 1; }
+
+        /* ===== TABELA ===== */
+        .table-container { margin-top: 20px; border: 1px solid #ddd; border-radius: 12px; max-height: 250px; overflow-y: auto; }
+        .table-title { background: #e3f2fd; padding: 16px; font-weight: bold; text-align: center; font-size: 22px; color: #1a237e; }
+        .table-row { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1.5fr; border-bottom: 1px solid #eee; }
+        .table-row .cell { padding: 14px 6px; text-align: center; font-size: 18px; word-break: break-word; }
+        .table-row.header-row { background: #f0f0f0; font-weight: bold; border-bottom: 2px solid #ccc; }
+
+        /* ===== SUPPORT OVERLAY ===== */
+        .support-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+        }
+        .support-overlay.active { display: flex; }
+        .support-box {
+            background: #3E4095;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            text-align: left;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+            border: 2px solid #FFD700;
+            position: relative;
+        }
+        .support-box h2 { color: #FFD700; font-size: 28px; text-align: center; margin-bottom: 25px; }
+        .support-box h3 { color: #FFD700; font-size: 18px; margin-top: 20px; margin-bottom: 10px; }
+        .support-box p { color: #ddd; font-size: 16px; margin: 8px 0; line-height: 1.6; }
+        .support-box hr { border: 1px solid rgba(255,215,0,0.3); margin: 20px 0; }
+        .support-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: #FFD700;
+            font-size: 28px;
+            cursor: pointer;
+            padding: 5px 10px;
+        }
+        .support-close:hover { color: #f44336; }
+        .support-contact {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .support-email {
+            color: #4CAF50;
+            font-size: 18px;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 5px;
+        }
+        .support-email:hover { text-decoration: underline; }
+        .support-phone { color: #FFD700; font-size: 18px; font-weight: bold; }
+        .support-note {
+            background: rgba(255,215,0,0.15);
+            border-left: 3px solid #FFD700;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        .support-note p { margin: 5px 0; }
+
+        /* ===== IZBOR NAČINA UNOSA ===== */
+        .choice-container { width: 100%; max-width: 500px; padding: 25px; }
+        .choice-box { background: #3E4095; border-radius: 20px; padding: 40px 30px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
+        .choice-btn { width: 100%; padding: 25px; border: none; border-radius: 16px; font-size: 18px; font-weight: bold; cursor: pointer; margin-bottom: 15px; transition: transform 0.2s; }
+        .choice-btn:hover { transform: scale(1.02); }
+        .choice-voice { background: #4FC3F7; color: #1a237e; }
+        .choice-manual { background: #FFB300; color: #1a237e; }
+
+        /* ===== ZVUČNI MENI ===== */
+        .voice-menu-container { width: 100%; max-width: 600px; padding: 25px; }
+        .voice-menu-box { background: #3E4095; border-radius: 20px; padding: 40px 30px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
+        .voice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .voice-btn { padding: 30px 15px; border: 2px solid #FFD700; border-radius: 16px; background: rgba(255,255,255,0.05); color: white; cursor: pointer; transition: all 0.3s; text-align: center; }
+        .voice-btn:hover { background: #FFD700; color: #1a237e; transform: scale(1.05); }
+        .voice-btn-exit { border-color: #f44336; }
+        .voice-btn-exit:hover { background: #f44336; color: white; }
+
+        /* ===== MODERN ALERT ===== */
+        #modernAlert {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            backdrop-filter: blur(5px);
+        }
+        #modernAlert .alert-box {
+            background: white;
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            animation: slideIn 0.3s ease;
+        }
+        #modernAlert .alert-icon { font-size: 64px; margin-bottom: 15px; }
+        #modernAlert .alert-title { color: #1a237e; margin-bottom: 10px; font-size: 28px; }
+        #modernAlert .alert-message { font-size: 18px; color: #555; margin-bottom: 25px; }
+        #modernAlert .alert-btn { background: #1a237e; color: white; border: none; padding: 12px 40px; border-radius: 12px; font-size: 18px; cursor: pointer; font-weight: bold; }
+
+        /* ===== MODERN CONFIRM ===== */
+        #modernConfirm {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            backdrop-filter: blur(5px);
+        }
+        #modernConfirm .confirm-box {
+            background: white;
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            animation: slideIn 0.3s ease;
+        }
+        #modernConfirm .confirm-icon { font-size: 64px; margin-bottom: 15px; }
+        #modernConfirm .confirm-title { color: #1a237e; margin-bottom: 10px; font-size: 28px; }
+        #modernConfirm .confirm-message { font-size: 18px; color: #555; margin-bottom: 25px; }
+        #modernConfirm .confirm-buttons { display: flex; gap: 10px; }
+        #modernConfirm .confirm-yes { flex: 1; background: #4CAF50; color: white; border: none; padding: 12px; border-radius: 12px; font-size: 18px; cursor: pointer; font-weight: bold; }
+        #modernConfirm .confirm-no { flex: 1; background: #f44336; color: white; border: none; padding: 12px; border-radius: 12px; font-size: 18px; cursor: pointer; font-weight: bold; }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .languages-grid { grid-template-columns: 1fr 1fr 1fr; }
+            .categories-grid { grid-template-columns: 1fr 1fr; }
+            .category-btn { padding: 30px 10px; font-size: 20px; min-height: 100px; }
+            .btn-header { font-size: 16px; padding: 12px 6px; }
+            .login-box { padding: 30px 20px; }
+            .lang-btn-main { padding: 15px 8px; min-height: 100px; font-size: 18px; }
+            .lang-btn-main img { width: 60px; height: 45px; }
+            .container { padding: 20px; }
+            .title { font-size: 26px; }
+        }
+
+        @media (max-width: 480px) {
+            .languages-grid { grid-template-columns: 1fr 1fr; }
+            .categories-grid { grid-template-columns: 1fr; }
+            .lang-btn-main .lang-name { font-size: 14px; }
+        }
     </style>
 </head>
 <body>
 
-<!-- ============================================ -->
-<!-- EKRAN 1: LOGIN - ORIGINALNI -->
-<!-- ============================================ -->
-<div id="loginScreen" class="screen" style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; background:#1a237e; padding:20px;">
-    <div class="login-container" style="width:100%; max-width:550px; padding:25px;">
-        <div class="login-box" style="background:#3E4095; border-radius:20px; padding:50px 40px; text-align:center; box-shadow:0 10px 40px rgba(0,0,0,0.6);">
-            
-            <!-- Logo -->
-            <img src="/Household_supplies/icons/logo.png" alt="Logo" class="logo-img" style="width:130px; height:130px; border-radius:50%; background:#FFD700; padding:15px; object-fit:contain; margin:0 auto; display:block;" onerror="this.style.display='none'">
-            
-            <!-- SUPPLIES naslov -->
-            <div class="logo-text" style="color:#FFD700; font-size:40px; font-weight:bold; margin-top:15px;">SUPPLIES</div>
-            
-            <!-- Podnaslov -->
-            <h2 style="color:white; font-size:30px; margin:20px 0 25px 0;">Unesite broj telefona</h2>
-            
-            <!-- Input polje -->
-            <input type="tel" id="phoneInput" placeholder="061 270 2101" style="
-                width:100%; padding:20px; font-size:26px; border:none; border-radius:12px; 
-                text-align:center; margin-bottom:20px; background:white;
-            ">
-            
-            <!-- ENTER dugme (ZELENO) -->
-            <button id="loginBtn" class="btn btn-green" style="
-                width:100%; padding:18px; border:none; border-radius:12px; 
-                font-size:24px; font-weight:bold; cursor:pointer; margin-bottom:12px;
-                background:#4CAF50; color:white;
-            ">ENTER</button>
-            
-            <!-- Izlaz dugme (CRVENO) -->
-            <button id="exitLoginBtn" class="btn btn-red" style="
-                width:100%; padding:18px; border:none; border-radius:12px; 
-                font-size:24px; font-weight:bold; cursor:pointer;
-                background:#f44336; color:white;
-            ">🚪 Izlaz</button>
-            
+<!-- ===== EKRAN 1: LOGIN ===== -->
+<div id="loginScreen" class="screen">
+    <div class="login-container">
+        <div class="login-box">
+            <img src="icons/logo.png" alt="Zalihe" class="logo-img" id="logoImg" onerror="this.style.display='none'">
+            <div class="logo-text">SUPPLIES</div>
+            <div style="font-size:18px;color:#aaa;margin-bottom:15px;">Home inventory management</div>
+            <h2>Login</h2>
+            <input type="tel" id="phoneInput" placeholder="Enter phone number" maxlength="15">
+            <button id="loginBtn" class="btn btn-green">ENTER</button>
+            <button id="supportBtn" class="btn btn-orange" onclick="document.getElementById('supportDialog').style.display='flex'; document.getElementById('supportDialog').classList.add('active');">📧 Support</button>
+            <div class="login-limits">
+                <span>📱 4: Maximum number of phone numbers.</span>
+                <span>🔒 3: Maximum attempts</span>
+            </div>
+            <button id="exitLoginBtn" class="btn btn-red" onclick="exitApp();">✖ EXIT</button>
         </div>
     </div>
 </div>
 
-<!-- ============================================ -->
-<!-- OSTALI EKRANI: JEZICI, IZBOR, GLASOVNI, MAIN -->
-<!-- ============================================ -->
-
-<!-- EKRAN 2: JEZICI -->
-<div id="languageScreen" class="screen" style="display:none; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; background:#1a237e; padding:20px;">
-    <div class="languages-box" style="background:rgba(255,215,0,0.05); padding:30px; border-radius:20px; border:2px solid #FFD700; max-width:450px; width:100%;">
-        <div class="languages-title" id="langTitle" style="color:#FFD700; font-size:20px; text-align:center; margin-bottom:20px; font-weight:bold;">
-            Izaberite jezik / Choose Language
+<!-- ===== SUPPORT DIJALOG ===== -->
+<div id="supportDialog" class="support-overlay">
+    <div class="support-box">
+        <button class="support-close" onclick="document.getElementById('supportDialog').style.display='none'; document.getElementById('supportDialog').classList.remove('active');">✖</button>
+        <h2>📧 Support</h2>
+        <div class="support-content">
+            <h3>How to use this app</h3>
+            <p>1. Enter your phone number</p>
+            <p>2. Click ENTER to continue</p>
+            <p>3. Select your language</p>
+            <p>4. Start managing your inventory</p>
+            <hr>
+            <h3>Need help?</h3>
+            <p>If you have any questions or issues:</p>
+            <div class="support-contact">
+                <p>📧 <strong>Email:</strong></p>
+                <a href="mailto:home_supplies@proton.me" class="support-email">home_supplies@proton.me</a>
+            </div>
+            <div class="support-contact">
+                <p>📱 <strong>Phone number:</strong></p>
+                <p class="support-phone">Your registered phone number is your login key.</p>
+            </div>
+            <div class="support-note">
+                <p>💡 <strong>Note:</strong></p>
+                <p>Your phone number is your only identifier in this app.</p>
+                <p>Please keep it safe and accessible.</p>
+            </div>
         </div>
-        <div class="languages-grid" id="languageGrid" style="display:grid; grid-template-columns:repeat(2,1fr); gap:10px;"></div>
-        <button id="exitLangBtn" style="
-            width:100%; margin-top:20px; padding:12px; font-size:16px; 
-            background:#f44336; color:white; border:none; 
-            border-radius:10px; font-weight:bold; cursor:pointer;
-        ">🚪 Izlaz</button>
+        <button class="btn btn-green" style="margin-top:20px;" onclick="document.getElementById('supportDialog').style.display='none'; document.getElementById('supportDialog').classList.remove('active');">✅ Got it</button>
     </div>
 </div>
 
-<!-- EKRAN 3: IZBOR NAČINA UNOSA -->
-<div id="choiceScreen" class="screen" style="display:none; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; background:#1a237e; padding:20px;">
-    <div style="background:rgba(255,215,0,0.05); padding:30px; border-radius:20px; border:2px solid #FFD700; max-width:350px; width:100%; text-align:center;">
-        <div style="font-size:32px; margin-bottom:5px; color:#FFD700; font-weight:bold;">SUPPLIES</div>
-        <div id="choiceTitleText" style="font-size:18px; color:#aaa; margin-bottom:25px;">Kako želite da unesete podatke?</div>
-        
-        <button onclick="selectVoiceMode()" style="width:100%; padding:20px; margin-bottom:12px; background:#2E7D32; color:#FFD700; border:2px solid #FFD700; border-radius:12px; font-size:20px; font-weight:bold; cursor:pointer;">
-            🎤 Govorite, a ja ću uneti
-        </button>
-        
-        <button onclick="selectManualMode()" style="width:100%; padding:20px; margin-bottom:12px; background:#1565C0; color:#FFD700; border:2px solid #FFD700; border-radius:12px; font-size:20px; font-weight:bold; cursor:pointer;">
-            ⌨️ Ukucajte podatke ručno
-        </button>
-        
-        <button id="backChoiceBtn" onclick="goBackFromChoice()" style="width:100%; padding:14px; margin-bottom:10px; background:#555; color:#FFD700; border:2px solid #FFD700; border-radius:12px; font-size:18px; font-weight:bold; cursor:pointer;">
-            ◀ Nazad na jezike
-        </button>
-        
-        <button id="exitChoiceBtn" onclick="exitApp()" style="width:100%; padding:14px; background:#f44336; color:white; border:none; border-radius:12px; font-size:18px; font-weight:bold; cursor:pointer;">
-            🚪 Izlaz
-        </button>
-    </div>
-</div>
-
-<!-- EKRAN 4: GLASOVNI MENI -->
-<div id="voiceMenuScreen" class="screen" style="display:none; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; background:#1a237e; padding:20px;">
-    <div style="background:rgba(255,215,0,0.05); padding:30px; border-radius:20px; border:2px solid #FFD700; max-width:350px; width:100%; text-align:center;">
-        <div id="voiceMenuTitleText" style="font-size:24px; color:#FFD700; margin-bottom:5px; font-weight:bold;">🎤 Glasovna kontrola</div>
-        <div id="voiceMenuPromptText" style="font-size:16px; color:#aaa; margin-bottom:20px;">Recite šta želite da uradite:</div>
-        
-        <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:20px;">
-            <div style="background:rgba(255,215,0,0.1); padding:10px; border-radius:8px; color:#FFD700; border:1px solid rgba(255,215,0,0.2);">📝 "Unos" - dodaj proizvod</div>
-            <div style="background:rgba(255,215,0,0.1); padding:10px; border-radius:8px; color:#FFD700; border:1px solid rgba(255,215,0,0.2);">📦 "Zalihe" - pregled inventara</div>
-            <div style="background:rgba(255,215,0,0.1); padding:10px; border-radius:8px; color:#FFD700; border:1px solid rgba(255,215,0,0.2);">🛒 "Spisak" - pregled potreba</div>
-            <div style="background:rgba(255,215,0,0.1); padding:10px; border-radius:8px; color:#FFD700; border:1px solid rgba(255,215,0,0.2);">⏹️ "Kraj" - završi glasovni unos</div>
+<!-- ===== EKRAN 2: JEZICI ===== -->
+<div id="languageScreen" class="screen" style="display:none;">
+    <div class="languages-container">
+        <div class="languages-box">
+            <div class="languages-title" id="langTitle">Izaberite jezik / Choose Language / Sprache auswählen / Válasszon nyelvet / Виберіть мову / Выберите язык / 选择语言 / Elija idioma / Escolha o idioma / Choisir la langue</div>
+            <div class="languages-grid" id="languageGrid"></div>
+            <button id="exitLangBtn" class="btn btn-red" style="margin-top:20px;" onclick="exitApp();">EXIT</button>
         </div>
-        
-        <div id="voiceStatus" style="padding:12px; background:rgba(255,255,255,0.1); border-radius:10px; color:#aaa; font-size:15px; margin-bottom:15px;">🎤 Slušam...</div>
-        
-        <button onclick="goBackFromVoice()" style="width:100%; padding:14px; margin-bottom:10px; background:#555; color:#FFD700; border:2px solid #FFD700; border-radius:12px; font-size:18px; font-weight:bold; cursor:pointer;">
-            ◀ Nazad na izbor
-        </button>
-        
-        <button id="exitVoiceBtn" onclick="exitApp()" style="width:100%; padding:14px; background:#f44336; color:white; border:none; border-radius:12px; font-size:18px; font-weight:bold; cursor:pointer;">
-            🚪 Izlaz
-        </button>
     </div>
 </div>
 
-<!-- EKRAN 5: GLAVNI EKRAN -->
+<!-- ===== EKRAN 3: IZBOR NAČINA UNOSA ===== -->
+<div id="choiceScreen" class="screen" style="display:none;">
+    <div class="choice-container">
+        <div class="choice-box">
+            <div class="logo-text" style="font-size:32px; margin-bottom:10px;">SUPPLIES</div>
+            <div id="choiceTitleText" style="font-size:18px; color:#aaa; margin-bottom:30px;">How do you want to enter data?</div>
+
+            <button id="voiceChoiceBtn" class="choice-btn choice-voice" onclick="selectVoiceMode(); return false;">
+                <div style="font-size:48px; margin-bottom:8px;">🎤</div>
+                <div id="voiceTitleText" style="font-size:24px; font-weight:bold;">Voice Input</div>
+                <div id="voiceDescText" style="font-size:16px; color:#aaa; margin-top:5px;">Speak and I will enter</div>
+            </button>
+
+            <button id="manualChoiceBtn" class="choice-btn choice-manual" onclick="selectManualMode(); return false;">
+                <div style="font-size:48px; margin-bottom:8px;">✍️</div>
+                <div id="manualTitleText" style="font-size:24px; font-weight:bold;">Manual Input</div>
+                <div id="manualDescText" style="font-size:16px; color:#aaa; margin-top:5px;">Type data manually</div>
+            </button>
+
+            <!-- ✅ ISPRAVNO - dugme "Back" vraća na jezike -->
+            <button id="exitChoiceBtn" class="btn btn-red" style="margin-top:20px;" onclick="goBackFromChoice()">🔙 Back</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== EKRAN 3: IZBOR NAČINA UNOSA ===== -->
+<div id="choiceScreen" class="screen" style="display:none;">
+    <div class="choice-container">
+        <div class="choice-box">
+            <div class="logo-text" style="font-size:32px; margin-bottom:10px;">SUPPLIES</div>
+            <div id="choiceTitleText" style="font-size:18px; color:#aaa; margin-bottom:30px;">How do you want to enter data?</div>
+
+            <button id="voiceChoiceBtn" class="choice-btn choice-voice" onclick="selectVoiceMode(); return false;">
+                <div style="font-size:48px; margin-bottom:8px;">🎤</div>
+                <div id="voiceTitleText" style="font-size:24px; font-weight:bold;">Voice Input</div>
+                <div id="voiceDescText" style="font-size:16px; color:#aaa; margin-top:5px;">Speak and I will enter</div>
+            </button>
+
+            <button id="manualChoiceBtn" class="choice-btn choice-manual" onclick="selectManualMode(); return false;">
+                <div style="font-size:48px; margin-bottom:8px;">✍️</div>
+                <div id="manualTitleText" style="font-size:24px; font-weight:bold;">Manual Input</div>
+                <div id="manualDescText" style="font-size:16px; color:#aaa; margin-top:5px;">Type data manually</div>
+            </button>
+
+            <!-- 🔥 DODAJ OVO NA 4. EKRAN -->
+            <button id="exitChoiceBtn" class="btn btn-red" style="margin-top:20px;" onclick="goBackFromChoice()">🔙 Back</button>
+        </div>
+    </div>
+</div>
+<!-- ===== EKRAN 5: GLAVNI EKRAN ===== -->
 <div id="mainScreen" class="screen" style="display:none; flex-direction:column; background:#f5f5f5; min-height:100vh;">
-    <div class="header" style="background:#1a237e; padding:12px 15px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-        <button id="backBtn" onclick="handleHeaderBack()" style="background:transparent; color:#FFD700; border:1px solid #FFD700; padding:8px 16px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:bold;">
-            <span id="backText">◀ Nazad</span>
-        </button>
-        <button onclick="renderInventory()" style="background:transparent; color:#FFD700; border:1px solid #FFD700; padding:8px 16px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:bold;">
-            <span id="invText">📦 Zalihe</span>
-        </button>
-        <button onclick="renderShoppingList()" style="background:transparent; color:#FFD700; border:1px solid #FFD700; padding:8px 16px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:bold;">
-            <span id="shopText">🛒 Spisak</span>
-        </button>
-        <button onclick="exitApp()" style="background:#f44336; color:white; border:none; padding:8px 16px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:bold;">
-            <span id="exitText">🚪 Izlaz</span>
-        </button>
+    <div class="header">
+       <button id="backBtn" class="btn-header btn-back" onclick="handleHeaderBack()"><span id="backText">Nazad</span></button>
+        <button class="btn-header btn-inventory" onclick="renderInventory()"><span id="invText">Zalihe</span></button>
+        <button class="btn-header btn-shopping" onclick="renderShoppingList()"><span id="shopText">Spisak</span></button>
     </div>
-    <div id="mainContent" style="flex:1; padding:15px; overflow-y:auto;"></div>
+    <div id="mainContent" class="container"></div>
 </div>
 
-<!-- ============================================ -->
-<!-- MODERN CONFIRM -->
-<!-- ============================================ -->
-<div id="modernConfirm" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); justify-content:center; align-items:center; z-index:9999;">
-    <div style="background:#8B0000; border:3px solid #FFD700; border-radius:14px; padding:20px; max-width:320px; width:90%; text-align:center;">
-        <div id="confirmIcon" style="font-size:36px; margin-bottom:5px;">⚠️</div>
-        <h2 id="confirmTitle" style="color:#FFD700; margin-bottom:5px; font-size:18px;">Potvrda</h2>
-        <p id="confirmMessage" style="color:#FFD700; margin-bottom:15px; font-size:14px;">Da li ste sigurni?</p>
-        <div style="display:flex; gap:10px;">
-            <button id="confirmYesBtn" style="flex:1; background:#2E7D32; color:#FFD700; border:none; padding:10px; border-radius:8px; font-size:16px; font-weight:bold; cursor:pointer;">✅ Da</button>
-            <button id="confirmNoBtn" style="flex:1; background:#f44336; color:white; border:none; padding:10px; border-radius:8px; font-size:16px; font-weight:bold; cursor:pointer;">✖ Ne</button>
+<!-- ===== MODERN ALERT ===== -->
+<div id="modernAlert">
+    <div class="alert-box">
+        <div class="alert-icon" id="alertIcon">📢</div>
+        <h2 class="alert-title" id="alertTitle">Obaveštenje</h2>
+        <p class="alert-message" id="alertMessage">Poruka</p>
+        <button class="alert-btn" onclick="closeModernAlert()">OK</button>
+    </div>
+</div>
+
+<!-- ===== MODERN CONFIRM ===== -->
+<div id="modernConfirm">
+    <div class="confirm-box">
+        <div class="confirm-icon" id="confirmIcon">⚠️</div>
+        <h2 class="confirm-title" id="confirmTitle">Potvrda</h2>
+        <p class="confirm-message" id="confirmMessage">Da li ste sigurni?</p>
+        <div class="confirm-buttons">
+            <button class="confirm-yes" onclick="closeModernConfirm(); if(confirmCallback && confirmCallback.onYes) confirmCallback.onYes();">✅ Da</button>
+            <button class="confirm-no" onclick="closeModernConfirm(); if(confirmCallback && confirmCallback.onNo) confirmCallback.onNo();">✖ Ne</button>
         </div>
     </div>
 </div>
 
 <!-- ============================================ -->
-<!-- ⭐ SCRIPT TAGOVI -->
+<!-- ⭐ SCRIPT TAGOVI - NA KRAJU BODY ⭐ -->
 <!-- ============================================ -->
 <script>
+    // ===== SERVICE WORKER REGISTRACIJA =====
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/Household_supplies/service-worker.js')
             .then(function(registration) {
@@ -191,6 +412,7 @@
             });
     }
 
+    // ===== INSTALACIJA APLIKACIJE =====
     let deferredPrompt;
     window.addEventListener('beforeinstallprompt', function(e) {
         e.preventDefault();
@@ -201,6 +423,7 @@
         deferredPrompt = null;
     });
 
+    // ===== FIX za base href =====
     (function() {
         const base = document.querySelector('base');
         if (base) {
@@ -212,8 +435,14 @@
     })();
 </script>
 
+<!-- ⭐ REDOSLED UČITAVANJA: -->
+<!-- 1. productParts.js - delovi proizvoda -->
 <script src="productParts.js" defer></script>
+
+<!-- 2. script1.js - TVOJ ORIGINALNI KOD (NE script.js!) -->
 <script src="script1.js" defer></script>
+
+<!-- 3. voiceCommands.js - glasovne komande -->
 <script src="voiceCommands.js" defer></script>
 
 </body>
