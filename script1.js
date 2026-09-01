@@ -2084,14 +2084,15 @@ document.addEventListener('DOMContentLoaded', function() {
         updateInterfaceLanguage();
     }
 
-    const backBtn = document.getElementById('backBtn');
-    if (backBtn) {
-        backBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log('⬅ Direktan klik na Back dugme');
-            handleBackAction();
-        });
+   const backBtn = document.getElementById('backBtn');
+if (backBtn) {
+    backBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('⬅ Direktan klik na Back dugme');
+        handleHeaderBack();  // ✅ OVO JE ISPRAVNO
+    });
+}
         console.log('✅ Back dugme direktno povezano');
     } else {
         console.warn('⚠️ Back dugme nije pronađeno!');
@@ -2214,15 +2215,26 @@ function selectManualMode() {
     renderCategories();
 }
 
-function goBackFromVoice() {
-    console.log('◀ Povratak sa glasovnog menija');
-    if (recognition) {
-        try { recognition.stop(); } catch(e) {}
-        recognition = null;
+function goBackFromChoice() {
+    console.log('🔙 Back - vraćam na jezike');
+    const choiceScreen = document.getElementById('choiceScreen');
+    const languageScreen = document.getElementById('languageScreen');
+    
+    if (choiceScreen) {
+        choiceScreen.style.display = 'none';
+        choiceScreen.classList.remove('active');
     }
-    showScreen('choiceScreen');
+    if (languageScreen) {
+        languageScreen.style.display = 'flex';
+        languageScreen.classList.add('active');
+        if (typeof renderLanguages === 'function') {
+            renderLanguages();
+        }
+    }
+    currentScreen = 'languages';
+    currentScreenState = 'languages';
+    screenHistory = ['languages'];
 }
-
 // ============================================
 // GLASOVNA KONTROLA I MAPIRANJE JEZIKA
 // ============================================
