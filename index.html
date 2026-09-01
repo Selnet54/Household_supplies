@@ -361,10 +361,10 @@
                     <div id="addMenuText" style="font-size:20px; font-weight:bold;">Unos podataka</div>
                 </button>
                 
-                <!-- 🔥 EXIT u grid-u - CRVENO -->
-                <button class="voice-btn voice-btn-exit" onclick="exitApp()" style="background:#f44336; color:white; border:2px solid #f44336;">
-                    <div style="font-size:40px;">🚪</div>
-                    <div id="exitMenuText" style="font-size:20px; font-weight:bold;">EXIT</div>
+                <!-- 🔥 BACK u grid-u - vraća na jezike -->
+                <button class="voice-btn" onclick="goBackFromVoice()" style="border:2px solid #FFD700; background:rgba(255,215,0,0.12);">
+                    <div style="font-size:40px;">◀</div>
+                    <div id="backMenuText" style="font-size:20px; font-weight:bold;">Back</div>
                 </button>
             </div>
             
@@ -372,21 +372,21 @@
                 🎤 Slušam... Recite "start" pa podatke
             </div>
             
-            <!-- 🔥 BACK dugme - CRVENO, piše BACK, vraća na jezike -->
-            <button id="backFromVoiceBtn" onclick="goBackFromVoice()" style="
+            <!-- 🔥 EXIT dugme - CRVENO, izlazi iz aplikacije -->
+            <button id="exitFromVoiceBtn" onclick="exitApp()" style="
                 margin-top:15px;
                 width:100%;
                 padding:14px;
                 background: #f44336;
-                color: #FFD700;
-                border: 2px solid #FFD700;
+                color: white;
+                border: 2px solid #f44336;
                 border-radius: 12px;
                 font-size: 18px;
                 font-weight: bold;
                 cursor: pointer;
                 transition: transform 0.2s;
             " onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
-                <span id="backVoiceText">◀ BACK</span>
+                <span>🚪 EXIT</span>
             </button>
         </div>
     </div>
