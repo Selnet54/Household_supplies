@@ -1062,6 +1062,14 @@ function selectLanguage(langCode) {
 function renderCategories() {
     console.log('📂 renderCategories pozvan za jezik:', currentLang);
     
+    // 🔥 PROVERI DA LI JE MIKROFON AKTIVAN
+    if (window.isVoiceModeActive && !recognition) {
+        console.log('🔄 Mikrofon nije aktivan, restartujem...');
+        if (typeof startVoiceRecognition === 'function') {
+            startVoiceRecognition();
+        }
+    }
+    
     // DODAJ U ISTORIJU
     if (currentScreen !== 'categories') {
         screenHistory.push(currentScreen);
@@ -1222,6 +1230,13 @@ function renderProductParts(subcategory) {
 }
 
 function renderDataEntry(productName) {
+    // 🔥 PROVERI DA LI JE MIKROFON AKTIVAN
+    if (window.isVoiceModeActive && !recognition) {
+        console.log('🔄 Mikrofon nije aktivan, restartujem...');
+        if (typeof startVoiceRecognition === 'function') {
+            startVoiceRecognition();
+        }
+    }
     // DODAJ U ISTORIJU
     if (currentScreen !== 'dataEntry') {
         screenHistory.push(currentScreen);
@@ -1506,6 +1521,14 @@ function saveProduct() {
 
 function renderInventory(lang) {
     console.log('📦 renderInventory pozvan za jezik:', lang || currentLang);
+    
+    // 🔥 PROVERI DA LI JE MIKROFON AKTIVAN
+    if (window.isVoiceModeActive && !recognition) {
+        console.log('🔄 Mikrofon nije aktivan, restartujem...');
+        if (typeof startVoiceRecognition === 'function') {
+            startVoiceRecognition();
+        }
+    }
     
     // DODAJ U ISTORIJU
     if (currentScreen !== 'inventory') {
@@ -1837,7 +1860,6 @@ function renderShoppingList() {
     html += `</div></div>`;
     content.innerHTML = html;
 }
-
 function oznaciSveShopping() {
     const checkboxes = document.querySelectorAll('.shopping-checkbox');
     const selectAll = document.getElementById('selectAllShopping');
