@@ -3,6 +3,9 @@
 // ============================================
 console.log('✅ Script.js je učitan!');
 
+// ===== GLOBALNI FLAG ZA VOICE MODE =====
+window.isVoiceModeActive = false;
+
 // ===== SPREČI NEŽELJENA PREUSMERAVANJA =====
 (function() {
     const originalOpen = window.open;
