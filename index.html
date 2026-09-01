@@ -374,14 +374,13 @@
 <!-- ===== EKRAN 5: GLAVNI EKRAN ===== -->
 <div id="mainScreen" class="screen" style="display:none; flex-direction:column; background:#f5f5f5; min-height:100vh;">
     <div class="header">
-        <button class="btn-header btn-back" onclick="handleHeaderBack()"><span id="backText">Nazad</span></button>
-        <button class="btn-header btn-inventory" onclick="renderInventory()"><span id="invText">Zalihe</span></button>
-        <button class="btn-header btn-shopping" onclick="renderShoppingList()"><span id="shopText">Spisak</span></button>
-        <!-- 🔥 EXIT dugme -->
-        <button class="btn-header btn-exit" onclick="exitApp()" style="background:#f44336; color:white;">
-            <span id="exitText">🚪 Izlaz</span>
-        </button>
-    </div>
+    <button class="btn-header btn-back" onclick="handleHeaderBack()"><span id="backText">Nazad</span></button>
+    <button class="btn-header btn-inventory" onclick="renderInventory()"><span id="invText">Zalihe</span></button>
+    <button class="btn-header btn-shopping" onclick="renderShoppingList()"><span id="shopText">Spisak</span></button>
+    <button id="exitMainBtn" class="btn-header btn-exit" onclick="exitApp()" style="background:#f44336; color:white; border:none; padding:8px 16px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:bold;">
+        <span id="exitText">🚪 Izlaz</span>
+    </button>
+</div>
     <div id="mainContent" class="container"></div>
 </div>
 
