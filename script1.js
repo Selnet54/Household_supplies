@@ -2477,49 +2477,59 @@ function handleHeaderBack() {
 }
 // ===== KRAJ handleHeaderBack =====
 
-// 2. POPRAVI DELEGIRANE KLIKOVE ZA exitChoiceBtn
-// Ovo dodaj u postojecu document.addEventListener('click', function(e) { ... })
-
-// Pronađi deo gde piše:
-// if (target.id === 'exitLoginBtn' || target.closest('#exitLoginBtn') ||
-//     target.id === 'exitLangBtn'  || target.closest('#exitLangBtn')  ||
-//     target.id === 'exitMainBtn'  || target.closest('#exitMainBtn') ||
-//     target.id === 'exitChoiceBtn' || target.closest('#exitChoiceBtn')) {
-//     console.log('🚪 Exit dugme kliknuto');
-//     exitApp();
-// }
-
-/*
-// ZAMENI CEO BLOK SA:
-if (target.id === 'exitLoginBtn' || target.closest('#exitLoginBtn') ||
-    target.id === 'exitLangBtn'  || target.closest('#exitLangBtn')  ||
-    target.id === 'exitMainBtn'  || target.closest('#exitMainBtn')) {
-    console.log('🚪 Exit dugme kliknuto');
-    exitApp();
-}
-
-if (target.id === 'exitChoiceBtn' || target.closest('#exitChoiceBtn')) {
-    console.log('🔙 Back dugme kliknuto - vraćam na jezike');
-    const choiceScreen = document.getElementById('choiceScreen');
-    const languageScreen = document.getElementById('languageScreen');
+// ============================================
+// 2. DELEGIRANI KLIKOVI - OVO JE VAN DOMContentLoaded
+// ============================================
+document.addEventListener('click', function(e) {
+    const target = e.target;
     
-    if (choiceScreen) {
-        choiceScreen.style.display = 'none';
-        choiceScreen.classList.remove('active');
+    // LOGIN
+    if (target.id === 'loginBtn' || target.closest('#loginBtn')) {
+        e.preventDefault();
+        console.log('🖱️ Klik na ENTER dugme');
+        triggerLogin();
     }
-    if (languageScreen) {
-        languageScreen.style.display = 'flex';
-        languageScreen.classList.add('active');
-        if (typeof renderLanguages === 'function') {
-            renderLanguages();
-        }
+
+    // EXIT dugmad - GASE aplikaciju
+    if (target.id === 'exitLoginBtn' || target.closest('#exitLoginBtn') ||
+        target.id === 'exitLangBtn'  || target.closest('#exitLangBtn')  ||
+        target.id === 'exitMainBtn'  || target.closest('#exitMainBtn')) {
+        console.log('🚪 Exit dugme kliknuto');
+        exitApp();
+        return;
     }
-    currentScreen = 'languages';
-    currentScreenState = 'languages';
-    screenHistory = ['languages'];
-    return;
-}
-*/
+
+    // exitChoiceBtn - GASI aplikaciju (EXIT)
+    if (target.id === 'exitChoiceBtn' || target.closest('#exitChoiceBtn')) {
+        console.log('🚪 Exit dugme kliknuto - gasim aplikaciju');
+        exitApp();
+        return;
+    }
+
+    // BACK dugme (header)
+    if (target.id === 'backBtn' || target.closest('#backBtn') ||
+        target.closest('.btn-back') || target.closest('#headerBackBtn') ||
+        target.closest('.back-arrow') || target.closest('.header-back')) {
+        e.preventDefault();
+        console.log('⬅ Kliknuto dugme Nazad');
+        handleBackAction();
+        return;
+    }
+
+    // INVENTORY
+    if (target.id === 'inventoryBtn' || target.closest('#inventoryBtn')) {
+        console.log('📦 Inventory klik');
+        renderInventory();
+        return;
+    }
+
+    // SHOPPING
+    if (target.id === 'shoppingBtn' || target.closest('#shoppingBtn')) {
+        console.log('🛒 Shopping klik');
+        renderShoppingList();
+        return;
+    }
+}, true);
 
 console.log('✅ Back dugme popravljeno - vraća na jezike sa 4. ekrana!');
 console.log('✅ App spreman!');
