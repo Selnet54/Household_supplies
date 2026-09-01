@@ -2094,7 +2094,7 @@ if (backBtn) {
     });
 }
         console.log('✅ Back dugme direktno povezano');
-    } else {
+    else {
         console.warn('⚠️ Back dugme nije pronađeno!');
     }
 
