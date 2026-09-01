@@ -316,78 +316,58 @@
 </div>
 
 <!-- ===== EKRAN 3: IZBOR NAČINA UNOSA ===== -->
-<div id="choiceScreen" class="screen" style="display:none; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; background:#1a237e; padding:20px;">
-    <div style="background:rgba(255,215,0,0.05); padding:30px; border-radius:20px; border:2px solid #FFD700; max-width:350px; width:100%; text-align:center;">
-        <div style="font-size:32px; margin-bottom:5px; color:#FFD700; font-weight:bold;">SUPPLIES</div>
-        <div id="choiceTitleText" style="font-size:18px; color:#aaa; margin-bottom:25px;">Kako želite da unesete podatke?</div>
-        
-        <!-- Glasovni unos -->
-        <button onclick="selectVoiceMode()" style="width:100%; padding:20px; margin-bottom:12px; background:#2E7D32; color:#FFD700; border:2px solid #FFD700; border-radius:12px; font-size:20px; font-weight:bold; cursor:pointer;">
-            🎤 Govorite, a ja ću uneti
-        </button>
-        
-        <!-- Ručni unos -->
-        <button onclick="selectManualMode()" style="width:100%; padding:20px; margin-bottom:12px; background:#1565C0; color:#FFD700; border:2px solid #FFD700; border-radius:12px; font-size:20px; font-weight:bold; cursor:pointer;">
-            ⌨️ Ukucajte podatke ručno
-        </button>
-        
-        <!-- Back dugme - vraća na jezike -->
-        <button id="backChoiceBtn" onclick="goBackFromChoice()" style="width:100%; padding:14px; margin-bottom:10px; background:#555; color:#FFD700; border:2px solid #FFD700; border-radius:12px; font-size:18px; font-weight:bold; cursor:pointer;">
-            ◀ Nazad na jezike
-        </button>
-        
-        <!-- EXIT dugme - GASI aplikaciju -->
-        <button id="exitChoiceBtn" onclick="exitApp()" style="width:100%; padding:14px; background:#f44336; color:white; border:none; border-radius:12px; font-size:18px; font-weight:bold; cursor:pointer;">
-            🚪 Izlaz
-        </button>
+<div id="choiceScreen" class="screen" style="display:none;">
+    <div class="choice-container">
+        <div class="choice-box">
+            <div class="logo-text" style="font-size:32px; margin-bottom:10px;">SUPPLIES</div>
+            <div id="choiceTitleText" style="font-size:18px; color:#aaa; margin-bottom:30px;">How do you want to enter data?</div>
+
+            <button id="voiceChoiceBtn" class="choice-btn choice-voice" onclick="selectVoiceMode(); return false;">
+                <div style="font-size:48px; margin-bottom:8px;">🎤</div>
+                <div id="voiceTitleText" style="font-size:24px; font-weight:bold;">Voice Input</div>
+                <div id="voiceDescText" style="font-size:16px; color:#aaa; margin-top:5px;">Speak and I will enter</div>
+            </button>
+
+            <button id="manualChoiceBtn" class="choice-btn choice-manual" onclick="selectManualMode(); return false;">
+                <div style="font-size:48px; margin-bottom:8px;">✍️</div>
+                <div id="manualTitleText" style="font-size:24px; font-weight:bold;">Manual Input</div>
+                <div id="manualDescText" style="font-size:16px; color:#aaa; margin-top:5px;">Type data manually</div>
+            </button>
+
+            <!-- ✅ ISPRAVNO - dugme "Back" vraća na jezike -->
+            <button id="exitChoiceBtn" class="btn btn-red" style="margin-top:20px;" onclick="goBackFromChoice()">🔙 Back</button>
+        </div>
     </div>
 </div>
 
-<!-- ============================================ -->
-<!-- EKRAN 4: GLASOVNI MENI (voiceMenuScreen) -->
-<!-- ============================================ -->
-<div id="voiceMenuScreen" class="screen" style="display:none; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; background:#1a237e; padding:20px;">
-    <div style="background:rgba(255,215,0,0.05); padding:30px; border-radius:20px; border:2px solid #FFD700; max-width:350px; width:100%; text-align:center;">
-        
-        <div id="voiceMenuTitleText" style="font-size:24px; color:#FFD700; margin-bottom:5px; font-weight:bold;">🎤 Glasovna kontrola</div>
-        <div id="voiceMenuPromptText" style="font-size:16px; color:#aaa; margin-bottom:20px;">Recite šta želite da uradite:</div>
-        
-        <!-- Komande -->
-        <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:20px;">
-            <div style="background:rgba(255,215,0,0.1); padding:10px; border-radius:8px; color:#FFD700; border:1px solid rgba(255,215,0,0.2);">
-                📝 "Unos" - dodaj proizvod
-            </div>
-            <div style="background:rgba(255,215,0,0.1); padding:10px; border-radius:8px; color:#FFD700; border:1px solid rgba(255,215,0,0.2);">
-                📦 "Zalihe" - pregled inventara
-            </div>
-            <div style="background:rgba(255,215,0,0.1); padding:10px; border-radius:8px; color:#FFD700; border:1px solid rgba(255,215,0,0.2);">
-                🛒 "Spisak" - pregled potreba
-            </div>
-            <div style="background:rgba(255,215,0,0.1); padding:10px; border-radius:8px; color:#FFD700; border:1px solid rgba(255,215,0,0.2);">
-                ⏹️ "Kraj" - završi glasovni unos
-            </div>
+<!-- ===== EKRAN 3: IZBOR NAČINA UNOSA ===== -->
+<div id="choiceScreen" class="screen" style="display:none;">
+    <div class="choice-container">
+        <div class="choice-box">
+            <div class="logo-text" style="font-size:32px; margin-bottom:10px;">SUPPLIES</div>
+            <div id="choiceTitleText" style="font-size:18px; color:#aaa; margin-bottom:30px;">How do you want to enter data?</div>
+
+            <button id="voiceChoiceBtn" class="choice-btn choice-voice" onclick="selectVoiceMode(); return false;">
+                <div style="font-size:48px; margin-bottom:8px;">🎤</div>
+                <div id="voiceTitleText" style="font-size:24px; font-weight:bold;">Voice Input</div>
+                <div id="voiceDescText" style="font-size:16px; color:#aaa; margin-top:5px;">Speak and I will enter</div>
+            </button>
+
+            <button id="manualChoiceBtn" class="choice-btn choice-manual" onclick="selectManualMode(); return false;">
+                <div style="font-size:48px; margin-bottom:8px;">✍️</div>
+                <div id="manualTitleText" style="font-size:24px; font-weight:bold;">Manual Input</div>
+                <div id="manualDescText" style="font-size:16px; color:#aaa; margin-top:5px;">Type data manually</div>
+            </button>
+
+            <!-- 🔥 DODAJ OVO NA 4. EKRAN -->
+            <button id="exitChoiceBtn" class="btn btn-red" style="margin-top:20px;" onclick="goBackFromChoice()">🔙 Back</button>
         </div>
-        
-        <!-- Status -->
-        <div id="voiceStatus" style="padding:12px; background:rgba(255,255,255,0.1); border-radius:10px; color:#aaa; font-size:15px; margin-bottom:15px;">
-            🎤 Slušam...
-        </div>
-        
-        <!-- Dugmad -->
-        <button onclick="goBackFromVoice()" style="width:100%; padding:14px; margin-bottom:10px; background:#555; color:#FFD700; border:2px solid #FFD700; border-radius:12px; font-size:18px; font-weight:bold; cursor:pointer;">
-            ◀ Nazad na izbor
-        </button>
-        
-        <button id="exitVoiceBtn" onclick="exitApp()" style="width:100%; padding:14px; background:#f44336; color:white; border:none; border-radius:12px; font-size:18px; font-weight:bold; cursor:pointer;">
-            🚪 Izlaz
-        </button>
-        
     </div>
 </div>
 <!-- ===== EKRAN 5: GLAVNI EKRAN ===== -->
 <div id="mainScreen" class="screen" style="display:none; flex-direction:column; background:#f5f5f5; min-height:100vh;">
     <div class="header">
-       <button id="backBtn" class="btn-header btn-back" onclick="handleHeaderBack()"><span id="backText">Nazad</span></button>
+       <button class="btn-header btn-back" onclick="handleHeaderBack()"><span id="backText">Nazad</span></button>
         <button class="btn-header btn-inventory" onclick="renderInventory()"><span id="invText">Zalihe</span></button>
         <button class="btn-header btn-shopping" onclick="renderShoppingList()"><span id="shopText">Spisak</span></button>
     </div>
