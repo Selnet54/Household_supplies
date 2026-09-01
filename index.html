@@ -344,29 +344,41 @@
         <div class="voice-menu-box">
             <div id="voiceMenuTitleText" style="font-size:20px; color:#FFD700; margin-bottom:5px;">🎤 Voice Control</div>
             <div id="voiceMenuPromptText" style="font-size:16px; color:#aaa; margin-bottom:25px;">Say what you want to do:</div>
+            
             <div class="voice-grid">
+                <!-- 1. Zalihe -->
                 <button class="voice-btn" onclick="voiceCommand('inventory')">
                     <div style="font-size:40px;">📦</div>
-                    <div id="invMenuText" style="font-size:20px; font-weight:bold;">Inventory</div>
+                    <div id="invMenuText" style="font-size:20px; font-weight:bold;">Zalihe</div>
                 </button>
+                
+                <!-- 2. Spisak -->
                 <button class="voice-btn" onclick="voiceCommand('shopping')">
                     <div style="font-size:40px;">🛒</div>
-                    <div id="shopMenuText" style="font-size:20px; font-weight:bold;">Shopping List</div>
+                    <div id="shopMenuText" style="font-size:20px; font-weight:bold;">Spisak</div>
                 </button>
+                
+                <!-- 3. Unos podataka -->
                 <button class="voice-btn" onclick="voiceCommand('add')">
                     <div style="font-size:40px;">➕</div>
-                    <div id="addMenuText" style="font-size:20px; font-weight:bold;">Add Product</div>
+                    <div id="addMenuText" style="font-size:20px; font-weight:bold;">Unos podataka</div>
                 </button>
+                
+                <!-- 4. EXIT (u grid-u) -->
                 <button class="voice-btn voice-btn-exit" onclick="exitApp()">
                     <div style="font-size:40px;">🚪</div>
                     <div id="exitMenuText" style="font-size:20px; font-weight:bold;">EXIT</div>
                 </button>
             </div>
+            
+            <!-- Status -->
             <div id="voiceStatus" style="margin-top:20px; padding:15px; background:rgba(255,255,255,0.1); border-radius:12px; color:#aaa; font-size:16px;">
-                🎤 Say commands
+                🎤 Slušam... Recite "start" pa podatke
             </div>
-            <button id="backFromVoiceBtn" class="btn btn-red" style="margin-top:15px;" onclick="goBackFromVoice()">
-                <span id="backVoiceText">◀ BACK</span>
+            
+            <!-- 🔥 BACK dugme - vraća na jezike -->
+            <button id="backFromVoiceBtn" class="btn btn-red" style="margin-top:15px; background:#555; color:#FFD700; border:2px solid #FFD700; padding:12px; border-radius:12px; font-size:18px; font-weight:bold; cursor:pointer; width:100%;" onclick="goBackFromVoice()">
+                <span id="backVoiceText">◀ Back</span>
             </button>
         </div>
     </div>
