@@ -2,6 +2,12 @@
 // VOICE COMMANDS - KONAČNA VERZIJA v2.0
 // ============================================
 
+// 🔥 PRVO DEFINISI exitApp DA BI BIO DOSTUPAN
+function exitApp() {
+    console.log('🚪 EXIT');
+    document.body.innerHTML = '<div style="text-align:center;color:#FFD700;font-size:32px;margin-top:50px;">👋 Hvala na korišćenju!</div>';
+}
+
 // 🔥 PRVO DEFINISI goBackFromVoice DA BI BIO DOSTUPAN
 function goBackFromVoice() {
     console.log('🔙 goBackFromVoice pozvan');
@@ -465,19 +471,6 @@ window.voiceCommand = function(cmd) {
     else if (cmd === 'shopping' && typeof renderShoppingList === 'function') renderShoppingList();
     else if (cmd === 'add' && typeof renderDataEntry === 'function') renderDataEntry('');
     else if (cmd === 'back' && typeof goBackFromVoice === 'function') goBackFromVoice();
-};
-
-window.goBackFromVoice = function() {
-    console.log('🔙 goBackFromVoice pozvan');
-    const voiceScreen = document.getElementById('voiceMenuScreen');
-    const choiceScreen = document.getElementById('choiceScreen');
-    if (voiceScreen) { voiceScreen.style.display = 'none'; voiceScreen.classList.remove('active'); }
-    if (choiceScreen) { choiceScreen.style.display = 'flex'; choiceScreen.classList.add('active'); }
-};
-
-window.exitApp = window.exitApp || function() {
-    console.log('🚪 EXIT');
-    document.body.innerHTML = '<div style="text-align:center;color:#FFD700;font-size:32px;margin-top:50px;">👋 Hvala na korišćenju!</div>';
 };
 
 console.log('✅ VoiceCommands.js POTPUNO ucitano!');
