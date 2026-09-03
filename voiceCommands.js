@@ -1567,5 +1567,18 @@ window.saveLastAddedProducts = saveLastAddedProducts;
 console.log('✅ Dodatak za isticanje novih proizvoda aktiviran!');
 
 // ============================================
+// 🔥 DIREKTNO IZVOZ ZA HTML DUGME - DODAJ OVO
+// ============================================
+
+window.selectVoiceMode = selectVoiceMode;
+window.startVoiceRecognition = startVoiceRecognition;
+window.requestMicrophonePermission = requestMicrophonePermission;
+window.goBackFromVoice = goBackFromVoice;
+window.exitApp = exitApp;
+
+console.log('✅ Voice funkcije izvezene za HTML dugmad!');
+console.log('✅ selectVoiceMode:', typeof window.selectVoiceMode);
+
+// ============================================
 // KRAJ FAJLA
 // ============================================
