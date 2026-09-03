@@ -450,60 +450,6 @@
     </div>
 </div>
 
-<!-- ============================================ -->
-<!-- ⭐ SCRIPT TAGOVI - NA KRAJU BODY ⭐ -->
-<!-- ============================================ -->
-
-<!-- 🔥 PRVO GLOBALNE PROMENLJIVE -->
-<script>
-    var recognition = null;
-    var activeBuffer = '';
-    var lastSavedData = null;
-    var isProcessingCommand = false;
-    var micActive = false;
-    console.log('🔥 Globalne voice promenljive definisane!');
-</script>
-
-<script>
-    // ===== SERVICE WORKER REGISTRACIJA =====
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/Household_supplies/service-worker.js')
-            .then(function(registration) {
-                console.log('✅ Service Worker registrovan:', registration);
-            })
-            .catch(function(error) {
-                console.log('❌ Service Worker greška:', error);
-            });
-    }
-
-    // ===== INSTALACIJA APLIKACIJE =====
-    let deferredPrompt;
-    window.addEventListener('beforeinstallprompt', function(e) {
-        e.preventDefault();
-        deferredPrompt = e;
-    });
-    window.addEventListener('appinstalled', function() {
-        console.log('✅ Aplikacija instalirana!');
-        deferredPrompt = null;
-    });
-
-    // ===== FIX za base href =====
-    (function() {
-        const base = document.querySelector('base');
-        if (base) {
-            const href = base.getAttribute('href');
-            if (href && !href.endsWith('/')) {
-                base.setAttribute('href', href + '/');
-            }
-        }
-    })();
-</script>
-
-<!-- ⭐ REDOSLED UČITAVANJA: -->
-<script src="productParts.js"></script>
-<script src="voiceCommands.js"></script>
-<script src="script1.js"></script>
-
 <!-- 🔥 FIX ZA MOBILNE UREĐAJE -->
 <script>
 // Spreči sleep mode na mobilnom
