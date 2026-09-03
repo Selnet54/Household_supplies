@@ -2,16 +2,19 @@
 // VOICE COMMANDS - KONAČNA VERZIJA v2.0
 // ============================================
 
-let activeBuffer = ''; 
-let lastSavedData = null;
-let isProcessingCommand = false;
+// 🔥 OVE PROMENLJIVE SU VEĆ GLOBALNO DEFINISANE U HTML-U
+// activeBuffer, lastSavedData, isProcessingCommand, micActive, recognition
+// ZATO IH OVDE NE DEKLARIŠEMO PONOVO!
+
 let END_AKTIVAN = false;
 let isVoiceInput = false;
 let ALLOW_INVENTORY_OPEN = false;
 let micRestartTimer = null;
-let micActive = false;
 
-// Direktni pokretač za 4. ekran (BEZ ASINHRONIH PREKIDA)
+// ============================================
+// DIREKTNI POKRETAČ ZA 4. EKRAN
+// ============================================
+
 window.forceStartVoice = function(e) {
     if (e) {
         e.preventDefault();
@@ -19,32 +22,30 @@ window.forceStartVoice = function(e) {
     }
     console.log('⚡ Forsirano pokretanje mikrofona sa 4. ekrana...');
 
-    // 1. Provera HTTPS protokola
     if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
-        alert('❌ Mikrofon radi SAMO na HTTPS vezi! Trenutni protokol je HTTP.');
+        alert('❌ Mikrofon radi SAMO na HTTPS vezi!');
         return;
     }
 
-    // 2. Provera podrške za Web Speech API
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-        alert('❌ Vaš pregledač ne podržava Web Speech API. Koristite Chrome ili Safari.');
+        alert('❌ Vaš pregledač ne podržava Web Speech API.');
         return;
     }
 
-    // 3. DIREKTNO POKRETANJE (bez getUserMedia asinhrone pauze)
     try {
         if (typeof window.startVoiceRecognition === 'function') {
             window.startVoiceRecognition();
         } else if (typeof startVoiceRecognition === 'function') {
             startVoiceRecognition();
         } else {
-            console.error('❌ Funkcija startVoiceRecognition nije pronađena u memoriji.');
+            console.error('❌ Funkcija startVoiceRecognition nije pronađena.');
         }
     } catch (err) {
         console.error('❌ Greška pri pokretanju:', err);
     }
 };
+
 // ============================================
 // 1. POMOĆNE FUNKCIJE
 // ============================================
@@ -414,11 +415,10 @@ window.selectManualMode = selectManualMode;
 
 // DEBUG: Provera da li je dugme povezano
 document.addEventListener('DOMContentLoaded', () => {
-    const startBtn = document.getElementById('activateMicBtn'); // 🔥 PROMENI ID
+    const startBtn = document.getElementById('activateMicBtn');
     if (startBtn) {
         startBtn.addEventListener('click', (e) => {
             console.log('✅ Kliknuto na zeleno dugme!');
-            // Direktan poziv bez async/promise kašnjenja za mobilne pregledače
             if (typeof startVoiceRecognition === 'function') {
                 startVoiceRecognition();
             }
@@ -432,6 +432,7 @@ document.addEventListener('DOMContentLoaded', () => {
 console.log('✅ Voice funkcije izvezene za HTML dugmad!');
 console.log('✅ selectVoiceMode:', typeof window.selectVoiceMode);
 console.log('✅ startVoiceRecognition:', typeof window.startVoiceRecognition);
+
 // ============================================
 // 6. DIREKTNI IZVOZI ZA HTML
 // ============================================
