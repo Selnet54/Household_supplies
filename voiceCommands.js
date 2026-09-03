@@ -28,7 +28,7 @@ function goBackFromVoice() {
 }
 
 // 🔥 GLOBALNE PROMENLJIVE
-llet END_AKTIVAN = false;
+let END_AKTIVAN = false;
 let isVoiceInput = false;
 let ALLOW_INVENTORY_OPEN = false;
 let micRestartTimer = null;
