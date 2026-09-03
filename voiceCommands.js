@@ -28,12 +28,13 @@ function goBackFromVoice() {
 }
 
 // 🔥 GLOBALNE PROMENLJIVE
-let END_AKTIVAN = false;
+llet END_AKTIVAN = false;
 let isVoiceInput = false;
 let ALLOW_INVENTORY_OPEN = false;
 let micRestartTimer = null;
-let currentLang = 'sr'; // 🔥 DODATO - podrazumevani jezik
 
+// 🔥 currentLang - koristi postojeći ili postavi podrazumevani
+var currentLang = (typeof currentLang !== 'undefined') ? currentLang : 'sr';
 // ============================================
 // DIREKTNI POKRETAČ ZA 4. EKRAN
 // ============================================
