@@ -1,7 +1,15 @@
 // ============================================
 // VOICE COMMANDS - KONAČNA POPRAVLJENA VERZIJA v2.1
 // ============================================
+// Izbegavanje SyntaxError-a ako je varijabla već deklarisana globalno
+if (typeof recognition === 'undefined') {
+    var recognition = null;
+}
+if (typeof micActive === 'undefined') {
+    var micActive = false;
+}
 
+// Ostale promenljive
 let activeBuffer = ''; 
 let lastSavedData = null;
 let isProcessingCommand = false;
@@ -9,8 +17,6 @@ let END_AKTIVAN = false;
 let isVoiceInput = false;
 let ALLOW_INVENTORY_OPEN = false;
 let micRestartTimer = null;
-let recognition = null;
-let micActive = false;
 
 // ============================================
 // 1. POMOĆNE FUNKCIJE
