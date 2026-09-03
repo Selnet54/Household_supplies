@@ -1072,6 +1072,7 @@ function goBackFromVoice() {
 function selectVoiceMode() {
     console.log('🎤 Izabran zvučni unos');
     
+    // 🔥 PRVO TRAŽI DOZVOLU ZA MIKROFON
     showVoiceStatus('🎤 Tražim dozvolu za mikrofon...', '#FFD700');
     
     requestMicrophonePermission()
@@ -1107,6 +1108,7 @@ function selectVoiceMode() {
             console.error('❌ Dozvola za mikrofon odbijena:', err);
             showVoiceStatus('❌ Dozvolite mikrofon u podešavanjima browsera!', '#f44336');
             
+            // 🔥 PRIKAŽI DUGME ZA PONOVNI POKUŠAJ
             const voiceStatus = document.getElementById('voiceStatus');
             if (voiceStatus) {
                 voiceStatus.innerHTML = `
@@ -1128,7 +1130,6 @@ function selectVoiceMode() {
             }
         });
 }
-
 // ============================================
 // 15. DODATNE FUNKCIJE ZA PRIKAZ I BRISANJE
 // ============================================
