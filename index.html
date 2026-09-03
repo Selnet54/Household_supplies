@@ -463,15 +463,15 @@
     })();
 </script>
 
-<!-- ⭐ REDOSLED UČITAVANJA: -->
+<!-- ⭐ REDOSLED UČITAVANJA (BEZ DEFER PROMENLJIVIH): -->
 <!-- 1. productParts.js - delovi proizvoda -->
-<script src="productParts.js" defer></script>
+<script src="productParts.js"></script>
 
-<!-- 2. script1.js - TVOJ ORIGINALNI KOD (NE script.js!) -->
-<script src="script1.js" defer></script>
+<!-- 2. voiceCommands.js - glasovne komande (MORA BITI PRE script1.js!) -->
+<script src="voiceCommands.js"></script>
 
-<!-- 3. voiceCommands.js - glasovne komande -->
-<script src="voiceCommands.js" defer></script>
+<!-- 3. script1.js - glavna logika aplikacije -->
+<script src="script1.js"></script>
 
 </body>
 </html>
