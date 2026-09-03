@@ -408,9 +408,16 @@ function saveLastAddedProducts(product) {
 
 window.selectVoiceMode = selectVoiceMode;
 window.startVoiceRecognition = startVoiceRecognition;
+window.stopVoiceRecognition = stopVoiceRecognition;
+window.requestMicrophonePermission = requestMicrophonePermission;
+window.processVoiceCommand = processAndSaveItem;
+window.goBackFromVoice = goBackFromVoice;
+window.exitApp = exitApp;
+window.selectManualMode = selectManualMode;
+
 // DEBUG: Provera da li je dugme povezano
 document.addEventListener('DOMContentLoaded', () => {
-    const startBtn = document.getElementById('startVoiceBtn'); // Zamenite ID sa ID-jem vašeg zelenog dugmeta
+    const startBtn = document.getElementById('activateMicBtn'); // 🔥 PROMENI ID
     if (startBtn) {
         startBtn.addEventListener('click', (e) => {
             console.log('✅ Kliknuto na zeleno dugme!');
@@ -419,10 +426,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 startVoiceRecognition();
             }
         });
+        console.log('✅ Zeleno dugme povezano!');
     } else {
-        console.error('❌ Zeleno dugme nije pronađeno u DOM-u! Proverite ID dugmeta.');
+        console.error('❌ Zeleno dugme nije pronađeno! Proverite ID "activateMicBtn".');
     }
 });
-window.stopVoiceRecognition = stopVoiceRecognition;
-window.requestMicrophonePermission = requestMicrophonePermission;
-window.processVoiceCommand = processAndSaveItem;
+
+console.log('✅ Voice funkcije izvezene za HTML dugmad!');
+console.log('✅ selectVoiceMode:', typeof window.selectVoiceMode);
+console.log('✅ startVoiceRecognition:', typeof window.startVoiceRecognition);
