@@ -1,7 +1,7 @@
 // ============================================
 // PUNI SCRIPT ZA APLIKACIJU - HIJERARHIJSKI NAZAD
 // ============================================
-console.log('✅ Script.js je učitan!');function saveProduct
+console.log('✅ Script.js je učitan!');
 
 // ===== GLOBALNI FLAG ZA VOICE MODE =====
 window.isVoiceModeActive = false;
@@ -25,6 +25,7 @@ window.isVoiceModeActive = false;
     
     console.log('✅ Zaštita od preusmeravanja aktivirana!');
 })();
+
 // ===== TRENUTNO STANJE =====
 let currentLang = 'en';
 let currentCategory = '';
