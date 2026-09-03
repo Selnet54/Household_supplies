@@ -2,6 +2,21 @@
 // VOICE COMMANDS - KONAČNA VERZIJA v2.0
 // ============================================
 
+// 🔥 PRVO DEFINISI goBackFromVoice DA BI BIO DOSTUPAN
+function goBackFromVoice() {
+    console.log('🔙 goBackFromVoice pozvan');
+    const voiceScreen = document.getElementById('voiceMenuScreen');
+    const choiceScreen = document.getElementById('choiceScreen');
+    if (voiceScreen) { 
+        voiceScreen.style.display = 'none'; 
+        voiceScreen.classList.remove('active'); 
+    }
+    if (choiceScreen) { 
+        choiceScreen.style.display = 'flex'; 
+        choiceScreen.classList.add('active'); 
+    }
+}
+
 // 🔥 OVE PROMENLJIVE SU VEĆ GLOBALNO DEFINISANE U HTML-U
 // activeBuffer, lastSavedData, isProcessingCommand, micActive, recognition
 // ZATO IH OVDE NE DEKLARIŠEMO PONOVO!
