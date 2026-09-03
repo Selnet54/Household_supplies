@@ -315,6 +315,30 @@
     </div>
 </div>
 
+<!-- ===== EKRAN 3: IZBOR NAČINA UNOSA (VRAĆEN EKRAN KOJI JE NEDOSTAJAO) ===== -->
+<div id="choiceScreen" class="screen" style="display:none;">
+    <div class="choice-container">
+        <div class="choice-box">
+            <div class="logo-text" style="font-size:32px; margin-bottom:10px;">SUPPLIES</div>
+            <div id="choiceTitleText" style="font-size:18px; color:#aaa; margin-bottom:30px;">How do you want to enter data?</div>
+
+            <button id="voiceChoiceBtn" class="choice-btn choice-voice" onclick="selectVoiceMode(); return false;">
+                <div style="font-size:48px; margin-bottom:8px;">🎤</div>
+                <div id="voiceTitleText" style="font-size:24px; font-weight:bold;">Voice Input</div>
+                <div id="voiceDescText" style="font-size:16px; color:#aaa; margin-top:5px;">Speak and I will enter</div>
+            </button>
+
+            <button id="manualChoiceBtn" class="choice-btn choice-manual" onclick="selectManualMode(); return false;">
+                <div style="font-size:48px; margin-bottom:8px;">✍️</div>
+                <div id="manualTitleText" style="font-size:24px; font-weight:bold;">Manual Input</div>
+                <div id="manualDescText" style="font-size:16px; color:#aaa; margin-top:5px;">Type data manually</div>
+            </button>
+
+            <button id="exitChoiceBtn" class="btn btn-red" style="margin-top:20px;" onclick="goBackFromChoice()">🔙 Back</button>
+        </div>
+    </div>
+</div>
+
 <!-- ===== EKRAN 4: ZVUČNI UNOS - GLAVNI MENI ===== -->
 <div id="voiceMenuScreen" class="screen" style="display:none;">
     <div class="voice-menu-container">
@@ -389,16 +413,17 @@
         </div>
     </div>
 </div>
+
 <!-- ===== EKRAN 5: GLAVNI EKRAN ===== -->
 <div id="mainScreen" class="screen" style="display:none; flex-direction:column; background:#f5f5f5; min-height:100vh;">
     <div class="header">
-    <button class="btn-header btn-back" onclick="handleHeaderBack()"><span id="backText">Nazad</span></button>
-    <button class="btn-header btn-inventory" onclick="renderInventory()"><span id="invText">Zalihe</span></button>
-    <button class="btn-header btn-shopping" onclick="renderShoppingList()"><span id="shopText">Spisak</span></button>
-    <button id="exitMainBtn" class="btn-header btn-exit" onclick="exitApp()" style="background:#f44336; color:white; border:none; padding:8px 16px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:bold;">
-        <span id="exitText">🚪 EXIT</span>  <!-- ✅ SADA JE EXIT -->
-    </button>
-</div>
+        <button class="btn-header btn-back" onclick="handleHeaderBack()"><span id="backText">Nazad</span></button>
+        <button class="btn-header btn-inventory" onclick="renderInventory()"><span id="invText">Zalihe</span></button>
+        <button class="btn-header btn-shopping" onclick="renderShoppingList()"><span id="shopText">Spisak</span></button>
+        <button id="exitMainBtn" class="btn-header btn-exit" onclick="exitApp()" style="background:#f44336; color:white; border:none; padding:8px 16px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:bold;">
+            <span id="exitText">🚪 EXIT</span>
+        </button>
+    </div>
     <div id="mainContent" class="container"></div>
 </div>
 
@@ -463,14 +488,9 @@
     })();
 </script>
 
-<!-- ⭐ REDOSLED UČITAVANJA (BEZ DEFER PROMENLJIVIH): -->
-<!-- 1. productParts.js - delovi proizvoda -->
+<!-- ⭐ REDOSLED UČITAVANJA: -->
 <script src="productParts.js"></script>
-
-<!-- 2. voiceCommands.js - glasovne komande (MORA BITI PRE script1.js!) -->
 <script src="voiceCommands.js"></script>
-
-<!-- 3. script1.js - glavna logika aplikacije -->
 <script src="script1.js"></script>
 
 </body>
