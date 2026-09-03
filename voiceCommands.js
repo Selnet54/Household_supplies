@@ -38,6 +38,30 @@ function showVoiceStatus(text, color) {
 }
 
 // ============================================
+// 🔥 PROVERA I TRAŽENJE DOZVOLE ZA MIKROFON
+// ============================================
+
+function requestMicrophonePermission() {
+    return new Promise((resolve, reject) => {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            reject('Browser ne podržava pristup mikrofonu');
+            return;
+        }
+        
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(function(stream) {
+                stream.getTracks().forEach(track => track.stop());
+                console.log('✅ Dozvola za mikrofon ODOBRENA!');
+                resolve(true);
+            })
+            .catch(function(err) {
+                console.error('❌ Dozvola za mikrofon ODBIJENA:', err);
+                reject(err);
+            });
+    });
+}
+
+// ============================================
 // 2. BROJEVI NA SRPSKOM
 // ============================================
 
@@ -695,7 +719,6 @@ function otvoriZaliheEkran() {
 function startVoiceRecognition() {
     console.log('🎤 startVoiceRecognition POZVAN!');
     
-    // 🔥 AKO JE VEĆ AKTIVAN, SAMO GA RESTARTUJ
     if (recognition) {
         try { recognition.stop(); } catch(e) {}
         recognition = null;
@@ -733,7 +756,6 @@ function startVoiceRecognition() {
         window.isVoiceModeActive = true;
     };
 
-    // 🔥 SAV KOD ZA onresult MORA BITI OVDE, UNUTAR FUNKCIJE!
     recognition.onresult = function(event) {
         let interimText = '';
         let finalChunk = '';
@@ -761,7 +783,6 @@ function startVoiceRecognition() {
         const lowerFull = activeBuffer.toLowerCase();
         console.log('🔍 PROVERAVAM CELI BAFER:', lowerFull);
         
-        // 1. IZLAZ
         if (lowerFull.includes('exit') || lowerFull.includes('izlaz')) {
             console.log('🚪 IZLAZ');
             isProcessingCommand = true;
@@ -773,7 +794,6 @@ function startVoiceRecognition() {
             return;
         }
         
-        // 2. NAZAD
         if (lowerFull.includes('nazad') || lowerFull.includes('back')) {
             console.log('⬅️ NAZAD');
             isProcessingCommand = true;
@@ -782,7 +802,6 @@ function startVoiceRecognition() {
             return;
         }
         
-        // 3. SPISAK
         if (lowerFull.includes('spisak') || lowerFull.includes('potrebe') || lowerFull.includes('shopping')) {
             console.log('🛒 SPISAK');
             isProcessingCommand = true;
@@ -793,7 +812,6 @@ function startVoiceRecognition() {
             return;
         }
         
-        // 4. ZALIHE (direktno, bez end)
         if ((lowerFull.includes('zalihe') || lowerFull.includes('stanje') || lowerFull.includes('inventory')) && !lowerFull.includes('end')) {
             console.log('📦 ZALIHE (direktno)');
             isProcessingCommand = true;
@@ -806,7 +824,6 @@ function startVoiceRecognition() {
             return;
         }
         
-        // END - OTVARA ZALIHE
         if (lowerFull.includes('end') || lowerFull.includes(' and ') || lowerFull.includes('kraj') || lowerFull.includes('završi')) {
             console.log('🏁 END DETEKTOVAN - otvaram zalihe!');
             isProcessingCommand = true;
@@ -859,7 +876,6 @@ function startVoiceRecognition() {
             return;
         }
         
-        // PLUS - ČUVANJE TRENUTNOG PROIZVODA
         if (lowerFull.includes('plus')) {
             console.log('✅ PLUS DETEKTOVAN - završavam unos (NE otvaram zalihe)');
             isProcessingCommand = true;
@@ -911,7 +927,6 @@ function startVoiceRecognition() {
             return;
         }
         
-        // UNOS - OTVARANJE DATA ENTRY EKRANA
         const dataEntryKeywords = ['unos', 'unesi', 'dodaj', 'novi', 'add'];
         if (dataEntryKeywords.some(k => lowerFull.includes(k))) {
             console.log('📝 UNOS DETEKTOVAN - otvaram data entry');
@@ -946,7 +961,7 @@ function startVoiceRecognition() {
                 restartMicrophone();
             }
         }, 10000);
-    };  // ← KRAJ onresult
+    };
 
     recognition.onerror = function(event) {
         console.error('⚠️ Speech Recognition greška:', event.error);
@@ -961,7 +976,6 @@ function startVoiceRecognition() {
     recognition.onend = function() {
         console.log('🎤 Glasovno prepoznavanje završeno.');
         isProcessingCommand = false;
-        // 🔥 AKO JE VOICE MODE AKTIVAN, RESTARTUJ MIKROFON
         if (window.isVoiceModeActive) {
             console.log('🔄 Voice mode je aktivan, restartujem mikrofon...');
             setTimeout(function() {
@@ -981,7 +995,8 @@ function startVoiceRecognition() {
         console.error('❌ Greška pri pokretanju:', e);
         showVoiceStatus('❌ Greška pri pokretanju mikrofona', '#f44336');
     }
-}  // ← KRAJ funkcije startVoiceRecognition
+}
+
 // ============================================
 // 11. ZAUSTAVI PREPOZNAVANJE
 // ============================================
@@ -1017,14 +1032,15 @@ function restartMicrophone() {
 
 function goBackFromVoice() {
     console.log('◀ goBackFromVoice POZVAN - vraćam na JEZIKE!');
-    stopVoiceRecognition();
+    
+    // 🔥 NE GASI MIKROFON - OSTAVI GA AKTIVNIM
+    // stopVoiceRecognition();  // ← UKLONJENO
     
     document.querySelectorAll('.screen').forEach(s => {
         s.style.display = 'none';
         s.classList.remove('active');
     });
     
-    // 🔥 VRAĆAM NA EKRAN SA JEZICIMA (languageScreen)
     const languageScreen = document.getElementById('languageScreen');
     if (languageScreen) {
         languageScreen.style.display = 'flex';
@@ -1032,7 +1048,6 @@ function goBackFromVoice() {
         console.log('✅ languageScreen prikazan');
     } else {
         console.warn('⚠️ languageScreen nije pronađen!');
-        // Fallback: ako nema languageScreen, idi na choiceScreen
         const choiceScreen = document.getElementById('choiceScreen');
         if (choiceScreen) {
             choiceScreen.style.display = 'flex';
@@ -1046,6 +1061,8 @@ function goBackFromVoice() {
     if (typeof updateInterfaceLanguage === 'function') {
         updateInterfaceLanguage();
     }
+    
+    console.log('🎤 Mikrofon ostaje aktivan!');
 }
 
 // ============================================
@@ -1055,32 +1072,63 @@ function goBackFromVoice() {
 function selectVoiceMode() {
     console.log('🎤 Izabran zvučni unos');
     
-    const choiceScreen = document.getElementById('choiceScreen');
-    const voiceScreen = document.getElementById('voiceMenuScreen');
+    showVoiceStatus('🎤 Tražim dozvolu za mikrofon...', '#FFD700');
     
-    if (choiceScreen) {
-        choiceScreen.style.display = 'none';
-        choiceScreen.classList.remove('active');
-    }
-    if (voiceScreen) {
-        voiceScreen.style.display = 'flex';
-        voiceScreen.classList.add('active');
-    }
-    
-    currentScreen = 'voiceMenuScreen';
-    currentScreenState = 'voiceMenuScreen';
-    screenHistory.push('choiceScreen');
-    
-    // 🔥 POKRENI MIKROFON I ZADrŽI GA AKTIVNIM
-    setTimeout(function() {
-        if (typeof startVoiceRecognition === 'function') {
-            startVoiceRecognition();
-            // 🔥 POSTAVI GLOBALNI FLAG DA JE MIKROFON AKTIVAN
+    requestMicrophonePermission()
+        .then(function() {
+            console.log('✅ Dozvola odobrena, pokrećem mikrofon');
+            
+            const choiceScreen = document.getElementById('choiceScreen');
+            const voiceScreen = document.getElementById('voiceMenuScreen');
+            
+            if (choiceScreen) {
+                choiceScreen.style.display = 'none';
+                choiceScreen.classList.remove('active');
+            }
+            if (voiceScreen) {
+                voiceScreen.style.display = 'flex';
+                voiceScreen.classList.add('active');
+            }
+            
+            currentScreen = 'voiceMenuScreen';
+            currentScreenState = 'voiceMenuScreen';
+            screenHistory.push('choiceScreen');
+            
             window.isVoiceModeActive = true;
-            console.log('🎤 Mikrofon pokrenut i ostaje aktivan na svim ekranima');
-        }
-    }, 500);
+            
+            setTimeout(function() {
+                if (typeof startVoiceRecognition === 'function') {
+                    startVoiceRecognition();
+                    console.log('🎤 Mikrofon pokrenut i ostaje aktivan na svim ekranima');
+                }
+            }, 500);
+        })
+        .catch(function(err) {
+            console.error('❌ Dozvola za mikrofon odbijena:', err);
+            showVoiceStatus('❌ Dozvolite mikrofon u podešavanjima browsera!', '#f44336');
+            
+            const voiceStatus = document.getElementById('voiceStatus');
+            if (voiceStatus) {
+                voiceStatus.innerHTML = `
+                    ❌ Dozvolite mikrofon u podešavanjima browsera!
+                    <br>
+                    <button onclick="selectVoiceMode()" style="
+                        margin-top:10px;
+                        padding:10px 20px;
+                        background:#4CAF50;
+                        color:white;
+                        border:none;
+                        border-radius:8px;
+                        font-size:16px;
+                        cursor:pointer;
+                    ">
+                        🔄 Pokušaj ponovo
+                    </button>
+                `;
+            }
+        });
 }
+
 // ============================================
 // 15. DODATNE FUNKCIJE ZA PRIKAZ I BRISANJE
 // ============================================
@@ -1126,6 +1174,7 @@ window._voiceCommandsStop = stopVoiceRecognition;
 window._voiceCommandsProcess = processAndSaveItem;
 window._voiceCommandsParse = parseVoiceDataEntry;
 window._voiceCommandsOpenZalihe = otvoriZaliheEkran;
+window.requestMicrophonePermission = requestMicrophonePermission;
 
 window.startVoiceRecognition = function() {
     console.log('🎤 startVoiceRecognition -> VOICE COMMANDS');
@@ -1486,7 +1535,6 @@ function saveLastAddedProducts(product) {
     }
 }
 
-// ===== PREUSMERAVANJE sacuvajPodatke DA ČUVA lastAddedProducts =====
 const originalSacuvajPodatke = sacuvajPodatke;
 
 sacuvajPodatke = function(data) {
