@@ -474,6 +474,17 @@
 <!-- ============================================ -->
 <!-- ⭐ SCRIPT TAGOVI - NA KRAJU BODY ⭐ -->
 <!-- ============================================ -->
+
+<!-- 🔥 PRVO GLOBALNE PROMENLJIVE -->
+<script>
+    var recognition = null;
+    var activeBuffer = '';
+    var lastSavedData = null;
+    var isProcessingCommand = false;
+    var micActive = false;
+    console.log('🔥 Globalne voice promenljive definisane!');
+</script>
+
 <script>
     // ===== SERVICE WORKER REGISTRACIJA =====
     if ('serviceWorker' in navigator) {
