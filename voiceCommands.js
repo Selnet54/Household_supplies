@@ -10,7 +10,6 @@ let isVoiceInput = false;
 let ALLOW_INVENTORY_OPEN = false;
 let micRestartTimer = null;
 let micActive = false;
-let recognition = null;  // 🔥🔥🔥 OVO JE FALILO - DODAJ OVO!
 
 // Direktni pokretač za 4. ekran (BEZ ASINHRONIH PREKIDA)
 window.forceStartVoice = function(e) {
