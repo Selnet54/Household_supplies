@@ -1,10 +1,6 @@
 // ============================================
-// VOICE COMMANDS - POPRAVLJENA VERZIJA v2.2
+// VOICE COMMANDS - KONAČNA VERZIJA v2.0
 // ============================================
-
-// Izbegavanje SyntaxError-a ako su varijable već deklarisane globalno
-if (typeof window.recognition === 'undefined') window.recognition = null;
-if (typeof window.micActive === 'undefined') window.micActive = false;
 
 let activeBuffer = ''; 
 let lastSavedData = null;
@@ -13,6 +9,8 @@ let END_AKTIVAN = false;
 let isVoiceInput = false;
 let ALLOW_INVENTORY_OPEN = false;
 let micRestartTimer = null;
+let micActive = false;
+let recognition = null;  // 🔥🔥🔥 OVO JE FALILO - DODAJ OVO!
 
 // Direktni pokretač za 4. ekran (BEZ ASINHRONIH PREKIDA)
 window.forceStartVoice = function(e) {
@@ -435,3 +433,39 @@ document.addEventListener('DOMContentLoaded', () => {
 console.log('✅ Voice funkcije izvezene za HTML dugmad!');
 console.log('✅ selectVoiceMode:', typeof window.selectVoiceMode);
 console.log('✅ startVoiceRecognition:', typeof window.startVoiceRecognition);
+// ============================================
+// 6. DIREKTNI IZVOZI ZA HTML
+// ============================================
+
+window.forceStartVoice = window.forceStartVoice || function() {
+    console.log('⚡ forceStartVoice pozvan!');
+    if (typeof startVoiceRecognition === 'function') {
+        startVoiceRecognition();
+    }
+};
+
+window.voiceCommand = function(cmd) {
+    console.log('🎤 voiceCommand:', cmd);
+    if (cmd === 'inventory' && typeof renderInventory === 'function') renderInventory();
+    else if (cmd === 'shopping' && typeof renderShoppingList === 'function') renderShoppingList();
+    else if (cmd === 'add' && typeof renderDataEntry === 'function') renderDataEntry('');
+    else if (cmd === 'back' && typeof goBackFromVoice === 'function') goBackFromVoice();
+};
+
+window.goBackFromVoice = function() {
+    console.log('🔙 goBackFromVoice pozvan');
+    const voiceScreen = document.getElementById('voiceMenuScreen');
+    const choiceScreen = document.getElementById('choiceScreen');
+    if (voiceScreen) { voiceScreen.style.display = 'none'; voiceScreen.classList.remove('active'); }
+    if (choiceScreen) { choiceScreen.style.display = 'flex'; choiceScreen.classList.add('active'); }
+};
+
+window.exitApp = window.exitApp || function() {
+    console.log('🚪 EXIT');
+    document.body.innerHTML = '<div style="text-align:center;color:#FFD700;font-size:32px;margin-top:50px;">👋 Hvala na korišćenju!</div>';
+};
+
+console.log('✅ VoiceCommands.js POTPUNO ucitano!');
+console.log('✅ recognition:', typeof recognition);
+console.log('✅ startVoiceRecognition:', typeof startVoiceRecognition);
+console.log('✅ forceStartVoice:', typeof window.forceStartVoice);
