@@ -719,6 +719,12 @@ function otvoriZaliheEkran() {
 function startVoiceRecognition() {
     console.log('🎤 startVoiceRecognition POZVAN!');
     
+    // 🔥 PROVERI DA LI JE DOZVOLA DATA - AKO NIJE, BROWSER ĆE TRAŽITI
+    if (window.isVoiceModeActive) {
+        console.log('✅ Voice mode aktivan, pokrećem Speech Recognition...');
+    }
+    
+    // 🔥 AKO VEĆ POSTOJI RECOGNITION, ZAUSTAVI GA
     if (recognition) {
         try { recognition.stop(); } catch(e) {}
         recognition = null;
@@ -748,12 +754,18 @@ function startVoiceRecognition() {
 
     recognition.onstart = function() {
         console.log('🎤 MIKROFON AKTIVAN!');
-        showVoiceStatus('🎤 Slušam... Recite "start" pa podatke', '#2196F3');
+        showVoiceStatus('🎤 Slušam... Recite "start" pa podatke', '#4CAF50');
         activeBuffer = '';
         isProcessingCommand = false;
         END_AKTIVAN = false;
         ALLOW_INVENTORY_OPEN = false;
         window.isVoiceModeActive = true;
+        // 🔥 SAKRUJ STATUS KADA MIKROFON PRORADI
+        const voiceStatus = document.getElementById('voiceStatus');
+        if (voiceStatus) {
+            voiceStatus.innerHTML = '🎤 Slušam... Recite "start" pa podatke';
+            voiceStatus.style.color = '#4CAF50';
+        }
     };
 
     recognition.onresult = function(event) {
@@ -1072,38 +1084,32 @@ function goBackFromVoice() {
 function selectVoiceMode() {
     console.log('🎤 Izabran zvučni unos');
     
-    // 🔥 PRVO TRAŽI DOZVOLU ZA MIKROFON
-    showVoiceStatus('🎤 Tražim dozvolu za mikrofon...', '#FFD700');
+    const choiceScreen = document.getElementById('choiceScreen');
+    const voiceScreen = document.getElementById('voiceMenuScreen');
     
-    requestMicrophonePermission()
-        .then(function() {
-            console.log('✅ Dozvola odobrena, pokrećem mikrofon');
-            
-            const choiceScreen = document.getElementById('choiceScreen');
-            const voiceScreen = document.getElementById('voiceMenuScreen');
-            
-            if (choiceScreen) {
-                choiceScreen.style.display = 'none';
-                choiceScreen.classList.remove('active');
-            }
-            if (voiceScreen) {
-                voiceScreen.style.display = 'flex';
-                voiceScreen.classList.add('active');
-            }
-            
-            currentScreen = 'voiceMenuScreen';
-            currentScreenState = 'voiceMenuScreen';
-            screenHistory.push('choiceScreen');
-            
-            window.isVoiceModeActive = true;
-            
-            setTimeout(function() {
-                if (typeof startVoiceRecognition === 'function') {
-                    startVoiceRecognition();
-                    console.log('🎤 Mikrofon pokrenut i ostaje aktivan na svim ekranima');
-                }
-            }, 500);
-        })
+    if (choiceScreen) {
+        choiceScreen.style.display = 'none';
+        choiceScreen.classList.remove('active');
+    }
+    if (voiceScreen) {
+        voiceScreen.style.display = 'flex';
+        voiceScreen.classList.add('active');
+    }
+    
+    currentScreen = 'voiceMenuScreen';
+    currentScreenState = 'voiceMenuScreen';
+    screenHistory.push('choiceScreen');
+    
+    window.isVoiceModeActive = true;
+    
+    // 🔥 DIREKTNO POKRENI MIKROFON - BROWSER ĆE SAM TRAŽITI DOZVOLU
+    setTimeout(function() {
+        if (typeof startVoiceRecognition === 'function') {
+            startVoiceRecognition();
+            console.log('🎤 Mikrofon pokrenut - browser će tražiti dozvolu');
+        }
+    }, 500);
+}
         .catch(function(err) {
             console.error('❌ Dozvola za mikrofon odbijena:', err);
             showVoiceStatus('❌ Dozvolite mikrofon u podešavanjima browsera!', '#f44336');
