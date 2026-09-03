@@ -372,6 +372,21 @@ function saveLastAddedProducts(product) {
 
 window.selectVoiceMode = selectVoiceMode;
 window.startVoiceRecognition = startVoiceRecognition;
+// DEBUG: Provera da li je dugme povezano
+document.addEventListener('DOMContentLoaded', () => {
+    const startBtn = document.getElementById('startVoiceBtn'); // Zamenite ID sa ID-jem vašeg zelenog dugmeta
+    if (startBtn) {
+        startBtn.addEventListener('click', (e) => {
+            console.log('✅ Kliknuto na zeleno dugme!');
+            // Direktan poziv bez async/promise kašnjenja za mobilne pregledače
+            if (typeof startVoiceRecognition === 'function') {
+                startVoiceRecognition();
+            }
+        });
+    } else {
+        console.error('❌ Zeleno dugme nije pronađeno u DOM-u! Proverite ID dugmeta.');
+    }
+});
 window.stopVoiceRecognition = stopVoiceRecognition;
 window.requestMicrophonePermission = requestMicrophonePermission;
 window.processVoiceCommand = processAndSaveItem;
