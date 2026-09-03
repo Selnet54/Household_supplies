@@ -1084,57 +1084,65 @@ function goBackFromVoice() {
 function selectVoiceMode() {
     console.log('🎤 Izabran zvučni unos');
     
-    const choiceScreen = document.getElementById('choiceScreen');
-    const voiceScreen = document.getElementById('voiceMenuScreen');
+    showVoiceStatus('🎤 Tražim dozvolu za mikrofon...', '#FFD700');
     
-    if (choiceScreen) {
-        choiceScreen.style.display = 'none';
-        choiceScreen.classList.remove('active');
+    // 🔥 PRVO TRAŽI DOZVOLU DIREKTNO
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(function(stream) {
+                stream.getTracks().forEach(track => track.stop());
+                console.log('✅ Dozvola ODOBRENA');
+                
+                const choiceScreen = document.getElementById('choiceScreen');
+                const voiceScreen = document.getElementById('voiceMenuScreen');
+                
+                if (choiceScreen) {
+                    choiceScreen.style.display = 'none';
+                    choiceScreen.classList.remove('active');
+                }
+                if (voiceScreen) {
+                    voiceScreen.style.display = 'flex';
+                    voiceScreen.classList.add('active');
+                }
+                
+                currentScreen = 'voiceMenuScreen';
+                currentScreenState = 'voiceMenuScreen';
+                screenHistory.push('choiceScreen');
+                window.isVoiceModeActive = true;
+                
+                setTimeout(function() {
+                    if (typeof startVoiceRecognition === 'function') {
+                        startVoiceRecognition();
+                    }
+                }, 500);
+            })
+            .catch(function(err) {
+                console.error('❌ Dozvola ODBIJENA:', err);
+                showVoiceStatus('❌ Dozvolite mikrofon!', '#f44336');
+                
+                const voiceStatus = document.getElementById('voiceStatus');
+                if (voiceStatus) {
+                    voiceStatus.innerHTML = `
+                        ❌ Dozvolite mikrofon u podešavanjima!
+                        <br><br>
+                        <button onclick="selectVoiceMode()" style="
+                            padding:12px 30px;
+                            background:#4CAF50;
+                            color:white;
+                            border:none;
+                            border-radius:12px;
+                            font-size:18px;
+                            cursor:pointer;
+                            font-weight:bold;
+                        ">
+                            🔄 Pokušaj ponovo
+                        </button>
+                    `;
+                }
+            });
+    } else {
+        showVoiceStatus('❌ Browser ne podržava mikrofon.', '#f44336');
     }
-    if (voiceScreen) {
-        voiceScreen.style.display = 'flex';
-        voiceScreen.classList.add('active');
-    }
-    
-    currentScreen = 'voiceMenuScreen';
-    currentScreenState = 'voiceMenuScreen';
-    screenHistory.push('choiceScreen');
-    
-    window.isVoiceModeActive = true;
-    
-    // 🔥 DIREKTNO POKRENI MIKROFON - BROWSER ĆE SAM TRAŽITI DOZVOLU
-    setTimeout(function() {
-        if (typeof startVoiceRecognition === 'function') {
-            startVoiceRecognition();
-            console.log('🎤 Mikrofon pokrenut - browser će tražiti dozvolu');
-        }
-    }, 500);
-}
-        .catch(function(err) {
-            console.error('❌ Dozvola za mikrofon odbijena:', err);
-            showVoiceStatus('❌ Dozvolite mikrofon u podešavanjima browsera!', '#f44336');
-            
-            // 🔥 PRIKAŽI DUGME ZA PONOVNI POKUŠAJ
-            const voiceStatus = document.getElementById('voiceStatus');
-            if (voiceStatus) {
-                voiceStatus.innerHTML = `
-                    ❌ Dozvolite mikrofon u podešavanjima browsera!
-                    <br>
-                    <button onclick="selectVoiceMode()" style="
-                        margin-top:10px;
-                        padding:10px 20px;
-                        background:#4CAF50;
-                        color:white;
-                        border:none;
-                        border-radius:8px;
-                        font-size:16px;
-                        cursor:pointer;
-                    ">
-                        🔄 Pokušaj ponovo
-                    </button>
-                `;
-            }
-        });
 }
 // ============================================
 // 15. DODATNE FUNKCIJE ZA PRIKAZ I BRISANJE
