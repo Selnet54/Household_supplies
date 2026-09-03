@@ -1,15 +1,11 @@
 // ============================================
-// VOICE COMMANDS - KONAČNA POPRAVLJENA VERZIJA v2.1
+// VOICE COMMANDS - POPRAVLJENA VERZIJA v2.2
 // ============================================
-// Izbegavanje SyntaxError-a ako je varijabla već deklarisana globalno
-if (typeof recognition === 'undefined') {
-    var recognition = null;
-}
-if (typeof micActive === 'undefined') {
-    var micActive = false;
-}
 
-// Ostale promenljive
+// Izbegavanje SyntaxError-a ako su varijable već deklarisane globalno
+if (typeof window.recognition === 'undefined') window.recognition = null;
+if (typeof window.micActive === 'undefined') window.micActive = false;
+
 let activeBuffer = ''; 
 let lastSavedData = null;
 let isProcessingCommand = false;
@@ -18,6 +14,40 @@ let isVoiceInput = false;
 let ALLOW_INVENTORY_OPEN = false;
 let micRestartTimer = null;
 
+// Direktni pokretač za 4. ekran (BEZ ASINHRONIH PREKIDA)
+window.forceStartVoice = function(e) {
+    if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    console.log('⚡ Forsirano pokretanje mikrofona sa 4. ekrana...');
+
+    // 1. Provera HTTPS protokola
+    if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+        alert('❌ Mikrofon radi SAMO na HTTPS vezi! Trenutni protokol je HTTP.');
+        return;
+    }
+
+    // 2. Provera podrške za Web Speech API
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        alert('❌ Vaš pregledač ne podržava Web Speech API. Koristite Chrome ili Safari.');
+        return;
+    }
+
+    // 3. DIREKTNO POKRETANJE (bez getUserMedia asinhrone pauze)
+    try {
+        if (typeof window.startVoiceRecognition === 'function') {
+            window.startVoiceRecognition();
+        } else if (typeof startVoiceRecognition === 'function') {
+            startVoiceRecognition();
+        } else {
+            console.error('❌ Funkcija startVoiceRecognition nije pronađena u memoriji.');
+        }
+    } catch (err) {
+        console.error('❌ Greška pri pokretanju:', err);
+    }
+};
 // ============================================
 // 1. POMOĆNE FUNKCIJE
 // ============================================
