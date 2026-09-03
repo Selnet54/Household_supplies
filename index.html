@@ -338,7 +338,29 @@
         </div>
     </div>
 </div>
+<!-- ===== EKRAN 3: IZBOR NAČINA UNOSA ===== -->
+<div id="choiceScreen" class="screen" style="display:none;">
+    <div class="choice-container">
+        <div class="choice-box">
+            <div class="logo-text" style="font-size:32px; margin-bottom:10px;">SUPPLIES</div>
+            <div id="choiceTitleText" style="font-size:18px; color:#aaa; margin-bottom:30px;">How do you want to enter data?</div>
 
+            <button id="voiceChoiceBtn" class="choice-btn choice-voice" onclick="selectVoiceMode(); return false;">
+                <div style="font-size:48px; margin-bottom:8px;">🎤</div>
+                <div id="voiceTitleText" style="font-size:24px; font-weight:bold;">Voice Input</div>
+                <div id="voiceDescText" style="font-size:16px; color:#aaa; margin-top:5px;">Speak and I will enter</div>
+            </button>
+
+            <button id="manualChoiceBtn" class="choice-btn choice-manual" onclick="selectManualMode(); return false;">
+                <div style="font-size:48px; margin-bottom:8px;">✍️</div>
+                <div id="manualTitleText" style="font-size:24px; font-weight:bold;">Manual Input</div>
+                <div id="manualDescText" style="font-size:16px; color:#aaa; margin-top:5px;">Type data manually</div>
+            </button>
+
+            <button id="exitChoiceBtn" class="btn btn-red" style="margin-top:20px;" onclick="exitApp()">🚪 EXIT</button>
+        </div>
+    </div>
+</div>
 <!-- ===== EKRAN 4: ZVUČNI UNOS - GLAVNI MENI ===== -->
 <div id="voiceMenuScreen" class="screen" style="display:none;">
     <div class="voice-menu-container">
