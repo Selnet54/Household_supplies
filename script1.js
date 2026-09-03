@@ -2178,7 +2178,6 @@ document.addEventListener('DOMContentLoaded', function() {
 // GLASOVNA KONTROLA I MAPIRANJE JEZIKA
 // ============================================
 
-let recognition = null;
 let isListening = false;
 
 const speechLangMap = {
