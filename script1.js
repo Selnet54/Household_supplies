@@ -1,7 +1,7 @@
 // ============================================
 // PUNI SCRIPT ZA APLIKACIJU - HIJERARHIJSKI NAZAD
 // ============================================
-console.log('✅ Script.js je učitan!');
+console.log('✅ Script.js je učitan!');function saveProduct
 
 // ===== GLOBALNI FLAG ZA VOICE MODE =====
 window.isVoiceModeActive = false;
