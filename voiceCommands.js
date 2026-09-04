@@ -1,5 +1,5 @@
 // ============================================
-// VOICE COMMANDS - KONAČNA VERZIJA v2.1 (FIX)
+// VOICE COMMANDS - KONAČNA VERZIJA v2.2 (ANDROID FIX)
 // ============================================
 
 // exitApp i goBackFromVoice sada žive isključivo u script1.js
@@ -11,6 +11,9 @@ let END_AKTIVAN = false;
 let isVoiceInput = false;
 let ALLOW_INVENTORY_OPEN = false;
 let micRestartTimer = null;
+
+// 🔥 ANDROID ZAŠTITA - Sprečava duplo pokretanje
+let isRestarting = false;
 
 // 🔥 recognition, micActive, activeBuffer, isProcessingCommand, lastSavedData
 // se NE deklarišu ovde — već postoje kao 'var' u index.html (inline <script>
@@ -25,13 +28,9 @@ let micRestartTimer = null;
 // getUserMedia() (to je uzrok ponovnog traženja dozvole na mobilnom)
 let micPermissionGranted = false;
 
-// 🔥 Dijagnostika i zaštita za restart petlju mikrofona (semafor-efekat)
-let recognitionStarting = false; // sprečava dva paralelna recognition objekta
-let lastStartTime = null;        // za merenje trajanja svake sesije
-let rapidCycleCount = 0;         // broj uzastopnih vrlo kratkih sesija (backoff okidač)
-
 // 🔥 currentLang - koristi postojeći ili postavi podrazumevani
 var currentLang = (typeof currentLang !== 'undefined') ? currentLang : 'sr';
+
 // ============================================
 // DIREKTNI POKRETAČ ZA 4. EKRAN - POPRAVLJEN
 // ============================================
@@ -75,6 +74,7 @@ window.forceStartVoice = function(e) {
         showVoiceStatus('❌ Dozvolite pristup mikrofonu u podešavanjima!', '#f44336');
     });
 };
+
 // ============================================
 // 1. POMOĆNE FUNKCIJE
 // ============================================
@@ -318,11 +318,17 @@ function otvoriZaliheEkran() {
 }
 
 // ============================================
-// 4. PREPOZNAVANJE GOVORA (GLAVNA FUNKCIJA) - POPRAVLJENO
+// 4. PREPOZNAVANJE GOVORA (GLAVNA FUNKCIJA) - ANDROID FIX
 // ============================================
 
 function startVoiceRecognition() {
     console.log('🎤 startVoiceRecognition pozvan!');
+
+    // 🔥 Spreči duplo pokretanje (Android često pozove dva puta)
+    if (isRestarting) {
+        console.log('⏳ Već se restartuje, ignorišem');
+        return;
+    }
 
     // 🔥 iOS Safari uopšte ne podržava Web Speech API (ni desktop ni mobilni
     // Safari) — obavesti korisnika umesto da tiho ne radi ništa
@@ -358,19 +364,9 @@ function startVoiceRecognition() {
     }
 
     window.isVoiceModeActive = true;
+    isRestarting = true;
 
     function beginRecognition() {
-        // 🔥 ZAŠTITA OD PREKLAPANJA: ako je poziv started dok je prethodni
-        // recognition još u procesu gašenja, dva paralelna recognition
-        // objekta se bore za isti mikrofon na Androidu — to sam po sebi
-        // pravi vrlo brzo gašenje/paljenje. Sačekaj da se prethodni potpuno
-        // ugasi (recognitionStarting flag) pre nego što napraviš novi.
-        if (recognitionStarting) {
-            console.log('⏸️ Recognition se već pokreće, preskačem duplo pokretanje');
-            return;
-        }
-        recognitionStarting = true;
-
         recognition = new SpeechRecognition();
 
         const speechLangMap = {
@@ -380,24 +376,19 @@ function startVoiceRecognition() {
         };
         recognition.lang = speechLangMap[currentLang] || 'sr-RS';
 
-        // 🔥 continuous TRUE — na desktopu produžava sesiju; na Android
-        // Chrome-u OVAJ FLAG SE U PRAKSI IGNORIŠE (poznato ograničenje
-        // Android-ove Speech Recognition implementacije — sesija se ipak
-        // zatvara posle svake pauze u govoru). Zato restart petlja ispod
-        // i dalje mora da postoji za Android, samo sad sa zaštitom od
-        // prebrzog ciklusa.
-        recognition.continuous = true;
+        // 🔥 KLJUČNA PROMENA: continuous FALSE (Android bolje radi)
+        // Android ignoriše continuous: true, pa prelazimo na ručni restart
+        recognition.continuous = false;
         recognition.interimResults = true;
         recognition.maxAlternatives = 1;
 
         recognition.onstart = function() {
-            recognitionStarting = false;
-            lastStartTime = Date.now();
             showVoiceStatus('🎤 Slušam...', '#4CAF50');
             activeBuffer = '';
             isProcessingCommand = false;
             micActive = true;
-            console.log('✅ Mikrofon aktivan! [t=' + lastStartTime + ']');
+            isRestarting = false;
+            console.log('✅ Mikrofon aktivan!');
         };
 
         recognition.onresult = function(event) {
@@ -426,67 +417,74 @@ function startVoiceRecognition() {
                 } else {
                     console.error('❌ processVoiceCommand nije definisan!');
                 }
-                // 🔥 Restart se dešava isključivo u onend (nema više duplog
-                // restartovanja ovde + u onend, što je pravilo dvostruke
-                // zahteve za dozvolu na mobilnom)
             }
         };
 
         recognition.onerror = function(event) {
-            console.error('❌ Speech error:', event.error, '[t=' + Date.now() + ']');
-            recognitionStarting = false;
+            console.error('❌ Speech error:', event.error);
 
-            if (event.error === 'aborted' || event.error === 'no-speech') {
-                console.log('⏸️ Normalna greška, ignorišem:', event.error);
+            if (event.error === 'aborted') {
+                console.log('⏸️ Zaustavljeno od strane korisnika');
+                isRestarting = false;
+                return;
+            }
+
+            if (event.error === 'no-speech') {
+                console.log('🔇 Nema govora, restartujem...');
+                if (window.isVoiceModeActive) {
+                    micRestartTimer = setTimeout(function() {
+                        if (window.isVoiceModeActive && !micActive) {
+                            startVoiceRecognition();
+                        }
+                    }, 500);
+                }
                 return;
             }
 
             if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
                 showVoiceStatus('❌ Pristup mikrofonu je blokiran! Proverite dozvole u podešavanjima browsera.', '#f44336');
                 window.isVoiceModeActive = false;
-                micPermissionGranted = false; // ponovo pitaj sledeći put kad korisnik eksplicitno pokrene
+                micPermissionGranted = false;
+                isRestarting = false;
             } else {
                 showVoiceStatus(`❌ Greška: ${event.error}`, '#f44336');
+                if (window.isVoiceModeActive) {
+                    micRestartTimer = setTimeout(function() {
+                        if (window.isVoiceModeActive && !micActive) {
+                            startVoiceRecognition();
+                        }
+                    }, 1000);
+                }
             }
             isProcessingCommand = false;
         };
 
         recognition.onend = function() {
-            const duration = lastStartTime ? (Date.now() - lastStartTime) : null;
-            console.log('⏹️ Mikrofon zaustavljen. Trajanje sesije: ' + duration + 'ms');
+            console.log('⏹️ Mikrofon zaustavljen');
             micActive = false;
-            recognitionStarting = false;
             recognition = null;
+            isRestarting = false;
 
-            if (!window.isVoiceModeActive) return;
-
-            // 🔥 BACKOFF: ako se sesija zatvara vrlo brzo (< 1200ms) više
-            // puta zaredom, to je Android koji forsira kratke cikluse —
-            // produži pauzu između restarta umesto da "trepće" svake
-            // sekunde. Ako traje duže (korisnik je stvarno pričao), vrati
-            // se na kratku, responzivnu pauzu.
-            if (duration !== null && duration < 1200) {
-                rapidCycleCount++;
+            // 🔥 RESTART SAMO AKO SMO JOŠ UVEK U VOICE MODE
+            if (window.isVoiceModeActive) {
+                console.log('🔄 Restartujem slušanje...');
+                micRestartTimer = setTimeout(function() {
+                    if (window.isVoiceModeActive && !micActive) {
+                        startVoiceRecognition();
+                    }
+                }, 500);
             } else {
-                rapidCycleCount = 0;
+                showVoiceStatus('🎤 Mikrofon zaustavljen', '#999999');
             }
-            const delay = rapidCycleCount >= 2 ? Math.min(600 + rapidCycleCount * 400, 3000) : 400;
-            console.log('🔄 Restart za ' + delay + 'ms (rapidCycleCount=' + rapidCycleCount + ')');
-
-            micRestartTimer = setTimeout(function() {
-                if (window.isVoiceModeActive && !micActive) {
-                    startVoiceRecognition();
-                }
-            }, delay);
         };
 
         try {
             recognition.start();
-            console.log('✅ Recognition.start() pozvan!');
+            console.log('✅ Recognition startovan!');
         } catch(e) {
-            recognitionStarting = false;
             console.error('❌ Greška pri startovanju:', e);
             showVoiceStatus('❌ Greška pri pokretanju mikrofona', '#f44336');
+            isRestarting = false;
         }
     }
 
@@ -501,9 +499,14 @@ function startVoiceRecognition() {
     requestMicrophonePermission().then(beginRecognition).catch(err => {
         console.error('❌ Dozvola za mikrofon ODBIJENA:', err);
         window.isVoiceModeActive = false;
+        isRestarting = false;
         showVoiceStatus('❌ Dozvolite pristup mikrofonu u podešavanjima!', '#f44336');
     });
 }
+
+// ============================================
+// 5. ZAUSTAVLJANJE MIKROFONA
+// ============================================
 
 function stopVoiceRecognition() {
     // 🔥 OVA FUNKCIJA JE RANIJE NEDOSTAJALA — pozivala se na 15+ mesta u
@@ -512,6 +515,7 @@ function stopVoiceRecognition() {
     // je i dalje radila u pozadini i ponovo tražila dozvolu.
     console.log('🛑 stopVoiceRecognition pozvan');
     window.isVoiceModeActive = false;
+    isRestarting = true; // Spreči auto-restart
 
     if (micRestartTimer) {
         clearTimeout(micRestartTimer);
@@ -526,6 +530,11 @@ function stopVoiceRecognition() {
     micActive = false;
     showVoiceStatus('🎤 Mikrofon zaustavljen', '#999999');
 }
+
+// ============================================
+// 6. OBRADA GLASOVNIH KOMANDI
+// ============================================
+
 function processVoiceCommand(command) {
     console.log('🎤 processVoiceCommand prima:', command);
     
@@ -696,14 +705,23 @@ function processVoiceCommand(command) {
     showVoiceStatus(`❌ Nije prepoznato: "${command}"`, '#f44336');
     console.warn('⚠️ Nepoznata komanda:', command);
 }
+
 // ============================================
-// 5. IZVOZ ZA HTML DUGMAD
+// 7. IZVOZ ZA HTML DUGMAD
 // ============================================
 
 window.startVoiceRecognition = startVoiceRecognition;
 window.stopVoiceRecognition = stopVoiceRecognition;
 window.requestMicrophonePermission = requestMicrophonePermission;
-// selectVoiceMode / selectManualMode / exitApp / goBackFromVoice se izvoze iz script1.js
+window.processVoiceCommand = processVoiceCommand;
+window.forceStartVoice = forceStartVoice;
+window.prikaziPoljaZaUnos = prikaziPoljaZaUnos;
+window.parseVoiceDataEntry = parseVoiceDataEntry;
+window.sacuvajPodatke = sacuvajPodatke;
+window.popuniFormuPodacima = popuniFormuPodacima;
+window.ensureFormVisible = ensureFormVisible;
+window.hideVoiceMenu = hideVoiceMenu;
+window.showVoiceStatus = showVoiceStatus;
 
 // 🔥 POSTAVI currentLang preko window (ako je definisan iz drugog skripta)
 if (typeof currentLang === 'undefined') {
@@ -712,7 +730,7 @@ if (typeof currentLang === 'undefined') {
 }
 
 // ============================================
-// 6. DIREKTNI IZVOZI ZA HTML
+// 8. DIREKTNI IZVOZI ZA HTML
 // ============================================
 
 window.forceStartVoice = window.forceStartVoice || function() {
@@ -786,34 +804,5 @@ window.addEventListener('beforeunload', function() {
     window.isVoiceModeActive = false;
 });
 
-console.log('✅ VoiceCommands.js POTPUNO ucitano v2.1!');
+console.log('✅ VoiceCommands.js POTPUNO ucitano v2.2 (Android FIX)!');
 console.log('✅ startVoiceRecognition:', typeof startVoiceRecognition);
-console.log('✅ selectManualMode:', typeof selectManualMode);
-/// ============================================
-// ============================================
-// 🔥 IZVOZI ZA GLOBAL - VOICE COMMANDS
-// ============================================
-
-window.startVoiceRecognition = startVoiceRecognition;
-window.stopVoiceRecognition = stopVoiceRecognition;
-window.requestMicrophonePermission = requestMicrophonePermission;
-window.processVoiceCommand = processVoiceCommand;  // 🔥 PROMENJENO - SADA PRAVA FUNKCIJA
-window.forceStartVoice = forceStartVoice;
-window.prikaziPoljaZaUnos = prikaziPoljaZaUnos;
-// selectVoiceMode / selectManualMode / exitApp / goBackFromVoice / saveLastAddedProducts se izvoze iz script1.js
-window.parseVoiceDataEntry = parseVoiceDataEntry;
-window.sacuvajPodatke = sacuvajPodatke;
-window.popuniFormuPodacima = popuniFormuPodacima;
-window.ensureFormVisible = ensureFormVisible;
-window.hideVoiceMenu = hideVoiceMenu;
-window.showVoiceStatus = showVoiceStatus;
-
-console.log('✅ VoiceCommands.js POTPUNO izvezen!');
-// ============================================
-// 🔥 POMOĆNI WINDOW POKAZIVAČ ZA script1.js
-// ============================================
-
-// Ovo omogućava script1.js da pronađe startVoiceRecognition
-window._voiceCommandsStart = startVoiceRecognition;
-
-console.log('✅ _voiceCommandsStart postavljen na:', typeof window._voiceCommandsStart);
