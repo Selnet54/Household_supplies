@@ -162,8 +162,6 @@
         .voice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .voice-btn { padding: 30px 15px; border: 2px solid #FFD700; border-radius: 16px; background: rgba(255,255,255,0.05); color: white; cursor: pointer; transition: all 0.3s; text-align: center; }
         .voice-btn:hover { background: #FFD700; color: #1a237e; transform: scale(1.05); }
-        .voice-btn-exit { border-color: #f44336; }
-        .voice-btn-exit:hover { background: #f44336; color: white; }
 
         /* ===== MODERN ALERT ===== */
         #modernAlert {
@@ -362,12 +360,7 @@
                     <div id="addMenuText" style="font-size:20px; font-weight:bold;">Unos podataka</div>
                 </button>
                 
-                <!-- 🔥 BACK u grid-u - CRVENA okvirna linija, providan -->
-                <button class="voice-btn" onclick="goBackFromVoice()" style="
-                    border: 3px solid #f44336; 
-                    background: rgba(244, 67, 54, 0.15);
-                    color: white;
-                ">
+                <button class="voice-btn" onclick="goBackFromVoice()" style="border: 3px solid #f44336; background: rgba(244, 67, 54, 0.15); color: white;">
                     <div style="font-size:40px;">◀</div>
                     <div id="backMenuText" style="font-size:20px; font-weight:bold;">Back</div>
                 </button>
@@ -377,37 +370,11 @@
                 🎤 Slušam... Recite "start" pa podatke
             </div>
             
-            <!-- 🔥 DUGME ZA DIREKTNO POKRETANJE MIKROFONA -->
-            <button id="activateMicBtn" onclick="startVoiceRecognition()" style="
-                margin-top:10px;
-                padding:14px;
-                background: #4CAF50;
-                color: white;
-                border: none;
-                border-radius: 12px;
-                font-size: 18px;
-                font-weight: bold;
-                cursor: pointer;
-                width: 100%;
-                transition: transform 0.2s;
-            " onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+            <button id="activateMicBtn" onclick="startVoiceRecognition()" style="margin-top:10px; padding:14px; background: #4CAF50; color: white; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; width: 100%; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
                 🎤 Aktiviraj mikrofon
             </button>
             
-            <!-- 🔥 EXIT dugme - CRVENO, izlazi iz aplikacije -->
-            <button id="exitFromVoiceBtn" onclick="exitApp()" style="
-                margin-top:15px;
-                width:100%;
-                padding:14px;
-                background: #f44336;
-                color: white;
-                border: 2px solid #f44336;
-                border-radius: 12px;
-                font-size: 18px;
-                font-weight: bold;
-                cursor: pointer;
-                transition: transform 0.2s;
-            " onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+            <button id="exitFromVoiceBtn" onclick="exitApp()" style="margin-top:15px; width:100%; padding:14px; background: #f44336; color: white; border: 2px solid #f44336; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
                 <span>🚪 EXIT</span>
             </button>
         </div>
@@ -450,23 +417,11 @@
     </div>
 </div>
 
-<!-- 🔥 FIX ZA MOBILNE UREĐAJE -->
-<script>
-// Spreči sleep mode na mobilnom
-function preventSleep() {
-    if (navigator.wakeLock) {
-        navigator.wakeLock.request('screen').catch(() => {});
-    }
-}
-document.addEventListener('click', preventSleep);
-document.addEventListener('touchstart', preventSleep);
-</script>
-
 <!-- ============================================ -->
 <!-- ⭐ SCRIPT TAGOVI - NA KRAJU BODY ⭐ -->
 <!-- ============================================ -->
 
-<!-- 🔥 PRVO GLOBALNE PROMENLJIVE -->
+<!-- 1. PRVO GLOBALNE PROMENLJIVE -->
 <script>
     var recognition = null;
     var activeBuffer = '';
@@ -476,8 +431,8 @@ document.addEventListener('touchstart', preventSleep);
     console.log('🔥 Globalne voice promenljive definisane!');
 </script>
 
+<!-- 2. SERVICE WORKER I BASE FIX -->
 <script>
-    // ===== SERVICE WORKER REGISTRACIJA =====
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/Household_supplies/service-worker.js')
             .then(function(registration) {
@@ -488,7 +443,6 @@ document.addEventListener('touchstart', preventSleep);
             });
     }
 
-    // ===== INSTALACIJA APLIKACIJE =====
     let deferredPrompt;
     window.addEventListener('beforeinstallprompt', function(e) {
         e.preventDefault();
@@ -499,7 +453,6 @@ document.addEventListener('touchstart', preventSleep);
         deferredPrompt = null;
     });
 
-    // ===== FIX za base href =====
     (function() {
         const base = document.querySelector('base');
         if (base) {
@@ -511,13 +464,23 @@ document.addEventListener('touchstart', preventSleep);
     })();
 </script>
 
-<!-- ⭐ REDOSLED UČITAVANJA: -->
+<!-- 3. VANJSKE SKRIPTE -->
 <script src="productParts.js"></script>
 <script src="voiceCommands.js"></script>
 <script src="script1.js"></script>
 
+<!-- 4. DODATNE LOGIČKE FUNKCIJE -->
 <script>
-    // FIX: Garantuje da mikrofon radi čak i ako se skripta sporije učitava
+    // Prevent sleep mode na mobilnim uređajima
+    function preventSleep() {
+        if (navigator.wakeLock) {
+            navigator.wakeLock.request('screen').catch(() => {});
+        }
+    }
+    document.addEventListener('click', preventSleep);
+    document.addEventListener('touchstart', preventSleep);
+
+    // Fallback za mikrofonske funkcije
     if (typeof window.startVoiceRecognition !== 'function') {
         window.startVoiceRecognition = function() {
             if (typeof forceStartVoice === 'function') {
@@ -530,110 +493,97 @@ document.addEventListener('touchstart', preventSleep);
             }
         };
     }
-</script>
 
-<!-- 🔥 FIX ZA MOBILNE UREĐAJE -->
-<script>
-function preventSleep() {
-    if (navigator.wakeLock) {
-        navigator.wakeLock.request('screen').catch(() => {});
-    }
-}
-document.addEventListener('click', preventSleep);
-document.addEventListener('touchstart', preventSleep);
-</script>
-
-<!-- 🔥 RENDER DATA ENTRY FUNKCIJA -->
-<script>
-function renderDataEntry(category) {
-    console.log('📝 renderDataEntry pozvan, category:', category);
-    
-    document.querySelectorAll('.screen').forEach(s => {
-        s.style.display = 'none';
-        s.classList.remove('active');
-    });
-    
-    const mainScreen = document.getElementById('mainScreen');
-    if (mainScreen) {
-        mainScreen.style.display = 'flex';
-        mainScreen.classList.add('active');
-    }
-    
-    const mainContent = document.getElementById('mainContent');
-    if (mainContent) {
-        mainContent.innerHTML = `
-            <div id="dataEntryScreen" style="display:block; padding:20px;">
-                <h2 class="title" id="dataEntryTitle">📝 Unos podataka</h2>
-                
-                <div class="row">
-                    <label for="productInput">Proizvod:</label>
-                    <input type="text" id="productInput" placeholder="Npr. mleko" style="flex:1; padding:16px; border:2px solid #ddd; border-radius:12px; font-size:24px;">
-                </div>
-                
-                <div class="row">
-                    <label>Količina:</label>
-                    <div class="inline-group">
-                        <input type="number" id="pieceInput" value="1" style="flex:1; padding:16px; border:2px solid #ddd; border-radius:12px; font-size:24px;">
-                        <label style="font-size:18px;">komada</label>
-                        <input type="number" id="quantityInput" value="1" style="flex:1; padding:16px; border:2px solid #ddd; border-radius:12px; font-size:24px;">
-                        <label style="font-size:18px;">kg/l/kom</label>
-                    </div>
-                </div>
-                
-                <div class="row">
-                    <label for="unitSelect">Jedinica:</label>
-                    <select id="unitSelect" style="flex:1; padding:16px; border:2px solid #ddd; border-radius:12px; font-size:24px;">
-                        <option value="kom">komad</option>
-                        <option value="kg">kilogram</option>
-                        <option value="g">gram</option>
-                        <option value="l">litar</option>
-                        <option value="pak">paket</option>
-                    </select>
-                </div>
-                
-                <div class="row">
-                    <label for="storageSelect">Skladište:</label>
-                    <select id="storageSelect" style="flex:1; padding:16px; border:2px solid #ddd; border-radius:12px; font-size:24px;">
-                        <option value="Zamrzivač 1">Zamrzivač 1</option>
-                        <option value="Zamrzivač 2">Zamrzivač 2</option>
-                        <option value="Zamrzivač 3">Zamrzivač 3</option>
-                        <option value="Frižider">Frižider</option>
-                        <option value="Ostava">Ostava</option>
-                    </select>
-                </div>
-                
-                <div class="row">
-                    <label for="shelfLifeInput">Rok (meseci):</label>
-                    <input type="number" id="shelfLifeInput" value="12" style="flex:1; padding:16px; border:2px solid #ddd; border-radius:12px; font-size:24px;">
-                    <div id="expiryDisplay" style="padding:16px; background:#f0f0f0; border-radius:12px; font-weight:bold; color:#1a237e; text-align:center; font-size:24px; min-width:120px;">
-                        📅 12 meseci
-                    </div>
-                </div>
-                
-                <div class="btn-group">
-                    <button class="btn-save" onclick="saveProduct()">💾 Sačuvaj</button>
-                    <button class="btn-cancel" onclick="renderInventory()">❌ Otkaži</button>
-                </div>
-            </div>
-        `;
+    // Render forma za ručni/glasovni unos
+    function renderDataEntry(category) {
+        console.log('📝 renderDataEntry pozvan, category:', category);
         
-        const shelfInput = document.getElementById('shelfLifeInput');
-        const expiryDisplay = document.getElementById('expiryDisplay');
-        if (shelfInput && expiryDisplay) {
-            shelfInput.addEventListener('input', function() {
-                const val = this.value || '0';
-                expiryDisplay.textContent = `📅 ${val} meseci`;
-            });
+        document.querySelectorAll('.screen').forEach(s => {
+            s.style.display = 'none';
+            s.classList.remove('active');
+        });
+        
+        const mainScreen = document.getElementById('mainScreen');
+        if (mainScreen) {
+            mainScreen.style.display = 'flex';
+            mainScreen.classList.add('active');
         }
         
-        if (typeof prikaziPoljaZaUnos === 'function') {
-            prikaziPoljaZaUnos();
+        const mainContent = document.getElementById('mainContent');
+        if (mainContent) {
+            mainContent.innerHTML = `
+                <div id="dataEntryScreen" style="display:block; padding:20px;">
+                    <h2 class="title" id="dataEntryTitle">📝 Unos podataka</h2>
+                    
+                    <div class="row">
+                        <label for="productInput">Proizvod:</label>
+                        <input type="text" id="productInput" placeholder="Npr. mleko" style="flex:1; padding:16px; border:2px solid #ddd; border-radius:12px; font-size:24px;">
+                    </div>
+                    
+                    <div class="row">
+                        <label>Količina:</label>
+                        <div class="inline-group">
+                            <input type="number" id="pieceInput" value="1" style="flex:1; padding:16px; border:2px solid #ddd; border-radius:12px; font-size:24px;">
+                            <label style="font-size:18px;">komada</label>
+                            <input type="number" id="quantityInput" value="1" style="flex:1; padding:16px; border:2px solid #ddd; border-radius:12px; font-size:24px;">
+                            <label style="font-size:18px;">kg/l/kom</label>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <label for="unitSelect">Jedinica:</label>
+                        <select id="unitSelect" style="flex:1; padding:16px; border:2px solid #ddd; border-radius:12px; font-size:24px;">
+                            <option value="kom">komad</option>
+                            <option value="kg">kilogram</option>
+                            <option value="g">gram</option>
+                            <option value="l">litar</option>
+                            <option value="pak">paket</option>
+                        </select>
+                    </div>
+                    
+                    <div class="row">
+                        <label for="storageSelect">Skladište:</label>
+                        <select id="storageSelect" style="flex:1; padding:16px; border:2px solid #ddd; border-radius:12px; font-size:24px;">
+                            <option value="Zamrzivač 1">Zamrzivač 1</option>
+                            <option value="Zamrzivač 2">Zamrzivač 2</option>
+                            <option value="Zamrzivač 3">Zamrzivač 3</option>
+                            <option value="Frižider">Frižider</option>
+                            <option value="Ostava">Ostava</option>
+                        </select>
+                    </div>
+                    
+                    <div class="row">
+                        <label for="shelfLifeInput">Rok (meseci):</label>
+                        <input type="number" id="shelfLifeInput" value="12" style="flex:1; padding:16px; border:2px solid #ddd; border-radius:12px; font-size:24px;">
+                        <div id="expiryDisplay" style="padding:16px; background:#f0f0f0; border-radius:12px; font-weight:bold; color:#1a237e; text-align:center; font-size:24px; min-width:120px;">
+                            📅 12 meseci
+                        </div>
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button class="btn-save" onclick="saveProduct()">💾 Sačuvaj</button>
+                        <button class="btn-cancel" onclick="renderInventory()">❌ Otkaži</button>
+                    </div>
+                </div>
+            `;
+            
+            const shelfInput = document.getElementById('shelfLifeInput');
+            const expiryDisplay = document.getElementById('expiryDisplay');
+            if (shelfInput && expiryDisplay) {
+                shelfInput.addEventListener('input', function() {
+                    const val = this.value || '0';
+                    expiryDisplay.textContent = `📅 ${val} meseci`;
+                });
+            }
+            
+            if (typeof prikaziPoljaZaUnos === 'function') {
+                prikaziPoljaZaUnos();
+            }
         }
     }
-}
 
-window.renderDataEntry = renderDataEntry;
-console.log('✅ renderDataEntry funkcija definisana!');
+    window.renderDataEntry = renderDataEntry;
+    console.log('✅ renderDataEntry funkcija definisana!');
 </script>
 
 </body>
