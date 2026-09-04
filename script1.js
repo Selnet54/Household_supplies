@@ -2205,142 +2205,15 @@ function speakText(text) {
         window.speechSynthesis.speak(utterance);
     }
 }
-// ============================================
-// 4. PREPOZNAVANJE GOVORA (GLAVNA FUNKCIJA) - POPRAVLJENO ZA MOBILNE
-// ============================================
-
-function startVoiceRecognition() {
-    console.log('🎤 startVoiceRecognition pozvan!');
-    
-    // 🔥 ZAUSTAVI PREĐAŠNJI RECOGNITION
-    if (recognition) {
-        try { recognition.stop(); } catch(e) {}
-        recognition = null;
-    }
-    
-    // 🔥 PROVERI HTTPS ZA GITHUB PAGES
-    if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
-        showVoiceStatus('❌ Mikrofon radi SAMO na HTTPS!', '#f44336');
-        return;
-    }
-    
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-        showVoiceStatus('❌ Pregledač ne podržava Web Speech API.', '#f44336');
-        return;
-    }
-
-    // 🔥 TRAŽI DOZVOLU ZA MIKROFON
-    requestMicrophonePermission().then(() => {
-        recognition = new SpeechRecognition();
-        
-        // 🔥 JEZIK - KORISTI currentLang
-        const speechLangMap = { 
-            sr: 'sr-RS', en: 'en-US', de: 'de-DE', 
-            hu: 'hu-HU', uk: 'uk-UA', ru: 'ru-RU', 
-            es: 'es-ES', fr: 'fr-FR' 
-        };
-        recognition.lang = speechLangMap[currentLang] || 'sr-RS';
-        
-        // 🔥 ZA MOBILNE - continuous FALSE, interimResults TRUE
-        recognition.continuous = false;  // 🔥 PROMENJENO NA false
-        recognition.interimResults = true;
-        recognition.maxAlternatives = 1;
-
-        recognition.onstart = function() {
-            showVoiceStatus('🎤 Slušam...', '#4CAF50');
-            activeBuffer = '';
-            isProcessingCommand = false;
-            window.isVoiceModeActive = true;
-            micActive = true;
-            console.log('✅ Mikrofon aktivan na GitHub Pages!');
-        };
-
-        recognition.onresult = function(event) {
-            let finalText = '';
-            let interimText = '';
-            
-            for (let i = event.resultIndex; i < event.results.length; i++) {
-                const transcript = event.results[i][0].transcript.trim();
-                if (event.results[i].isFinal) {
-                    finalText += (finalText ? ' ' : '') + transcript;
-                } else {
-                    interimText += transcript;
-                }
-            }
-            
-            // 🔥 PRIKAŽI INTERIM REZULTAT
-            if (interimText) {
-                showVoiceStatus(`🎤 Slušam: "${interimText}"`, '#FFD700');
-            }
-            
-            // 🔥 KAD JE FINAL - OBRADI KOMANDU
-            if (finalText) {
-                console.log('📝 Finalno čujem:', finalText);
-                activeBuffer = finalText;
-                showVoiceStatus(`🎤 Čuo: "${finalText}"`, '#4CAF50');
-                
-                // 🔥 OBRADI KOMANDU ODMAN
-                processVoiceCommand(finalText);
-                
-                // 🔥 RESETUJ BUFFER ZA SLEDEĆI UNOS
-                activeBuffer = '';
-            }
-        };
-
-        recognition.onerror = function(event) {
-            console.error('❌ Speech error:', event.error);
-            
-            // 🔥 IGNORIŠI 'aborted' i 'no-speech' greške
-            if (event.error === 'aborted' || event.error === 'no-speech') {
-                console.log('⏸️ Normalna greška, ignorišem:', event.error);
-                return;
-            }
-            
-            if (event.error === 'not-allowed') {
-                showVoiceStatus('❌ Pristup mikrofonu je blokiran!', '#f44336');
-                window.isVoiceModeActive = false;
-            } else {
-                showVoiceStatus(`❌ Greška: ${event.error}`, '#f44336');
-            }
-            isProcessingCommand = false;
-        };
-
-        recognition.onend = function() {
-            console.log('⏹️ Mikrofon zaustavljen');
-            micActive = false;
-            
-            // 🔥 RESTART SAMO AKO SMO JOŠ UVEK U VOICE MODE
-            if (window.isVoiceModeActive && !recognition) {
-                console.log('🔄 Restartovanje mikrofona...');
-                setTimeout(function() {
-                    if (window.isVoiceModeActive && !micActive) {
-                        startVoiceRecognition();
-                    }
-                }, 500);
-            }
-        };
-
-        // 🔥 POKRENI PREPOZNAVANJE
-        try {
-            recognition.start();
-            console.log('✅ Recognition startovan na GitHub Pages!');
-        } catch(e) {
-            console.error('❌ Greška pri startovanju:', e);
-            showVoiceStatus('❌ Greška pri pokretanju mikrofona', '#f44336');
-        }
-        
-    }).catch(err => {
-        console.error('❌ Dozvola za mikrofon ODBIJENA:', err);
-        showVoiceStatus('❌ Dozvolite pristup mikrofonu u podešavanjima!', '#f44336');
-    });
-}
+// startVoiceRecognition je premešten isključivo u voiceCommands.js
+// (bio je duplo definisan ovde i tamo, što je pravilo da mikrofon
+// radi različito u zavisnosti od redosleda učitavanja skripti).
 
 // ============================================
 // IZVEZI FUNKCIJE GLOBALNO
 // ============================================
 
-window.stopVoiceRecognition = stopVoiceRecognition;
+// stopVoiceRecognition se sada definiše i izvozi isključivo iz voiceCommands.js
 window.getCurrentLang = getCurrentLang;
 window.t = t;
 window.switchLanguage = selectLanguage;
@@ -2355,8 +2228,7 @@ window.renderInventory = renderInventory;
 window.renderShoppingList = renderShoppingList;
 window.renderCategories = renderCategories;
 window.renderDataEntry = renderDataEntry;
-window.processVoiceCommand = processVoiceCommand;
-window.voiceCommand = processVoiceCommand;
+// processVoiceCommand / voiceCommand se izvoze iz voiceCommands.js
 window.exitApp = exitApp;
 window.goBackFromChoice = goBackFromChoice;
 window.showModernAlert = showModernAlert;
