@@ -5,7 +5,13 @@
 // exitApp i goBackFromVoice sada žive isključivo u script1.js
 // (bile su duplirane ovde, što je pravilo nasumično ponašanje
 // u zavisnosti od toga koja definicija "pobedi" po redosledu skripti)
-
+// 🔥 GLOBALNI RECOGNITION OBJEKAT I SPREČAVANJE PREBRZOG RESTARTA
+let recognition = null;
+let micActive = false;
+let isProcessingCommand = false;
+let activeBuffer = '';
+let lastSavedData = null;
+let isRestarting = false; // Zaštita od dupliranja restart poziva
 // 🔥 GLOBALNE PROMENLJIVE
 let END_AKTIVAN = false;
 let isVoiceInput = false;
@@ -431,21 +437,23 @@ function startVoiceRecognition() {
         };
 
         recognition.onend = function() {
-            console.log('⏹️ Mikrofon zaustavljen');
-            micActive = false;
-            recognition = null;
-
-            // 🔥 RESTART SAMO AKO SMO JOŠ UVEK U VOICE MODE.
-            // Pošto je dozvola već keširana (micPermissionGranted), ovaj
-            // restart NEĆE ponovo zvati getUserMedia — samo recognition.start().
-            if (window.isVoiceModeActive) {
-                micRestartTimer = setTimeout(function() {
-                    if (window.isVoiceModeActive && !micActive) {
-                        startVoiceRecognition();
-                    }
-                }, 400);
+    console.log('⏹️ Mikrofon zaustavljen');
+    micActive = false;
+    
+    // RESTART SAMO AKO JE VOICE MODE AKTIVAN I NIJE VEC U TOKU RESTART
+    if (window.isVoiceModeActive && !isRestarting) {
+        isRestarting = true;
+        console.log('🔄 Restartovanje mikrofona sa zadrškom...');
+        
+        // Zadrška od 1000ms kako Android ne bi blokirao/duplirao sesije
+        setTimeout(function() {
+            isRestarting = false;
+            if (window.isVoiceModeActive && !micActive) {
+                startVoiceRecognition();
             }
-        };
+        }, 1000); 
+    }
+};
 
         try {
             recognition.start();
@@ -472,24 +480,24 @@ function startVoiceRecognition() {
 }
 
 function stopVoiceRecognition() {
-    // 🔥 OVA FUNKCIJA JE RANIJE NEDOSTAJALA — pozivala se na 15+ mesta u
-    // oba fajla ali nigde nije bila definisana, pa je svaki poziv bacao
-    // grešku, mikrofon se nikad nije stvarno gasio, i onend-restart petlja
-    // je i dalje radila u pozadini i ponovo tražila dozvolu.
     console.log('🛑 stopVoiceRecognition pozvan');
     window.isVoiceModeActive = false;
 
+    // 🔥 Očisti tajmer ako je restart bio na čekanju
     if (micRestartTimer) {
         clearTimeout(micRestartTimer);
         micRestartTimer = null;
     }
 
     if (recognition) {
-        recognition.onend = null; // spreči auto-restart pri namernom zaustavljanju
+        // 🔥 Ključno: ukloni onend da se spreči restart ako smo namerno ugasili mic
+        recognition.onend = null; 
         try { recognition.stop(); } catch(e) {}
         recognition = null;
     }
+    
     micActive = false;
+    isRestarting = false;
     showVoiceStatus('🎤 Mikrofon zaustavljen', '#999999');
 }
 function processVoiceCommand(command) {
