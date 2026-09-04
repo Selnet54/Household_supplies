@@ -364,8 +364,11 @@ function startVoiceRecognition() {
         };
         recognition.lang = speechLangMap[currentLang] || 'sr-RS';
 
-        // 🔥 ZA MOBILNE - continuous FALSE (bolje radi)
-        recognition.continuous = false;
+        // 🔥 continuous TRUE — mikrofon ostaje otvoren i hvata više fraza
+        // zaredom bez gašenja/paljenja posle svake. continuous:false je
+        // pravio da se sesija zatvori posle svake kratke tišine, pa je
+        // restart-petlja (400ms) delovala kao treperenje svake sekunde.
+        recognition.continuous = true;
         recognition.interimResults = true;
         recognition.maxAlternatives = 1;
 
@@ -624,35 +627,34 @@ function processVoiceCommand(command) {
         return;
     }
     
-    // 🔥 Ako smo na data entry ekranu i nije komanda, popuni polje
+    // 🔥 Ako smo na data entry ekranu i nije prepoznata komanda, IZVUCI
+    // strukturirane podatke iz cele izgovorene rečenice (naziv, količina,
+    // jedinica, skladište, rok) umesto da se sirov tekst gura samo u
+    // polje za proizvod (to je pravilo da SVE što izgovoriš uvek završi
+    // u prvom polju, bez obzira šta si zapravo rekao).
     const dataEntryScreen = document.getElementById('dataEntryScreen');
     if (dataEntryScreen && dataEntryScreen.style.display !== 'none') {
-        // Popuni polje za proizvod
-        const productInput = document.getElementById('productInput');
-        if (productInput && command.length > 2) {
-            productInput.value = command;
-            productInput.dispatchEvent(new Event('input', { bubbles: true }));
-            showVoiceStatus(`✏️ Uneto: "${command}"`, '#4CAF50');
-            console.log('📝 Popunjeno polje sa:', command);
+        if (command.length > 2) {
+            const data = parseVoiceDataEntry(command);
+            if (data.product_name && data.product_name !== 'Proizvod') {
+                popuniFormuPodacima(data);
+                console.log('📝 Polja popunjena iz:', command, data);
+            } else {
+                // Nije prepoznat naziv proizvoda - ne prepisuj postojeći unos,
+                // samo obavesti korisnika da probaju ponovo
+                showVoiceStatus(`❓ Nisam razumeo naziv proizvoda u: "${command}"`, '#FFD700');
+            }
             return;
         }
     }
     
-    // 🔥 Ako ništa od gore, pokušaj kao direktan unos proizvoda
+    // 🔥 Ako ništa od gore, pokušaj kao direktan unos proizvoda (otvara
+    // prazan ekran za unos i odmah ga popunjava strukturirano)
     if (command.length > 3) {
         console.log('📝 DIREKTAN UNOS PROIZVODA:', command);
-        // Proveri da li smo na data entry ekranu
-        const dataEntryScreen = document.getElementById('dataEntryScreen');
-        if (dataEntryScreen && dataEntryScreen.style.display !== 'none') {
-            const productInput = document.getElementById('productInput');
-            if (productInput) {
-                productInput.value = command;
-                productInput.dispatchEvent(new Event('input', { bubbles: true }));
-                showVoiceStatus(`✏️ Uneto: "${command}"`, '#4CAF50');
-                return;
-            }
-        }
-        renderDataEntry(command);
+        renderDataEntry('');
+        const data = parseVoiceDataEntry(command);
+        popuniFormuPodacima(data);
         return;
     }
     
