@@ -2205,114 +2205,134 @@ function speakText(text) {
         window.speechSynthesis.speak(utterance);
     }
 }
-// ===== startVoiceRecognition - KORISTI VOICE COMMANDS =====
+// ============================================
+// 4. PREPOZNAVANJE GOVORA (GLAVNA FUNKCIJA) - POPRAVLJENO ZA MOBILNE
+// ============================================
+
 function startVoiceRecognition() {
-    console.log('🎤 startVoiceRecognition -> VOICE COMMANDS');
+    console.log('🎤 startVoiceRecognition pozvan!');
     
-    // 🔥 PRVO PROVERI DIREKTNO PREKO WINDOW
-    if (typeof window.startVoiceRecognition === 'function' && 
-        window.startVoiceRecognition !== startVoiceRecognition) {
-        console.log('📞 Pozivam window.startVoiceRecognition iz voiceCommands.js');
-        return window.startVoiceRecognition();
-    }
-    
-    // 🔥 PROVERI POMOĆNI POKAZIVAČ
-    if (typeof window._voiceCommandsStart === 'function') {
-        console.log('📞 Pozivam window._voiceCommandsStart');
-        return window._voiceCommandsStart();
-    }
-    
-    // 🔥 PROVERI DA LI JE voiceCommands.js UČITAN PREKO DRUGIH FUNKCIJA
-    if (typeof window.voiceCommand === 'function' || typeof window.processVoiceCommand === 'function') {
-        console.log('✅ voiceCommands.js je učitan (otkriven preko voiceCommand)');
-        // Pokušaj ponovo sa window.startVoiceRecognition
-        if (typeof window.startVoiceRecognition === 'function') {
-            return window.startVoiceRecognition();
-        }
-    }
-    
-    console.warn('⚠️ voiceCommands nije učitan!');
-    showModernAlert('Greška', 'Glasovne komande se još učitavaju... Molimo sačekajte.', '⏳');
-}
-
-function processVoiceCommand(command) {
-    console.log('🎤 processVoiceCommand prima:', command);
-    
-    // PROSLEDI KOMANDU voiceCommands.js
-    if (typeof window.voiceCommand === 'function') {
-        console.log('📞 Pozivam window.voiceCommand');
-        return window.voiceCommand(command);
-    }
-    
-    // PROSLEDI KOMANDU preko window.processVoiceCommand (ako postoji)
-    if (typeof window.processVoiceCommand === 'function' && 
-        window.processVoiceCommand !== processVoiceCommand) {
-        console.log('📞 Pozivam window.processVoiceCommand iz voiceCommands.js');
-        return window.processVoiceCommand(command);
-    }
-    
-    // FALLBACK - direktna obrada
-    console.warn('⚠️ voiceCommands nije učitan, koristim fallback');
-    const cmd = command.toLowerCase().trim();
-    
-    // UNOS
-    if (cmd === 'unos' || cmd === 'unesi' || cmd === 'add' || 
-        cmd === 'dodaj' || cmd === 'novi' || cmd === 'novo') {
-        console.log('📝 UNOS - otvaram data entry');
-        renderDataEntry('');
-        return;
-    }
-    
-    // ZALIHE
-    if (cmd === 'zalihe' || cmd === 'otvori zalihe' || cmd === 'stanje' ||
-        cmd === 'inventar' || cmd === 'pregled' || cmd === 'skladiste') {
-        console.log('📦 ZALIHE - otvaram');
-        renderInventory();
-        return;
-    }
-    
-    // SPISAK
-    if (cmd === 'spisak' || cmd === 'otvori spisak' || cmd === 'potrebe' ||
-        cmd === 'lista' || cmd === 'shopping' || cmd === 'kupovina') {
-        console.log('🛒 SPISAK - otvaram');
-        renderShoppingList();
-        return;
-    }
-    
-    // 🔥 END - VIŠE VARIJANTI
-    const endVariants = ['end', 'and', 'ond', 'ent', 'en', 'ende', 'endi', 'ends',
-                         'kraj', 'kra', 'krajn', 'krajni', 'kraji', 
-                         'krajnji', 'krajnje', 'zavrsi', 'završetak',
-                         'stop', 'stp', 'stahp', 'stap', 'gotovo'];
-    
-    if (endVariants.includes(cmd) || cmd.includes('end') || cmd.includes('kraj')) {
-        console.log('🏁 END - otvaram zalihe');
-        renderInventory();
-        return;
-    }
-    
-    showModernAlert('Nepoznata komanda', `Nije prepoznato: "${command}"`, '❓');
-}
-
-function stopVoiceRecognition() {
+    // 🔥 ZAUSTAVI PREĐAŠNJI RECOGNITION
     if (recognition) {
-        try {
-            recognition.stop();
-            recognition = null;
-            console.log('🛑 Recognition zaustavljen');
-        } catch(e) {}
+        try { recognition.stop(); } catch(e) {}
+        recognition = null;
     }
-    const statusEl = document.getElementById('voiceStatus');
-    if (statusEl) {
-        statusEl.textContent = '⏸️ Prepoznavanje zaustavljeno';
-        statusEl.style.color = '#aaa';
+    
+    // 🔥 PROVERI HTTPS ZA GITHUB PAGES
+    if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+        showVoiceStatus('❌ Mikrofon radi SAMO na HTTPS!', '#f44336');
+        return;
     }
-}
+    
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        showVoiceStatus('❌ Pregledač ne podržava Web Speech API.', '#f44336');
+        return;
+    }
 
-function hideAllScreens() {
-    document.querySelectorAll('.screen').forEach(s => {
-        s.style.display = 'none';
-        s.classList.remove('active');
+    // 🔥 TRAŽI DOZVOLU ZA MIKROFON
+    requestMicrophonePermission().then(() => {
+        recognition = new SpeechRecognition();
+        
+        // 🔥 JEZIK - KORISTI currentLang
+        const speechLangMap = { 
+            sr: 'sr-RS', en: 'en-US', de: 'de-DE', 
+            hu: 'hu-HU', uk: 'uk-UA', ru: 'ru-RU', 
+            es: 'es-ES', fr: 'fr-FR' 
+        };
+        recognition.lang = speechLangMap[currentLang] || 'sr-RS';
+        
+        // 🔥 ZA MOBILNE - continuous FALSE, interimResults TRUE
+        recognition.continuous = false;  // 🔥 PROMENJENO NA false
+        recognition.interimResults = true;
+        recognition.maxAlternatives = 1;
+
+        recognition.onstart = function() {
+            showVoiceStatus('🎤 Slušam...', '#4CAF50');
+            activeBuffer = '';
+            isProcessingCommand = false;
+            window.isVoiceModeActive = true;
+            micActive = true;
+            console.log('✅ Mikrofon aktivan na GitHub Pages!');
+        };
+
+        recognition.onresult = function(event) {
+            let finalText = '';
+            let interimText = '';
+            
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                const transcript = event.results[i][0].transcript.trim();
+                if (event.results[i].isFinal) {
+                    finalText += (finalText ? ' ' : '') + transcript;
+                } else {
+                    interimText += transcript;
+                }
+            }
+            
+            // 🔥 PRIKAŽI INTERIM REZULTAT
+            if (interimText) {
+                showVoiceStatus(`🎤 Slušam: "${interimText}"`, '#FFD700');
+            }
+            
+            // 🔥 KAD JE FINAL - OBRADI KOMANDU
+            if (finalText) {
+                console.log('📝 Finalno čujem:', finalText);
+                activeBuffer = finalText;
+                showVoiceStatus(`🎤 Čuo: "${finalText}"`, '#4CAF50');
+                
+                // 🔥 OBRADI KOMANDU ODMAN
+                processVoiceCommand(finalText);
+                
+                // 🔥 RESETUJ BUFFER ZA SLEDEĆI UNOS
+                activeBuffer = '';
+            }
+        };
+
+        recognition.onerror = function(event) {
+            console.error('❌ Speech error:', event.error);
+            
+            // 🔥 IGNORIŠI 'aborted' i 'no-speech' greške
+            if (event.error === 'aborted' || event.error === 'no-speech') {
+                console.log('⏸️ Normalna greška, ignorišem:', event.error);
+                return;
+            }
+            
+            if (event.error === 'not-allowed') {
+                showVoiceStatus('❌ Pristup mikrofonu je blokiran!', '#f44336');
+                window.isVoiceModeActive = false;
+            } else {
+                showVoiceStatus(`❌ Greška: ${event.error}`, '#f44336');
+            }
+            isProcessingCommand = false;
+        };
+
+        recognition.onend = function() {
+            console.log('⏹️ Mikrofon zaustavljen');
+            micActive = false;
+            
+            // 🔥 RESTART SAMO AKO SMO JOŠ UVEK U VOICE MODE
+            if (window.isVoiceModeActive && !recognition) {
+                console.log('🔄 Restartovanje mikrofona...');
+                setTimeout(function() {
+                    if (window.isVoiceModeActive && !micActive) {
+                        startVoiceRecognition();
+                    }
+                }, 500);
+            }
+        };
+
+        // 🔥 POKRENI PREPOZNAVANJE
+        try {
+            recognition.start();
+            console.log('✅ Recognition startovan na GitHub Pages!');
+        } catch(e) {
+            console.error('❌ Greška pri startovanju:', e);
+            showVoiceStatus('❌ Greška pri pokretanju mikrofona', '#f44336');
+        }
+        
+    }).catch(err => {
+        console.error('❌ Dozvola za mikrofon ODBIJENA:', err);
+        showVoiceStatus('❌ Dozvolite pristup mikrofonu u podešavanjima!', '#f44336');
     });
 }
 
