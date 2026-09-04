@@ -24,12 +24,17 @@ console.log('✅ Script.js je učitan!');
 })();
 
 // ===== TRENUTNO STANJE =====
-let currentLang = 'en';
+if (typeof currentLang === 'undefined') {
+    var currentLang = 'en';
+}
 let currentCategory = '';
 let currentSubcategory = '';
 let currentProductPart = '';
 let currentScreenState = 'languages';
-let fromChoiceScreen = false; // <--- DODAJTE OVU LINIJU
+let fromChoiceScreen = false;
+let screenHistory = ['languages'];
+let currentScreen = 'languages';
+let previousScreen = null;
 
 // ===== 0. EXIT FUNKCIJA =====
 function exitApp() {
@@ -1970,11 +1975,21 @@ function handleHeaderBack() {
         }
     }
 }
+// ============================================
+// IZVOZI ZA GLOBAL - DA BI BILI DOSTUPNI U HTML-u
+// ============================================
 
-// Izvezi funkcije globalno
-window.startVoiceRecognition = startVoiceRecognition;
-window.stopVoiceRecognition = stopVoiceRecognition;
-window.getCurrentLang = getCurrentLang;
+window.saveProduct = saveProduct;
+window.saveProductSilent = saveProductSilent;
+window.triggerLogin = triggerLogin;
+window.prikaziSveUnose = prikaziSveUnose;
+window.renderLanguages = renderLanguages;
+window.renderCategories = renderCategories;
+window.renderInventory = renderInventory;
+window.renderShoppingList = renderShoppingList;
+window.renderDataEntry = renderDataEntry;
+window.prikaziPoljaZaUnos = prikaziPoljaZaUnos;
 
-console.log('✅ Voice recognition dodatak učitan!');
-console.log('✅ stopVoiceRecognition i getCurrentLang izvezeni globalno');
+console.log('✅ Sve funkcije iz script1.js izvezene globalno!');
+console.log('✅ App spreman!');   // <--- OVAJ DODAJ
+
