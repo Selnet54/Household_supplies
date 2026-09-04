@@ -5,18 +5,16 @@
 // exitApp i goBackFromVoice sada žive isključivo u script1.js
 // (bile su duplirane ovde, što je pravilo nasumično ponašanje
 // u zavisnosti od toga koja definicija "pobedi" po redosledu skripti)
+
 // 🔥 GLOBALNI RECOGNITION OBJEKAT I SPREČAVANJE PREBRZOG RESTARTA
-let recognition = null;
-let micActive = false;
-let isProcessingCommand = false;
-let activeBuffer = '';
-let lastSavedData = null;
-let isRestarting = false; // Zaštita od dupliranja restart poziva
-// 🔥 GLOBALNE PROMENLJIVE
-let END_AKTIVAN = false;
-let isVoiceInput = false;
-let ALLOW_INVENTORY_OPEN = false;
-let micRestartTimer = null;
+// (promenljive recognition, micActive, isProcessingCommand, activeBuffer, lastSavedData 
+// već postoje kao 'var' u globalnom opsegu, pa ih ovde ne re-deklarišemo sa 'let')
+
+isRestarting = false; // Zaštita od dupliranja restart poziva
+END_AKTIVAN = false;
+isVoiceInput = false;
+ALLOW_INVENTORY_OPEN = false;
+micRestartTimer = null;
 
 // 🔥 recognition, micActive, activeBuffer, isProcessingCommand, lastSavedData
 // se NE deklarišu ovde — već postoje kao 'var' u index.html (inline <script>
@@ -291,7 +289,9 @@ function sacuvajPodatke(data) {
                 saved = true;
             } catch(e) { console.warn(e); }
         }
-        if (saved) saveLastAddedProducts(data);
+        if (saved && typeof saveLastAddedProducts === 'function') {
+    saveLastAddedProducts(data);
+}
         isVoiceInput = false;
     }, 500);
     return saved;
@@ -436,25 +436,22 @@ function startVoiceRecognition() {
             isProcessingCommand = false;
         };
 
-        recognition.onend = function() {
-    console.log('⏹️ Mikrofon zaustavljen');
-    micActive = false;
-    
-    // RESTART SAMO AKO JE VOICE MODE AKTIVAN I NIJE VEC U TOKU RESTART
-    if (window.isVoiceModeActive && !isRestarting) {
-        isRestarting = true;
-        console.log('🔄 Restartovanje mikrofona sa zadrškom...');
-        
-        // Zadrška od 1000ms kako Android ne bi blokirao/duplirao sesije
-        setTimeout(function() {
-            isRestarting = false;
-            if (window.isVoiceModeActive && !micActive) {
-                startVoiceRecognition();
+    recognition.onend = function() {
+            console.log('⏹️ Mikrofon zaustavljen');
+            micActive = false;
+            
+            if (window.isVoiceModeActive && !isRestarting) {
+                isRestarting = true;
+                console.log('🔄 Restartovanje mikrofona sa zadrškom...');
+                
+                micRestartTimer = setTimeout(function() {
+                    isRestarting = false;
+                    if (window.isVoiceModeActive && !micActive) {
+                        startVoiceRecognition();
+                    }
+                }, 1000); 
             }
-        }, 1000); 
-    }
-};
-
+        };
         try {
             recognition.start();
             console.log('✅ Recognition startovan!');
