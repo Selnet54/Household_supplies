@@ -311,8 +311,8 @@ function otvoriZaliheEkran() {
     ALLOW_INVENTORY_OPEN = false;
 }
 
-// ============================================
-// 4. PREPOZNAVANJE GOVORA (GLAVNA FUNKCIJA)
+/// ============================================
+// 4. PREPOZNAVANJE GOVORA (GLAVNA FUNKCIJA) - POPRAVLJENO ZA GITHUB PAGES
 // ============================================
 
 function startVoiceRecognition() {
@@ -322,6 +322,12 @@ function startVoiceRecognition() {
     if (recognition) {
         try { recognition.stop(); } catch(e) {}
         recognition = null;
+    }
+    
+    // 🔥 PROVERI HTTPS ZA GITHUB PAGES
+    if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+        showVoiceStatus('❌ Mikrofon radi SAMO na HTTPS!', '#f44336');
+        return;
     }
     
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -353,7 +359,7 @@ function startVoiceRecognition() {
             isProcessingCommand = false;
             window.isVoiceModeActive = true;
             micActive = true;
-            console.log('✅ Mikrofon aktivan!');
+            console.log('✅ Mikrofon aktivan na GitHub Pages!');
         };
 
         recognition.onresult = function(event) {
@@ -416,17 +422,16 @@ function startVoiceRecognition() {
 
         recognition.onerror = function(event) {
             console.error('❌ Speech error:', event.error);
+            
+            // 🔥 IGNORIŠI 'aborted' i 'no-speech' greške (normalne na mobilnom)
+            if (event.error === 'aborted' || event.error === 'no-speech') {
+                console.log('⏸️ Normalna greška, ignorišem:', event.error);
+                return;
+            }
+            
             if (event.error === 'not-allowed') {
                 showVoiceStatus('❌ Pristup mikrofonu je blokiran!', '#f44336');
-            } else if (event.error === 'no-speech') {
-                showVoiceStatus('🔇 Nije detektovan govor, pokušajte ponovo...', '#FFD700');
-                // 🔥 POKUŠAJ PONOVO
-                setTimeout(() => {
-                    if (micActive) {
-                        try { recognition.stop(); } catch(e) {}
-                        setTimeout(startVoiceRecognition, 300);
-                    }
-                }, 1000);
+                window.isVoiceModeActive = false;
             } else {
                 showVoiceStatus(`❌ Greška: ${event.error}`, '#f44336');
             }
@@ -436,29 +441,30 @@ function startVoiceRecognition() {
         recognition.onend = function() {
             console.log('⏹️ Mikrofon zaustavljen');
             micActive = false;
-            if (window.isVoiceModeActive) {
-                // 🔥 RESTART NA MOBILNOM
-                setTimeout(() => {
-                    if (!micActive && window.isVoiceModeActive) {
-                        console.log('🔄 Restartovanje mikrofona...');
+            
+            // 🔥 RESTART SAMO AKO SMO JOŠ UVEK U VOICE MODE
+            if (window.isVoiceModeActive && !recognition) {
+                console.log('🔄 Restartovanje mikrofona...');
+                setTimeout(function() {
+                    if (window.isVoiceModeActive && !micActive) {
                         startVoiceRecognition();
                     }
-                }, 300);
+                }, 800);
             }
         };
 
         // 🔥 POKRENI PREPOZNAVANJE
         try {
             recognition.start();
-            console.log('✅ Recognition startovan!');
+            console.log('✅ Recognition startovan na GitHub Pages!');
         } catch(e) {
             console.error('❌ Greška pri startovanju:', e);
             showVoiceStatus('❌ Greška pri pokretanju mikrofona', '#f44336');
         }
         
     }).catch(err => {
+        console.error('❌ Dozvola za mikrofon ODBIJENA:', err);
         showVoiceStatus('❌ Dozvolite pristup mikrofonu u podešavanjima!', '#f44336');
-        console.error('❌ Greška dozvole:', err);
     });
 }
 
