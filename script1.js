@@ -2538,8 +2538,8 @@ document.addEventListener('click', function(e) {
 }, true);
 
 console.log('✅ Back dugme popravljeno - vraća na jezike sa 4. ekrana!');
-// ============================================
-// FUNKCIJE ZA 3. EKRAN (IZBOR NAČINA UNOSA)
+/// ============================================
+// FUNKCIJE ZA 3. EKRAN (IZBOR NAČINA UNOSA) - POPRAVLJENE
 // ============================================
 
 function selectVoiceMode() {
@@ -2561,11 +2561,46 @@ function selectVoiceMode() {
     currentScreenState = 'voiceMenuScreen';
     screenHistory.push('choiceScreen');
     
-    setTimeout(function() {
-        if (typeof startVoiceRecognition === 'function') {
-            startVoiceRecognition();
-        }
-    }, 500);
+    // 🔥 PRVO TRAŽI DOZVOLU ZA MIKROFON (KLJUČNO ZA MOBILNE)
+    if (typeof requestMicrophonePermission === 'function') {
+        requestMicrophonePermission().then(() => {
+            console.log('✅ Dozvola za mikrofon odobrena!');
+            const statusEl = document.getElementById('voiceStatus');
+            if (statusEl) {
+                statusEl.textContent = '🎤 Dozvola odobrena, pokrećem...';
+                statusEl.style.color = '#4CAF50';
+            }
+            
+            setTimeout(function() {
+                if (typeof startVoiceRecognition === 'function') {
+                    startVoiceRecognition();
+                } else {
+                    console.error('❌ startVoiceRecognition nije definisan');
+                    const statusEl2 = document.getElementById('voiceStatus');
+                    if (statusEl2) {
+                        statusEl2.textContent = '❌ Greška: funkcija nije učitana';
+                        statusEl2.style.color = '#f44336';
+                    }
+                }
+            }, 300);
+        }).catch(err => {
+            console.error('❌ Dozvola za mikrofon ODBIJENA:', err);
+            const statusEl = document.getElementById('voiceStatus');
+            if (statusEl) {
+                statusEl.textContent = '❌ Dozvolite pristup mikrofonu u podešavanjima!';
+                statusEl.style.color = '#f44336';
+            }
+            showModernAlert('Greška', 'Dozvolite pristup mikrofonu u podešavanjima!', '🎤');
+        });
+    } else {
+        // Fallback ako requestMicrophonePermission nije dostupan
+        console.warn('⚠️ requestMicrophonePermission nije definisan, pokušavam direktno');
+        setTimeout(function() {
+            if (typeof startVoiceRecognition === 'function') {
+                startVoiceRecognition();
+            }
+        }, 500);
+    }
 }
 
 function selectManualMode() {
@@ -2624,6 +2659,9 @@ window.renderInventory = renderInventory;
 window.renderShoppingList = renderShoppingList;
 window.renderDataEntry = renderDataEntry;
 window.prikaziPoljaZaUnos = prikaziPoljaZaUnos;
-
+window.requestMicrophonePermission = requestMicrophonePermission;  // <-- DODAJ OVO
+window.selectVoiceMode = selectVoiceMode;                         // <-- DODAJ OVO
+window.selectManualMode = selectManualMode;                       // <-- DODAJ OVO
+window.goBackFromVoice = goBackFromVoice;  
 console.log('✅ Sve funkcije iz script1.js izvezene globalno!');
 console.log('✅ App spreman!');
