@@ -36,7 +36,7 @@ let micRestartTimer = null;
 // 🔥 currentLang - koristi postojeći ili postavi podrazumevani
 var currentLang = (typeof currentLang !== 'undefined') ? currentLang : 'sr';
 // ============================================
-// DIREKTNI POKRETAČ ZA 4. EKRAN
+// DIREKTNI POKRETAČ ZA 4. EKRAN - POPRAVLJEN
 // ============================================
 
 window.forceStartVoice = function(e) {
@@ -59,15 +59,25 @@ window.forceStartVoice = function(e) {
         return;
     }
 
-    // 🔥 DIREKTNO POKRETANJE BEZ PROVERE
-    if (typeof window.startVoiceRecognition === 'function') {
-        window.startVoiceRecognition();
-    } else {
-        console.error('❌ Funkcija startVoiceRecognition nije pronađena.');
-        showVoiceStatus('❌ Greška: funkcija nije učitana', '#f44336');
-    }
+    // 🔥 PRVO TRAŽI DOZVOLU ZA MIKROFON
+    requestMicrophonePermission().then(() => {
+        console.log('✅ Dozvola za mikrofon odobrena!');
+        showVoiceStatus('🎤 Dozvola odobrena, pokrećem...', '#4CAF50');
+        
+        // 🔥 ZATIM POKRENI PREPOZNAVANJE
+        if (typeof window.startVoiceRecognition === 'function') {
+            setTimeout(() => {
+                window.startVoiceRecognition();
+            }, 300);
+        } else {
+            console.error('❌ Funkcija startVoiceRecognition nije pronađena.');
+            showVoiceStatus('❌ Greška: funkcija nije učitana', '#f44336');
+        }
+    }).catch(err => {
+        console.error('❌ Dozvola za mikrofon ODBIJENA:', err);
+        showVoiceStatus('❌ Dozvolite pristup mikrofonu u podešavanjima!', '#f44336');
+    });
 };
-
 // ============================================
 // 1. POMOĆNE FUNKCIJE
 // ============================================
