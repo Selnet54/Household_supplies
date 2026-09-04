@@ -606,7 +606,26 @@ window.addEventListener('beforeunload', function() {
 console.log('✅ VoiceCommands.js POTPUNO ucitano v2.1!');
 console.log('✅ startVoiceRecognition:', typeof startVoiceRecognition);
 console.log('✅ selectManualMode:', typeof selectManualMode);
+/// ============================================
+// 🔥 IZVOZI ZA GLOBAL - VOICE COMMANDS
 // ============================================
-// 🔥 IZVOZI ZA GLOBAL
-// ============================================
-window.prikaziPoljaZaUnos = prikaziPoljaZaUnos;   // <--- DODAJ OVDE
+
+window.selectVoiceMode = selectVoiceMode;
+window.startVoiceRecognition = startVoiceRecognition;
+window.stopVoiceRecognition = stopVoiceRecognition;
+window.requestMicrophonePermission = requestMicrophonePermission;
+window.processVoiceCommand = processAndSaveItem;
+window.goBackFromVoice = goBackFromVoice;
+window.exitApp = exitApp;
+window.selectManualMode = selectManualMode;
+window.forceStartVoice = forceStartVoice;
+window.prikaziPoljaZaUnos = prikaziPoljaZaUnos;
+window.saveLastAddedProducts = saveLastAddedProducts;
+window.parseVoiceDataEntry = parseVoiceDataEntry;
+window.sacuvajPodatke = sacuvajPodatke;
+window.popuniFormuPodacima = popuniFormuPodacima;
+window.ensureFormVisible = ensureFormVisible;
+window.hideVoiceMenu = hideVoiceMenu;
+window.showVoiceStatus = showVoiceStatus;
+
+console.log('✅ VoiceCommands.js POTPUNO izvezen!');
