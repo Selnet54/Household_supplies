@@ -12,14 +12,13 @@ let isVoiceInput = false;
 let ALLOW_INVENTORY_OPEN = false;
 let micRestartTimer = null;
 
-// 🔥 OVE PROMENLJIVE PRE NISU BILE DEKLARISANE (let/var) NIGDE —
-// postajale su "slučajni" globalni implicitni globali, što je
-// nepouzdano na mobilnim browserima. Sada su eksplicitne:
-let recognition = null;
-let micActive = false;
-let activeBuffer = '';
-let isProcessingCommand = false;
-let lastSavedData = null;
+// 🔥 recognition, micActive, activeBuffer, isProcessingCommand, lastSavedData
+// se NE deklarišu ovde — već postoje kao 'var' u index.html (inline <script>
+// pre ovog fajla), i taj 'var' je vidljiv ovde bez ikakve nove deklaracije.
+// (Ranije je ovde stajalo 'let recognition = null; ...' što je pravilo
+// SyntaxError: "Identifier 'recognition' has already been declared" i
+// gasilo ceo ovaj fajl — let ne sme da redeklariše postojeći var u istom
+// globalnom scope-u, koji se deli preko svih <script> tagova na strani.)
 
 // 🔥 KLJUČNO ZA MOBILNE: pamti da li je dozvola već data u ovoj sesiji,
 // da restartovanje mikrofona ne mora svaki put iznova da zove
