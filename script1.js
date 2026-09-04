@@ -2208,11 +2208,33 @@ function speakText(text) {
 // ===== startVoiceRecognition - KORISTI VOICE COMMANDS =====
 function startVoiceRecognition() {
     console.log('🎤 startVoiceRecognition -> VOICE COMMANDS');
+    
+    // 🔥 PRVO PROVERI DIREKTNO PREKO WINDOW
+    if (typeof window.startVoiceRecognition === 'function' && 
+        window.startVoiceRecognition !== startVoiceRecognition) {
+        console.log('📞 Pozivam window.startVoiceRecognition iz voiceCommands.js');
+        return window.startVoiceRecognition();
+    }
+    
+    // 🔥 PROVERI POMOĆNI POKAZIVAČ
     if (typeof window._voiceCommandsStart === 'function') {
+        console.log('📞 Pozivam window._voiceCommandsStart');
         return window._voiceCommandsStart();
     }
+    
+    // 🔥 PROVERI DA LI JE voiceCommands.js UČITAN PREKO DRUGIH FUNKCIJA
+    if (typeof window.voiceCommand === 'function' || typeof window.processVoiceCommand === 'function') {
+        console.log('✅ voiceCommands.js je učitan (otkriven preko voiceCommand)');
+        // Pokušaj ponovo sa window.startVoiceRecognition
+        if (typeof window.startVoiceRecognition === 'function') {
+            return window.startVoiceRecognition();
+        }
+    }
+    
     console.warn('⚠️ voiceCommands nije učitan!');
+    showModernAlert('Greška', 'Glasovne komande se još učitavaju... Molimo sačekajte.', '⏳');
 }
+
 function processVoiceCommand(command) {
     console.log('🎤 processVoiceCommand prima:', command);
     
@@ -2222,7 +2244,15 @@ function processVoiceCommand(command) {
         return window.voiceCommand(command);
     }
     
+    // PROSLEDI KOMANDU preko window.processVoiceCommand (ako postoji)
+    if (typeof window.processVoiceCommand === 'function' && 
+        window.processVoiceCommand !== processVoiceCommand) {
+        console.log('📞 Pozivam window.processVoiceCommand iz voiceCommands.js');
+        return window.processVoiceCommand(command);
+    }
+    
     // FALLBACK - direktna obrada
+    console.warn('⚠️ voiceCommands nije učitan, koristim fallback');
     const cmd = command.toLowerCase().trim();
     
     // UNOS
@@ -2263,6 +2293,7 @@ function processVoiceCommand(command) {
     
     showModernAlert('Nepoznata komanda', `Nije prepoznato: "${command}"`, '❓');
 }
+
 function stopVoiceRecognition() {
     if (recognition) {
         try {
