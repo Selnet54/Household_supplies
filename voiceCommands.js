@@ -629,3 +629,11 @@ window.hideVoiceMenu = hideVoiceMenu;
 window.showVoiceStatus = showVoiceStatus;
 
 console.log('✅ VoiceCommands.js POTPUNO izvezen!');
+// ============================================
+// 🔥 POMOĆNI WINDOW POKAZIVAČ ZA script1.js
+// ============================================
+
+// Ovo omogućava script1.js da pronađe startVoiceRecognition
+window._voiceCommandsStart = startVoiceRecognition;
+
+console.log('✅ _voiceCommandsStart postavljen na:', typeof window._voiceCommandsStart);
