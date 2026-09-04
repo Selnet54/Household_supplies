@@ -378,7 +378,7 @@
             </div>
             
             <!-- 🔥 DUGME ZA DIREKTNO POKRETANJE MIKROFONA -->
-            <button id="activateMicBtn" onclick="if(typeof window.startVoiceRecognition === 'function') { window.startVoiceRecognition(); } else { alert('Glasovne komande se još učitavaju...'); }" style="
+            <button id="activateMicBtn" onclick="startVoiceRecognition()" style="
                 margin-top:10px;
                 padding:14px;
                 background: #4CAF50;
@@ -516,9 +516,24 @@ document.addEventListener('touchstart', preventSleep);
 <script src="voiceCommands.js"></script>
 <script src="script1.js"></script>
 
+<script>
+    // FIX: Garantuje da mikrofon radi čak i ako se skripta sporije učitava
+    if (typeof window.startVoiceRecognition !== 'function') {
+        window.startVoiceRecognition = function() {
+            if (typeof forceStartVoice === 'function') {
+                forceStartVoice();
+            } else if (typeof mainStartVoice === 'function') {
+                mainStartVoice();
+            } else {
+                console.log('Inicijalizujem mikrofon...');
+                location.reload();
+            }
+        };
+    }
+</script>
+
 <!-- 🔥 FIX ZA MOBILNE UREĐAJE -->
 <script>
-// Spreči sleep mode na mobilnom
 function preventSleep() {
     if (navigator.wakeLock) {
         navigator.wakeLock.request('screen').catch(() => {});
@@ -530,26 +545,20 @@ document.addEventListener('touchstart', preventSleep);
 
 <!-- 🔥 RENDER DATA ENTRY FUNKCIJA -->
 <script>
-// ============================================
-// RENDER DATA ENTRY - za Voice Commands
-// ============================================
 function renderDataEntry(category) {
     console.log('📝 renderDataEntry pozvan, category:', category);
     
-    // Sakrij sve ekrane
     document.querySelectorAll('.screen').forEach(s => {
         s.style.display = 'none';
         s.classList.remove('active');
     });
     
-    // Pokaži glavni ekran
     const mainScreen = document.getElementById('mainScreen');
     if (mainScreen) {
         mainScreen.style.display = 'flex';
         mainScreen.classList.add('active');
     }
     
-    // Generiši HTML za unos
     const mainContent = document.getElementById('mainContent');
     if (mainContent) {
         mainContent.innerHTML = `
@@ -608,7 +617,6 @@ function renderDataEntry(category) {
             </div>
         `;
         
-        // 🔥 Dodaj event listener za shelf life
         const shelfInput = document.getElementById('shelfLifeInput');
         const expiryDisplay = document.getElementById('expiryDisplay');
         if (shelfInput && expiryDisplay) {
@@ -618,16 +626,13 @@ function renderDataEntry(category) {
             });
         }
         
-        // 🔥 Sakrij sva polja (voice će ih prikazati)
-        prikaziPoljaZaUnos();
+        if (typeof prikaziPoljaZaUnos === 'function') {
+            prikaziPoljaZaUnos();
+        }
     }
 }
 
-// 🔥 IZVOZI ZA GLOBAL
 window.renderDataEntry = renderDataEntry;
-window.prikaziPoljaZaUnos = prikaziPoljaZaUnos;
-window.saveProduct = saveProduct;
-
 console.log('✅ renderDataEntry funkcija definisana!');
 </script>
 
