@@ -596,3 +596,7 @@ window.addEventListener('beforeunload', function() {
 console.log('✅ VoiceCommands.js POTPUNO ucitano v2.1!');
 console.log('✅ startVoiceRecognition:', typeof startVoiceRecognition);
 console.log('✅ selectManualMode:', typeof selectManualMode);
+// ============================================
+// 🔥 IZVOZI ZA GLOBAL
+// ============================================
+window.prikaziPoljaZaUnos = prikaziPoljaZaUnos;   // <--- DODAJ OVDE
