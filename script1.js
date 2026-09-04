@@ -2611,4 +2611,17 @@ function goBackFromVoice() {
     currentScreenState = 'choiceScreen';
     screenHistory.pop();
 }
+// ===== IZVOZI ZA GLOBAL =====
+window.triggerLogin = triggerLogin;
+window.saveProduct = saveProduct;
+window.saveProductSilent = saveProductSilent;
+window.prikaziSveUnose = prikaziSveUnose;
+window.renderLanguages = renderLanguages;
+window.renderCategories = renderCategories;
+window.renderInventory = renderInventory;
+window.renderShoppingList = renderShoppingList;
+window.renderDataEntry = renderDataEntry;
+window.prikaziPoljaZaUnos = prikaziPoljaZaUnos;
+
+console.log('✅ Sve funkcije iz script1.js izvezene globalno!');
 console.log('✅ App spreman!');
