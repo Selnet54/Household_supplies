@@ -313,68 +313,46 @@ function otvoriZaliheEkran() {
 }
 
 // ============================================
-// 4. PREPOZNAVANJE GOVORA (GLAVNA FUNKCIJA) - POPRAVLJENO SA ZAŠTITOM
+// 4. PREPOZNAVANJE GOVORA - ALTERNATIVNI PRISTUP
 // ============================================
 
-// 🔥 DODATNE GLOBALNE PROMENLJIVE ZA ZAŠTITU OD PREBRZIH RESTARTOVA
-let recognitionStarting = false;   // sprečava duplo pokretanje
-let lastStartTime = 0;            // vreme poslednjeg starta
-let rapidCycleCount = 0;          // brojač brzih ciklusa
-let cycleStartTime = 0;           // vreme početka merenja ciklusa
-let isRestarting = false;         // sprečava lančane restartove
+// 🔥 NOVE GLOBALNE PROMENLJIVE
+let isListening = false;
+let voiceTimeout = null;
+let lastCommandTime = 0;
 
 function startVoiceRecognition() {
     console.log('🎤 startVoiceRecognition pozvan!');
     
-    // 🔥 ZAŠTITA OD PREBRZIH RESTARTOVA
-    const now = Date.now();
-    if (recognitionStarting) {
-        console.log('⏳ Već se pokreće, ignorišem');
+    // Ako već slušamo, ne radi ništa
+    if (isListening) {
+        console.log('⏳ Već slušam, ignorišem');
         return;
     }
-    
-    // Ako je prošlo manje od 100ms od poslednjeg starta, to je sumnjivo brzo
-    if (now - lastStartTime < 100) {
-        rapidCycleCount++;
-        console.warn(`⚠️ Prebrzi restart #${rapidCycleCount} (${now - lastStartTime}ms)`);
-        
-        // Ako imamo 3 brza ciklusa u 2 sekunde, uspori
-        if (rapidCycleCount >= 3) {
-            console.warn('🐌 Previše brzih ciklusa, usporavam na 1.5s');
-            showVoiceStatus('⏳ Pauza između pokretanja...', '#FFD700');
-            setTimeout(() => {
-                rapidCycleCount = 0;
-                startVoiceRecognition();
-            }, 1500);
-            return;
-        }
-        return;
-    }
-    
-    // Resetuj brojač ako je prošlo dovoljno vremena
-    if (now - cycleStartTime > 5000) {
-        rapidCycleCount = 0;
-        cycleStartTime = now;
-    }
-    
-    lastStartTime = now;
-    recognitionStarting = true;
-    isRestarting = true;
 
-    // 🔥 iOS Safari uopšte ne podržava Web Speech API
+    // iOS Safari provera
     const ua = navigator.userAgent || '';
     const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     const isSafari = /^((?!chrome|android).)*safari/i.test(ua);
     if (isIOS && isSafari) {
-        showVoiceStatus('❌ Glasovni unos nije podržan u Safari na iOS-u. Koristite Chrome/Android ili ručni unos.', '#f44336');
-        recognitionStarting = false;
-        isRestarting = false;
+        showVoiceStatus('❌ Glasovni unos nije podržan u Safari na iOS-u.', '#f44336');
         return;
     }
 
-    // 🔥 ZAUSTAVI PREĐAŠNJI RECOGNITION (bez okidanja onend restarta)
+    // HTTPS provera
+    if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+        showVoiceStatus('❌ Mikrofon radi SAMO na HTTPS!', '#f44336');
+        return;
+    }
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        showVoiceStatus('❌ Pregledač ne podržava Web Speech API.', '#f44336');
+        return;
+    }
+
+    // Zaustavi prethodni recognition
     if (recognition) {
-        recognition.onend = null;
         try { recognition.stop(); } catch(e) {}
         recognition = null;
     }
@@ -383,25 +361,10 @@ function startVoiceRecognition() {
         micRestartTimer = null;
     }
 
-    // 🔥 PROVERI HTTPS
-    if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
-        showVoiceStatus('❌ Mikrofon radi SAMO na HTTPS!', '#f44336');
-        recognitionStarting = false;
-        isRestarting = false;
-        return;
-    }
-
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-        showVoiceStatus('❌ Pregledač ne podržava Web Speech API.', '#f44336');
-        recognitionStarting = false;
-        isRestarting = false;
-        return;
-    }
-
     window.isVoiceModeActive = true;
+    isListening = true;
 
-    function beginRecognition() {
+    function createRecognition() {
         recognition = new SpeechRecognition();
 
         const speechLangMap = {
@@ -410,23 +373,40 @@ function startVoiceRecognition() {
             es: 'es-ES', fr: 'fr-FR'
         };
         recognition.lang = speechLangMap[currentLang] || 'sr-RS';
-
-        // 🔥 continuous TRUE — Android ga ignoriše, ali to je OK
-        recognition.continuous = true;
+        
+        // 🔥 continuous: false - Android bolje radi sa ovim
+        recognition.continuous = false;
         recognition.interimResults = true;
         recognition.maxAlternatives = 1;
 
         recognition.onstart = function() {
-            console.log(`✅ [${new Date().toISOString()}] Mikrofon aktivan!`);
+            console.log('✅ Mikrofon aktivan!');
             showVoiceStatus('🎤 Slušam...', '#4CAF50');
-            activeBuffer = '';
-            isProcessingCommand = false;
             micActive = true;
-            recognitionStarting = false;
-            isRestarting = false;
+            isListening = true;
+            
+            // Resetuj timeout za automatsko gašenje (nakon 10s tišine)
+            if (voiceTimeout) clearTimeout(voiceTimeout);
+            voiceTimeout = setTimeout(() => {
+                if (isListening && !micActive) {
+                    console.log('⏰ Automatsko gašenje mikrofona (tišina)');
+                    stopVoiceRecognition();
+                }
+            }, 10000);
         };
 
         recognition.onresult = function(event) {
+            // Resetuj timeout na svaki zvuk
+            if (voiceTimeout) {
+                clearTimeout(voiceTimeout);
+                voiceTimeout = setTimeout(() => {
+                    if (isListening && !micActive) {
+                        console.log('⏰ Automatsko gašenje mikrofona (tišina)');
+                        stopVoiceRecognition();
+                    }
+                }, 10000);
+            }
+
             let finalText = '';
             let interimText = '';
 
@@ -444,86 +424,96 @@ function startVoiceRecognition() {
             }
 
             if (finalText) {
-                console.log(`📝 [${new Date().toISOString()}] Finalno čujem:`, finalText);
+                console.log(`📝 Čujem:`, finalText);
                 showVoiceStatus(`🎤 Čuo: "${finalText}"`, '#4CAF50');
+                lastCommandTime = Date.now();
 
                 if (typeof processVoiceCommand === 'function') {
                     processVoiceCommand(finalText);
-                } else {
-                    console.error('❌ processVoiceCommand nije definisan!');
                 }
+                
+                // 🔥 NAKON ŠTO ČUJE KOMANDU, AUTOMATSKI SE PONOVO UKLJUČUJE
+                // ali sa malim zakašnjenjem da se ne bi preklapao
+                setTimeout(() => {
+                    if (window.isVoiceModeActive && isListening) {
+                        console.log('🔄 Ponovno pokretanje slušanja...');
+                        startVoiceRecognition();
+                    }
+                }, 300);
             }
         };
 
         recognition.onerror = function(event) {
             console.error('❌ Speech error:', event.error);
-            recognitionStarting = false;
-            isRestarting = false;
-
-            if (event.error === 'aborted' || event.error === 'no-speech') {
-                console.log('⏸️ Normalna greška, ignorišem:', event.error);
+            
+            if (event.error === 'aborted') {
+                console.log('⏸️ Zaustavljeno od strane korisnika');
                 return;
             }
 
             if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
-                showVoiceStatus('❌ Pristup mikrofonu je blokiran! Proverite dozvole u podešavanjima browsera.', '#f44336');
+                showVoiceStatus('❌ Pristup mikrofonu je blokiran!', '#f44336');
                 window.isVoiceModeActive = false;
                 micPermissionGranted = false;
+                isListening = false;
+            } else if (event.error === 'no-speech') {
+                // Nema govora - samo restartuj
+                console.log('🔇 Nema govora, restartujem...');
+                if (window.isVoiceModeActive && isListening) {
+                    setTimeout(() => {
+                        startVoiceRecognition();
+                    }, 500);
+                }
             } else {
                 showVoiceStatus(`❌ Greška: ${event.error}`, '#f44336');
+                // Pokušaj restart za druge greške
+                if (window.isVoiceModeActive && isListening) {
+                    setTimeout(() => {
+                        startVoiceRecognition();
+                    }, 1000);
+                }
             }
-            isProcessingCommand = false;
         };
 
         recognition.onend = function() {
-            const endTime = Date.now();
-            console.log(`⏹️ [${new Date().toISOString()}] Mikrofon zaustavljen, trajao: ${endTime - lastStartTime}ms`);
+            console.log('⏹️ Mikrofon zaustavljen');
             micActive = false;
             recognition = null;
-            recognitionStarting = false;
-
-            // 🔥 RESTART SAMO AKO SMO JOŠ UVEK U VOICE MODE I NIJE RUČNO ZAUSTAVLJEN
-            if (window.isVoiceModeActive && !isRestarting) {
-                console.log('🔄 Planiran restart za 600ms (Android continuous bug workaround)');
-                
-                // Duži timeout za Android (600ms umesto 400ms)
-                micRestartTimer = setTimeout(function() {
-                    if (window.isVoiceModeActive && !micActive && !recognitionStarting) {
-                        console.log(`🔄 [${new Date().toISOString()}] Izvršavam restart...`);
+            
+            // 🔥 AKO SMO JOŠ UVEK U VOICE MODE, RESTARTUJ
+            if (window.isVoiceModeActive && isListening) {
+                console.log('🔄 Restartujem slušanje...');
+                setTimeout(() => {
+                    if (window.isVoiceModeActive && isListening) {
                         startVoiceRecognition();
-                    } else {
-                        console.log('⏭️ Restart preskočen (uslovi nisu ispunjeni)');
                     }
-                }, 600);
-            } else if (isRestarting) {
-                console.log('🔄 Restart je već u toku, ne planiram novi');
+                }, 500);
             } else {
-                console.log('⏹️ Voice mode nije aktivan, restart neće biti');
+                console.log('⏹️ Voice mode nije aktivan, zaustavljam');
+                showVoiceStatus('🎤 Mikrofon zaustavljen', '#999999');
             }
         };
 
         try {
             recognition.start();
-            console.log(`✅ [${new Date().toISOString()}] Recognition startovan!`);
+            console.log('✅ Recognition startovan!');
         } catch(e) {
             console.error('❌ Greška pri startovanju:', e);
             showVoiceStatus('❌ Greška pri pokretanju mikrofona', '#f44336');
-            recognitionStarting = false;
-            isRestarting = false;
+            isListening = false;
         }
     }
 
-    // 🔥 AKO JE DOZVOLA VEĆ ODOBRENA, POKRENI DIREKTNO
+    // Pokreni sa dozvolom
     if (micPermissionGranted) {
-        beginRecognition();
+        createRecognition();
         return;
     }
 
-    requestMicrophonePermission().then(beginRecognition).catch(err => {
+    requestMicrophonePermission().then(createRecognition).catch(err => {
         console.error('❌ Dozvola za mikrofon ODBIJENA:', err);
         window.isVoiceModeActive = false;
-        recognitionStarting = false;
-        isRestarting = false;
+        isListening = false;
         showVoiceStatus('❌ Dozvolite pristup mikrofonu u podešavanjima!', '#f44336');
     });
 }
@@ -531,7 +521,12 @@ function startVoiceRecognition() {
 function stopVoiceRecognition() {
     console.log('🛑 stopVoiceRecognition pozvan');
     window.isVoiceModeActive = false;
-    isRestarting = true; // spreči auto-restart
+    isListening = false;
+
+    if (voiceTimeout) {
+        clearTimeout(voiceTimeout);
+        voiceTimeout = null;
+    }
 
     if (micRestartTimer) {
         clearTimeout(micRestartTimer);
@@ -539,16 +534,14 @@ function stopVoiceRecognition() {
     }
 
     if (recognition) {
-        recognition.onend = null; // spreči auto-restart pri namernom zaustavljanju
         try { recognition.stop(); } catch(e) {}
         recognition = null;
     }
     micActive = false;
-    recognitionStarting = false;
     showVoiceStatus('🎤 Mikrofon zaustavljen', '#999999');
 }
 
-// processVoiceCommand ostaje ISTI - ne menja se
+// processVoiceCommand ostaje ISTI
 // ============================================
 // 5. IZVOZ ZA HTML DUGMAD
 // ============================================
