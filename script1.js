@@ -27,7 +27,9 @@ window.isVoiceModeActive = false;
 })();
 
 // ===== TRENUTNO STANJE =====
-let currentLang = 'en';
+if (typeof currentLang === 'undefined') {
+    var currentLang = 'en';
+}
 let currentCategory = '';
 let currentSubcategory = '';
 let currentProductPart = '';
