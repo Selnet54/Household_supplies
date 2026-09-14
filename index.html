@@ -563,24 +563,25 @@ function renderDataEntry(category) {
 }
 
 // 🔥 IZVOZI ZA GLOBAL - SA PROVEROM
-if (typeof prikaziPoljaZaUnos !== 'undefined') {
-    window.prikaziPoljaZaUnos = prikaziPoljaZaUnos;
-} else {
-    // Ako još nije definisano, sačekaj da voiceCommands.js učita
-    document.addEventListener('DOMContentLoaded', function() {
-        setTimeout(function() {
-            if (typeof prikaziPoljaZaUnos !== 'undefined') {
-                window.prikaziPoljaZaUnos = prikaziPoljaZaUnos;
-            }
-        }, 100);
-    });
-}
-
 window.renderDataEntry = renderDataEntry;
-window.saveProduct = saveProduct;
+
+// Sačekaj da se sve učita pre nego što izvezemo prikaziPoljaZaUnos
+window.addEventListener('load', function() {
+    console.log('🔍 Provera funkcija:');
+    console.log('prikaziPoljaZaUnos:', typeof window.prikaziPoljaZaUnos);
+    console.log('saveProduct:', typeof window.saveProduct);
+    console.log('renderDataEntry:', typeof window.renderDataEntry);
+    console.log('startVoiceRecognition:', typeof window.startVoiceRecognition);
+});
 
 console.log('✅ renderDataEntry funkcija definisana!');
 </script>
+<!-- 🔥 GLAVNE SKRIPTE - DODAJ OVO -->
+<script src="productParts.js"></script>
+<script src="script1.js"></script>
+<script src="voiceCommands.js"></script>
+</body>
+</html>
 
 </body>
 </html>
