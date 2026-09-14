@@ -1,5 +1,5 @@
 // ============================================
-// VOICE COMMANDS - v7.0 (BUFFER SISTEM)
+// VOICE COMMANDS - v8.0 (BUFFER + ISPRAVKE)
 // ============================================
 
 // 🔥 GLOBALNE PROMENLJIVE
@@ -13,12 +13,10 @@ let isVoiceInput = false;
 let micRestartTimer = null;
 let isRestarting = false;
 let micPermissionGranted = false;
-let noSpeechCount = 0;
 let noSpeechTimer = null;
 
 // 🔥 BUFFER ZA SKUPLJANJE REČI
 let voiceBuffer = '';
-let isRecording = false;
 
 if (typeof window.currentLang === 'undefined') {
     window.currentLang = 'sr';
@@ -86,8 +84,8 @@ function getNumber(word) {
 
 const UNIT_MAP = {
     'kilogram': 'kg', 'kilograma': 'kg', 'kg': 'kg', 'kilogrami': 'kg',
-    'gram': 'g', 'grama': 'g', 'grami': 'g',
-    'litar': 'l', 'litara': 'l', 'litri': 'l',
+    'gram': 'g', 'grama': 'g', 'grami': 'g', 'g': 'g',
+    'litar': 'l', 'litara': 'l', 'litri': 'l', 'l': 'l',
     'komad': 'kom', 'komada': 'kom', 'kom': 'kom', 'komadi': 'kom',
     'paket': 'pak', 'paketa': 'pak', 'pak': 'pak', 'paketi': 'pak'
 };
@@ -129,22 +127,24 @@ function parseVoiceDataEntry(command) {
     let foundStorage = null;
     let storageWords = ['zamrzivač', 'zamrzivac', 'frižider', 'frizider', 'ostava', 'špajz'];
     for (let word of storageWords) {
-        const regex = new RegExp('\\b' + word + '\\b', 'i');
+        const regex = new RegExp('(^|\\s)' + word + '(\\s|$)', 'i');
         if (regex.test(text)) {
             foundStorage = getStorage(word);
-            break;
+            if (foundStorage) break;
         }
     }
     if (foundStorage) result.storage = foundStorage;
     
-    // Jedinica
+    // Jedinica - uključi i 'g' i 'l'
     let foundUnit = null;
-    let unitWords = ['kilogram', 'kilograma', 'kg', 'gram', 'grama', 'litar', 'litara', 'komad', 'komada', 'kom', 'paket', 'paketa', 'pak'];
+    let unitWords = ['kilogram', 'kilograma', 'kg', 'gram', 'grama', 'grami',
+                     'litar', 'litara', 'litri', 'komad', 'komada', 'kom', 'komadi',
+                     'paket', 'paketa', 'pak', 'g', 'l'];
     for (let word of unitWords) {
-        const regex = new RegExp('\\b' + word + '\\b', 'i');
+        const regex = new RegExp('(^|\\s)' + word + '(\\s|$)', 'i');
         if (regex.test(text)) {
             foundUnit = getUnit(word);
-            break;
+            if (foundUnit) break;
         }
     }
     if (foundUnit) result.unit = foundUnit;
@@ -321,7 +321,6 @@ function startVoiceRecognition() {
 
     window.isVoiceModeActive = true;
     isRestarting = true;
-    noSpeechCount = 0;
 
     function beginRecognition() {
         recognition = new SpeechRecognition();
@@ -342,13 +341,10 @@ function startVoiceRecognition() {
             isProcessingCommand = false;
             micActive = true;
             isRestarting = false;
-            noSpeechCount = 0;
             console.log('✅ Mikrofon aktivan!');
         };
 
         recognition.onresult = function(event) {
-            noSpeechCount = 0;
-            
             let finalText = '';
             let interimText = '';
 
@@ -377,33 +373,20 @@ function startVoiceRecognition() {
 
             if (event.error === 'aborted') {
                 isRestarting = false;
-                noSpeechCount = 0;
                 return;
             }
 
             if (event.error === 'no-speech') {
-                noSpeechCount++;
-                console.log(`🔇 Nema govora (${noSpeechCount}x)`);
+                console.log('🔇 Nema govora, čekam 2s pre restarta...');
                 
-                if (noSpeechCount >= 3) {
-                    showVoiceStatus('⏳ Pauza...', '#FFD700');
-                    if (noSpeechTimer) clearTimeout(noSpeechTimer);
-                    noSpeechTimer = setTimeout(() => {
-                        noSpeechCount = 0;
-                        if (window.isVoiceModeActive && !micActive && !isRestarting) {
-                            startVoiceRecognition();
-                        }
-                    }, 5000);
-                    return;
-                }
-                
-                if (window.isVoiceModeActive && !isRestarting) {
-                    micRestartTimer = setTimeout(function() {
-                        if (window.isVoiceModeActive && !micActive && !isRestarting) {
-                            startVoiceRecognition();
-                        }
-                    }, 1000);
-                }
+                // 🔥 NE RESTARTUJ ODMAH - čekaj 2 sekunde
+                if (noSpeechTimer) clearTimeout(noSpeechTimer);
+                noSpeechTimer = setTimeout(() => {
+                    if (window.isVoiceModeActive && !micActive && !isRestarting) {
+                        console.log('🔄 Restart posle no-speech pauze');
+                        startVoiceRecognition();
+                    }
+                }, 2000);
                 return;
             }
 
@@ -412,7 +395,6 @@ function startVoiceRecognition() {
                 window.isVoiceModeActive = false;
                 micPermissionGranted = false;
                 isRestarting = false;
-                noSpeechCount = 0;
             } else {
                 showVoiceStatus(`❌ Greška: ${event.error}`, '#f44336');
                 if (window.isVoiceModeActive && !isRestarting) {
@@ -430,7 +412,6 @@ function startVoiceRecognition() {
             console.log('⏹️ Mikrofon zaustavljen');
             micActive = false;
             recognition = null;
-            noSpeechCount = 0;
             
             if (window.isVoiceModeActive && !isRestarting) {
                 console.log('🔄 Restartujem slušanje za 800ms...');
@@ -496,7 +477,7 @@ function stopVoiceRecognition() {
 }
 
 // ============================================
-// 6. OBRADA GLASOVNIH KOMANDI - BUFFER SISTEM
+// 6. OBRADA GLASOVNIH KOMANDI
 // ============================================
 
 function processVoiceCommand(command) {
@@ -511,11 +492,13 @@ function processVoiceCommand(command) {
     console.log('🔍 Procesiram:', lowerCmd);
     
     // ============================================
-    // KOMANDA: START - resetuj buffer i otvori unos
+    // KOMANDA: START / UNOS - otvori unos
     // ============================================
-    if (lowerCmd === 'start' || lowerCmd === 'pokreni' || lowerCmd === 'zapocni' || lowerCmd === 'počni' || lowerCmd === 'enter') {
-        console.log('▶️ START - resetujem buffer i otvaram unos');
-        voiceBuffer = ''; // Resetuj buffer
+    if (lowerCmd === 'start' || lowerCmd === 'unos' || lowerCmd === 'unesi' ||
+        lowerCmd === 'pokreni' || lowerCmd === 'zapocni' || lowerCmd === 'počni' ||
+        lowerCmd === 'novi' || lowerCmd === 'novo' || lowerCmd === 'enter' || lowerCmd === 'add') {
+        console.log('▶️ START/UNOS - resetujem buffer i otvaram unos');
+        voiceBuffer = '';
         
         if (typeof window.renderDataEntry === 'function') {
             window.renderDataEntry('');
@@ -533,10 +516,8 @@ function processVoiceCommand(command) {
     if (lowerCmd.includes('plus') || lowerCmd.includes('dodaj') || lowerCmd.includes('sačuvaj') || lowerCmd.includes('sacuvaj')) {
         console.log('➕ PLUS - upisujem buffer:', voiceBuffer);
         
-        // 🔥 Izbaci "Plus" iz trenutne komande
         let cleanCommand = cmd.replace(/\b(plus|dodaj|sačuvaj|sacuvaj)\b/gi, '').trim();
         
-        // Ako ima nešto u cleanCommand, dodaj u buffer
         if (cleanCommand.length > 1) {
             voiceBuffer += (voiceBuffer ? ' ' : '') + cleanCommand;
         }
@@ -544,18 +525,15 @@ function processVoiceCommand(command) {
         console.log('📦 Buffer pre upisa:', voiceBuffer);
         
         if (voiceBuffer.trim().length < 2) {
-            showVoiceStatus('❌ Nema podataka za upis. Izdiktirajte pa recite "plus"', '#f44336');
+            showVoiceStatus('❌ Nema podataka za upis.', '#f44336');
             return;
         }
         
-        // 🔥 PARSIRAJ CEO BUFFER
         const data = parseVoiceDataEntry(voiceBuffer);
         console.log('📦 PARSED:', data);
         
-        // 🔥 POPUNI FORMU
         popuniFormuPodacima(data);
         
-        // 🔥 SAČEKAJ DA SE FORMA POPUNI, PA SAČUVAJ
         setTimeout(() => {
             if (typeof window.saveProduct === 'function') {
                 window.saveProduct();
@@ -563,9 +541,22 @@ function processVoiceCommand(command) {
                 saveProduct();
             }
             console.log('✅ Sačuvano iz buffera:', voiceBuffer);
+            
+            // 🔥 OČISTI POLJA
+            setTimeout(() => {
+                ['productInput', 'pieceInput', 'quantityInput', 'shelfLifeInput'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.value = '';
+                });
+                const pieceEl = document.getElementById('pieceInput');
+                if (pieceEl) pieceEl.value = '1';
+                const qtyEl = document.getElementById('quantityInput');
+                if (qtyEl) qtyEl.value = '1';
+                const shelfEl = document.getElementById('shelfLifeInput');
+                if (shelfEl) shelfEl.value = '12';
+            }, 300);
         }, 600);
         
-        // 🔥 RESETUJ BUFFER
         voiceBuffer = '';
         
         showVoiceStatus(`✅ Sačuvano: ${data.product_name}. Recite sledeći ili "end"`, '#4CAF50');
@@ -578,17 +569,14 @@ function processVoiceCommand(command) {
     if (lowerCmd.includes('end') || lowerCmd.includes('kraj') || lowerCmd.includes('gotovo') || lowerCmd.includes('zavrsi')) {
         console.log('🏁 END - završavam unos');
         
-        // 🔥 Izbaci "End" iz trenutne komande
         let cleanCommand = cmd.replace(/\b(end|kraj|gotovo|zavrsi)\b/gi, '').trim();
         
-        // Ako ima nešto u cleanCommand, dodaj u buffer
         if (cleanCommand.length > 1) {
             voiceBuffer += (voiceBuffer ? ' ' : '') + cleanCommand;
         }
         
         console.log('📦 Buffer pre upisa:', voiceBuffer);
         
-        // 🔥 Ako ima nešto u bufferu, upiši i sačuvaj
         if (voiceBuffer.trim().length > 2) {
             const data = parseVoiceDataEntry(voiceBuffer);
             popuniFormuPodacima(data);
@@ -603,10 +591,8 @@ function processVoiceCommand(command) {
             }, 600);
         }
         
-        // 🔥 Resetuj buffer
         voiceBuffer = '';
         
-        // 🔥 Otvori zalihe
         setTimeout(() => {
             if (typeof window.renderInventory === 'function') {
                 window.renderInventory();
@@ -708,7 +694,7 @@ window.ensureFormVisible = ensureFormVisible;
 // ============================================
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('✅ DOMContentLoaded - voiceCommands.js v7.0');
+    console.log('✅ DOMContentLoaded - voiceCommands.js v8.0');
     
     const startBtn = document.getElementById('activateMicBtn');
     if (startBtn) {
@@ -730,5 +716,4 @@ window.addEventListener('beforeunload', function() {
     window.isVoiceModeActive = false;
 });
 
-console.log('✅ VoiceCommands.js v7.0 UCITAN - BUFFER SISTEM!');
-console.log('✅ startVoiceRecognition:', typeof startVoiceRecognition);
+console.log('✅ VoiceCommands.js v8.0 UCITAN - BUFFER + ISPRAVKE!');
