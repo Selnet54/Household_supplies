@@ -162,6 +162,8 @@
         .voice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .voice-btn { padding: 30px 15px; border: 2px solid #FFD700; border-radius: 16px; background: rgba(255,255,255,0.05); color: white; cursor: pointer; transition: all 0.3s; text-align: center; }
         .voice-btn:hover { background: #FFD700; color: #1a237e; transform: scale(1.05); }
+        .voice-btn-exit { border-color: #f44336; }
+        .voice-btn-exit:hover { background: #f44336; color: white; }
 
         /* ===== MODERN ALERT ===== */
         #modernAlert {
@@ -259,7 +261,7 @@
             <div style="font-size:18px;color:#aaa;margin-bottom:15px;">Home inventory management</div>
             <h2>Login</h2>
             <input type="tel" id="phoneInput" placeholder="Enter phone number" maxlength="15">
-            <button id="loginBtn" class="btn btn-green" onclick="triggerLogin()">ENTER</button>
+            <button id="loginBtn" class="btn btn-green">ENTER</button>
             <button id="supportBtn" class="btn btn-orange" onclick="document.getElementById('supportDialog').style.display='flex'; document.getElementById('supportDialog').classList.add('active');">📧 Support</button>
             <div class="login-limits">
                 <span>📱 4: Maximum number of phone numbers.</span>
@@ -360,7 +362,12 @@
                     <div id="addMenuText" style="font-size:20px; font-weight:bold;">Unos podataka</div>
                 </button>
                 
-                <button class="voice-btn" onclick="goBackFromVoice()" style="border: 3px solid #f44336; background: rgba(244, 67, 54, 0.15); color: white;">
+                <!-- 🔥 BACK u grid-u - CRVENA okvirna linija, providan -->
+                <button class="voice-btn" onclick="goBackFromVoice()" style="
+                    border: 3px solid #f44336; 
+                    background: rgba(244, 67, 54, 0.15);
+                    color: white;
+                ">
                     <div style="font-size:40px;">◀</div>
                     <div id="backMenuText" style="font-size:20px; font-weight:bold;">Back</div>
                 </button>
@@ -370,11 +377,37 @@
                 🎤 Slušam... Recite "start" pa podatke
             </div>
             
-            <button id="activateMicBtn" onclick="startVoiceRecognition()" style="margin-top:10px; padding:14px; background: #4CAF50; color: white; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; width: 100%; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+            <!-- 🔥 DUGME ZA DIREKTNO POKRETANJE MIKROFONA -->
+            <button id="activateMicBtn" onclick="if(typeof window.startVoiceRecognition === 'function') { window.startVoiceRecognition(); } else { alert('Glasovne komande se još učitavaju...'); }" style="
+                margin-top:10px;
+                padding:14px;
+                background: #4CAF50;
+                color: white;
+                border: none;
+                border-radius: 12px;
+                font-size: 18px;
+                font-weight: bold;
+                cursor: pointer;
+                width: 100%;
+                transition: transform 0.2s;
+            " onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
                 🎤 Aktiviraj mikrofon
             </button>
             
-            <button id="exitFromVoiceBtn" onclick="exitApp()" style="margin-top:15px; width:100%; padding:14px; background: #f44336; color: white; border: 2px solid #f44336; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+            <!-- 🔥 EXIT dugme - CRVENO, izlazi iz aplikacije -->
+            <button id="exitFromVoiceBtn" onclick="exitApp()" style="
+                margin-top:15px;
+                width:100%;
+                padding:14px;
+                background: #f44336;
+                color: white;
+                border: 2px solid #f44336;
+                border-radius: 12px;
+                font-size: 18px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: transform 0.2s;
+            " onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
                 <span>🚪 EXIT</span>
             </button>
         </div>
@@ -417,98 +450,40 @@
     </div>
 </div>
 
-<!-- ============================================ -->
-<!-- ⭐ SCRIPT TAGOVI - NA KRAJU BODY ⭐ -->
-<!-- ============================================ -->
-
-<!-- 1. PRVO GLOBALNE PROMENLJIVE -->
+<!-- 🔥 FIX ZA MOBILNE UREĐAJE -->
 <script>
-    var recognition = null;
-    var activeBuffer = '';
-    var lastSavedData = null;
-    var isProcessingCommand = false;
-    var micActive = false;
-    console.log('🔥 Globalne voice promenljive definisane!');
+// Spreči sleep mode na mobilnom
+function preventSleep() {
+    if (navigator.wakeLock) {
+        navigator.wakeLock.request('screen').catch(() => {});
+    }
+}
+document.addEventListener('click', preventSleep);
+document.addEventListener('touchstart', preventSleep);
 </script>
 
-<!-- 2. SERVICE WORKER I BASE FIX -->
+<!-- 🔥 RENDER DATA ENTRY FUNKCIJA -->
 <script>
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/Household_supplies/service-worker.js')
-            .then(function(registration) {
-                console.log('✅ Service Worker registrovan:', registration);
-            })
-            .catch(function(error) {
-                console.log('❌ Service Worker greška:', error);
-            });
-    }
-
-    let deferredPrompt;
-    window.addEventListener('beforeinstallprompt', function(e) {
-        e.preventDefault();
-        deferredPrompt = e;
-    });
-    window.addEventListener('appinstalled', function() {
-        console.log('✅ Aplikacija instalirana!');
-        deferredPrompt = null;
-    });
-
-    (function() {
-        const base = document.querySelector('base');
-        if (base) {
-            const href = base.getAttribute('href');
-            if (href && !href.endsWith('/')) {
-                base.setAttribute('href', href + '/');
-            }
-        }
-    })();
-</script>
-
-<!-- 3. VANJSKE SKRIPTE -->
-<script src="productParts.js"></script>
-<script src="script1.js"></script>       <!-- script1.js PRVI -->
-<script src="voiceCommands.js"></script> <!-- voiceCommands.js POSLEDNJI - pobeđuje! -->
-
-<!-- 4. DODATNE LOGIČKE FUNKCIJE -->
-<script>
-    // Prevent sleep mode na mobilnim uređajima
-    function preventSleep() {
-        if (navigator.wakeLock) {
-            navigator.wakeLock.request('screen').catch(() => {});
-        }
-    }
-    document.addEventListener('click', preventSleep);
-    document.addEventListener('touchstart', preventSleep);
-
-    // Fallback za mikrofonske funkcije
-    if (typeof window.startVoiceRecognition !== 'function') {
-        window.startVoiceRecognition = function() {
-            if (typeof forceStartVoice === 'function') {
-                forceStartVoice();
-            } else if (typeof mainStartVoice === 'function') {
-                mainStartVoice();
-            } else {
-                console.log('Inicijalizujem mikrofon...');
-                location.reload();
-            }
-        };
-    }
-
-   // Render forma za ručni/glasovni unos (STARI LAYOUT)
+// ============================================
+// RENDER DATA ENTRY - za Voice Commands
+// ============================================
 function renderDataEntry(category) {
     console.log('📝 renderDataEntry pozvan, category:', category);
     
+    // Sakrij sve ekrane
     document.querySelectorAll('.screen').forEach(s => {
         s.style.display = 'none';
         s.classList.remove('active');
     });
     
+    // Pokaži glavni ekran
     const mainScreen = document.getElementById('mainScreen');
     if (mainScreen) {
         mainScreen.style.display = 'flex';
         mainScreen.classList.add('active');
     }
     
+    // Generiši HTML za unos
     const mainContent = document.getElementById('mainContent');
     if (mainContent) {
         mainContent.innerHTML = `
@@ -567,6 +542,7 @@ function renderDataEntry(category) {
             </div>
         `;
         
+        // 🔥 Dodaj event listener za shelf life
         const shelfInput = document.getElementById('shelfLifeInput');
         const expiryDisplay = document.getElementById('expiryDisplay');
         if (shelfInput && expiryDisplay) {
@@ -576,13 +552,17 @@ function renderDataEntry(category) {
             });
         }
         
-        if (typeof prikaziPoljaZaUnos === 'function') {
-            prikaziPoljaZaUnos();
-        }
+        // 🔥 Sakrij sva polja (voice će ih prikazati)
+        prikaziPoljaZaUnos();
     }
 }
-    window.renderDataEntry = renderDataEntry;
-    console.log('✅ renderDataEntry funkcija definisana!');
+
+// 🔥 IZVOZI ZA GLOBAL
+window.renderDataEntry = renderDataEntry;
+window.prikaziPoljaZaUnos = prikaziPoljaZaUnos;
+window.saveProduct = saveProduct;
+
+console.log('✅ renderDataEntry funkcija definisana!');
 </script>
 
 </body>
