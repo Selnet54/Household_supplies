@@ -2,7 +2,13 @@
 // VOICE COMMANDS - v5.0 (SAMO GLAS, SVE OSTALO IZ script1.js)
 // ============================================
 
-// 🔥 GLOBALNE PROMENLJIVE
+// 🔥 GLOBALNE PROMENLJIVE - recognition MORA BITI DEKLARISAN
+var recognition = null;
+var micActive = false;
+var activeBuffer = '';
+var isProcessingCommand = false;
+
+// Ostale globalne promenljive
 let END_AKTIVAN = false;
 let isVoiceInput = false;
 let micRestartTimer = null;
@@ -10,6 +16,7 @@ let isRestarting = false;
 let micPermissionGranted = false;
 let noSpeechCount = 0;
 let noSpeechTimer = null;
+
 // 🔥 NE DEKLARIŠI currentLang - već postoji u script1.js
 if (typeof window.currentLang === 'undefined') {
     window.currentLang = 'sr';
