@@ -1344,6 +1344,9 @@ function prikaziSveUnose() {
     if (!container) return;
     const zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
     
+    // 🔥 DOBAVI POSLEDNJE UNETE PROIZVODE (ISTO KAO U renderInventory)
+    const lastAdded = JSON.parse(localStorage.getItem('lastAddedProducts') || '[]');
+    
     // 🔥 KOLONE: Naziv (1.5fr) | Komad (0.4fr) | Količina (0.4fr) | Jedinica (0.4fr) | Rok (0.4fr) | Skladište (1fr)
     container.innerHTML = `
         <div class="table-row header-row" style="display:grid; grid-template-columns:1.5fr 0.4fr 0.4fr 0.4fr 0.4fr 1fr; gap:2px; background:#f0f0f0; font-weight:bold; border-bottom:2px solid #ccc; padding:5px 0;">
@@ -1370,9 +1373,23 @@ function prikaziSveUnose() {
         const expiry = new Date(p.entry_date);
         expiry.setMonth(expiry.getMonth() + p.shelf_life_months);
         const expiryDisplay = expiry.toLocaleDateString('sr-RS', { month: '2-digit', year: '2-digit' });
+        
+        // 🔥 PROVERI DA LI JE PROIZVOD NOVO DODAT
+        const isNew = lastAdded.some(la => la.product_name === p.product_name && la.entry_date === p.entry_date);
+        
+        let bgColor = '';
+        let borderLeft = '';
+        let transition = '';
+        
+        if (isNew) {
+            bgColor = '#e3f2fd';
+            borderLeft = '4px solid #1976d2';
+            transition = 'background-color 0.5s ease';
+        }
+        
         const row = document.createElement('div');
         row.className = 'table-row';
-        row.style.cssText = 'display:grid; grid-template-columns:1.5fr 0.4fr 0.4fr 0.4fr 0.4fr 1fr; gap:2px; border-bottom:1px solid #eee; padding:5px 0;';
+        row.style.cssText = `display:grid; grid-template-columns:1.5fr 0.4fr 0.4fr 0.4fr 0.4fr 1fr; gap:2px; border-bottom:1px solid #eee; padding:5px 0; background:${bgColor}; border-left:${borderLeft}; transition:${transition};`;
         row.innerHTML = `
             <div class="cell" style="font-weight:bold; color:#1a237e; text-align:left; padding-left:8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${p.product_name || 'Nepoznat'}</div>
             <div class="cell" style="text-align:center; font-size:14px;">${p.piece || '-'}</div>
@@ -1383,8 +1400,18 @@ function prikaziSveUnose() {
         `;
         container.appendChild(row);
     });
+    
+    // 🔥 UKLONI ISTICANJE POSLE 5 SEKUNDI
+    setTimeout(function() {
+        const rows = container.querySelectorAll('.table-row');
+        rows.forEach(row => {
+            if (row.style.backgroundColor === 'rgb(227, 242, 253)') {
+                row.style.backgroundColor = '';
+                row.style.borderLeft = '';
+            }
+        });
+    }, 5000);
 }
-
 function updateExpiryDate() {
     const dateInput = document.getElementById('dateInput');
     const shelfLifeInput = document.getElementById('shelfLifeInput');
@@ -1520,7 +1547,6 @@ function saveProduct() {
     document.getElementById('productInput').focus();
     document.getElementById('productInput').select();
     
-    showModernAlert(t('success'), t('product_saved'), '✅');
 }
 
 function renderInventory(lang) {
@@ -1653,7 +1679,6 @@ function obrisiZalihe() {
         showModernAlert(t('no_selection'), t('no_items_selected'), '⚠️');
         return;
     }
-    if (!confirm(t('delete_confirm').replace('{count}', selected.length))) return;
     const zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
     const indices = Array.from(selected).map(cb => parseInt(cb.dataset.index));
     indices.sort((a, b) => b - a);
@@ -1922,7 +1947,6 @@ function obrisiOznacenoShopping() {
         showModernAlert(t('no_selection'), t('no_items_selected'), '⚠️');
         return;
     }
-    if (!confirm(t('delete_confirm').replace('{count}', selected.length))) return;
     let shopping = JSON.parse(localStorage.getItem('shoppingList') || '[]');
     const indices = Array.from(selected).map(cb => parseInt(cb.dataset.index));
     indices.sort((a, b) => b - a);
