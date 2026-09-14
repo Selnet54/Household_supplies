@@ -10,7 +10,10 @@ let isRestarting = false;
 let micPermissionGranted = false;
 let noSpeechCount = 0;
 let noSpeechTimer = null;
-var currentLang = (typeof currentLang !== 'undefined') ? currentLang : 'sr';
+// 🔥 NE DEKLARIŠI currentLang - već postoji u script1.js
+if (typeof window.currentLang === 'undefined') {
+    window.currentLang = 'sr';
+}
 
 // ============================================
 // 1. POMOĆNE FUNKCIJE
