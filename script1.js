@@ -2238,26 +2238,24 @@ function startVoiceRecognition() {
 let isVoiceBusy = false;
 
 function processVoiceCommand(command) {
-    if (!command || isVoiceBusy) return;
+    if (!command) return;
 
     const cmd = command.toString().trim();
     console.log('🎤 processVoiceCommand prima:', cmd);
 
-    // Sprečavanje beskonačne petlje za pozive bez teksta ili čisto "add"
-    if (cmd.toLowerCase() === 'add') {
-        console.warn('⚠️ Blokiran dupli "add" poziv.');
+    // Sprečavanje beskonačne petlje i duplih poziva za "add"
+    if (cmd.toLowerCase() === 'add' || isVoiceBusy) {
+        console.warn('⚠️ Blokiran dupli ili nevažeći poziv:', cmd);
         return;
     }
 
     isVoiceBusy = true;
 
-    // Prosleđivanje komande u voiceCommands.js
+    // Prosleđivanje u voiceCommands.js (ako postoji evaluateVoicePipeline)
     if (typeof evaluateVoicePipeline === 'function') {
         evaluateVoicePipeline(cmd);
-    } else if (typeof window.voiceCommand === 'function') {
-        window.voiceCommand(cmd);
     } else {
-        // Obični otvori ekrana ako nije učitan glavni pipeline
+        // Fallback otvaranje ekrana
         const lower = cmd.toLowerCase();
         if (lower === 'unos' || lower === 'unesi' || lower === 'dodaj') {
             if (typeof renderDataEntry === 'function') renderDataEntry('');
@@ -2272,7 +2270,7 @@ function processVoiceCommand(command) {
 }
 
 function stopVoiceRecognition() {
-    if (recognition) {
+    if (typeof recognition !== 'undefined' && recognition) {
         try {
             recognition.stop();
             recognition = null;
@@ -2298,55 +2296,56 @@ function hideAllScreens() {
 // ============================================
 
 window.stopVoiceRecognition = stopVoiceRecognition;
-window.getCurrentLang = getCurrentLang;
-window.t = t;
-window.switchLanguage = selectLanguage;
-window.showScreen = showScreen;
-window.openDataEntry = renderDataEntry;
-window.saveProductSilent = saveProductSilent;
-window.deleteItem = function(itemId) {
-    // ...
-};
-window.goBack = goBack;
-window.renderInventory = renderInventory;
-window.renderShoppingList = renderShoppingList;
-window.renderCategories = renderCategories;
-window.renderDataEntry = renderDataEntry;
+window.getCurrentLang = typeof getCurrentLang !== 'undefined' ? getCurrentLang : null;
+window.t = typeof t !== 'undefined' ? t : null;
+window.switchLanguage = typeof selectLanguage !== 'undefined' ? selectLanguage : null;
+window.showScreen = typeof showScreen !== 'undefined' ? showScreen : null;
+window.openDataEntry = typeof renderDataEntry !== 'undefined' ? renderDataEntry : null;
+window.saveProductSilent = typeof saveProductSilent !== 'undefined' ? saveProductSilent : null;
+window.deleteItem = window.deleteItem || function(itemId) {};
+window.goBack = typeof goBack !== 'undefined' ? goBack : null;
+window.renderInventory = typeof renderInventory !== 'undefined' ? renderInventory : null;
+window.renderShoppingList = typeof renderShoppingList !== 'undefined' ? renderShoppingList : null;
+window.renderCategories = typeof renderCategories !== 'undefined' ? renderCategories : null;
+window.renderDataEntry = typeof renderDataEntry !== 'undefined' ? renderDataEntry : null;
 window.processVoiceCommand = processVoiceCommand;
-window.voiceCommand = processVoiceCommand;
-window.exitApp = exitApp;
-window.goBackFromChoice = goBackFromChoice;
-window.showModernAlert = showModernAlert;
-window.closeModernAlert = closeModernAlert;
-window.showModernConfirm = showModernConfirm;
-window.closeModernConfirm = closeModernConfirm;
-window.handleConfirmYes = handleConfirmYes;
-window.handleConfirmNo = handleConfirmNo;
-window.triggerLogin = triggerLogin;
-window.handleBackAction = handleBackAction;
-window.saveProduct = saveProduct;
-window.saveProductSilent = saveProductSilent;
-window.prikaziSveUnose = prikaziSveUnose;
-window.updateExpiryDate = updateExpiryDate;
-window.renderLanguages = renderLanguages;
-window.selectLanguage = selectLanguage;
-window.renderCategories = renderCategories;
-window.renderSubcategories = renderSubcategories;
-window.renderSubcategoryGroup = renderSubcategoryGroup;
-window.renderProductParts = renderProductParts;
-window.renderInventory = renderInventory;
-window.renderShoppingList = renderShoppingList;
-window.azurirajZalihe = azurirajZalihe;
-window.obrisiZalihe = obrisiZalihe;
-window.toggleAllCheckboxes = toggleAllCheckboxes;
-window.obrisiOznacenoShopping = obrisiOznacenoShopping;
-window.kopirajShopping = kopirajShopping;
-window.oznaciSveShopping = oznaciSveShopping;
-window.selectVoiceMode = selectVoiceMode;
-window.selectManualMode = selectManualMode;
-window.goBackFromVoice = goBackFromVoice;
-window.speakText = speakText;
-window.saveLastAddedProducts = saveLastAddedProducts;
+
+// VAŽNO: Ne dodeljujemo processVoiceCommand samoj sebi pod window.voiceCommand
+// radi izbegavanja beskonačne petlje.
+window.voiceCommand = function(cmd) {
+    processVoiceCommand(cmd);
+};
+
+window.exitApp = typeof exitApp !== 'undefined' ? exitApp : null;
+window.goBackFromChoice = typeof goBackFromChoice !== 'undefined' ? goBackFromChoice : null;
+window.showModernAlert = typeof showModernAlert !== 'undefined' ? showModernAlert : null;
+window.closeModernAlert = typeof closeModernAlert !== 'undefined' ? closeModernAlert : null;
+window.showModernConfirm = typeof showModernConfirm !== 'undefined' ? showModernConfirm : null;
+window.closeModernConfirm = typeof closeModernConfirm !== 'undefined' ? closeModernConfirm : null;
+window.handleConfirmYes = typeof handleConfirmYes !== 'undefined' ? handleConfirmYes : null;
+window.handleConfirmNo = typeof handleConfirmNo !== 'undefined' ? handleConfirmNo : null;
+window.triggerLogin = typeof triggerLogin !== 'undefined' ? triggerLogin : null;
+window.handleBackAction = typeof handleBackAction !== 'undefined' ? handleBackAction : null;
+window.saveProduct = typeof saveProduct !== 'undefined' ? saveProduct : null;
+window.prikaziSveUnose = typeof prikaziSveUnose !== 'undefined' ? prikaziSveUnose : null;
+window.updateExpiryDate = typeof updateExpiryDate !== 'undefined' ? updateExpiryDate : null;
+window.renderLanguages = typeof renderLanguages !== 'undefined' ? renderLanguages : null;
+window.selectLanguage = typeof selectLanguage !== 'undefined' ? selectLanguage : null;
+window.renderSubcategories = typeof renderSubcategories !== 'undefined' ? renderSubcategories : null;
+window.renderSubcategoryGroup = typeof renderSubcategoryGroup !== 'undefined' ? renderSubcategoryGroup : null;
+window.renderProductParts = typeof renderProductParts !== 'undefined' ? renderProductParts : null;
+window.azurirajZalihe = typeof azurirajZalihe !== 'undefined' ? azurirajZalihe : null;
+window.obrisiZalihe = typeof obrisiZalihe !== 'undefined' ? obrisiZalihe : null;
+window.toggleAllCheckboxes = typeof toggleAllCheckboxes !== 'undefined' ? toggleAllCheckboxes : null;
+window.obrisiOznacenoShopping = typeof obrisiOznacenoShopping !== 'undefined' ? obrisiOznacenoShopping : null;
+window.kopirajShopping = typeof kopirajShopping !== 'undefined' ? kopirajShopping : null;
+window.oznaciSveShopping = typeof oznaciSveShopping !== 'undefined' ? oznaciSveShopping : null;
+window.selectVoiceMode = typeof selectVoiceMode !== 'undefined' ? selectVoiceMode : null;
+window.selectManualMode = typeof selectManualMode !== 'undefined' ? selectManualMode : null;
+window.goBackFromVoice = typeof goBackFromVoice !== 'undefined' ? goBackFromVoice : null;
+window.speakText = typeof speakText !== 'undefined' ? speakText : null;
+window.saveLastAddedProducts = typeof saveLastAddedProducts !== 'undefined' ? saveLastAddedProducts : null;
+
 window.ocistiPolja = window.ocistiPolja || function() {
     console.log('🧹 Čistim polja');
     ['productInput', 'pieceInput', 'quantityInput', 'shelfLifeInput', 'descriptionInput'].forEach(function(id) {
@@ -2357,8 +2356,7 @@ window.ocistiPolja = window.ocistiPolja || function() {
     if (p) { p.focus(); p.select(); }
 };
 
-console.log('✅ Sve dodatne funkcije izvezene globalno!');
-console.log('✅ stopVoiceRecognition, getCurrentLang, t, switchLanguage, showScreen, openDataEntry, saveProductSilent, deleteItem, goBack, processVoiceCommand, saveLastAddedProducts');
+console.log('✅ Sve dodatne funkcije izvezene globalno i usklađene!');
 // ============================================
 // POPRAVKA ZA BACK DUGME NA 4. EKRANU
 // ============================================
