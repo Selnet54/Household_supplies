@@ -1,181 +1,139 @@
 // ============================================
-// POTPUNO STABILAN VOICECOMMANDS.JS (BEZ SAMOINICIJATIVNOG UPISA)
+// POTPUNO AUTOMATSKI NATIVNI MIKROFON (AUTO-RESTART)
 // ============================================
 
-let whisperRecorder = null;
-let whisperStream = null;
-let isWhisperActive = false;
-let voiceAccumulatedText = "";
-const GROQ_API_KEY = "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";
+let recognition = null;
+let isVoiceActive = false;
+let userIntentionalStop = false;
 
-async function toggleWhisperRecognition() {
-    if (isWhisperActive) {
-        stopWhisperRecognition();
-    } else {
-        startWhisperRecognition();
+function initSpeechRecognition() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        updateVoiceUI("❌ Pretraživač ne podržava glasovno upravljanje", "#f44336");
+        return null;
     }
-}
 
-async function startWhisperRecognition() {
-    try {
-        whisperStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        isWhisperActive = true;
-        voiceAccumulatedText = "";
+    const rec = new SpeechRecognition();
+    rec.continuous = true;
+    rec.interimResults = false;
+    rec.lang = 'sr-RS'; // Srpski jezik za prepoznavanje
+
+    rec.onstart = () => {
+        isVoiceActive = true;
+        updateVoiceUI("🎤 Mikrofon aktivan. Pričajte slobodno...", "#4CAF50");
+    };
+
+    rec.onresult = (event) => {
+        const lastIndex = event.results.length - 1;
+        const recognizedText = event.results[lastIndex][0].transcript.trim();
+        console.log("👂 Čuo sam:", recognizedText);
         
-        updateVoiceUI("🎤 Mikrofon spreman. Recite 'Unos' ili 'Start'", "#4CAF50");
-        runChunkRecordingLoop();
-    } catch (err) {
-        updateVoiceUI("❌ Greška pri pristupu mikrofonu!", "#f44336");
-        console.error(err);
+        updateVoiceUI(`👂 Čuo sam: "${recognizedText}"`, "#FFD700");
+
+        if (typeof evaluateVoicePipeline === 'function') {
+            evaluateVoicePipeline(recognizedText);
+        }
+    };
+
+    rec.onerror = (event) => {
+        console.warn("⚠️ Mikrofonska greška:", event.error);
+        if (event.error === 'not-allowed') {
+            userIntentionalStop = true;
+            updateVoiceUI("❌ Pristup mikrofonu je odbijen!", "#f44336");
+        }
+    };
+
+    rec.onend = () => {
+        isVoiceActive = false;
+        // AUTOMATSKI RESTART: Ako ga sistem ugasi sam, ponovo ga palimo bez dodira ekrana
+        if (!userIntentionalStop) {
+            console.log("🔄 Sistem je ugasio mikrofon - automatsko ponovno paljenje...");
+            setTimeout(() => {
+                try {
+                    rec.start();
+                } catch (e) {
+                    console.log("Mikrofon je već pokrenut.");
+                }
+            }, 300);
+        } else {
+            updateVoiceUI("⏹️ Mikrofon isključen", "#aaa");
+        }
+    };
+
+    return rec;
+}
+
+// Pokretanje i zaustavljanje mikrofona
+function toggleVoiceRecognition() {
+    if (isVoiceActive) {
+        stopVoiceRecognition();
+    } else {
+        startVoiceRecognition();
     }
 }
 
-function stopWhisperRecognition() {
-    isWhisperActive = false;
-    if (whisperRecorder && whisperRecorder.state !== "inactive") {
-        whisperRecorder.stop();
+function startVoiceRecognition() {
+    userIntentionalStop = false;
+    if (!recognition) {
+        recognition = initSpeechRecognition();
     }
-    if (whisperStream) {
-        whisperStream.getTracks().forEach(track => track.stop());
+    if (recognition && !isVoiceActive) {
+        try {
+            recognition.start();
+        } catch (e) {
+            console.log("Mikrofon start greška:", e);
+        }
     }
+}
+
+function stopVoiceRecognition() {
+    userIntentionalStop = true;
+    if (recognition) {
+        try {
+            recognition.stop();
+        } catch (e) {}
+    }
+    isVoiceActive = false;
     updateVoiceUI("⏹️ Mikrofon isključen", "#aaa");
 }
 
-function runChunkRecordingLoop() {
-    if (!isWhisperActive) return;
-
-    let chunks = [];
-    let options = {};
-    if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
-        options = { mimeType: 'audio/webm;codecs=opus' };
-    } else if (MediaRecorder.isTypeSupported('audio/webm')) {
-        options = { mimeType: 'audio/webm' };
-    } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
-        options = { mimeType: 'audio/mp4' };
-    }
-
-    try {
-        whisperRecorder = new MediaRecorder(whisperStream, options);
-    } catch (e) {
-        whisperRecorder = new MediaRecorder(whisperStream);
-    }
-
-    whisperRecorder.ondataavailable = e => { 
-        if (e.data && e.data.size > 0) chunks.push(e.data); 
-    };
-
-    whisperRecorder.onstop = async () => {
-        if (chunks.length > 0 && isWhisperActive) {
-            const actualType = whisperRecorder.mimeType || 'audio/webm';
-            const blob = new Blob(chunks, { type: actualType });
-            await sendChunkToWhisper(blob);
-        }
-        if (isWhisperActive) runChunkRecordingLoop();
-    };
-
-    whisperRecorder.start();
-    setTimeout(() => {
-        if (whisperRecorder && whisperRecorder.state === "recording") {
-            whisperRecorder.stop();
-        }
-    }, 3500);
-}
-
-async function sendChunkToWhisper(audioBlob) {
-    const formData = new FormData();
-    const ext = audioBlob.type.includes('mp4') ? 'mp4' : 'webm';
-    formData.append("file", audioBlob, `audio.${ext}`);
-    formData.append("model", "whisper-large-v3");
-    formData.append("language", "sr");
-
-    try {
-        const res = await fetch("https://api.groq.com/openai/v1/audio/transcriptions", {
-            method: "POST",
-            headers: { "Authorization": `Bearer ${GROQ_API_KEY}` },
-            body: formData
-        });
-        const data = await res.json();
-        
-        if (data.text) {
-            // Očišćen tekst bez znakova interpunkcije
-            let cleanText = data.text.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").trim();
-            let lower = cleanText.toLowerCase();
-            
-            // STROGA FILTRACIJA LAŽNIH ŠUMOVA I PORTUGALSKIH/ENGLESKIH LAŽNIH PREVODA
-            const isNoise = cleanText.length < 2 || 
-                            lower === "hvala" || 
-                            lower === "hvala vam" || 
-                            lower === "šta" || 
-                            lower === "sta" || 
-                            lower.includes("subtitles") ||
-                            lower.includes("obrada");
-
-            if (!isNoise) {
-                voiceAccumulatedText = (voiceAccumulatedText + " " + cleanText).trim();
-                updateVoiceUI(`👂 Čuo sam: "${voiceAccumulatedText}"`, "#FFD700");
-                evaluateVoicePipeline(voiceAccumulatedText);
-            }
-        }
-    } catch (err) {
-        console.warn("Groq Whisper error:", err);
-    }
-}
-
 // -------------------------------------------------------------
-// RUTER KOMANDI (ČEKA SVE DOK NE KAŽETE PLUS ILI END)
+// OBRADA KOMANDI I PARSIRANJE ARTIKALA
 // -------------------------------------------------------------
 function evaluateVoicePipeline(rawText) {
-    let lower = rawText.toLowerCase();
+    if (!rawText) return;
+    let lower = rawText.toLowerCase().trim();
 
-    // 1. UNOS -> Otvara ekran i potpuno čisti bafer
-    if (lower.includes("unos")) {
+    // 1. OTVARANJE EKRANA UNOS
+    if (lower.includes("unos") || lower.includes("unesi") || lower.includes("dodaj")) {
         if (typeof window.renderDataEntry === 'function') {
             window.renderDataEntry();
         }
-        voiceAccumulatedText = ""; 
-        updateVoiceUI("📝 Ekran otvoren! Recite 'Start' za novo diktiranje.", "#4CAF50");
+        updateVoiceUI("📝 Ekran za unos otvoren!", "#4CAF50");
         return;
     }
 
-    // 2. START -> Resetuje plave boje u bazi i čisti bafer
-    if (lower.includes("start")) {
-        clearBlueFlagsInStorage();
-        voiceAccumulatedText = "";
-        updateVoiceUI("🎤 Startovano! Diktirajte artikal pa recite 'Plus'...", "#4CAF50");
-        return;
-    }
-
-    // 3. PLUS -> Tek OVDE se vrši upisivanje u bazu i na ekran
-    if (lower.includes("plus")) {
-        let phraseBeforePlus = rawText.split(/plus/i)[0].trim();
-        if (phraseBeforePlus.length > 1) {
-            let parsed = parseSmartVoiceText(phraseBeforePlus);
-            saveParsedItemToStorage(parsed, true);
+    // 2. OTVARANJE ZALIHA / KRAJ
+    if (lower.includes("zalihe") || lower.includes("stanje") || lower.includes("kraj") || lower.includes("end")) {
+        if (typeof window.renderInventory === 'function') {
+            window.renderInventory();
         }
-        voiceAccumulatedText = ""; // Čistimo bafer za sledeći proizvod!
-        updateVoiceUI("➕ Sačuvano u plavoj boji! Diktirajte sledeći pa kažite 'Plus'", "#2196F3");
+        updateVoiceUI("📦 Prikazane zalihe!", "#4CAF50");
         return;
     }
 
-    // 4. END -> Kraj rada, čuva poslednje i otvara zalihe
-    if (lower.includes("end") || lower.includes("kraj")) {
-        let phraseBeforeEnd = rawText.split(/(end|kraj)/i)[0].trim();
-        if (phraseBeforeEnd.length > 1) {
-            let parsed = parseSmartVoiceText(phraseBeforeEnd);
-            saveParsedItemToStorage(parsed, true);
-        }
-        stopWhisperRecognition();
-        if (typeof renderInventory === 'function') renderInventory();
-        updateVoiceUI("📦 Unos završen! Prikazane zalihe.", "#4CAF50");
-        return;
+    // 3. DIKTIRANJE ARTIKALA (Ako tekst sadrži nazive mesta ili količinu)
+    if (lower.includes("zamrzivač") || lower.includes("zamrzivac") || lower.includes("frižider") || 
+        lower.includes("frizider") || lower.includes("ostava") || lower.includes("kilo") || lower.includes("kg")) {
+        
+        let parsed = parseSmartVoiceText(rawText);
+        saveParsedItemToStorage(parsed, true);
+        updateVoiceUI(`➕ Sačuvano: ${parsed.product_name} (${parsed.quantity} ${parsed.unit})`, "#2196F3");
     }
 }
 
-// -------------------------------------------------------------
-// ANALIZA TEKSTA (ODVAJA IME, KOLIČINU I LOKACIJU)
-// -------------------------------------------------------------
 function parseSmartVoiceText(text) {
-    let clean = text.toLowerCase();
+    let clean = text.toLowerCase().trim();
     
     let result = {
         product_name: "",
@@ -185,31 +143,30 @@ function parseSmartVoiceText(text) {
         shelf_life: 6
     };
 
-    // Određivanje skladišta
+    // Detekcija lokacije
     if (clean.includes("zamrzivač 2") || clean.includes("zamrzivac 2")) result.storage = "Zamrzivač 2";
     else if (clean.includes("zamrzivač 3") || clean.includes("zamrzivac 3")) result.storage = "Zamrzivač 3";
     else if (clean.includes("frižider") || clean.includes("frizider")) result.storage = "Frižider";
-    else if (clean.includes("ostava")) result.storage = "Ostava";
+    else if (clean.includes("ostava") || clean.includes("špajz")) result.storage = "Ostava";
+    else if (clean.includes("zamrzivač") || clean.includes("zamrzivac")) result.storage = "Zamrzivač 1";
 
-    // Određivanje jedinice
+    // Jedinica
     if (clean.includes("kilogram") || clean.includes("kilo") || clean.includes("kg")) result.unit = "kg";
-    else if (clean.includes("litar") || clean.includes("litri") || clean.includes("l")) result.unit = "l";
+    else if (clean.includes("litar") || clean.includes("litra") || clean.includes("l")) result.unit = "l";
     else if (clean.includes("gram") || clean.includes("g")) result.unit = "g";
-    else if (clean.includes("paket") || clean.includes("pakovanja")) result.unit = "pak";
+    else if (clean.includes("paket") || clean.includes("pak")) result.unit = "pak";
 
-    // Određivanje brojeva
+    // Brojevi
     let numbers = clean.match(/\d+/g);
     if (numbers && numbers.length > 0) {
         result.quantity = parseInt(numbers[0]);
-        if (numbers.length > 1) {
-            result.shelf_life = parseInt(numbers[1]);
-        }
+        if (numbers.length > 1) result.shelf_life = parseInt(numbers[1]);
     }
 
     // Čišćenje imena artikla
     let nameClean = clean
-        .replace(/zamrzivač \d|zamrzivac \d|frižider|frizider|ostava/gi, "")
-        .replace(/kilogram|kilograma|kilo|kg|litar|litra|gram|paket|komad|komada/gi, "")
+        .replace(/zamrzivač \d|zamrzivac \d|zamrzivač|zamrzivac|frižider|frizider|ostava|špajz/gi, "")
+        .replace(/kilogram|kilograma|kilo|kg|litar|litra|gram|paket|komad|komada|kom/gi, "")
         .replace(/\d+/g, "")
         .trim();
 
@@ -235,12 +192,6 @@ function saveParsedItemToStorage(data, isNewFlag) {
     localStorage.setItem('zalihe', JSON.stringify(zalihe));
 }
 
-function clearBlueFlagsInStorage() {
-    let zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
-    zalihe = zalihe.map(item => { item.isNew = false; return item; });
-    localStorage.setItem('zalihe', JSON.stringify(zalihe));
-}
-
 function updateVoiceUI(msg, color) {
     const statusDiv = document.getElementById('voiceStatus');
     if (statusDiv) {
@@ -249,8 +200,8 @@ function updateVoiceUI(msg, color) {
     }
 }
 
-window.startVoiceRecognition = toggleWhisperRecognition;
-// Povezivanje sa script1.js
-window.voiceCommand = function(text) {
-    evaluateVoicePipeline(text);
-};
+// Globalni ulazi
+window.startVoiceRecognition = startVoiceRecognition;
+window.stopVoiceRecognition = stopVoiceRecognition;
+window.toggleVoiceRecognition = toggleVoiceRecognition;
+window.voiceCommand = evaluateVoicePipeline;
