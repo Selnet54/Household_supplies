@@ -1,5 +1,5 @@
 // ============================================
-// VOICE COMMANDS - v13.1 (POPRAVLJENO DUPLIRANJE REZULTATA)
+// VOICE COMMANDS - v13.2 (CELA REČ ZA SVE KOMANDE - NEMA VIŠE "BEND")
 // START/PLUS/OBRIŠI/END + BUFFER + ISPRAVNA DODELA BROJEVA
 // ============================================
 
@@ -834,9 +834,8 @@ function processSingleVoiceCommand(command) {
 
     // 🔥 OBRIŠI - poništava trenutno diktirane podatke PRE nego što se
     // sačuvaju sa "Plus". Ne snima ništa, samo prazni bafer i formu.
-    if (lowerCmd.includes('obriši') || lowerCmd.includes('obrisi') ||
-        lowerCmd.includes('izbriši') || lowerCmd.includes('izbrisi') ||
-        lowerCmd.includes('otkaži') || lowerCmd.includes('otkazi')) {
+    // Koristi \b (cela reč) da izbegne lažno okidanje na sličnim rečima.
+    if (/\b(obriši|obrisi|izbriši|izbrisi|otkaži|otkazi)\b/i.test(lowerCmd)) {
 
         console.log('🗑️ OBRIŠI - poništavam trenutni unos');
         obrisiTrenutniUnos();
@@ -844,8 +843,7 @@ function processSingleVoiceCommand(command) {
     }
 
     // PLUS
-    if (lowerCmd.includes('plus') || lowerCmd.includes('dodaj') ||
-        lowerCmd.includes('sačuvaj') || lowerCmd.includes('sacuvaj')) {
+    if (/\b(plus|dodaj|sačuvaj|sacuvaj)\b/i.test(lowerCmd)) {
 
         console.log('➕ PLUS - upisujem buffer:', voiceBuffer);
 
@@ -872,8 +870,7 @@ function processSingleVoiceCommand(command) {
     }
 
     // END
-    if (lowerCmd.includes('end') || lowerCmd.includes('kraj') ||
-        lowerCmd.includes('gotovo') || lowerCmd.includes('zavrsi')) {
+    if (/\b(end|kraj|gotovo|zavrsi)\b/i.test(lowerCmd)) {
 
         console.log('🏁 END - završavam unos i otvaram zalihe');
 
@@ -912,8 +909,7 @@ function processSingleVoiceCommand(command) {
     }
 
     // ZALIHE
-    if (lowerCmd.includes('zalihe') || lowerCmd.includes('stanje') ||
-        lowerCmd.includes('inventar') || lowerCmd.includes('inventory')) {
+    if (/\b(zalihe|stanje|inventar|inventory)\b/i.test(lowerCmd)) {
         console.log('📦 ZALIHE');
         voiceBuffer = '';
         if (typeof window.renderInventory === 'function') {
@@ -926,8 +922,7 @@ function processSingleVoiceCommand(command) {
     }
 
     // SPISAK
-    if (lowerCmd.includes('spisak') || lowerCmd.includes('potrebe') ||
-        lowerCmd.includes('lista') || lowerCmd.includes('shopping')) {
+    if (/\b(spisak|potrebe|lista|shopping)\b/i.test(lowerCmd)) {
         console.log('🛒 SPISAK');
         voiceBuffer = '';
         if (typeof window.renderShoppingList === 'function') {
@@ -940,7 +935,7 @@ function processSingleVoiceCommand(command) {
     }
 
     // NAZAD
-    if (lowerCmd.includes('nazad') || lowerCmd.includes('back') || lowerCmd.includes('vrati')) {
+    if (/\b(nazad|back|vrati)\b/i.test(lowerCmd)) {
         console.log('⬅️ NAZAD');
         voiceBuffer = '';
         stopVoiceRecognition();
@@ -953,8 +948,7 @@ function processSingleVoiceCommand(command) {
     }
 
     // EXIT
-    if (lowerCmd.includes('exit') || lowerCmd.includes('izlaz') ||
-        lowerCmd.includes('izadji') || lowerCmd.includes('zatvori')) {
+    if (/\b(exit|izlaz|izadji|zatvori)\b/i.test(lowerCmd)) {
         console.log('🚪 EXIT');
         voiceBuffer = '';
         stopVoiceRecognition();
@@ -1051,5 +1045,5 @@ window.addEventListener('beforeunload', function() {
     window.isVoiceModeActive = false;
 });
 
-console.log('✅ VoiceCommands.js v13.1 UCITAN - POPRAVLJENO DUPLIRANJE REZULTATA!');
+console.log('✅ VoiceCommands.js v13.2 UCITAN - POUZDANA DETEKCIJA KOMANDI (CELA REČ)!');
 console.log('✅ startVoiceRecognition:', typeof startVoiceRecognition);
