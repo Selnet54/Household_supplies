@@ -1,5 +1,5 @@
 // ============================================
-// VOICE COMMANDS - v13.0 (OBRIŠI + TRAJNO OTVOREN MIKROFON)
+// VOICE COMMANDS - v13.1 (POPRAVLJENO DUPLIRANJE REZULTATA)
 // START/PLUS/OBRIŠI/END + BUFFER + ISPRAVNA DODELA BROJEVA
 // ============================================
 
@@ -16,6 +16,7 @@ let micPermissionGranted = false;
 let noSpeechTimer = null;
 
 let voiceBuffer = '';
+let lastProcessedResultIndex = 0; // 🔥 sopstveno praćenje obrađenih rezultata (Android event.resultIndex je nepouzdan)
 
 if (typeof window.currentLang === 'undefined') {
     window.currentLang = 'sr';
@@ -616,30 +617,45 @@ function startVoiceRecognition() {
             micActive = true;
             isRestarting = false;
             END_AKTIVAN = false;
+            lastProcessedResultIndex = 0; // 🔥 reset brojača za novu sesiju
             console.log('✅ Mikrofon aktivan!');
         };
 
         recognition.onresult = function(event) {
-            let finalText = '';
+            // 🔥 POPRAVKA DUPLIRANJA/GUBLJENJA TEKSTA:
+            // event.resultIndex koji šalje Android Chrome NIJE uvek
+            // pouzdan u continuous režimu — zna da prijavi pogrešnu
+            // vrednost, što je dovodilo do toga da se isti finalni
+            // rezultat obradi više puta (ili da se deo teksta preskoči),
+            // truje se voiceBuffer i pravi besmislen upis u polja.
+            // Zato sami pratimo koji je indeks poslednji obrađen i
+            // NIKAD ne obrađujemo isti finalni rezultat dvaput.
+
             let interimText = '';
 
-            for (let i = event.resultIndex; i < event.results.length; i++) {
-                const transcript = event.results[i][0].transcript.trim();
-                if (event.results[i].isFinal) {
-                    finalText += (finalText ? ' ' : '') + transcript;
-                } else {
-                    interimText += transcript;
+            for (let i = 0; i < event.results.length; i++) {
+                const result = event.results[i];
+
+                if (!result.isFinal) {
+                    interimText += result[0].transcript;
+                    continue;
+                }
+
+                // Ovaj finalni rezultat je već obrađen ranije - preskoči.
+                if (i < lastProcessedResultIndex) continue;
+
+                const transcript = result[0].transcript.trim();
+                lastProcessedResultIndex = i + 1;
+
+                if (transcript) {
+                    console.log('📝 Finalno čujem (indeks ' + i + '):', transcript);
+                    showVoiceStatus(`🎤 Čuo: "${transcript}"`, '#4CAF50');
+                    processVoiceCommand(transcript);
                 }
             }
 
             if (interimText) {
                 showVoiceStatus(`🎤 Slušam: "${interimText}"`, '#FFD700');
-            }
-
-            if (finalText) {
-                console.log('📝 Finalno čujem:', finalText);
-                showVoiceStatus(`🎤 Čuo: "${finalText}"`, '#4CAF50');
-                processVoiceCommand(finalText);
             }
         };
 
@@ -1035,5 +1051,5 @@ window.addEventListener('beforeunload', function() {
     window.isVoiceModeActive = false;
 });
 
-console.log('✅ VoiceCommands.js v13.0 UCITAN - OBRIŠI KOMANDA + TRAJNI MIKROFON!');
+console.log('✅ VoiceCommands.js v13.1 UCITAN - POPRAVLJENO DUPLIRANJE REZULTATA!');
 console.log('✅ startVoiceRecognition:', typeof startVoiceRecognition);
