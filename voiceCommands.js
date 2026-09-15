@@ -566,6 +566,9 @@ function startVoiceRecognition() {
         };
         recognition.lang = speechLangMap[currentLang] || 'sr-RS';
 
+        // 🔥 continuous = true — mikrofon ostaje aktivan i sluša više
+        // fraza u istoj sesiji, umesto da se gasi/pali (i bipuje) posle
+        // svake pojedinačne izgovorene reči/fraze.
         recognition.continuous = true;
         recognition.interimResults = true;
         recognition.maxAlternatives = 3;
