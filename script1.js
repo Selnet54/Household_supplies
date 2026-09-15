@@ -2235,54 +2235,16 @@ function startVoiceRecognition() {
     }
     console.warn('⚠️ voiceCommands nije učitan!');
 }
-let isVoiceBusy = false;
-
-function processVoiceCommand(command) {
-    if (!command) return;
-
-    const cmd = command.toString().trim();
-    console.log('🎤 processVoiceCommand prima:', cmd);
-
-    // Sprečavanje beskonačne petlje i duplih poziva za "add"
-    if (cmd.toLowerCase() === 'add' || isVoiceBusy) {
-        console.warn('⚠️ Blokiran dupli ili nevažeći poziv:', cmd);
-        return;
-    }
-
-    isVoiceBusy = true;
-
-    // Prosleđivanje u voiceCommands.js (ako postoji evaluateVoicePipeline)
-    if (typeof evaluateVoicePipeline === 'function') {
-        evaluateVoicePipeline(cmd);
-    } else {
-        // Fallback otvaranje ekrana
-        const lower = cmd.toLowerCase();
-        if (lower === 'unos' || lower === 'unesi' || lower === 'dodaj') {
-            if (typeof renderDataEntry === 'function') renderDataEntry('');
-        } else if (lower === 'zalihe' || lower === 'stanje' || lower === 'inventar') {
-            if (typeof renderInventory === 'function') renderInventory();
-        } else if (lower === 'spisak' || lower === 'lista' || lower === 'kupovina') {
-            if (typeof renderShoppingList === 'function') renderShoppingList();
-        }
-    }
-
-    setTimeout(() => { isVoiceBusy = false; }, 400);
-}
-
-function stopVoiceRecognition() {
-    if (typeof recognition !== 'undefined' && recognition) {
-        try {
-            recognition.stop();
-            recognition = null;
-            console.log('🛑 Recognition zaustavljen');
-        } catch(e) {}
-    }
-    const statusEl = document.getElementById('voiceStatus');
-    if (statusEl) {
-        statusEl.textContent = '⏸️ Prepoznavanje zaustavljeno';
-        statusEl.style.color = '#aaa';
-    }
-}
+// ============================================
+// 🔥 UKLONJENO: processVoiceCommand, stopVoiceRecognition, isVoiceBusy
+// ============================================
+// Ove funkcije su već potpuno implementirane u voiceCommands.js (v13),
+// sa Start/Plus/Obriši/End logikom i baferom. Pošto su obe skripte
+// definisale funkciju sa ISTIM imenom na globalnom nivou, ona koja se
+// učita POSLEDNJA u HTML-u je brisala/prepisivala onu drugu — zbog toga
+// je dolazilo do gubljenja komandi i pogrešnog upisa podataka.
+// Ovde ih više ne definišemo, tako da voiceCommands.js ostaje jedini
+// izvor istine za obradu glasovnih komandi.
 
 function hideAllScreens() {
     document.querySelectorAll('.screen').forEach(s => {
@@ -2295,7 +2257,6 @@ function hideAllScreens() {
 // IZVEZI FUNKCIJE GLOBALNO
 // ============================================
 
-window.stopVoiceRecognition = stopVoiceRecognition;
 window.getCurrentLang = typeof getCurrentLang !== 'undefined' ? getCurrentLang : null;
 window.t = typeof t !== 'undefined' ? t : null;
 window.switchLanguage = typeof selectLanguage !== 'undefined' ? selectLanguage : null;
@@ -2308,13 +2269,10 @@ window.renderInventory = typeof renderInventory !== 'undefined' ? renderInventor
 window.renderShoppingList = typeof renderShoppingList !== 'undefined' ? renderShoppingList : null;
 window.renderCategories = typeof renderCategories !== 'undefined' ? renderCategories : null;
 window.renderDataEntry = typeof renderDataEntry !== 'undefined' ? renderDataEntry : null;
-window.processVoiceCommand = processVoiceCommand;
 
-// VAŽNO: Ne dodeljujemo processVoiceCommand samoj sebi pod window.voiceCommand
-// radi izbegavanja beskonačne petlje.
-window.voiceCommand = function(cmd) {
-    processVoiceCommand(cmd);
-};
+// 🔥 UKLONJENO: window.processVoiceCommand, window.voiceCommand
+// (ove exportuje voiceCommands.js, ovde ih ne diramo da ih ne bismo
+// slučajno prepisali pogrešnim redosledom učitavanja skripti)
 
 window.exitApp = typeof exitApp !== 'undefined' ? exitApp : null;
 window.goBackFromChoice = typeof goBackFromChoice !== 'undefined' ? goBackFromChoice : null;
@@ -2356,7 +2314,7 @@ window.ocistiPolja = window.ocistiPolja || function() {
     if (p) { p.focus(); p.select(); }
 };
 
-console.log('✅ Sve dodatne funkcije izvezene globalno i usklađene!');
+console.log('✅ Sve dodatne funkcije izvezene globalno i usklađene (bez sukoba sa voiceCommands.js)!');
 // ============================================
 // POPRAVKA ZA BACK DUGME NA 4. EKRANU
 // ============================================
