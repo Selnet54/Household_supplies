@@ -1,5 +1,5 @@
 // ============================================
-// VOICE COMMANDS - v13.2 (CELA REČ ZA SVE KOMANDE - NEMA VIŠE "BEND")
+// VOICE COMMANDS - v13.3 (WATCHDOG - MIKROFON SE NE ZAGLAVLJUJE)
 // START/PLUS/OBRIŠI/END + BUFFER + ISPRAVNA DODELA BROJEVA
 // ============================================
 
@@ -17,6 +17,7 @@ let noSpeechTimer = null;
 
 let voiceBuffer = '';
 let lastProcessedResultIndex = 0; // 🔥 sopstveno praćenje obrađenih rezultata (Android event.resultIndex je nepouzdan)
+let micWatchdogTimer = null; // 🔥 čuvar koji prinudno oživljava mikrofon ako se zaglavi
 
 if (typeof window.currentLang === 'undefined') {
     window.currentLang = 'sr';
@@ -561,6 +562,36 @@ function sacuvajPodatkeBezPopupa(data) {
 // 6. PREPOZNAVANJE GOVORA
 // ============================================
 
+// ============================================
+// 6b. ČUVAR MIKROFONA (WATCHDOG)
+// ============================================
+// Ako mikrofon treba da radi (window.isVoiceModeActive === true) ali
+// nije aktivan (!micActive) duže od par sekundi, nešto je zaglavljeno
+// (npr. isRestarting zastavica ostala na true zbog retkog browser/WebView
+// bug-a). Umesto da čekamo da se to samo reši, prinudno resetujemo
+// zastavice i ponovo pokrećemo mikrofon. Ovo je poslednja linija odbrane
+// koja garantuje da mikrofon nikad ne ostane "mrtav" duže od par sekundi.
+
+function startMicWatchdog() {
+    if (micWatchdogTimer) clearInterval(micWatchdogTimer);
+    micWatchdogTimer = setInterval(function() {
+        if (window.isVoiceModeActive && !micActive) {
+            console.warn('🐕 WATCHDOG: mikrofon treba da radi ali je ugašen - prinudni restart!');
+            isRestarting = false; // 🔥 oslobađa eventualno zaglavljenu zastavicu
+            if (micRestartTimer) clearTimeout(micRestartTimer);
+            if (noSpeechTimer) clearTimeout(noSpeechTimer);
+            startVoiceRecognition();
+        }
+    }, 3000); // provera na svake 3 sekunde
+}
+
+function stopMicWatchdog() {
+    if (micWatchdogTimer) {
+        clearInterval(micWatchdogTimer);
+        micWatchdogTimer = null;
+    }
+}
+
 function startVoiceRecognition() {
     console.log('🎤 startVoiceRecognition pozvan!');
 
@@ -593,6 +624,7 @@ function startVoiceRecognition() {
 
     window.isVoiceModeActive = true;
     isRestarting = true;
+    startMicWatchdog(); // 🔥 pokreni čuvara čim glasovni mod postane aktivan
 
     function beginRecognition() {
         recognition = new SpeechRecognition();
@@ -747,6 +779,7 @@ function stopVoiceRecognition() {
     console.log('🛑 stopVoiceRecognition pozvan');
     window.isVoiceModeActive = false;
     isRestarting = true;
+    stopMicWatchdog(); // 🔥 zaustavi čuvara - ovo je namerno gašenje
 
     if (micRestartTimer) clearTimeout(micRestartTimer);
     if (noSpeechTimer) clearTimeout(noSpeechTimer);
@@ -973,6 +1006,8 @@ function processSingleVoiceCommand(command) {
 
 window.startVoiceRecognition = startVoiceRecognition;
 window.stopVoiceRecognition = stopVoiceRecognition;
+window.startMicWatchdog = startMicWatchdog;
+window.stopMicWatchdog = stopMicWatchdog;
 window.processVoiceCommand = processVoiceCommand;
 window.processSingleVoiceCommand = processSingleVoiceCommand;
 window.requestMicrophonePermission = requestMicrophonePermission;
@@ -1045,5 +1080,5 @@ window.addEventListener('beforeunload', function() {
     window.isVoiceModeActive = false;
 });
 
-console.log('✅ VoiceCommands.js v13.2 UCITAN - POUZDANA DETEKCIJA KOMANDI (CELA REČ)!');
+console.log('✅ VoiceCommands.js v13.3 UCITAN - WATCHDOG AKTIVAN, MIKROFON SE VIŠE NE ZAGLAVLJUJE!');
 console.log('✅ startVoiceRecognition:', typeof startVoiceRecognition);
