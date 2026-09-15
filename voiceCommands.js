@@ -41,18 +41,40 @@ function stopWhisperRecognition() {
     updateVoiceUI("⏹️ Mikrofon isključen", "#aaa");
 }
 
-// 2. Seckanje audio zapisa na svake 3.5 sekunde
+// ============================================
+// POPRAVLJENO SECKANJE I SLANJE NA WHISPER
+// ============================================
+
 function runChunkRecordingLoop() {
     if (!isWhisperActive) return;
 
     let chunks = [];
-    whisperRecorder = new MediaRecorder(whisperStream, { mimeType: 'audio/webm' });
+    
+    // 1. DINO-PROVERA PODRŽANOG FORMAT (Rešava Safari/iOS i Android problem)
+    let options = {};
+    if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+        options = { mimeType: 'audio/webm;codecs=opus' };
+    } else if (MediaRecorder.isTypeSupported('audio/webm')) {
+        options = { mimeType: 'audio/webm' };
+    } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+        options = { mimeType: 'audio/mp4' };
+    } // Ako ništa nije podržano, ostavlja prazan objekat i browser sam bira svoj najbolji format
 
-    whisperRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+    try {
+        whisperRecorder = new MediaRecorder(whisperStream, options);
+    } catch (e) {
+        whisperRecorder = new MediaRecorder(whisperStream);
+    }
+
+    whisperRecorder.ondataavailable = e => { 
+        if (e.data && e.data.size > 0) chunks.push(e.data); 
+    };
 
     whisperRecorder.onstop = async () => {
         if (chunks.length > 0 && isWhisperActive) {
-            const blob = new Blob(chunks, { type: 'audio/webm' });
+            // Uzimamo tačan MIME tip koji je MediaRecorder zapravo koristio
+            const actualType = whisperRecorder.mimeType || 'audio/webm';
+            const blob = new Blob(chunks, { type: actualType });
             await sendChunkToWhisper(blob);
         }
         if (isWhisperActive) runChunkRecordingLoop();
@@ -66,10 +88,12 @@ function runChunkRecordingLoop() {
     }, 3500);
 }
 
-// 3. Slanje na Whisper API i akumulacija govora
 async function sendChunkToWhisper(audioBlob) {
     const formData = new FormData();
-    formData.append("file", audioBlob, "audio.webm");
+    
+    // Ekstenzija fajla spram tipa snimka
+    const ext = audioBlob.type.includes('mp4') ? 'mp4' : 'webm';
+    formData.append("file", audioBlob, `audio.${ext}`);
     formData.append("model", "whisper-large-v3");
     formData.append("language", "sr");
 
@@ -81,10 +105,23 @@ async function sendChunkToWhisper(audioBlob) {
         });
         const data = await res.json();
         
-        if (data.text && data.text.trim().length > 0) {
-            voiceAccumulatedText = (voiceAccumulatedText + " " + data.text.trim()).trim();
-            updateVoiceUI(`👂 Bafer: "${voiceAccumulatedText}"`, "#FFD700");
-            evaluateVoicePipeline(voiceAccumulatedText);
+        if (data.text) {
+            let cleanText = data.text.trim();
+            
+            // 2. FILTRIRANJE ŠUMOVA I LAŽNIH BAFERA
+            // Ignorišemo tačke, kratke brljotine i poznate Whisper halucinacije u tišini
+            const isNoise = cleanText === "." || 
+                            cleanText.length < 2 || 
+                            cleanText.toLowerCase().includes("subtitles") ||
+                            cleanText.toLowerCase().includes("hvala");
+
+            if (!isNoise) {
+                voiceAccumulatedText = (voiceAccumulatedText + " " + cleanText).trim();
+                updateVoiceUI(`👂 Čuo sam: "${voiceAccumulatedText}"`, "#FFD700");
+                
+                // Šaljemo na dalju obradu komandi
+                evaluateVoicePipeline(voiceAccumulatedText);
+            }
         }
     } catch (err) {
         console.warn("Groq Whisper error:", err);
