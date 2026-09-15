@@ -117,6 +117,7 @@ function parseVoiceDataEntry(command) {
     console.log('🔍 PARSIRAM:', command);
     
     let text = command.replace(/^(unos|start|dodaj|novi|novo|add|unesi)\s*/i, '').trim();
+    let lowerText = text.toLowerCase();
     
     let result = {
         product_name: '',
@@ -127,7 +128,7 @@ function parseVoiceDataEntry(command) {
         storage: 'Zamrzivač 1'
     };
     
-    // Skladište
+    // 🔥 1. NAĐI SKLADIŠTE (samo prvo)
     let foundStorage = null;
     let storageWords = ['zamrzivač', 'zamrzivac', 'frižider', 'frizider', 'ostava', 'špajz'];
     for (let word of storageWords) {
@@ -139,7 +140,7 @@ function parseVoiceDataEntry(command) {
     }
     if (foundStorage) result.storage = foundStorage;
     
-    // Jedinica
+    // 🔥 2. NAĐI JEDINICU (samo prvu)
     let foundUnit = null;
     let unitWords = ['kilogram', 'kilograma', 'kg', 'gram', 'grama', 'grami',
                      'litar', 'litara', 'litri', 'komad', 'komada', 'kom', 'komadi',
@@ -153,16 +154,18 @@ function parseVoiceDataEntry(command) {
     }
     if (foundUnit) result.unit = foundUnit;
     
-    // Rok
+    // 🔥 3. NAĐI ROK - "X meseci"
     let meseciMatch = text.match(/(\d+|jedan|dva|tri|četiri|pet|šest|sedam|osam|devet|deset|jedanaest|dvanaest)\s*meseci/i);
     if (meseciMatch) {
         let val = meseciMatch[1].toLowerCase();
         if (NUMBER_WORDS[val]) val = NUMBER_WORDS[val];
         result.shelf_life = val;
+        // Ukloni "X meseci" iz teksta
         text = text.replace(meseciMatch[0], '').trim();
+        lowerText = text.toLowerCase();
     }
     
-    // Brojevi i naziv
+    // 🔥 4. NAĐI SVE BROJEVE (samo prva dva!)
     let words = text.split(/\s+/);
     let numbers = [];
     let nameParts = [];
@@ -173,6 +176,7 @@ function parseVoiceDataEntry(command) {
             numbers.push(num);
         } else {
             let lower = word.toLowerCase();
+            // Preskoči jedinice i skladišta
             if (!unitWords.includes(lower) && !storageWords.includes(lower) && 
                 lower !== 'meseci' && lower !== 'mesec' && lower !== 'meseca') {
                 nameParts.push(word);
@@ -180,7 +184,12 @@ function parseVoiceDataEntry(command) {
         }
     }
     
+    console.log('📊 Brojevi:', numbers);
+    console.log('📊 Naziv delovi:', nameParts);
+    
+    // 🔥 5. DODELA KOLIČINA (samo prva dva broja!)
     if (foundUnit === 'kg' || foundUnit === 'g' || foundUnit === 'l') {
+        // Za kg/g/l: piece = prvi broj, quantity = drugi broj
         if (numbers.length >= 2) {
             result.piece = numbers[0];
             result.quantity = numbers[1];
@@ -189,17 +198,21 @@ function parseVoiceDataEntry(command) {
             result.quantity = numbers[0];
         }
     } else {
+        // Za kom/pak: piece = quantity = prvi broj
         if (numbers.length >= 1) {
             result.piece = numbers[0];
             result.quantity = numbers[0];
         }
+        // Ako ima drugi broj, to je rok (ako nije pronađen "meseci")
         if (numbers.length >= 2 && !meseciMatch) {
             result.shelf_life = numbers[1];
         }
     }
     
+    // 🔥 6. NAZIV - sklopi od preostalih reči
     result.product_name = nameParts.join(' ').trim();
     if (!result.product_name || result.product_name.length < 2) {
+        // Ako nema naziva, uzmi prvu reč iz teksta
         let match = text.match(/^([a-zA-ZšđčćžŠĐČĆŽ\s]+)/);
         if (match) {
             result.product_name = match[1].trim();
