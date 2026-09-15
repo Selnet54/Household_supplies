@@ -528,13 +528,11 @@ function startVoiceRecognition() {
 
     if (isRestarting) return;
 
-    const ua = navigator.userAgent || '';
-    const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    const isSafari = /^((?!chrome|android).)*safari/i.test(ua);
-    if (isIOS && isSafari) {
-        showVoiceStatus('❌ Glasovni unos nije podržan u Safari na iOS-u.', '#f44336');
-        return;
-    }
+    // 🔥 UKLONJENA zastarela blokada za iOS Safari — Safari na iOS/iPadOS
+    // podržava webkitSpeechRecognition od verzije 14.5+ (2021), pa je
+    // stara provera nepotrebno sprečavala glasovni unos na iPhone/iPad-u.
+    // Ako pregledač zaista ne podržava API, to hvata provera ispod
+    // (SpeechRecognition === undefined).
 
     if (recognition) {
         recognition.onend = null;
@@ -568,9 +566,9 @@ function startVoiceRecognition() {
         };
         recognition.lang = speechLangMap[currentLang] || 'sr-RS';
 
-        recognition.continuous = true;  
+        recognition.continuous = false;
         recognition.interimResults = true;
-        recognition.maxAlternatives = 1;
+        recognition.maxAlternatives = 3;
 
         recognition.onstart = function() {
             showVoiceStatus('🎤 Slušam...', '#4CAF50');
@@ -645,7 +643,7 @@ function startVoiceRecognition() {
             console.log('⏹️ Mikrofon zaustavljen');
             micActive = false;
             recognition = null;
-            
+
             if (window.isVoiceModeActive && !isRestarting) {
                 micRestartTimer = setTimeout(function() {
                     if (window.isVoiceModeActive && !micActive && !isRestarting) {
@@ -677,7 +675,6 @@ function startVoiceRecognition() {
         showVoiceStatus('❌ Dozvolite pristup mikrofonu!', '#f44336');
     });
 }
-
 // ============================================
 // 7. ZAUSTAVLJANJE
 // ============================================
