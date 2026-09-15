@@ -699,35 +699,70 @@ function stopVoiceRecognition() {
     showVoiceStatus('🎤 Mikrofon zaustavljen', '#999999');
 }
 
-// ============================================
+/// ============================================
 // 8. OBRADA GLASOVNIH KOMANDI
 // ============================================
 
 function processVoiceCommand(command) {
     console.log('🎤 processVoiceCommand prima:', command);
-    
+
     if (!command || command.length < 1) return;
-    
+
+    let cmd = command.trim();
+
+    // 🔥 NOVO: razdvoji "Start ... Plus ... End" izgovoreno u jednom dahu
+    // na zasebne segmente, tako da svaka komanda (Start/Plus/End) prođe
+    // kroz svoju granu umesto da bude "progutana" u jednom pozivu.
+    const splitRegex = /\b(plus|dodaj|sačuvaj|sacuvaj|end|kraj|gotovo|zavrsi)\b/i;
+
+    if (splitRegex.test(cmd)) {
+        const parts = cmd.split(splitRegex);
+        console.log('✂️ Podeljeno na segmente:', parts);
+
+        for (let i = 0; i < parts.length; i += 2) {
+            const segment = parts[i] ? parts[i].trim() : '';
+            const keyword = parts[i + 1];
+
+            if (segment) {
+                console.log('▶️ Obrađujem segment:', segment);
+                processSingleVoiceCommand(segment);
+            }
+            if (keyword) {
+                console.log('▶️ Obrađujem ključnu reč:', keyword);
+                processSingleVoiceCommand(keyword);
+            }
+        }
+        return;
+    }
+
+    processSingleVoiceCommand(cmd);
+}
+
+function processSingleVoiceCommand(command) {
+    console.log('🎤 processSingleVoiceCommand prima:', command);
+
+    if (!command || command.length < 1) return;
+
     let cmd = command.trim();
     let lowerCmd = cmd.toLowerCase();
     console.log('🔍 Procesiram:', lowerCmd);
-    
+
     // START
     if (lowerCmd.startsWith('start') || lowerCmd === 'unos' || lowerCmd === 'unesi' ||
         lowerCmd === 'pokreni' || lowerCmd === 'zapocni' || lowerCmd === 'počni' ||
         lowerCmd === 'novi' || lowerCmd === 'novo' || lowerCmd === 'enter' || lowerCmd === 'add') {
-        
+
         console.log('▶️ START - otvaram unos');
-        
+
         voiceBuffer = cmd.replace(/^(start|unos|unesi|pokreni|zapocni|počni|novi|novo|enter|add)\s*/i, '').trim();
         console.log('📦 Buffer nakon Start:', voiceBuffer);
-        
+
         if (typeof window.renderDataEntry === 'function') {
             window.renderDataEntry('');
         } else if (typeof renderDataEntry === 'function') {
             renderDataEntry('');
         }
-        
+
         if (voiceBuffer) {
             showVoiceStatus(`🎤 Slušam: "${voiceBuffer}"`, '#FFD700');
         } else {
@@ -735,52 +770,52 @@ function processVoiceCommand(command) {
         }
         return;
     }
-    
+
     // PLUS
-    if (lowerCmd.includes('plus') || lowerCmd.includes('dodaj') || 
+    if (lowerCmd.includes('plus') || lowerCmd.includes('dodaj') ||
         lowerCmd.includes('sačuvaj') || lowerCmd.includes('sacuvaj')) {
-        
+
         console.log('➕ PLUS - upisujem buffer:', voiceBuffer);
-        
+
         let cleanCommand = cmd.replace(/\b(plus|dodaj|sačuvaj|sacuvaj)\b/gi, '').trim();
-        
+
         console.log('📦 Buffer pre upisa:', voiceBuffer);
         console.log('📦 Ostatak posle plus:', cleanCommand);
-        
+
         if (voiceBuffer.trim().length < 2) {
             showVoiceStatus('❌ Nema podataka za upis.', '#f44336');
             return;
         }
-        
+
         const data = parseVoiceDataEntry(voiceBuffer);
         console.log('📦 PARSED:', data);
-        
+
         sacuvajPodatkeBezPopupa(data);
-        
+
         voiceBuffer = cleanCommand || '';
         console.log('🧹 Novi buffer:', voiceBuffer);
-        
+
         showVoiceStatus(`✅ Sačuvano: ${data.product_name}. Izdiktirajte sledeći ili recite "End"`, '#4CAF50');
         return;
     }
-    
+
     // END
-    if (lowerCmd.includes('end') || lowerCmd.includes('kraj') || 
+    if (lowerCmd.includes('end') || lowerCmd.includes('kraj') ||
         lowerCmd.includes('gotovo') || lowerCmd.includes('zavrsi')) {
-        
+
         console.log('🏁 END - završavam unos i otvaram zalihe');
-        
+
         let cleanCommand = cmd.replace(/\b(end|kraj|gotovo|zavrsi)\b/gi, '').trim();
-        
+
         console.log('📦 Buffer pre upisa:', voiceBuffer);
         console.log('📦 Ostatak posle end:', cleanCommand);
-        
+
         if (voiceBuffer.trim().length > 2) {
             const data = parseVoiceDataEntry(voiceBuffer);
             sacuvajPodatkeBezPopupa(data);
             console.log('✅ Sačuvano iz buffera (End):', voiceBuffer);
         }
-        
+
         if (cleanCommand.length > 2) {
             const data2 = parseVoiceDataEntry(cleanCommand);
             setTimeout(() => {
@@ -788,9 +823,9 @@ function processVoiceCommand(command) {
                 console.log('✅ Sačuvano iz End ostatka:', cleanCommand);
             }, 1000);
         }
-        
+
         voiceBuffer = '';
-        
+
         setTimeout(() => {
             if (typeof window.renderInventory === 'function') {
                 window.renderInventory();
@@ -799,13 +834,13 @@ function processVoiceCommand(command) {
             }
             showVoiceStatus('📦 Zalihe otvorene', '#4CAF50');
         }, 2500);
-        
+
         stopVoiceRecognition();
         return;
     }
-    
+
     // ZALIHE
-    if (lowerCmd.includes('zalihe') || lowerCmd.includes('stanje') || 
+    if (lowerCmd.includes('zalihe') || lowerCmd.includes('stanje') ||
         lowerCmd.includes('inventar') || lowerCmd.includes('inventory')) {
         console.log('📦 ZALIHE');
         voiceBuffer = '';
@@ -817,9 +852,9 @@ function processVoiceCommand(command) {
         stopVoiceRecognition();
         return;
     }
-    
+
     // SPISAK
-    if (lowerCmd.includes('spisak') || lowerCmd.includes('potrebe') || 
+    if (lowerCmd.includes('spisak') || lowerCmd.includes('potrebe') ||
         lowerCmd.includes('lista') || lowerCmd.includes('shopping')) {
         console.log('🛒 SPISAK');
         voiceBuffer = '';
@@ -831,7 +866,7 @@ function processVoiceCommand(command) {
         stopVoiceRecognition();
         return;
     }
-    
+
     // NAZAD
     if (lowerCmd.includes('nazad') || lowerCmd.includes('back') || lowerCmd.includes('vrati')) {
         console.log('⬅️ NAZAD');
@@ -844,9 +879,9 @@ function processVoiceCommand(command) {
         }
         return;
     }
-    
+
     // EXIT
-    if (lowerCmd.includes('exit') || lowerCmd.includes('izlaz') || 
+    if (lowerCmd.includes('exit') || lowerCmd.includes('izlaz') ||
         lowerCmd.includes('izadji') || lowerCmd.includes('zatvori')) {
         console.log('🚪 EXIT');
         voiceBuffer = '';
@@ -858,7 +893,7 @@ function processVoiceCommand(command) {
         }
         return;
     }
-    
+
     // SVE OSTALO - DODAJ U BUFFER
     console.log('📝 Dodajem u buffer:', cmd);
     voiceBuffer += (voiceBuffer ? ' ' : '') + cmd;
@@ -873,6 +908,7 @@ function processVoiceCommand(command) {
 window.startVoiceRecognition = startVoiceRecognition;
 window.stopVoiceRecognition = stopVoiceRecognition;
 window.processVoiceCommand = processVoiceCommand;
+window.processSingleVoiceCommand = processSingleVoiceCommand;
 window.requestMicrophonePermission = requestMicrophonePermission;
 window.parseVoiceDataEntry = parseVoiceDataEntry;
 window.popuniFormuPodacima = popuniFormuPodacima;
@@ -888,8 +924,8 @@ window.voiceCommand = processVoiceCommand;
 // ============================================
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('✅ DOMContentLoaded - voiceCommands.js v12.0');
-    
+    console.log('✅ DOMContentLoaded - voiceCommands.js v12.1');
+
     const startBtn = document.getElementById('activateMicBtn');
     if (startBtn) {
         startBtn.addEventListener('click', function(e) {
@@ -910,5 +946,5 @@ window.addEventListener('beforeunload', function() {
     window.isVoiceModeActive = false;
 });
 
-console.log('✅ VoiceCommands.js v12.0 UCITAN - POPRAVLJEN PARSER!');
+console.log('✅ VoiceCommands.js v12.1 UCITAN - START/PLUS/END RAZDVAJANJE!');
 console.log('✅ startVoiceRecognition:', typeof startVoiceRecognition);
