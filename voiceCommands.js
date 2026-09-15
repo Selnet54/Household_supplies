@@ -615,15 +615,15 @@ function startVoiceRecognition() {
             }
 
             if (event.error === 'no-speech') {
-                console.log('🔇 Nema govora, čekam 2s...');
-                if (noSpeechTimer) clearTimeout(noSpeechTimer);
-                noSpeechTimer = setTimeout(() => {
-                    if (window.isVoiceModeActive && !micActive && !isRestarting) {
-                        startVoiceRecognition();
-                    }
-                }, 2000);
-                return;
-            }
+    console.log('🔇 Nema govora, čekam...');
+    if (noSpeechTimer) clearTimeout(noSpeechTimer);
+    noSpeechTimer = setTimeout(() => {
+        if (window.isVoiceModeActive && !micActive && !isRestarting) {
+            startVoiceRecognition();
+        }
+    }, 300);   // 🔥 bilo 2000ms
+    return;
+}
 
             if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
                 showVoiceStatus('❌ Pristup mikrofonu je blokiran!', '#f44336');
@@ -637,26 +637,26 @@ function startVoiceRecognition() {
                         if (window.isVoiceModeActive && !micActive) {
                             startVoiceRecognition();
                         }
-                    }, 1500);
+                    }, 300);
                 }
             }
         };
 
         recognition.onend = function() {
-            console.log('⏹️ Mikrofon zaustavljen');
-            micActive = false;
-            recognition = null;
+    console.log('⏹️ Mikrofon zaustavljen');
+    micActive = false;
+    recognition = null;
 
-            if (window.isVoiceModeActive && !isRestarting) {
-                micRestartTimer = setTimeout(function() {
-                    if (window.isVoiceModeActive && !micActive && !isRestarting) {
-                        startVoiceRecognition();
-                    }
-                }, 800);
-            } else {
-                isRestarting = false;
+    if (window.isVoiceModeActive && !isRestarting) {
+        micRestartTimer = setTimeout(function() {
+            if (window.isVoiceModeActive && !micActive && !isRestarting) {
+                startVoiceRecognition();
             }
-        };
+        }, 150);   // 🔥 bilo 800ms
+    } else {
+        isRestarting = false;
+    }
+};
 
         try {
             recognition.start();
@@ -920,11 +920,11 @@ window._voiceCommandsStart = startVoiceRecognition;
 window.voiceCommand = processVoiceCommand;
 
 // ============================================
-// 10. DOMContentLoaded
+// 10. DOMContentLoaded - DUGME ZA MIKROFON
 // ============================================
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('✅ DOMContentLoaded - voiceCommands.js v12.1');
+    console.log('✅ DOMContentLoaded - voiceCommands.js v12.2');
 
     const startBtn = document.getElementById('activateMicBtn');
     if (startBtn) {
@@ -937,6 +937,70 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// ============================================
+// 11. AUTO-START MIKROFONA (ako je dozvola već data)
+// ============================================
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Proveri da li je dozvola već data (Permissions API)
+    if (navigator.permissions && navigator.permissions.query) {
+        navigator.permissions.query({ name: 'microphone' })
+            .then(function(result) {
+                if (result.state === 'granted') {
+                    console.log('🎤 Dozvola već data — pokrećem mikrofon automatski');
+                    micPermissionGranted = true;
+                    // Sačekaj malo da se UI učita
+                    setTimeout(function() {
+                        if (!window.isVoiceModeActive) {
+                            startVoiceRecognition();
+                        }
+                    }, 1000);
+                } else {
+                    console.log('🎤 Dozvola nije data — čekam klik na dugme');
+                }
+            })
+            .catch(function() {
+                console.log('⚠️ Permissions API nije podržan');
+            });
+    } else {
+        console.log('⚠️ Permissions API nije podržan — čekam klik');
+    }
+});
+
+// ============================================
+// 12. RESTART NA FOKUS / VIDLJIVOST
+// ============================================
+
+// Kada se korisnik vrati u aplikaciju (iz druge app, ili otključa telefon),
+// mobilni OS je često prekinuo pristup mikrofonu. Ponovo ga pokreni.
+document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'visible') {
+        console.log('👁️ Aplikacija ponovo vidljiva');
+        if (window.isVoiceModeActive && !micActive && !recognition && !isRestarting) {
+            console.log('🔄 Mikrofon nije aktivan — restartujem');
+            setTimeout(function() {
+                startVoiceRecognition();
+            }, 500);
+        }
+    } else {
+        console.log('👁️ Aplikacija u pozadini — mikrofon može biti prekinut');
+    }
+});
+
+// Isto i za window focus (desktop)
+window.addEventListener('focus', function() {
+    console.log('🪟 Window dobio fokus');
+    if (window.isVoiceModeActive && !micActive && !recognition && !isRestarting) {
+        setTimeout(function() {
+            startVoiceRecognition();
+        }, 300);
+    }
+});
+
+// ============================================
+// 13. PRE UČITAVANJA / ZATVARANJA
+// ============================================
+
 window.addEventListener('beforeunload', function() {
     if (recognition) {
         try { recognition.stop(); } catch(e) {}
@@ -946,5 +1010,5 @@ window.addEventListener('beforeunload', function() {
     window.isVoiceModeActive = false;
 });
 
-console.log('✅ VoiceCommands.js v12.1 UCITAN - START/PLUS/END RAZDVAJANJE!');
+console.log('✅ VoiceCommands.js v12.2 UCITAN - AUTO-START + FOKUS RESTART!');
 console.log('✅ startVoiceRecognition:', typeof startVoiceRecognition);
