@@ -578,3 +578,9 @@ body {
         font-size: 16px;
     }
 }
+/* ===== PLAVA PODLOGA ZA NOVO UNETE PROIZVODE ===== */
+.table-row.is-new-item {
+    background-color: #e3f2fd !important; /* Svetlo plava podloga */
+    border-left: 5px solid #2196F3;       /* Plava linija sa strane */
+    font-weight: bold;
+}
