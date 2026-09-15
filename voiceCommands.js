@@ -250,3 +250,7 @@ function updateVoiceUI(msg, color) {
 }
 
 window.startVoiceRecognition = toggleWhisperRecognition;
+// Povezivanje sa script1.js
+window.voiceCommand = function(text) {
+    evaluateVoicePipeline(text);
+};
