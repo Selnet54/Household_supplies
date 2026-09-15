@@ -2235,55 +2235,72 @@ function startVoiceRecognition() {
     }
     console.warn('⚠️ voiceCommands nije učitan!');
 }
+let isProcessingVoice = false; // Blokada za petlju
+
 function processVoiceCommand(command) {
+    if (!command || isProcessingVoice) return; // Ako već obrađuje, prekini!
+
     console.log('🎤 processVoiceCommand prima:', command);
     
-    // PROSLEDI KOMANDU voiceCommands.js
-    if (typeof window.voiceCommand === 'function') {
-        console.log('📞 Pozivam window.voiceCommand');
-        return window.voiceCommand(command);
+    // Ako stigne čisto "add", a već smo u procesu, ne šalji dalje
+    if (command.toString().trim().toLowerCase() === 'add') {
+        console.warn('⚠️ Blokiran ponovljeni "add" poziv.');
+        return;
     }
-    
-    // FALLBACK - direktna obrada
-    const cmd = command.toLowerCase().trim();
-    
+
+    isProcessingVoice = true;
+
+    const cmd = command.toString().toLowerCase().trim();
+
     // UNOS
     if (cmd === 'unos' || cmd === 'unesi' || cmd === 'add' || 
         cmd === 'dodaj' || cmd === 'novi' || cmd === 'novo') {
         console.log('📝 UNOS - otvaram data entry');
         renderDataEntry('');
+        setTimeout(() => { isProcessingVoice = false; }, 500);
         return;
     }
-    
+
     // ZALIHE
     if (cmd === 'zalihe' || cmd === 'otvori zalihe' || cmd === 'stanje' ||
         cmd === 'inventar' || cmd === 'pregled' || cmd === 'skladiste') {
         console.log('📦 ZALIHE - otvaram');
         renderInventory();
+        setTimeout(() => { isProcessingVoice = false; }, 500);
         return;
     }
-    
+
     // SPISAK
     if (cmd === 'spisak' || cmd === 'otvori spisak' || cmd === 'potrebe' ||
         cmd === 'lista' || cmd === 'shopping' || cmd === 'kupovina') {
         console.log('🛒 SPISAK - otvaram');
         renderShoppingList();
+        setTimeout(() => { isProcessingVoice = false; }, 500);
         return;
     }
-    
-    // 🔥 END - VIŠE VARIJANTI
+
+    // END / KRAJ
     const endVariants = ['end', 'and', 'ond', 'ent', 'en', 'ende', 'endi', 'ends',
                          'kraj', 'kra', 'krajn', 'krajni', 'kraji', 
                          'krajnji', 'krajnje', 'zavrsi', 'završetak',
                          'stop', 'stp', 'stahp', 'stap', 'gotovo'];
-    
+
     if (endVariants.includes(cmd) || cmd.includes('end') || cmd.includes('kraj')) {
         console.log('🏁 END - otvaram zalihe');
         renderInventory();
+        setTimeout(() => { isProcessingVoice = false; }, 500);
         return;
     }
-    
-    showModernAlert('Nepoznata komanda', `Nije prepoznato: "${command}"`, '❓');
+
+    // Ako ništa gore nije presrelo, tek onda prosledi na detaljniju obradu u voiceCommands.js
+    if (typeof window.voiceCommand === 'function') {
+        console.log('📞 Pozivam window.voiceCommand');
+        window.voiceCommand(command);
+    } else {
+        showModernAlert('Nepoznata komanda', `Nije prepoznato: "${command}"`, '❓');
+    }
+
+    setTimeout(() => { isProcessingVoice = false; }, 500);
 }
 function stopVoiceRecognition() {
     if (recognition) {
