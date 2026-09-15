@@ -568,9 +568,9 @@ function startVoiceRecognition() {
         };
         recognition.lang = speechLangMap[currentLang] || 'sr-RS';
 
-        recognition.continuous = false;
+        recognition.continuous = true;  
         recognition.interimResults = true;
-        recognition.maxAlternatives = 3;
+        recognition.maxAlternatives = 1;
 
         recognition.onstart = function() {
             showVoiceStatus('🎤 Slušam...', '#4CAF50');
