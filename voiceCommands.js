@@ -6,8 +6,7 @@ let whisperRecorder = null;
 let whisperStream = null;
 let isWhisperActive = false;
 let voiceAccumulatedText = "";
-const GROQ_API_KEY = "TVOJ_GROQ_API_KEY"; // Ovde stavite besplatni Groq API ključ
-
+const GROQ_API_KEY = "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";
 // 1. Pokretanje / Zaustavljanje mikrofona
 async function toggleWhisperRecognition() {
     if (isWhisperActive) {
