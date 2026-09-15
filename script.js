@@ -1303,27 +1303,40 @@ function saveProduct() {
     const quantity = document.getElementById('quantityInput')?.value.trim();
     const shelfLife = document.getElementById('shelfLifeInput')?.value.trim();
     
+    // 🔥 AKO JE VOICE INPUT, NE PRIKAZUJ POPUP
+    const isVoice = window._isVoiceInput === true;
+    
     // Provera obaveznih polja
     if (!product) {
-        showModernAlert(t('missing_info'), t('enter_product_name'), '📝');
+        if (!isVoice) showModernAlert(t('missing_info'), t('enter_product_name'), '📝');
         document.getElementById('productInput')?.focus();
         return;
     }
     if (!piece) {
-        showModernAlert(t('missing_info'), 'Unesite komad!', '📝');
+        if (!isVoice) showModernAlert(t('missing_info'), 'Unesite komad!', '📝');
         document.getElementById('pieceInput')?.focus();
         return;
     }
     if (!quantity || isNaN(parseFloat(quantity))) {
-        showModernAlert(t('missing_info'), t('enter_quantity'), '📝');
+        if (!isVoice) showModernAlert(t('missing_info'), t('enter_quantity'), '📝');
         document.getElementById('quantityInput')?.focus();
         return;
     }
     if (!shelfLife || isNaN(parseInt(shelfLife))) {
-        showModernAlert(t('missing_info'), 'Unesite rok trajanja (meseci)!', '📝');
+        if (!isVoice) showModernAlert(t('missing_info'), 'Unesite rok trajanja (meseci)!', '📝');
         document.getElementById('shelfLifeInput')?.focus();
         return;
     }
+    
+    // 🔥 SAČUVAJ TRENUTNE VREDNOSTI PRE BRISANJA (ako je voice input)
+    const savedValues = {
+        product: product || '',
+        piece: piece || '1',
+        quantity: quantity || '1',
+        shelf_life: shelfLife || '12',
+        unit: document.getElementById('unitSelect')?.value || 'kg',
+        storage: document.getElementById('storageSelect')?.value || 'Ostalo'
+    };
     
     const productData = {
         id: Date.now(),
@@ -1335,12 +1348,18 @@ function saveProduct() {
         entry_date: document.getElementById('dateInput')?.value || new Date().toISOString().split('T')[0],
         shelf_life_months: parseInt(shelfLife),
         storage_location: document.getElementById('storageSelect')?.value || 'Ostalo',
-        isNew: true  // <--- DODAJ OVO
+        isNew: true
     };
     
     let zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
     zalihe.push(productData);
     localStorage.setItem('zalihe', JSON.stringify(zalihe));
+    
+    // 🔥 DODAJ U lastAddedProducts
+    if (typeof saveLastAddedProducts === 'function') {
+        try { saveLastAddedProducts(productData); } catch(e) {}
+    }
+    
     prikaziSveUnose();
     
     // Resetuj polja (osim productName)
@@ -1351,173 +1370,65 @@ function saveProduct() {
     document.getElementById('productInput').focus();
     document.getElementById('productInput').select();
     
-    showModernAlert(t('success'), t('product_saved'), '✅');
-}
-
-function renderInventory() {
-    // ===== DODAJ OVO =====
-    console.log('📦 renderInventory pozvan za jezik:', currentLang);
-    
-    // PROVERI DA LI JE MAIN SCREEN PRIKAZAN
-    const mainScreen = document.getElementById('mainScreen');
-    if (mainScreen && mainScreen.style.display !== 'flex') {
-        // Sakrij sve ekrane
-        document.querySelectorAll('.screen').forEach(s => {
-            s.style.display = 'none';
-            s.classList.remove('active');
-        });
-        // Prikaži mainScreen
-        mainScreen.style.display = 'flex';
-        mainScreen.classList.add('active');
-        console.log('✅ mainScreen prikazan iz renderInventory');
-    }
-    // ===== KRAJ DODATKA =====
-    
-    currentScreenState = 'inventory';
-    const content = document.getElementById('mainContent');
-    if (!content) return;
-    
-    const zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
-    const aktivneZalihe = zalihe.filter(p => p.quantity > 0);
-    
-    let html = `<div class="title">${t('stanje')}</div>`;
-    html += `<div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;">`;
-    html += `<button onclick="azurirajZalihe()" style="background:#4CAF50; color:white; border:none; padding:10px 20px; border-radius:8px; font-size:16px; cursor:pointer;">✅ ${t('azuriraj')}</button>`;
-    html += `<button onclick="obrisiZalihe()" style="background:#666; color:white; border:none; padding:10px 20px; border-radius:8px; font-size:16px; cursor:pointer;">🗑️ ${t('obrisi')}</button>`;
-    html += `<button onclick="renderCategories()" style="background:#f44336; color:white; border:none; padding:10px 20px; border-radius:8px; font-size:16px; cursor:pointer;">✖ ${t('odustani')}</button>`;
-    html += `</div>`;
-    
-    html += `<div class="table-container" style="max-height:400px; overflow-y:auto;">`;
-    html += `<div class="table-title">📦 ${t('stanje')}</div>`;
-    html += `<div id="inventoryTable">`;
-    html += `<div class="table-row header-row" style="display:grid; grid-template-columns:40px 1.2fr 1.2fr 0.8fr 0.8fr 0.8fr 0.8fr 1fr; gap:2px; background:#f0f0f0; font-weight:bold; border-bottom:2px solid #ccc; padding:5px 0;">`;
-    html += `<div class="cell" style="text-align:center;"><input type="checkbox" id="selectAll" onchange="toggleAllCheckboxes()"></div>`;
-    html += `<div class="cell">${t('naziv_proizvoda')}</div>`;
-    html += `<div class="cell">${t('opis')}</div>`;
-    html += `<div class="cell">${t('komad')}</div>`;
-    html += `<div class="cell">${t('kolicina')}</div>`;
-    html += `<div class="cell">${t('jedinica_mere')}</div>`;
-    html += `<div class="cell">${t('rok_trajanja')}</div>`;
-    html += `<div class="cell">${t('mesto_skladistenja')}</div>`;
-    html += `</div>`;
-    
-    if (aktivneZalihe.length === 0) {
-        html += `<div class="table-row"><div class="cell" style="grid-column:span 8;padding:30px;color:#999;text-align:center;">${t('nema_proizvoda')}</div></div>`;
-    } else {
-        aktivneZalihe.forEach((p) => {
-            const originalIndex = zalihe.indexOf(p);
-            const expiry = new Date(p.entry_date);
-            expiry.setMonth(expiry.getMonth() + p.shelf_life_months);
-            const expiryDisplay = expiry.toLocaleDateString('sr-RS', { month: '2-digit', year: '2-digit' });
-            
-            // ===== DODATO: Provera za novi proizvod =====
-            const isNew = p.isNew === true;
-            const isLow = (p.unit === 'g' && p.quantity < 400) || (p.unit === 'kg' && p.quantity < 0.4) || ((p.unit === 'kom' || p.unit === 'pcs') && p.quantity <= 2);
-
-            // ===== DODATO: Svetloplava za NOVE, narandžasta za KRITIČNE količine =====
-            let bgColor = '';
-            if (isNew) {
-                    bgColor = '#90CAF9';  // Svetloplava - NOVI PROIZVODI
-            } else if (isLow) {
-                bgColor = '#F9AA65';  // Narandžasta - KRITIČNE KOLIČINE
-            }
-            // Ako nije ni novo ni kritično, bgColor ostaje prazan (default boja)
-            
-            html += `<div class="table-row" style="display:grid; grid-template-columns:40px 1.2fr 1.2fr 0.8fr 0.8fr 0.8fr 0.8fr 1fr; gap:2px; border-bottom:1px solid #eee; padding:5px 0; background:${bgColor};">`;
-            html += `<div class="cell" style="text-align:center;"><input type="checkbox" class="row-checkbox" data-index="${originalIndex}"></div>`;
-            html += `<div class="cell">${p.product_name}</div>`;
-            html += `<div class="cell">${p.description || ''}</div>`;
-            html += `<div class="cell">${p.piece || '-'}</div>`;
-            html += `<div class="cell">${p.quantity}</div>`;
-            html += `<div class="cell">${p.unit}</div>`;
-            html += `<div class="cell">${expiryDisplay}</div>`;
-            html += `<div class="cell">${p.storage_location}</div>`;
-            html += `</div>`;
-        });
-    }
-    html += `</div></div>`;
-    content.innerHTML = html;
-    
-    // ===== DODATO: Ukloni "novo" oznake nakon prikaza =====
-    clearNewFlags();
-}
-
-// ===== UKLONI "NOVO" OZNAKU NAKON ŠTO SE PRIKAŽU ZALIHE =====
-function clearNewFlags() {
-    let zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
-    let changed = false;
-    zalihe.forEach(p => {
-        if (p.isNew === true) {
-            p.isNew = false;
-            changed = true;
-        }
-    });
-    if (changed) {
-        localStorage.setItem('zalihe', JSON.stringify(zalihe));
-        console.log('✅ Oznake "novo" uklonjene');
-    }
-}
-// ===== GLAVNA FUNKCIJA ZA NAZAD / ODUSTANI =====
-function handleBackAction() {
-    console.log('⬅️ Trenutni ekran stanje:', currentScreenState);
-    console.log('📌 currentCategory:', currentCategory);
-    console.log('📌 currentSubcategory:', currentSubcategory);
-    console.log('📌 currentProductPart:', currentProductPart);
-    console.log('📌 fromChoiceScreen:', fromChoiceScreen);
-    
-    if (currentScreenState === 'dataEntry') {
-        // Ako smo došli direktno sa choiceScreen-a (klik na "Unos podataka")
-        if (fromChoiceScreen) {
-            // Vrati se na choiceScreen
-            showScreen('choiceScreen');
-            fromChoiceScreen = false; // Resetuj flag
-            if (typeof updateHeaderLanguage === 'function') {
-                updateHeaderLanguage();
-            }
-            if (typeof updateInterfaceLanguage === 'function') {
-                updateInterfaceLanguage();
-            }
-            return;
-        }
+    // 🔥 AKO JE VOICE INPUT, VRATI VREDNOSTI ODMAH
+    if (isVoice) {
+        console.log('🔄 saveProduct: vraćam vrednosti u formu (voice input)...');
         
-        // Inače, vrati se na prethodni ekran
-        if (currentSubcategory) {
-            renderProductParts(currentSubcategory);
-        } else if (currentCategory) {
-            renderSubcategories(currentCategory);
-        } else {
-            // Ako nema kategorije, vrati se na choiceScreen
-            showScreen('choiceScreen');
-            if (typeof updateHeaderLanguage === 'function') {
-                updateHeaderLanguage();
+        // Prvi pokušaj - odmah
+        setTimeout(() => {
+            const productInput = document.getElementById('productInput');
+            const pieceInput = document.getElementById('pieceInput');
+            const quantityInput = document.getElementById('quantityInput');
+            const shelfLifeInput = document.getElementById('shelfLifeInput');
+            const unitSelect = document.getElementById('unitSelect');
+            const storageSelect = document.getElementById('storageSelect');
+            
+            if (productInput) {
+                productInput.value = savedValues.product;
+                productInput.dispatchEvent(new Event('input', { bubbles: true }));
             }
-            if (typeof updateInterfaceLanguage === 'function') {
-                updateInterfaceLanguage();
+            if (pieceInput) pieceInput.value = savedValues.piece;
+            if (quantityInput) quantityInput.value = savedValues.quantity;
+            if (shelfLifeInput) shelfLifeInput.value = savedValues.shelf_life;
+            if (unitSelect) unitSelect.value = savedValues.unit;
+            if (storageSelect) storageSelect.value = savedValues.storage;
+            
+            if (typeof updateExpiryDate === 'function') {
+                try { updateExpiryDate(); } catch(e) {}
             }
-        }
-    } else if (currentScreenState === 'productParts') {
-        if (currentCategory) {
-            renderSubcategories(currentCategory);
-        } else {
-            renderCategories();
-        }
-    } else if (currentScreenState === 'subcategories') {
-        renderCategories();
-    } else if (currentScreenState === 'categories') {
-        showScreen('choiceScreen');
-        if (typeof updateHeaderLanguage === 'function') {
-            updateHeaderLanguage();
-        }
-        if (typeof updateInterfaceLanguage === 'function') {
-            updateInterfaceLanguage();
-        }
-    } else if (currentScreenState === 'shopping' || currentScreenState === 'inventory') {
-        // Sa shopping ili inventory ekrana vrati se na kategorije
-        showScreen('mainScreen');
-        renderCategories();
+            
+            console.log('✅ saveProduct: vrednosti vraćene odmah');
+        }, 50);
+        
+        // Drugi pokušaj - 300ms (zaštita ako prvi ne uspe)
+        setTimeout(() => {
+            const productInput = document.getElementById('productInput');
+            if (productInput && productInput.value === '') {
+                console.log('🔄 saveProduct: drugi pokušaj vraćanja vrednosti...');
+                if (productInput) productInput.value = savedValues.product;
+                const pieceInput = document.getElementById('pieceInput');
+                if (pieceInput) pieceInput.value = savedValues.piece;
+                const quantityInput = document.getElementById('quantityInput');
+                if (quantityInput) quantityInput.value = savedValues.quantity;
+                const shelfLifeInput = document.getElementById('shelfLifeInput');
+                if (shelfLifeInput) shelfLifeInput.value = savedValues.shelf_life;
+                const unitSelect = document.getElementById('unitSelect');
+                if (unitSelect) unitSelect.value = savedValues.unit;
+                const storageSelect = document.getElementById('storageSelect');
+                if (storageSelect) storageSelect.value = savedValues.storage;
+                
+                if (typeof prikaziPoljaZaUnos === 'function') {
+                    prikaziPoljaZaUnos();
+                }
+                console.log('✅ saveProduct: vrednosti vraćene u drugom pokušaju');
+            }
+        }, 300);
+        
+        // NE prikazuj popup
+        console.log('⛔ saveProduct: popup preskočen (voice input)');
     } else {
-        showScreen('mainScreen');
-        renderCategories();
+        // Normalan ručni unos - prikaži popup
+        showModernAlert(t('success'), t('product_saved'), '✅');
     }
 }
 // ===== TRIGGER LOGIN =====
