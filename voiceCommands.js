@@ -1,5 +1,5 @@
 // ============================================
-// POTPUNO POPRAVLJEN VOICECOMMANDS.JS
+// POTPUNO STABILAN VOICECOMMANDS.JS (BEZ SAMOINICIJATIVNOG UPISA)
 // ============================================
 
 let whisperRecorder = null;
@@ -22,7 +22,7 @@ async function startWhisperRecognition() {
         isWhisperActive = true;
         voiceAccumulatedText = "";
         
-        updateVoiceUI("🎤 Mikrofon aktivan. Recite 'Unos', pa 'Start'...", "#4CAF50");
+        updateVoiceUI("🎤 Mikrofon spreman. Recite 'Unos' ili 'Start'", "#4CAF50");
         runChunkRecordingLoop();
     } catch (err) {
         updateVoiceUI("❌ Greška pri pristupu mikrofonu!", "#f44336");
@@ -97,14 +97,22 @@ async function sendChunkToWhisper(audioBlob) {
         const data = await res.json();
         
         if (data.text) {
-            // Čišćenje znakova interpunkcije koje Whisper sam dodaje (npr. "Unos." prebacuje u "unos")
-            let cleanText = data.text.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").trim().toLowerCase();
+            // Očišćen tekst bez znakova interpunkcije
+            let cleanText = data.text.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").trim();
+            let lower = cleanText.toLowerCase();
             
-            // Ignorišemo tišinu i halucinacije
-            if (cleanText.length > 1 && !cleanText.includes("subtitles") && cleanText !== "hvala") {
+            // STROGA FILTRACIJA LAŽNIH ŠUMOVA I PORTUGALSKIH/ENGLESKIH LAŽNIH PREVODA
+            const isNoise = cleanText.length < 2 || 
+                            lower === "hvala" || 
+                            lower === "hvala vam" || 
+                            lower === "šta" || 
+                            lower === "sta" || 
+                            lower.includes("subtitles") ||
+                            lower.includes("obrada");
+
+            if (!isNoise) {
                 voiceAccumulatedText = (voiceAccumulatedText + " " + cleanText).trim();
-                updateVoiceUI(`👂 Čujem: "${voiceAccumulatedText}"`, "#FFD700");
-                
+                updateVoiceUI(`👂 Čuo sam: "${voiceAccumulatedText}"`, "#FFD700");
                 evaluateVoicePipeline(voiceAccumulatedText);
             }
         }
@@ -114,63 +122,57 @@ async function sendChunkToWhisper(audioBlob) {
 }
 
 // -------------------------------------------------------------
-// RUTER KOMANDI (Rešava ignorisanje reči i pogrešno upisivanje)
+// RUTER KOMANDI (ČEKA SVE DOK NE KAŽETE PLUS ILI END)
 // -------------------------------------------------------------
 function evaluateVoicePipeline(rawText) {
     let lower = rawText.toLowerCase();
 
-    // 1. UNOS -> Pametno hvata "unos" čak i ako ima reči oko nje
+    // 1. UNOS -> Otvara ekran i potpuno čisti bafer
     if (lower.includes("unos")) {
         if (typeof window.renderDataEntry === 'function') {
             window.renderDataEntry();
         }
-        voiceAccumulatedText = ""; // Čistimo bafer nakon otvaranja
-        updateVoiceUI("📝 Ekran otvoren! Izgovorite 'Start' za diktiranje.", "#4CAF50");
+        voiceAccumulatedText = ""; 
+        updateVoiceUI("📝 Ekran otvoren! Recite 'Start' za novo diktiranje.", "#4CAF50");
         return;
     }
 
-    // 2. START -> Resetuje plave oznake
+    // 2. START -> Resetuje plave boje u bazi i čisti bafer
     if (lower.includes("start")) {
         clearBlueFlagsInStorage();
         voiceAccumulatedText = "";
-        updateVoiceUI("🎤 Diktirajte proizvod, pa recite 'Plus'...", "#4CAF50");
+        updateVoiceUI("🎤 Startovano! Diktirajte artikal pa recite 'Plus'...", "#4CAF50");
         return;
     }
 
-    // 3. PLUS -> Raščlanjuje diktirani tekst i čuva ga
+    // 3. PLUS -> Tek OVDE se vrši upisivanje u bazu i na ekran
     if (lower.includes("plus")) {
         let phraseBeforePlus = rawText.split(/plus/i)[0].trim();
         if (phraseBeforePlus.length > 1) {
             let parsed = parseSmartVoiceText(phraseBeforePlus);
-            fillFormAndSave(parsed, true);
+            saveParsedItemToStorage(parsed, true);
         }
-        voiceAccumulatedText = "";
-        updateVoiceUI("➕ Sačuvano u plavoj boji! Diktirajte dalje...", "#2196F3");
+        voiceAccumulatedText = ""; // Čistimo bafer za sledeći proizvod!
+        updateVoiceUI("➕ Sačuvano u plavoj boji! Diktirajte sledeći pa kažite 'Plus'", "#2196F3");
         return;
     }
 
-    // 4. END -> Kraj unosa i prikaz zaliha
+    // 4. END -> Kraj rada, čuva poslednje i otvara zalihe
     if (lower.includes("end") || lower.includes("kraj")) {
         let phraseBeforeEnd = rawText.split(/(end|kraj)/i)[0].trim();
         if (phraseBeforeEnd.length > 1) {
             let parsed = parseSmartVoiceText(phraseBeforeEnd);
-            fillFormAndSave(parsed, true);
+            saveParsedItemToStorage(parsed, true);
         }
         stopWhisperRecognition();
         if (typeof renderInventory === 'function') renderInventory();
-        updateVoiceUI("📦 Unos završen! Otvorene zalihe.", "#4CAF50");
+        updateVoiceUI("📦 Unos završen! Prikazane zalihe.", "#4CAF50");
         return;
-    }
-
-    // Ako je ekran za unos otvoren, u realnom vremenu popunjavamo polja na ekranu!
-    if (document.getElementById('productInput') && rawText.length > 1) {
-        let liveParsed = parseSmartVoiceText(rawText);
-        updateInputFields(liveParsed);
     }
 }
 
 // -------------------------------------------------------------
-// PAMETNI PARSER (Odvaja ime, brojeve, jedinicu i zamrzivač)
+// ANALIZA TEKSTA (ODVAJA IME, KOLIČINU I LOKACIJU)
 // -------------------------------------------------------------
 function parseSmartVoiceText(text) {
     let clean = text.toLowerCase();
@@ -183,28 +185,28 @@ function parseSmartVoiceText(text) {
         shelf_life: 6
     };
 
-    // Prepoznaj skladište
+    // Određivanje skladišta
     if (clean.includes("zamrzivač 2") || clean.includes("zamrzivac 2")) result.storage = "Zamrzivač 2";
     else if (clean.includes("zamrzivač 3") || clean.includes("zamrzivac 3")) result.storage = "Zamrzivač 3";
     else if (clean.includes("frižider") || clean.includes("frizider")) result.storage = "Frižider";
     else if (clean.includes("ostava")) result.storage = "Ostava";
 
-    // Prepoznaj jedinicu
+    // Određivanje jedinice
     if (clean.includes("kilogram") || clean.includes("kilo") || clean.includes("kg")) result.unit = "kg";
     else if (clean.includes("litar") || clean.includes("litri") || clean.includes("l")) result.unit = "l";
     else if (clean.includes("gram") || clean.includes("g")) result.unit = "g";
     else if (clean.includes("paket") || clean.includes("pakovanja")) result.unit = "pak";
 
-    // Izvlačenje brojeva za količinu
+    // Određivanje brojeva
     let numbers = clean.match(/\d+/g);
     if (numbers && numbers.length > 0) {
         result.quantity = parseInt(numbers[0]);
         if (numbers.length > 1) {
-            result.shelf_life = parseInt(numbers[1]); // Drugi broj je rok u mesecima
+            result.shelf_life = parseInt(numbers[1]);
         }
     }
 
-    // Ime proizvoda je sve što preostane kad izbacimo reči za jedinice i skladište
+    // Čišćenje imena artikla
     let nameClean = clean
         .replace(/zamrzivač \d|zamrzivac \d|frižider|frizider|ostava/gi, "")
         .replace(/kilogram|kilograma|kilo|kg|litar|litra|gram|paket|komad|komada/gi, "")
@@ -215,17 +217,7 @@ function parseSmartVoiceText(text) {
     return result;
 }
 
-function updateInputFields(data) {
-    if (document.getElementById('productInput')) document.getElementById('productInput').value = data.product_name;
-    if (document.getElementById('quantityInput')) document.getElementById('quantityInput').value = data.quantity;
-    if (document.getElementById('unitSelect')) document.getElementById('unitSelect').value = data.unit;
-    if (document.getElementById('storageSelect')) document.getElementById('storageSelect').value = data.storage;
-    if (document.getElementById('shelfLifeInput')) document.getElementById('shelfLifeInput').value = data.shelf_life;
-}
-
-function fillFormAndSave(data, isNewFlag) {
-    updateInputFields(data);
-
+function saveParsedItemToStorage(data, isNewFlag) {
     let zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
     let newItem = {
         id: Date.now(),
