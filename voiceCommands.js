@@ -1,5 +1,5 @@
 // ============================================
-// VOICE COMMANDS - v13.4 (AUTO-REAKTIVACIJA MIKROFONA + STABILAN TAJMER)
+// VOICE COMMANDS - v13.5 (AUTO-SAVE NE PUCA USRED REČENICE)
 // START/PLUS/OBRIŠI/END + BUFFER + ISPRAVNA DODELA BROJEVA
 // ============================================
 
@@ -20,6 +20,8 @@ let lastProcessedResultIndex = 0; // 🔥 sopstveno praćenje obrađenih rezulta
 let micWatchdogTimer = null; // 🔥 čuvar koji prinudno oživljava mikrofon ako se zaglavi
 let autoSaveTimer = null; // 🔥 automatsko čuvanje bafera ako "Plus"/"Kraj" ne bude čuveno
 const AUTO_SAVE_SILENCE_MS = 4000; // koliko tišine (ms) čekamo pre automatskog čuvanja
+let incompleteAutoSaveSkips = 0; // 🔥 koliko puta smo odložili čuvanje jer je naziv bio "Proizvod"
+const MAX_INCOMPLETE_SKIPS = 2; // posle ovoliko odlaganja, ipak sačuvaj (bolje nešto nego ništa)
 let voiceModeEverUsed = false; // 🔥 da li je mikrofon bar jednom uspešno pokrenut (za auto-reaktivaciju)
 let dataEntryScreenObserver = null; // 🔥 prati kad se ekran za unos ponovo prikaže
 
@@ -425,10 +427,20 @@ function scheduleAutoSave() {
     if (autoSaveTimer) clearTimeout(autoSaveTimer);
     autoSaveTimer = setTimeout(function() {
         if (voiceBuffer.trim().length >= 2) {
+            const probniParse = parseVoiceDataEntry(voiceBuffer);
+
+            if (probniParse.product_name === 'Proizvod' && incompleteAutoSaveSkips < MAX_INCOMPLETE_SKIPS) {
+                incompleteAutoSaveSkips++;
+                console.log(`⏱️ AUTO-SAVE preskočen (${incompleteAutoSaveSkips}/${MAX_INCOMPLETE_SKIPS}) - naziv bi bio "Proizvod":`, voiceBuffer);
+                showVoiceStatus(`⏳ Čekam nastavak... ("${voiceBuffer}")`, '#FF9800');
+                scheduleAutoSave();
+                return;
+            }
+
             console.log('⏱️ AUTO-SAVE - "Plus"/"Kraj" nije čuven, čuvam bafer automatski:', voiceBuffer);
-            const data = parseVoiceDataEntry(voiceBuffer);
-            sacuvajPodatkeBezPopupa(data);
-            showVoiceStatus(`⏱️ Automatski sačuvano (tišina): ${data.product_name}`, '#FF9800');
+            incompleteAutoSaveSkips = 0;
+            sacuvajPodatkeBezPopupa(probniParse);
+            showVoiceStatus(`⏱️ Automatski sačuvano (tišina): ${probniParse.product_name}`, '#FF9800');
             voiceBuffer = '';
         }
     }, AUTO_SAVE_SILENCE_MS);
@@ -439,6 +451,7 @@ function cancelAutoSave() {
         clearTimeout(autoSaveTimer);
         autoSaveTimer = null;
     }
+    incompleteAutoSaveSkips = 0;
 }
 
 // ============================================
@@ -724,6 +737,13 @@ function startVoiceRecognition() {
 
             if (interimText) {
                 showVoiceStatus(`🎤 Slušam: "${interimText}"`, '#FFD700');
+                // 🔥 KLJUČNA POPRAVKA: dok engine još uvek "žvaće" privremeni
+                // (interim) tekst, to je dokaz da korisnik i dalje govori -
+                // pomeri tajmer za auto-čuvanje unapred, da ne bi pukao
+                // usred rečenice pre nego što finalna reč uopšte stigne.
+                if (voiceBuffer.trim().length >= 2) {
+                    scheduleAutoSave();
+                }
             }
         };
 
@@ -1085,6 +1105,7 @@ function processSingleVoiceCommand(command) {
     console.log('📝 Dodajem u buffer:', cmd);
     voiceBuffer += (voiceBuffer ? ' ' : '') + cmd;
     console.log('📦 Buffer sada:', voiceBuffer);
+    incompleteAutoSaveSkips = 0; // 🔥 stigla je nova reč - resetuj brojač čekanja
     scheduleAutoSave(); // 🔥 svaka nova reč pomera tajmer za automatsko čuvanje unapred
     showVoiceStatus(`🎤 Slušam: "${voiceBuffer}"`, '#FFD700');
 }
@@ -1115,7 +1136,7 @@ window.voiceCommand = processVoiceCommand;
 // ============================================
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('✅ DOMContentLoaded - voiceCommands.js v13.4');
+    console.log('✅ DOMContentLoaded - voiceCommands.js v13.5');
 
     posmatrajEkranZaUnos(); // 🔥 pokreni posmatranje ekrana za unos
 
@@ -1171,5 +1192,5 @@ window.addEventListener('beforeunload', function() {
     window.isVoiceModeActive = false;
 });
 
-console.log('✅ VoiceCommands.js v13.4 UCITAN - AUTO-REAKTIVACIJA MIKROFONA POSLE END-a!');
+console.log('✅ VoiceCommands.js v13.5 UCITAN - AUTO-SAVE VIŠE NE PUCA USRED REČENICE!');
 console.log('✅ startVoiceRecognition:', typeof startVoiceRecognition);
