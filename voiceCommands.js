@@ -1,5 +1,5 @@
 // ============================================
-// VOICE COMMANDS - v13.3 (WATCHDOG - MIKROFON SE NE ZAGLAVLJUJE)
+// VOICE COMMANDS - v13.4 (AUTO-REAKTIVACIJA MIKROFONA + STABILAN TAJMER)
 // START/PLUS/OBRIŠI/END + BUFFER + ISPRAVNA DODELA BROJEVA
 // ============================================
 
@@ -18,6 +18,10 @@ let noSpeechTimer = null;
 let voiceBuffer = '';
 let lastProcessedResultIndex = 0; // 🔥 sopstveno praćenje obrađenih rezultata (Android event.resultIndex je nepouzdan)
 let micWatchdogTimer = null; // 🔥 čuvar koji prinudno oživljava mikrofon ako se zaglavi
+let autoSaveTimer = null; // 🔥 automatsko čuvanje bafera ako "Plus"/"Kraj" ne bude čuveno
+const AUTO_SAVE_SILENCE_MS = 4000; // koliko tišine (ms) čekamo pre automatskog čuvanja
+let voiceModeEverUsed = false; // 🔥 da li je mikrofon bar jednom uspešno pokrenut (za auto-reaktivaciju)
+let dataEntryScreenObserver = null; // 🔥 prati kad se ekran za unos ponovo prikaže
 
 if (typeof window.currentLang === 'undefined') {
     window.currentLang = 'sr';
@@ -367,6 +371,7 @@ function popuniFormuPodacima(data) {
 function obrisiTrenutniUnos() {
     console.log('🗑️ Brišem trenutno diktirane podatke');
 
+    cancelAutoSave(); // 🔥 spreči da stari tajmer kasnije sačuva već obrisan bafer
     voiceBuffer = '';
 
     const productInput = document.getElementById('productInput');
@@ -404,6 +409,36 @@ function obrisiTrenutniUnos() {
     }
 
     showVoiceStatus('🗑️ Obrisano. Izdiktirajte ponovo.', '#FF9800');
+}
+
+// ============================================
+// 4c. AUTOMATSKO ČUVANJE BAFERA NA TIŠINU
+// ============================================
+// Ako se dogodi da "Plus" ili "Kraj" ne budu čuveni (mikrofon interno
+// ima kratke "slepe" trenutke tokom continuous prepoznavanja), bafer bi
+// se inače beskonačno gomilao sledećim izdiktiranim stavkama, praveći
+// besmislene brojeve (npr. 10 komada, pogrešan rok itd.). Ova funkcija
+// zakazuje automatsko čuvanje ako prođe AUTO_SAVE_SILENCE_MS bez ijedne
+// nove reči - kao da je korisnik rekao "Plus" sam.
+
+function scheduleAutoSave() {
+    if (autoSaveTimer) clearTimeout(autoSaveTimer);
+    autoSaveTimer = setTimeout(function() {
+        if (voiceBuffer.trim().length >= 2) {
+            console.log('⏱️ AUTO-SAVE - "Plus"/"Kraj" nije čuven, čuvam bafer automatski:', voiceBuffer);
+            const data = parseVoiceDataEntry(voiceBuffer);
+            sacuvajPodatkeBezPopupa(data);
+            showVoiceStatus(`⏱️ Automatski sačuvano (tišina): ${data.product_name}`, '#FF9800');
+            voiceBuffer = '';
+        }
+    }, AUTO_SAVE_SILENCE_MS);
+}
+
+function cancelAutoSave() {
+    if (autoSaveTimer) {
+        clearTimeout(autoSaveTimer);
+        autoSaveTimer = null;
+    }
 }
 
 // ============================================
@@ -650,6 +685,7 @@ function startVoiceRecognition() {
             isRestarting = false;
             END_AKTIVAN = false;
             lastProcessedResultIndex = 0; // 🔥 reset brojača za novu sesiju
+            voiceModeEverUsed = true; // 🔥 mikrofon je bar jednom uspešno pokrenut u ovoj sesiji stranice
             console.log('✅ Mikrofon aktivan!');
         };
 
@@ -772,6 +808,46 @@ function startVoiceRecognition() {
 }
 
 // ============================================
+// 6c. AUTOMATSKA REAKTIVACIJA MIKROFONA NA POVRATAK EKRANA ZA UNOS
+// ============================================
+// Kad se kaže "End", mikrofon se namerno potpuno gasi. Ali ako se
+// korisnik POSLE toga vrati na ekran za unos (klikom na "Nazad", ili na
+// bilo koji drugi način koji mi ne kontrolišemo iz ovog fajla), mikrofon
+// treba sam da se probudi - bez obzira KOJIM putem je korisnik stigao
+// nazad na taj ekran. Zato ne kačimo ovo na dugme "Nazad" (koje je u
+// drugom fajlu i ne vidimo ga), nego posmatramo sam DOM: čim ekran za
+// unos postane vidljiv, a mikrofon treba da radi a ne radi - upali ga.
+
+function posmatrajEkranZaUnos() {
+    const screen = document.getElementById('dataEntryScreen');
+    if (!screen) {
+        // Ekran možda još nije renderovan pri prvom učitavanju - probaj kasnije.
+        setTimeout(posmatrajEkranZaUnos, 500);
+        return;
+    }
+
+    if (dataEntryScreenObserver) return; // već posmatramo, ne dupliraj
+
+    dataEntryScreenObserver = new MutationObserver(function() {
+        const jeVidljiv = screen.classList.contains('active') ||
+                           screen.style.display === 'flex' ||
+                           screen.style.display === 'block';
+
+        if (jeVidljiv && voiceModeEverUsed && !window.isVoiceModeActive && !micActive && !isRestarting) {
+            console.log('👁️ Ekran za unos ponovo prikazan - reaktiviram mikrofon');
+            setTimeout(function() {
+                if (!window.isVoiceModeActive && !micActive && !isRestarting) {
+                    startVoiceRecognition();
+                }
+            }, 300);
+        }
+    });
+
+    dataEntryScreenObserver.observe(screen, { attributes: true, attributeFilter: ['class', 'style'] });
+    console.log('👁️ Posmatranje ekrana za unos aktivno');
+}
+
+// ============================================
 // 7. ZAUSTAVLJANJE
 // ============================================
 
@@ -848,6 +924,8 @@ function processSingleVoiceCommand(command) {
 
         console.log('▶️ START - otvaram unos');
 
+        cancelAutoSave(); // 🔥 stari bafer (ako je bio) se ovde odbacuje, ne treba da se auto-sačuva
+
         voiceBuffer = cmd.replace(/^(start|unos|unesi|pokreni|zapocni|počni|novi|novo|enter|add)\s*/i, '').trim();
         console.log('📦 Buffer nakon Start:', voiceBuffer);
 
@@ -859,6 +937,7 @@ function processSingleVoiceCommand(command) {
 
         if (voiceBuffer) {
             showVoiceStatus(`🎤 Slušam: "${voiceBuffer}"`, '#FFD700');
+            scheduleAutoSave(); // 🔥 ako "Plus"/"Kraj" ne stigne, sačuvaj posle tišine
         } else {
             showVoiceStatus('🎤 Redosled: NAZIV → KOMAD → KOLIČINA → JEDINICA → ROK → SKLADIŠTE', '#4CAF50');
         }
@@ -880,6 +959,8 @@ function processSingleVoiceCommand(command) {
 
         console.log('➕ PLUS - upisujem buffer:', voiceBuffer);
 
+        cancelAutoSave(); // 🔥 spreči da stari tajmer kasnije sačuva bafer SLEDEĆE stavke
+
         let cleanCommand = cmd.replace(/\b(plus|dodaj|sačuvaj|sacuvaj)\b/gi, '').trim();
 
         console.log('📦 Buffer pre upisa:', voiceBuffer);
@@ -898,6 +979,10 @@ function processSingleVoiceCommand(command) {
         voiceBuffer = cleanCommand || '';
         console.log('🧹 Novi buffer:', voiceBuffer);
 
+        if (voiceBuffer) {
+            scheduleAutoSave(); // 🔥 ostatak posle "Plus" je početak sledeće stavke - zakaži i za nju
+        }
+
         showVoiceStatus(`✅ Sačuvano: ${data.product_name}. Izdiktirajte sledeći ili recite "End"`, '#4CAF50');
         return;
     }
@@ -907,10 +992,13 @@ function processSingleVoiceCommand(command) {
 
         console.log('🏁 END - završavam unos i otvaram zalihe');
 
+        cancelAutoSave(); // 🔥 sesija se zatvara, ne treba da nešto kasnije "iskrsne" iz starog tajmera
+
         let cleanCommand = cmd.replace(/\b(end|kraj|gotovo|zavrsi)\b/gi, '').trim();
 
         console.log('📦 Buffer pre upisa:', voiceBuffer);
         console.log('📦 Ostatak posle end:', cleanCommand);
+
 
         if (voiceBuffer.trim().length > 2) {
             const data = parseVoiceDataEntry(voiceBuffer);
@@ -997,6 +1085,7 @@ function processSingleVoiceCommand(command) {
     console.log('📝 Dodajem u buffer:', cmd);
     voiceBuffer += (voiceBuffer ? ' ' : '') + cmd;
     console.log('📦 Buffer sada:', voiceBuffer);
+    scheduleAutoSave(); // 🔥 svaka nova reč pomera tajmer za automatsko čuvanje unapred
     showVoiceStatus(`🎤 Slušam: "${voiceBuffer}"`, '#FFD700');
 }
 
@@ -1026,7 +1115,9 @@ window.voiceCommand = processVoiceCommand;
 // ============================================
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('✅ DOMContentLoaded - voiceCommands.js v13.0');
+    console.log('✅ DOMContentLoaded - voiceCommands.js v13.4');
+
+    posmatrajEkranZaUnos(); // 🔥 pokreni posmatranje ekrana za unos
 
     const startBtn = document.getElementById('activateMicBtn');
     if (startBtn) {
@@ -1080,5 +1171,5 @@ window.addEventListener('beforeunload', function() {
     window.isVoiceModeActive = false;
 });
 
-console.log('✅ VoiceCommands.js v13.3 UCITAN - WATCHDOG AKTIVAN, MIKROFON SE VIŠE NE ZAGLAVLJUJE!');
+console.log('✅ VoiceCommands.js v13.4 UCITAN - AUTO-REAKTIVACIJA MIKROFONA POSLE END-a!');
 console.log('✅ startVoiceRecognition:', typeof startVoiceRecognition);
