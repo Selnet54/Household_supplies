@@ -1,18 +1,25 @@
 {
-    "name": "Supplies - Home Inventory",
-    "short_name": "Supplies",
-    "description": "Home inventory management app",
-    "start_url": "/Household_supplies/index.html",
-    "scope": "/Household_supplies/",
-    "display": "standalone",
-    "background_color": "#1a237e",
-    "theme_color": "#1a237e",
-    "orientation": "portrait",
-    "icons": [
-        {
-            "src": "/Household_supplies/icons/logo.png?v=2",
-            "sizes": "512x512",
-            "type": "image/png"
-        }
-    ]
+  "id": "/Household_supplies/index.html",
+  "name": "Supplies - Home Inventory",
+  "short_name": "Supplies",
+  "description": "Home inventory management app",
+  "start_url": "/Household_supplies/index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1a237e",
+  "theme_color": "#1a237e",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
 }
