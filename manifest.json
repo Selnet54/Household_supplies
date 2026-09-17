@@ -1,9 +1,9 @@
 {
-  "id": "index.html",
+  "id": "/Household_supplies/index.html",
   "name": "Zalihe - Household Supplies",
   "short_name": "Zalihe",
   "description": "Home inventory management app",
-  "start_url": "index.html",
+  "start_url": "/Household_supplies/index.html",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#1a237e",
