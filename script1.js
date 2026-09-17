@@ -2138,9 +2138,23 @@ function updateHeaderLanguage() {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ DOM je spreman!');
 
-    updateHeaderLanguage();
+    // 1. AŽURIRANJE JEZIKA
+    if (typeof updateHeaderLanguage === 'function') {
+        updateHeaderLanguage();
+    }
     if (typeof updateInterfaceLanguage === 'function') {
         updateInterfaceLanguage();
+    }
+
+    // 2. AUTOMATSKO PRIKAZIVANJE PRVOG (LOGIN) EKRANA
+    hideAllScreens();
+    const initialScreen = document.getElementById('loginScreen') || document.querySelector('.screen');
+    if (initialScreen) {
+        initialScreen.style.display = 'flex';
+        initialScreen.classList.add('active');
+        console.log('🚀 Pokrenut početni ekran:', initialScreen.id);
+    } else {
+        console.warn('⚠️ Nije pronađen nijedan ekran sa klasom .screen ili ID-jem loginScreen!');
     }
 
     // BACK DUGME
@@ -2150,7 +2164,9 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             e.stopPropagation();
             console.log('⬅ Direktan klik na Back dugme');
-            handleHeaderBack();
+            if (typeof handleHeaderBack === 'function') {
+                handleHeaderBack();
+            }
         });
         console.log('✅ Back dugme direktno povezano');
     } else {
@@ -2164,34 +2180,42 @@ document.addEventListener('DOMContentLoaded', function() {
             if (activeElement && activeElement.id === 'phoneInput') {
                 e.preventDefault();
                 console.log('⌨️ Enter taster pritisnut na phoneInput-u');
-                triggerLogin();
+                if (typeof triggerLogin === 'function') {
+                    triggerLogin();
+                }
             }
         }
         if (e.key === 'Escape') {
-            closeModernConfirm();
+            if (typeof closeModernConfirm === 'function') {
+                closeModernConfirm();
+            }
         }
     });
 
-    // CONFIRM DUGMAD - OVO JE JEDINO MESTO GDE TREBA DA BUDE!
+    // CONFIRM DUGMAD
     const yesBtn = document.getElementById('confirmYesBtn');
     const noBtn = document.getElementById('confirmNoBtn');
     
     if (yesBtn) {
         yesBtn.addEventListener('click', function() {
-            if (confirmCallback && confirmCallback.onYes) {
+            if (typeof confirmCallback !== 'undefined' && confirmCallback && confirmCallback.onYes) {
                 confirmCallback.onYes();
             }
-            closeModernConfirm();
+            if (typeof closeModernConfirm === 'function') {
+                closeModernConfirm();
+            }
         });
         console.log('✅ Confirm Yes dugme povezano');
     }
     
     if (noBtn) {
         noBtn.addEventListener('click', function() {
-            if (confirmCallback && confirmCallback.onNo) {
+            if (typeof confirmCallback !== 'undefined' && confirmCallback && confirmCallback.onNo) {
                 confirmCallback.onNo();
             }
-            closeModernConfirm();
+            if (typeof closeModernConfirm === 'function') {
+                closeModernConfirm();
+            }
         });
         console.log('✅ Confirm No dugme povezano');
     }
@@ -2222,11 +2246,13 @@ function speakText(text) {
     if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = speechLangMap[currentLang] || 'en-US';
+        const currentLanguage = typeof currentLang !== 'undefined' ? currentLang : 'en';
+        utterance.lang = speechLangMap[currentLanguage] || 'en-US';
         utterance.rate = 1.0;
         window.speechSynthesis.speak(utterance);
     }
 }
+
 // ===== startVoiceRecognition - KORISTI VOICE COMMANDS =====
 function startVoiceRecognition() {
     console.log('🎤 startVoiceRecognition -> VOICE COMMANDS');
@@ -2235,16 +2261,6 @@ function startVoiceRecognition() {
     }
     console.warn('⚠️ voiceCommands nije učitan!');
 }
-// ============================================
-// 🔥 UKLONJENO: processVoiceCommand, stopVoiceRecognition, isVoiceBusy
-// ============================================
-// Ove funkcije su već potpuno implementirane u voiceCommands.js (v13),
-// sa Start/Plus/Obriši/End logikom i baferom. Pošto su obe skripte
-// definisale funkciju sa ISTIM imenom na globalnom nivou, ona koja se
-// učita POSLEDNJA u HTML-u je brisala/prepisivala onu drugu — zbog toga
-// je dolazilo do gubljenja komandi i pogrešnog upisa podataka.
-// Ovde ih više ne definišemo, tako da voiceCommands.js ostaje jedini
-// izvor istine za obradu glasovnih komandi.
 
 function hideAllScreens() {
     document.querySelectorAll('.screen').forEach(s => {
@@ -2269,10 +2285,6 @@ window.renderInventory = typeof renderInventory !== 'undefined' ? renderInventor
 window.renderShoppingList = typeof renderShoppingList !== 'undefined' ? renderShoppingList : null;
 window.renderCategories = typeof renderCategories !== 'undefined' ? renderCategories : null;
 window.renderDataEntry = typeof renderDataEntry !== 'undefined' ? renderDataEntry : null;
-
-// 🔥 UKLONJENO: window.processVoiceCommand, window.voiceCommand
-// (ove exportuje voiceCommands.js, ovde ih ne diramo da ih ne bismo
-// slučajno prepisali pogrešnim redosledom učitavanja skripti)
 
 window.exitApp = typeof exitApp !== 'undefined' ? exitApp : null;
 window.goBackFromChoice = typeof goBackFromChoice !== 'undefined' ? goBackFromChoice : null;
@@ -2303,6 +2315,7 @@ window.selectManualMode = typeof selectManualMode !== 'undefined' ? selectManual
 window.goBackFromVoice = typeof goBackFromVoice !== 'undefined' ? goBackFromVoice : null;
 window.speakText = typeof speakText !== 'undefined' ? speakText : null;
 window.saveLastAddedProducts = typeof saveLastAddedProducts !== 'undefined' ? saveLastAddedProducts : null;
+window.hideAllScreens = typeof hideAllScreens !== 'undefined' ? hideAllScreens : null;
 
 window.ocistiPolja = window.ocistiPolja || function() {
     console.log('🧹 Čistim polja');
