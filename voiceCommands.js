@@ -19,7 +19,7 @@ let voiceBuffer = '';
 let lastProcessedResultIndex = 0; // 🔥 sopstveno praćenje obrađenih rezultata (Android event.resultIndex je nepouzdan)
 let micWatchdogTimer = null; // 🔥 čuvar koji prinudno oživljava mikrofon ako se zaglavi
 let autoSaveTimer = null; // 🔥 automatsko čuvanje bafera ako "Plus"/"Kraj" ne bude čuveno
-const AUTO_SAVE_SILENCE_MS = 4000; // koliko tišine (ms) čekamo pre automatskog čuvanja
+const AUTO_SAVE_SILENCE_MS = 8000; // koliko tišine (ms) čekamo pre automatskog čuvanja
 let incompleteAutoSaveSkips = 0; // 🔥 koliko puta smo odložili čuvanje jer je naziv bio "Proizvod"
 const MAX_INCOMPLETE_SKIPS = 2; // posle ovoliko odlaganja, ipak sačuvaj (bolje nešto nego ništa)
 let voiceModeEverUsed = false; // 🔥 da li je mikrofon bar jednom uspešno pokrenut (za auto-reaktivaciju)
@@ -420,7 +420,7 @@ function obrisiTrenutniUnos() {
 // ima kratke "slepe" trenutke tokom continuous prepoznavanja), bafer bi
 // se inače beskonačno gomilao sledećim izdiktiranim stavkama, praveći
 // besmislene brojeve (npr. 10 komada, pogrešan rok itd.). Ova funkcija
-// zakazuje automatsko čuvanje ako prođe AUTO_SAVE_SILENCE_MS bez ijedne
+// zakazuje automatsko čuvanje ako prođe  bez ijedne
 // nove reči - kao da je korisnik rekao "Plus" sam.
 
 function scheduleAutoSave() {
