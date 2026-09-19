@@ -1050,7 +1050,7 @@ function processSingleVoiceCommand(command) {
     }
 
     // ZALIHE
-    if (/\b(zalih\w*|stanje|inventar|inventory)\b/i.test(lowerCmd)) {
+    if (/\b(zalih\w*|inventar\w*|inventory)\b/i.test(lowerCmd)) {
         console.log('📦 ZALIHE');
         voiceBuffer = '';
         if (typeof window.renderInventory === 'function') {
