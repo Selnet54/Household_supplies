@@ -1100,7 +1100,37 @@ function processSingleVoiceCommand(command) {
         }
         return;
     }
+// STANJE PROIZVODA - "batak pileći stanje" → nađi i prikaži ukupnu količinu
+if (/\bstanj\w*\b/i.test(lowerCmd)) {
+    const naziv = cmd.replace(/\bstanj\w*\b/i, '').trim().toLowerCase();
+    if (naziv) {
+        const zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
+        const nadjeni = zalihe.filter(p => p.quantity > 0 &&
+            (p.product_name || '').toLowerCase().includes(naziv));
 
+        if (nadjeni.length === 0) {
+            showVoiceStatus(`❌ Nema "${naziv}" u zalihama.`, '#f44336');
+        } else {
+            const ukupno = nadjeni.reduce((sum, p) => sum + (parseFloat(p.quantity) || 0), 0);
+            const jedinica = nadjeni[0].unit;
+            showVoiceStatus(`📦 ${nadjeni[0].product_name}: ${ukupno} ${jedinica}`, '#4CAF50');
+
+            if (typeof window.renderInventory === 'function') {
+                window.renderInventory();
+                setTimeout(() => {
+                    const red = document.querySelector(`[data-product*="${naziv}"]`);
+                    if (red) {
+                        red.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        red.style.outline = '3px solid #1976d2';
+                        setTimeout(() => red.style.outline = '', 3000);
+                    }
+                }, 300);
+            }
+        }
+        voiceBuffer = '';
+        return;
+    }
+}
     // SVE OSTALO - DODAJ U BUFFER
     console.log('📝 Dodajem u buffer:', cmd);
     voiceBuffer += (voiceBuffer ? ' ' : '') + cmd;
