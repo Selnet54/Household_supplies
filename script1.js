@@ -1616,52 +1616,55 @@ function renderInventory(lang) {
 } else {
     // 🔥 GRUPISANJE ISTIH PROIZVODA (isti naziv + ista jedinica) - sabira komad i količinu
     const grupe = {};
-    aktivneZalihe.forEach(p => {
-        const kljuc = (p.product_name || '').trim().toLowerCase() + '|' + (p.unit || '');
-        if (!grupe[kljuc]) {
-            grupe[kljuc] = {
-                product_name: p.product_name,
-                description: p.description || '',
-                piece: 0,
-                quantity: 0,
-                unit: p.unit,
-                storage_location: new Set(),
-                najranijiIstek: null,
-                originalIndexes: []
-            };
-        }
-        const g = grupe[kljuc];
-        g.piece += parseFloat(p.piece) || 0;
-        g.quantity += parseFloat(p.quantity) || 0;
-        g.storage_location.add(p.storage_location);
-        g.originalIndexes.push(zalihe.indexOf(p));
+aktivneZalihe.forEach(p => {
+    const kljuc = (p.product_name || '').trim().toLowerCase() + '|' + (p.unit || '') + '|' + (p.storage_location || '');
+    if (!grupe[kljuc]) {
+        grupe[kljuc] = {
+            product_name: p.product_name,
+            description: p.description || '',
+            piece: 0,
+            quantity: 0,
+            unit: p.unit,
+            storage_location: p.storage_location || '',
+            najranijiIstek: null,
+            originalIndexes: []
+        };
+    }
+    const g = grupe[kljuc];
+    g.piece += parseFloat(p.piece) || 0;
+    g.quantity += parseFloat(p.quantity) || 0;
+    g.originalIndexes.push(zalihe.indexOf(p));
+    const expiry = new Date(p.entry_date);
+    expiry.setMonth(expiry.getMonth() + p.shelf_life_months);
+    if (!g.najranijiIstek || expiry < g.najranijiIstek) g.najranijiIstek = expiry;
+});
 
-        const expiry = new Date(p.entry_date);
-        expiry.setMonth(expiry.getMonth() + p.shelf_life_months);
-        if (!g.najranijiIstek || expiry < g.najranijiIstek) g.najranijiIstek = expiry;
-    });
+// 🔥 SORTIRANO PO SKLADIŠTU, PA PO NAZIVU
+const grupisaneListe = Object.values(grupe).sort((a, b) => {
+    const s = (a.storage_location || '').localeCompare(b.storage_location || '');
+    return s !== 0 ? s : a.product_name.localeCompare(b.product_name);
+});
 
-    Object.values(grupe).forEach(g => {
-        const expiryDisplay = g.najranijiIstek.toLocaleDateString('sr-RS', { month: '2-digit', year: '2-digit' });
-        const isLow = (g.unit === 'g' && g.quantity < 400) || (g.unit === 'kg' && g.quantity < 0.4) || ((g.unit === 'kom' || g.unit === 'pcs') && g.quantity <= 2);
-        const isNew = lastAdded.some(la => (la.product_name || '').toLowerCase() === g.product_name.toLowerCase());
+grupisaneListe.forEach(g => {
+    const expiryDisplay = g.najranijiIstek.toLocaleDateString('sr-RS', { month: '2-digit', year: '2-digit' });
+    const isLow = (g.unit === 'g' && g.quantity < 400) || (g.unit === 'kg' && g.quantity < 0.4) || ((g.unit === 'kom' || g.unit === 'pcs') && g.quantity <= 2);
+    const isNew = lastAdded.some(la => (la.product_name || '').toLowerCase() === g.product_name.toLowerCase());
 
-        let bgColor = '', borderLeft = '';
-        if (isNew) { bgColor = '#e3f2fd'; borderLeft = '4px solid #1976d2'; }
-        else if (isLow) { bgColor = '#F9AA65'; }
+    let bgColor = '', borderLeft = '';
+    if (isNew) { bgColor = '#e3f2fd'; borderLeft = '4px solid #1976d2'; }
+    else if (isLow) { bgColor = '#F9AA65'; }
 
-        html += `<div class="table-row" data-product="${g.product_name.toLowerCase()}" style="display:grid; grid-template-columns:40px 1.2fr 1.2fr 0.8fr 0.8fr 0.8fr 0.8fr 1fr; gap:2px; border-bottom:1px solid #eee; padding:5px 0; background:${bgColor}; border-left:${borderLeft};">`;
-        html += `<div class="cell" style="text-align:center;"><input type="checkbox" class="row-checkbox" data-indexes="${g.originalIndexes.join(',')}"></div>`;
-        html += `<div class="cell">${g.product_name}</div>`;
-        html += `<div class="cell">${g.description}</div>`;
-        html += `<div class="cell">${g.piece}</div>`;
-        html += `<div class="cell">${g.quantity}</div>`;
-        html += `<div class="cell">${g.unit}</div>`;
-        html += `<div class="cell">${expiryDisplay}</div>`;
-        html += `<div class="cell">${[...g.storage_location].join(', ')}</div>`;
-        html += `</div>`;
-    });
-}
+    html += `<div class="table-row voice-highlight-target" data-product="${g.product_name.toLowerCase()}" style="display:grid; grid-template-columns:40px 1.2fr 1.2fr 0.8fr 0.8fr 0.8fr 0.8fr 1fr; gap:2px; border-bottom:1px solid #eee; padding:5px 0; background:${bgColor}; border-left:${borderLeft};">`;
+    html += `<div class="cell" style="text-align:center;"><input type="checkbox" class="row-checkbox" data-indexes="${g.originalIndexes.join(',')}"></div>`;
+    html += `<div class="cell">${g.product_name}</div>`;
+    html += `<div class="cell">${g.description}</div>`;
+    html += `<div class="cell">${g.piece}</div>`;
+    html += `<div class="cell">${g.quantity}</div>`;
+    html += `<div class="cell">${g.unit}</div>`;
+    html += `<div class="cell">${expiryDisplay}</div>`;
+    html += `<div class="cell">${g.storage_location}</div>`;
+    html += `</div>`;
+});
     html += `</div></div>`;
     content.innerHTML = html;
     
