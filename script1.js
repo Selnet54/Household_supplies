@@ -1612,44 +1612,56 @@ function renderInventory(lang) {
     html += `</div>`;
     
     if (aktivneZalihe.length === 0) {
-        html += `<div class="table-row"><div class="cell" style="grid-column:span 8;padding:30px;color:#999;text-align:center;">${t('nema_proizvoda')}</div></div>`;
-    } else {
-        aktivneZalihe.forEach((p, index) => {
-            const originalIndex = zalihe.indexOf(p);
-            const expiry = new Date(p.entry_date);
-            expiry.setMonth(expiry.getMonth() + p.shelf_life_months);
-            const expiryDisplay = expiry.toLocaleDateString('sr-RS', { month: '2-digit', year: '2-digit' });
-            const isLow = (p.unit === 'g' && p.quantity < 400) || (p.unit === 'kg' && p.quantity < 0.4) || ((p.unit === 'kom' || p.unit === 'pcs') && p.quantity <= 2);
-            
-            // PROVERI DA LI JE PROIZVOD NOVO DODAT
-            const isNew = lastAdded.some(la => la.product_name === p.product_name && la.entry_date === p.entry_date);
-            
-            // ODREĐIVANJE BOJE: prioritet - novo (svetloplava), zatim niska količina (narandžasta)
-            let bgColor = '';
-            let borderLeft = '';
-            let transition = '';
-            
-            if (isNew) {
-                bgColor = '#e3f2fd'; // Svetloplava
-                borderLeft = '4px solid #1976d2';
-                transition = 'background-color 0.5s ease';
-                console.log(`🆕 Novi proizvod istaknut: ${p.product_name}`);
-            } else if (isLow) {
-                bgColor = '#F9AA65'; // Narandžasta za niske količine
-            }
-            
-            html += `<div class="table-row" style="display:grid; grid-template-columns:40px 1.2fr 1.2fr 0.8fr 0.8fr 0.8fr 0.8fr 1fr; gap:2px; border-bottom:1px solid #eee; padding:5px 0; background:${bgColor}; border-left:${borderLeft}; transition:${transition};">`;
-            html += `<div class="cell" style="text-align:center;"><input type="checkbox" class="row-checkbox" data-index="${originalIndex}"></div>`;
-            html += `<div class="cell">${p.product_name}</div>`;
-            html += `<div class="cell">${p.description || ''}</div>`;
-            html += `<div class="cell">${p.piece || '-'}</div>`;
-            html += `<div class="cell">${p.quantity}</div>`;
-            html += `<div class="cell">${p.unit}</div>`;
-            html += `<div class="cell">${expiryDisplay}</div>`;
-            html += `<div class="cell">${p.storage_location}</div>`;
-            html += `</div>`;
-        });
-    }
+    html += `<div class="table-row"><div class="cell" style="grid-column:span 8;padding:30px;color:#999;text-align:center;">${t('nema_proizvoda')}</div></div>`;
+} else {
+    // 🔥 GRUPISANJE ISTIH PROIZVODA (isti naziv + ista jedinica) - sabira komad i količinu
+    const grupe = {};
+    aktivneZalihe.forEach(p => {
+        const kljuc = (p.product_name || '').trim().toLowerCase() + '|' + (p.unit || '');
+        if (!grupe[kljuc]) {
+            grupe[kljuc] = {
+                product_name: p.product_name,
+                description: p.description || '',
+                piece: 0,
+                quantity: 0,
+                unit: p.unit,
+                storage_location: new Set(),
+                najranijiIstek: null,
+                originalIndexes: []
+            };
+        }
+        const g = grupe[kljuc];
+        g.piece += parseFloat(p.piece) || 0;
+        g.quantity += parseFloat(p.quantity) || 0;
+        g.storage_location.add(p.storage_location);
+        g.originalIndexes.push(zalihe.indexOf(p));
+
+        const expiry = new Date(p.entry_date);
+        expiry.setMonth(expiry.getMonth() + p.shelf_life_months);
+        if (!g.najranijiIstek || expiry < g.najranijiIstek) g.najranijiIstek = expiry;
+    });
+
+    Object.values(grupe).forEach(g => {
+        const expiryDisplay = g.najranijiIstek.toLocaleDateString('sr-RS', { month: '2-digit', year: '2-digit' });
+        const isLow = (g.unit === 'g' && g.quantity < 400) || (g.unit === 'kg' && g.quantity < 0.4) || ((g.unit === 'kom' || g.unit === 'pcs') && g.quantity <= 2);
+        const isNew = lastAdded.some(la => (la.product_name || '').toLowerCase() === g.product_name.toLowerCase());
+
+        let bgColor = '', borderLeft = '';
+        if (isNew) { bgColor = '#e3f2fd'; borderLeft = '4px solid #1976d2'; }
+        else if (isLow) { bgColor = '#F9AA65'; }
+
+        html += `<div class="table-row" data-product="${g.product_name.toLowerCase()}" style="display:grid; grid-template-columns:40px 1.2fr 1.2fr 0.8fr 0.8fr 0.8fr 0.8fr 1fr; gap:2px; border-bottom:1px solid #eee; padding:5px 0; background:${bgColor}; border-left:${borderLeft};">`;
+        html += `<div class="cell" style="text-align:center;"><input type="checkbox" class="row-checkbox" data-indexes="${g.originalIndexes.join(',')}"></div>`;
+        html += `<div class="cell">${g.product_name}</div>`;
+        html += `<div class="cell">${g.description}</div>`;
+        html += `<div class="cell">${g.piece}</div>`;
+        html += `<div class="cell">${g.quantity}</div>`;
+        html += `<div class="cell">${g.unit}</div>`;
+        html += `<div class="cell">${expiryDisplay}</div>`;
+        html += `<div class="cell">${[...g.storage_location].join(', ')}</div>`;
+        html += `</div>`;
+    });
+}
     html += `</div></div>`;
     content.innerHTML = html;
     
@@ -1680,7 +1692,10 @@ function obrisiZalihe() {
         return;
     }
     const zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
-    const indices = Array.from(selected).map(cb => parseInt(cb.dataset.index));
+    let indices = [];
+    selected.forEach(cb => {
+        cb.dataset.indexes.split(',').forEach(i => indices.push(parseInt(i)));
+    });
     indices.sort((a, b) => b - a);
     indices.forEach(i => zalihe.splice(i, 1));
     localStorage.setItem('zalihe', JSON.stringify(zalihe));
@@ -1697,9 +1712,13 @@ function azurirajZalihe() {
         showModernAlert(t('error'), 'Možete ažurirati samo jedan red odjednom!', '❌');
         return;
     }
-    const index = parseInt(selected[0].dataset.index);
+    const indexes = selected[0].dataset.indexes.split(',').map(Number);
+    if (indexes.length > 1) {
+        showModernAlert(t('error'), 'Ovaj proizvod ima više unosa spojenih u jedan red - obrišite ih i unesite ponovo kao jedan.', '❌');
+        return;
+    }
     const zalihe = JSON.parse(localStorage.getItem('zalihe') || '[]');
-    renderUpdateEntry(zalihe[index], index);
+    renderUpdateEntry(zalihe[indexes[0]], indexes[0]);
 }
 
 function renderUpdateEntry(proizvod, index) {
