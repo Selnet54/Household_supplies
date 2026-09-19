@@ -874,7 +874,7 @@ function posmatrajEkranZaUnos() {
 function stopVoiceRecognition() {
     console.log('🛑 stopVoiceRecognition pozvan');
     window.isVoiceModeActive = false;
-    isRestarting = true;
+    isRestarting = false; 
     stopMicWatchdog(); // 🔥 zaustavi čuvara - ovo je namerno gašenje
 
     if (micRestartTimer) clearTimeout(micRestartTimer);
@@ -1008,7 +1008,7 @@ function processSingleVoiceCommand(command) {
     }
 
     // END
-    if (/\b(end|kraj|gotovo|zavrsi)\b/i.test(lowerCmd)) {
+    if (/\b(end\w*|kraj\w*|gotov\w*|završ\w*|zavrs\w*)\b/i.test(lowerCmd)) {
 
         console.log('🏁 END - završavam unos i otvaram zalihe');
 
@@ -1050,7 +1050,7 @@ function processSingleVoiceCommand(command) {
     }
 
     // ZALIHE
-    if (/\b(zalihe|stanje|inventar|inventory)\b/i.test(lowerCmd)) {
+    if (/\b(zalih\w*|stanje|inventar|inventory)\b/i.test(lowerCmd)) {
         console.log('📦 ZALIHE');
         voiceBuffer = '';
         if (typeof window.renderInventory === 'function') {
