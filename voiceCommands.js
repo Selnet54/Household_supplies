@@ -116,6 +116,11 @@ function getStorage(word) {
     return null;
 }
 
+// 🔥 NORMALIZACIJA - uklanja duplirana slova (grill→gril, npr.)
+function normalizujNaziv(str) {
+    return (str || '').toLowerCase().replace(/(.)\1+/g, '$1').trim();
+}
+
 // ============================================
 // 3. PARSER - REDOSLED: naziv → komad → količina → jedinica → rok → skladište
 // ============================================
