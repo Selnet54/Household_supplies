@@ -1548,6 +1548,10 @@ function saveProduct() {
     document.getElementById('productInput').select();
     
 }
+// 🔥 NORMALIZACIJA - uklanja duplirana slova (grill→gril, npr.)
+function normalizujNaziv(str) {
+    return (str || '').toLowerCase().replace(/(.)\1+/g, '$1').trim();
+}
 
 function renderInventory(lang) {
     console.log('📦 renderInventory pozvan za jezik:', lang || currentLang);
