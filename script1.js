@@ -2,7 +2,13 @@
 // PUNI SCRIPT ZA APLIKACIJU - HIJERARHIJSKI NAZAD
 // ============================================
 console.log('✅ Script.js je učitan!');
-
+// 🔥 SINHRONIZACIJA JEZIKA SA voiceCommands.js
+const savedLang = localStorage.getItem('appLanguage');
+if (savedLang) {
+    currentLang = savedLang;
+    window.currentLang = savedLang;
+    console.log('🌐 Učitan jezik iz localStorage:', savedLang);
+}
 // ===== GLOBALNI FLAG ZA VOICE MODE =====
 window.isVoiceModeActive = false;
 
@@ -54,7 +60,9 @@ function exitApp() {
     } else {
         poruka = translations[currentLang]?.exit_poruka || "Thanks for using this app! 👋";
     }
-    
+    // 🔥 ODMAH IZVEZI - ne čekaj DOMContentLoaded
+    window.exitApp = exitApp;
+    window.goBack = goBack;
     document.body.innerHTML = '';
     document.body.style.background = '#1a237e';
     document.body.style.margin = '0';
@@ -1052,6 +1060,15 @@ function getCurrentLang() {
 function selectLanguage(langCode) {
     currentLang = langCode;
     
+    // 🔥 KLJUČNA POPRAVKA - sinhronizuj jezik sa voiceCommands.js
+    window.currentLang = langCode;
+    localStorage.setItem('appLanguage', langCode);
+    
+    // 🔥 Obavesti voiceCommands.js
+    if (typeof window.setVoiceLanguage === 'function') {
+        window.setVoiceLanguage(langCode);
+    }
+    
     if (typeof updateHeaderLanguage === 'function') {
         updateHeaderLanguage();
     }
@@ -1059,7 +1076,6 @@ function selectLanguage(langCode) {
         updateInterfaceLanguage();
     }
 
-    // 🔥 ZAMENI showScreen('choiceScreen') SA:
     navigateTo('choiceScreen');
 }
 
@@ -2018,47 +2034,6 @@ function ocistiPolja() {
         window.resetCurrentProductData();
     }
 }
-/// ===== GO BACK SA ISTORIJOM =====
-function goBack() {
-    const lang = currentLang || 'sr';
-    
-    console.log('⬅️ goBack pozvan, trenutni ekran:', currentScreen);
-    console.log('📜 Istorija:', screenHistory);
-    
-    // Ako smo na dataEntry, očisti glasovne podatke
-    if (currentScreen === 'dataEntry') {
-        if (typeof window.ocistiPolja === 'function') {
-            window.ocistiPolja();
-        }
-    }
-    
-    if (screenHistory.length > 0) {
-        const previousScreen = screenHistory.pop();
-        console.log('📜 Vraćam se na:', previousScreen);
-        currentScreen = previousScreen;
-        
-        switch(previousScreen) {
-            case 'inventory':
-                renderInventory(lang);
-                break;
-            case 'dataEntry':
-                renderDataEntry('');
-                break;
-            case 'shoppingList':
-                renderShoppingList(lang);
-                break;
-            default:
-                renderCategories(lang);
-                currentScreen = 'categories';
-        }
-        return;
-    }
-    
-    console.log('🏠 Nema istorije, idem na kategorije');
-    renderCategories(lang);
-    currentScreen = 'categories';
-}
-
 // ===== GLAVNA FUNKCIJA ZA NAZAD / ODUSTANI =====
 function handleBackAction() {
     console.log('⬅️ handleBackAction pozvan');
@@ -2098,17 +2073,17 @@ function updateHeaderLanguage() {
     console.log('🔄 Ažuriram header za jezik:', lang);
     
     const headerTranslations = {
-    'sr': { nazad: '◀ Nazad', stanje: '📦 Zalihe', spisak: '🛒 Spisak', odustani: '🚪 EXIT' },
-    'en': { nazad: '◀ Back', stanje: '📦 Inventory', spisak: '🛒 Shopping List', odustani: '🚪 EXIT' },
-    'de': { nazad: '◀ Zurück', stanje: '📦 Bestand', spisak: '🛒 Einkaufsliste', odustani: '🚪 EXIT' },
-    'hu': { nazad: '◀ Vissza', stanje: '📦 Készlet', spisak: '🛒 Bevásárlólista', odustani: '🚪 EXIT' },
-    'uk': { nazad: '◀ Назад', stanje: '📦 Запаси', spisak: '🛒 Список', odustani: '🚪 EXIT' },
-    'ru': { nazad: '◀ Назад', stanje: '📦 Запасы', spisak: '🛒 Список', odustani: '🚪 EXIT' },
-    'zh': { nazad: '◀ 返回', stanje: '📦 库存', spisak: '🛒 购物清单', odustani: '🚪 退出' },
-    'es': { nazad: '◀ Atrás', stanje: '📦 Inventario', spisak: '🛒 Lista de Compras', odustani: '🚪 SALIR' },
-    'pt': { nazad: '◀ Voltar', stanje: '📦 Estoque', spisak: '🛒 Lista de Compras', odustani: '🚪 SAIR' },
-    'fr': { nazad: '◀ Retour', stanje: '📦 Stock', spisak: '🛒 Liste de Courses', odustani: '🚪 SORTIR' }
-};
+        'sr': { 'nazad': '◀ Nazad', 'stanje': '📦 Zalihe', 'spisak': '🛒 Spisak', 'odustani': '🚪 EXIT' },
+        'en': { 'nazad': '◀ Back', 'stanje': '📦 Inventory', 'spisak': '🛒 Shopping List', 'odustani': '🚪 EXIT' },
+        'de': { 'nazad': '◀ Zurück', 'stanje': '📦 Bestand', 'spisak': '🛒 Einkaufsliste', 'odustani': '🚪 EXIT' },
+        'hu': { 'nazad': '◀ Vissza', 'stanje': '📦 Készlet', 'spisak': '🛒 Bevásárlólista', 'odustani': '🚪 EXIT' },
+        'uk': { 'nazad': '◀ Назад', 'stanje': '📦 Запаси', 'spisak': '🛒 Список', 'odustani': '🚪 ВИХІД' },
+        'ru': { 'nazad': '◀ Назад', 'stanje': '📦 Запасы', 'spisak': '🛒 Список', 'odustani': '🚪 ВЫХОД' },
+        'zh': { 'nazad': '◀ 返回', 'stanje': '📦 库存', 'spisak': '🛒 购物清单', 'odustani': '🚪 退出' },
+        'es': { 'nazad': '◀ Atrás', 'stanje': '📦 Inventario', 'spisak': '🛒 Lista de Compras', 'odustani': '🚪 SALIR' },
+        'pt': { 'nazad': '◀ Voltar', 'stanje': '📦 Estoque', 'spisak': '🛒 Lista de Compras', 'odustani': '🚪 SAIR' },
+        'fr': { 'nazad': '◀ Retour', 'stanje': '📦 Stock', 'spisak': '🛒 Liste de Courses', 'odustani': '🚪 SORTIR' }
+    };
     
     const ht = (key) => {
         return headerTranslations[lang]?.[key] || headerTranslations['en'][key] || key;
@@ -2127,22 +2102,16 @@ function updateHeaderLanguage() {
     
     if (headerTitle) {
         const screenTitles = {
-            'sr': {
-                'categories': '📂 Kategorije',
-                'inventory': '📦 Zalihe',
-                'dataEntry': '✏️ Unos artikla',
-                'shoppingList': '🛒 Spisak',
-                'choice': '🎯 Izbor unosa',
-                'voiceMenu': '🎤 Glasovni meni'
-            },
-            'en': {
-                'categories': '📂 Categories',
-                'inventory': '📦 Inventory',
-                'dataEntry': '✏️ Add Item',
-                'shoppingList': '🛒 Shopping List',
-                'choice': '🎯 Choice',
-                'voiceMenu': '🎤 Voice Menu'
-            }
+            'sr': { 'categories': '📂 Kategorije', 'inventory': '📦 Zalihe', 'dataEntry': '✏️ Unos artikla', 'shoppingList': '🛒 Spisak', 'choice': '🎯 Izbor unosa', 'voiceMenu': '🎤 Glasovni meni' },
+            'en': { 'categories': '📂 Categories', 'inventory': '📦 Inventory', 'dataEntry': '✏️ Add Item', 'shoppingList': '🛒 Shopping List', 'choice': '🎯 Choice', 'voiceMenu': '🎤 Voice Menu' },
+            'de': { 'categories': '📂 Kategorien', 'inventory': '📦 Bestand', 'dataEntry': '✏️ Artikel hinzufügen', 'shoppingList': '🛒 Einkaufsliste', 'choice': '🎯 Auswahl', 'voiceMenu': '🎤 Sprachmenü' },
+            'hu': { 'categories': '📂 Kategóriák', 'inventory': '📦 Készlet', 'dataEntry': '✏️ Termék hozzáadása', 'shoppingList': '🛒 Bevásárlólista', 'choice': '🎯 Választás', 'voiceMenu': '🎤 Hangmenü' },
+            'uk': { 'categories': '📂 Категорії', 'inventory': '📦 Запаси', 'dataEntry': '✏️ Додати товар', 'shoppingList': '🛒 Список', 'choice': '🎯 Вибір', 'voiceMenu': '🎤 Голосове меню' },
+            'ru': { 'categories': '📂 Категории', 'inventory': '📦 Запасы', 'dataEntry': '✏️ Добавить товар', 'shoppingList': '🛒 Список', 'choice': '🎯 Выбор', 'voiceMenu': '🎤 Голосовое меню' },
+            'zh': { 'categories': '📂 类别', 'inventory': '📦 库存', 'dataEntry': '✏️ 添加商品', 'shoppingList': '🛒 购物清单', 'choice': '🎯 选择', 'voiceMenu': '🎤 语音菜单' },
+            'es': { 'categories': '📂 Categorías', 'inventory': '📦 Inventario', 'dataEntry': '✏️ Añadir artículo', 'shoppingList': '🛒 Lista de Compras', 'choice': '🎯 Elección', 'voiceMenu': '🎤 Menú de voz' },
+            'pt': { 'categories': '📂 Categorias', 'inventory': '📦 Estoque', 'dataEntry': '✏️ Adicionar item', 'shoppingList': '🛒 Lista de Compras', 'choice': '🎯 Escolha', 'voiceMenu': '🎤 Menu de voz' },
+            'fr': { 'categories': '📂 Catégories', 'inventory': '📦 Stock', 'dataEntry': '✏️ Ajouter un article', 'shoppingList': '🛒 Liste de Courses', 'choice': '🎯 Choix', 'voiceMenu': '🎤 Menu vocal' }
         };
         
         const currentScreenName = currentScreen || 'categories';
@@ -2361,7 +2330,7 @@ function handleHeaderBack() {
     console.log('📌 Trenutni ekran:', currentScreen);
     console.log('📜 Istorija:', screenHistory);
     
-    // 1. Ako smo na voice menu, vrati se na choiceScreen
+    // Ako smo na voice menu, vrati se na choiceScreen
     const voiceMenuScreen = document.getElementById('voiceMenuScreen');
     if (voiceMenuScreen && voiceMenuScreen.classList.contains('active')) {
         if (typeof goBackFromVoice === 'function') {
@@ -2370,28 +2339,19 @@ function handleHeaderBack() {
         }
     }
     
-    // 2. Ako smo na choiceScreen (4. ekran), vrati na jezike
+    // Ako smo na choiceScreen, vrati na jezike
     if (currentScreen === 'choiceScreen') {
-        console.log('🔙 Vraćam na jezike');
-        const choiceScreen = document.getElementById('choiceScreen');
-        const languageScreen = document.getElementById('languageScreen');
-        
-        if (choiceScreen) {
-            choiceScreen.style.display = 'none';
-            choiceScreen.classList.remove('active');
+        if (typeof goBackFromChoice === 'function') {
+            goBackFromChoice();
+            return;
         }
-        if (languageScreen) {
-            languageScreen.style.display = 'flex';
-            languageScreen.classList.add('active');
-            if (typeof renderLanguages === 'function') {
-                renderLanguages();
-            }
-        }
-        currentScreen = 'languages';
-        currentScreenState = 'languages';
-        screenHistory = ['languages'];
-        return;
     }
+    
+    // Inače koristi standardni goBack() (jedinstvena funkcija sa vrha fajla)
+    if (typeof goBack === 'function') {
+        goBack();
+    }
+}
     
     // 3. 🔥 KORISTI screenHistory ZA HIJERARHIJSKI NAZAD
     if (screenHistory.length > 0) {
