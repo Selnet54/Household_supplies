@@ -1618,8 +1618,6 @@ function renderInventory(lang) {
     if (aktivneZalihe.length === 0) {
     html += `<div class="table-row"><div class="cell" style="grid-column:span 8;padding:30px;color:#999;text-align:center;">${t('nema_proizvoda')}</div></div>`;
 } else {
-    // 🔥 GRUPISANJE ISTIH PROIZVODA (isti naziv + ista jedinica) - sabira komad i količinu
-    const grupe = {};
 // 🔥 GRUPISANJE: normalizovan naziv (grill≈gril) + delimično poklapanje (gril ≈ gril pile) + ista jedinica + isto skladište
 const grupe = [];
 aktivneZalihe.forEach(p => {
