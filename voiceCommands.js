@@ -858,13 +858,13 @@ function posmatrajEkranZaUnos() {
                            screen.style.display === 'flex' ||
                            screen.style.display === 'block';
 
-        if (jeVidljiv && voiceModeEverUsed && !window.isVoiceModeActive && !micActive && !isRestarting) {
+                if (jeVidljiv && voiceModeEverUsed && !window.isVoiceModeActive && !micActive && !isRestarting) {
             console.log('👁️ Ekran za unos ponovo prikazan - reaktiviram mikrofon');
             setTimeout(function() {
                 if (!window.isVoiceModeActive && !micActive && !isRestarting) {
                     startVoiceRecognition();
                 }
-            }, 300);
+            }, 700);
         }
     });
 
