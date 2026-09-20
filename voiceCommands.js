@@ -858,7 +858,7 @@ function posmatrajEkranZaUnos() {
                            screen.style.display === 'flex' ||
                            screen.style.display === 'block';
 
-                if (jeVidljiv && voiceModeEverUsed && !window.isVoiceModeActive && !micActive && !isRestarting) {
+        if (jeVidljiv && voiceModeEverUsed && !window.isVoiceModeActive && !micActive && !isRestarting) {
             console.log('👁️ Ekran za unos ponovo prikazan - reaktiviram mikrofon');
             setTimeout(function() {
                 if (!window.isVoiceModeActive && !micActive && !isRestarting) {
@@ -1067,7 +1067,7 @@ function processSingleVoiceCommand(command) {
         } else if (typeof renderInventory === 'function') {
             renderInventory();
         }
-        stopVoiceRecognition();
+        // 🔥 Mikrofon OSTAJE aktivan i na ekranu Zaliha - da "stanje" komanda može da radi ovde
         return;
     }
 
