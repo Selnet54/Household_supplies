@@ -976,6 +976,8 @@ function processSingleVoiceCommand(command) {
 
         console.log('🗑️ OBRIŠI - poništavam trenutni unos');
         obrisiTrenutniUnos();
+        // 🔥 Prisilan restart mikrofona - da sledeća reč sigurno stigne čista
+        try { recognition.stop(); } catch(e) {}
         return;
     }
 
@@ -1009,6 +1011,8 @@ function processSingleVoiceCommand(command) {
         }
 
         showVoiceStatus(`✅ Sačuvano: ${data.product_name}. Izdiktirajte sledeći ili recite "End"`, '#4CAF50');
+        // 🔥 Prisilan restart mikrofona - da sledeća reč sigurno stigne čista
+        try { recognition.stop(); } catch(e) {}
         return;
     }
 
