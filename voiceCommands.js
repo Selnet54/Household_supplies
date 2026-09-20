@@ -769,7 +769,7 @@ function startVoiceRecognition() {
                     if (window.isVoiceModeActive && !micActive && !isRestarting) {
                         startVoiceRecognition();
                     }
-                }, 300);
+                }, 400);
                 return;
             }
 
@@ -786,7 +786,7 @@ function startVoiceRecognition() {
                         if (window.isVoiceModeActive && !micActive) {
                             startVoiceRecognition();
                         }
-                    }, 300);
+                    }, 400);
                 }
             }
         };
@@ -805,7 +805,7 @@ function startVoiceRecognition() {
                     if (window.isVoiceModeActive && !micActive && !isRestarting) {
                         startVoiceRecognition();
                     }
-                }, 150);
+                }, 400);
             } else {
                 isRestarting = false;
             }
