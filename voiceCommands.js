@@ -102,7 +102,7 @@ const NUMBER_WORDS_BY_LANG = {
         'siebzig': '70', 'achtzig': '80', 'neunzig': '90', 'hundert': '100'
     },
     hu: {
-        'nulla': '0', 'egy': '1', 'kettő': '2', 'ketto': '2', 'kettő': '2', 'három': '3',
+        'nulla': '0', 'egy': '1', 'kettő': '2', 'ketto': '2', 'két': '2', 'három': '3',
         'harom': '3', 'négy': '4', 'negy': '4', 'öt': '5', 'ot': '5', 'hat': '6',
         'hét': '7', 'het': '7', 'nyolc': '8', 'kilenc': '9', 'tíz': '10', 'tiz': '10',
         'tizenegy': '11', 'tizenkettő': '12', 'tizenharom': '13', 'tizennégy': '14',
@@ -243,29 +243,24 @@ const UNIT_MAP_BY_LANG = {
 const STORAGE_MAP_BY_LANG = {
     sr: {
         'zamrzivač': 'Zamrzivač 1', 'zamrzivac': 'Zamrzivač 1',
-        'zamrzivač 1': 'Zamrzivač 1', 'zamrzivac 1': 'Zamrzivač 1',
-        'zamrzivač 2': 'Zamrzivač 2', 'zamrzivac 2': 'Zamrzivač 2',
-        'zamrzivač 3': 'Zamrzivač 3', 'zamrzivac 3': 'Zamrzivač 3',
         'frižider': 'Frižider', 'frizider': 'Frižider',
         'ostava': 'Ostava', 'špajz': 'Ostava'
     },
     en: {
-        'freezer': 'Zamrzivač 1', 'freezer 1': 'Zamrzivač 1',
-        'freezer 2': 'Zamrzivač 2', 'freezer 3': 'Zamrzivač 3',
+        'freezer': 'Zamrzivač 1',
         'fridge': 'Frižider', 'refrigerator': 'Frižider',
         'pantry': 'Ostava', 'cellar': 'Ostava'
     },
     de: {
-        'gefrierschrank': 'Zamrzivač 1', 'gefrierschrank 1': 'Zamrzivač 1',
-        'gefrierschrank 2': 'Zamrzivač 2', 'gefrierschrank 3': 'Zamrzivač 3',
+        'gefrierschrank': 'Zamrzivač 1',
         'kühlschrank': 'Frižider', 'kuhlschrank': 'Frižider',
         'speisekammer': 'Ostava', 'vorratskammer': 'Ostava'
     },
     hu: {
+        'mélyhűtő': 'Zamrzivač 1', 'melyhuto': 'Zamrzivač 1',
         'fagyasztó': 'Zamrzivač 1', 'fagyaszto': 'Zamrzivač 1',
-        'fagyasztó 1': 'Zamrzivač 1', 'fagyasztó 2': 'Zamrzivač 2',
-        'fagyasztó 3': 'Zamrzivač 3',
-        'hűtő': 'Frižider', 'huto': 'Frižider', 'hűtőszekrény': 'Frižider',
+        'hűtőszekrény': 'Frižider', 'hutoszekreny': 'Frižider',
+        'hűtő': 'Frižider', 'huto': 'Frižider',
         'kamra': 'Ostava', 'éléskamra': 'Ostava'
     },
     uk: {
@@ -284,14 +279,12 @@ const STORAGE_MAP_BY_LANG = {
         '储藏室': 'Ostava'
     },
     es: {
-        'congelador': 'Zamrzivač 1', 'congelador 1': 'Zamrzivač 1',
-        'congelador 2': 'Zamrzivač 2', 'congelador 3': 'Zamrzivač 3',
+        'congelador': 'Zamrzivač 1',
         'nevera': 'Frižider', 'refrigerador': 'Frižider',
         'despensa': 'Ostava'
     },
     pt: {
-        'congelador': 'Zamrzivač 1', 'congelador 1': 'Zamrzivač 1',
-        'congelador 2': 'Zamrzivač 2', 'congelador 3': 'Zamrzivač 3',
+        'congelador': 'Zamrzivač 1',
         'geladeira': 'Frižider', 'frigorífico': 'Frižider', 'frigorifico': 'Frižider',
         'despensa': 'Ostava'
     },
@@ -310,7 +303,8 @@ function getUnit(word) {
 function getStorage(word) {
     const w = word.toLowerCase();
     const dict = getLangDict(STORAGE_MAP_BY_LANG);
-    for (let key in dict) {
+    const sortedKeys = Object.keys(dict).sort((a, b) => b.length - a.length);
+    for (let key of sortedKeys) {
         if (w.includes(key) || key.includes(w)) return dict[key];
     }
     return null;
@@ -333,7 +327,7 @@ const COMMAND_WORDS = {
         start: ['start', 'new', 'begin', 'enter', 'add'],
         plus: ['plus', 'next', 'save'],
         obrisi: ['delete', 'cancel', 'clear', 'remove'],
-        end: ['end', 'done', 'finish'],
+        end: ['end', 'done', 'finish', 'and'],
         zalihe: ['inventory', 'stock', 'storage'],
         spisak: ['shopping list', 'list', 'needs'],
         nazad: ['back'],
@@ -504,7 +498,7 @@ function parseVoiceDataEntry(command) {
     // 🔥 2. NAĐI SKLADIŠTE (rečnik za trenutni jezik)
     let foundStorage = null;
     let storageIndex = -1;
-    let storageWords = Object.keys(getLangDict(STORAGE_MAP_BY_LANG));
+    let storageWords = Object.keys(getLangDict(STORAGE_MAP_BY_LANG)).sort((a, b) => b.length - a.length);
 
     for (let i = 0; i < words.length; i++) {
         let w = words[i].toLowerCase();
