@@ -352,7 +352,7 @@ const COMMAND_WORDS = {
         stanje: ['status', 'bestand\\w*', 'wie ?viel']
     },
     hu: {
-        start: ['kezdés', 'kezdes', 'új', 'uj', 'kezdd', 'hozzáad', 'hozzaad'],
+        start: ['kezdés', 'kezdes', 'új', 'uj', 'kezdd', 'hozzáad', 'hozzaad', 'adatbevitel', 'indítás', 'inditas', 'indít', 'indit'],
         plus: ['plusz', 'tovább', 'tovabb', 'mentés', 'mentes'],
         obrisi: ['töröl\\w*', 'torol\\w*', 'mégse', 'megse'],
         end: ['vége', 'vege', 'kész', 'kesz', 'befejez\\w*'],
@@ -465,9 +465,13 @@ function normalizujNaziv(str) {
 function parseVoiceDataEntry(command) {
     console.log('🔍 PARSIRAM:', command);
 
+    const startWords = getLangDict(COMMAND_WORDS).start.map(w => w.replace(/\\w\*/g, ''));
+    const stripRx = new RegExp('^(' + startWords.join('|') + ')\\s*', 'i');
+    const removeRx = new RegExp('\\b(' + [...getLangDict(COMMAND_WORDS).plus, ...getLangDict(COMMAND_WORDS).end].join('|') + ')\\b', 'gi');
+
     let text = command
-        .replace(/^(unos|start|dodaj|novi|novo|add|unesi)\s*/i, '')
-        .replace(/\b(plus|end|kraj|gotovo|zavrsi)\b/gi, '')
+        .replace(stripRx, '')
+        .replace(removeRx, '')
         .trim();
 
     let words = text.split(/\s+/).filter(Boolean);
@@ -482,14 +486,10 @@ function parseVoiceDataEntry(command) {
         storage: 'Zamrzivač 1'
     };
 
-    // 🔥 1. NAĐI JEDINICU
+    // 🔥 1. NAĐI JEDINICU (rečnik za trenutni jezik)
     let foundUnit = null;
     let unitIndex = -1;
-    let unitWords = ['kilogram', 'kilograma', 'kg', 'kilogrami',
-                     'gram', 'grama', 'grami', 'g',
-                     'litar', 'litara', 'litri', 'l',
-                     'komad', 'komada', 'kom', 'komadi',
-                     'paket', 'paketa', 'pak', 'paketi'];
+    let unitWords = Object.keys(getLangDict(UNIT_MAP_BY_LANG));
 
     for (let i = 0; i < words.length; i++) {
         let w = words[i].toLowerCase();
@@ -501,10 +501,10 @@ function parseVoiceDataEntry(command) {
         }
     }
 
-    // 🔥 2. NAĐI SKLADIŠTE
+    // 🔥 2. NAĐI SKLADIŠTE (rečnik za trenutni jezik)
     let foundStorage = null;
     let storageIndex = -1;
-    let storageWords = ['zamrzivač', 'zamrzivac', 'frižider', 'frizider', 'ostava', 'špajz'];
+    let storageWords = Object.keys(getLangDict(STORAGE_MAP_BY_LANG));
 
     for (let i = 0; i < words.length; i++) {
         let w = words[i].toLowerCase();
@@ -583,15 +583,6 @@ function parseVoiceDataEntry(command) {
             result.shelf_life = numbers[1];
             console.log('📦 2+ broja (kom/pak): piece = quantity =', numbers[0], ', shelf_life =', numbers[1]);
         }
-    }
-
-    // 🔥 6. EKSPLICITNO "MESECI" IMA PREDNOST
-    let meseciMatch = text.match(/(\d+|jedan|dva|tri|četiri|pet|šest|sedam|osam|devet|deset|jedanaest|dvanaest)\s*meseci/i);
-    if (meseciMatch) {
-        let val = meseciMatch[1].toLowerCase();
-        if (getLangDict(NUMBER_WORDS_BY_LANG)[val]) val = getLangDict(NUMBER_WORDS_BY_LANG)[val];
-        result.shelf_life = val;
-        console.log('📅 Rok (meseci eksplicitno):', val);
     }
 
     if (foundUnit) result.unit = foundUnit;
