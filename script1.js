@@ -2098,39 +2098,17 @@ function updateHeaderLanguage() {
     console.log('🔄 Ažuriram header za jezik:', lang);
     
     const headerTranslations = {
-        'sr': {
-            'nazad': '◀ Nazad',
-            'stanje': '📦 Zalihe',
-            'spisak': '🛒 Spisak',
-            'odustani': '🚪 EXIT',  // ✅ PROMENJENO
-            'unos_podataka': '✏️ Unos podataka',
-            'glasovni_unos': '🎤 Glasovni unos',
-            'rucni_unos': '⌨️ Ručni unos',
-            'kako_uneti': 'Kako želite da unesete podatke?',
-            'govorite_i_unecu': 'Govorite, a ja ću uneti',
-            'ukucajte_rucno': 'Ukucajte podatke ručno',
-            'glasovna_kontrola': '🎤 Glasovna kontrola',
-            'recite_sta_zelite': 'Recite šta želite da uradite:',
-            'dodaj_proizvod': '➕ Dodaj proizvod',
-            'izlaz': '🚪 Izlaz'
-        },
-        'en': {
-            'nazad': '◀ Back',
-            'stanje': '📦 Inventory',
-            'spisak': '🛒 Shopping List',
-            'odustani': '🚪 EXIT',  // ✅ PROMENJENO
-            'unos_podataka': '✏️ Data Entry',
-            'glasovni_unos': '🎤 Voice Input',
-            'rucni_unos': '⌨️ Manual Input',
-            'kako_uneti': 'How do you want to enter data?',
-            'govorite_i_unecu': 'Speak and I will enter',
-            'ukucajte_rucno': 'Type data manually',
-            'glasovna_kontrola': '🎤 Voice Control',
-            'recite_sta_zelite': 'Say what you want to do:',
-            'dodaj_proizvod': '➕ Add Product',
-            'izlaz': '🚪 Exit'
-        }
-    };
+    'sr': { nazad: '◀ Nazad', stanje: '📦 Zalihe', spisak: '🛒 Spisak', odustani: '🚪 EXIT' },
+    'en': { nazad: '◀ Back', stanje: '📦 Inventory', spisak: '🛒 Shopping List', odustani: '🚪 EXIT' },
+    'de': { nazad: '◀ Zurück', stanje: '📦 Bestand', spisak: '🛒 Einkaufsliste', odustani: '🚪 EXIT' },
+    'hu': { nazad: '◀ Vissza', stanje: '📦 Készlet', spisak: '🛒 Bevásárlólista', odustani: '🚪 EXIT' },
+    'uk': { nazad: '◀ Назад', stanje: '📦 Запаси', spisak: '🛒 Список', odustani: '🚪 EXIT' },
+    'ru': { nazad: '◀ Назад', stanje: '📦 Запасы', spisak: '🛒 Список', odustani: '🚪 EXIT' },
+    'zh': { nazad: '◀ 返回', stanje: '📦 库存', spisak: '🛒 购物清单', odustani: '🚪 退出' },
+    'es': { nazad: '◀ Atrás', stanje: '📦 Inventario', spisak: '🛒 Lista de Compras', odustani: '🚪 SALIR' },
+    'pt': { nazad: '◀ Voltar', stanje: '📦 Estoque', spisak: '🛒 Lista de Compras', odustani: '🚪 SAIR' },
+    'fr': { nazad: '◀ Retour', stanje: '📦 Stock', spisak: '🛒 Liste de Courses', odustani: '🚪 SORTIR' }
+};
     
     const ht = (key) => {
         return headerTranslations[lang]?.[key] || headerTranslations['en'][key] || key;
