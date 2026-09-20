@@ -1667,8 +1667,9 @@ grupisaneListe.forEach(g => {
     html += `<div class="cell">${g.unit}</div>`;
     html += `<div class="cell">${expiryDisplay}</div>`;
     html += `<div class="cell">${g.storage_location}</div>`;
-    html += `</div>`;
+        html += `</div>`;
 });
+}
     html += `</div></div>`;
     content.innerHTML = html;
     
