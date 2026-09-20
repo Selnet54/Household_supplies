@@ -1620,31 +1620,49 @@ function renderInventory(lang) {
 } else {
     // 🔥 GRUPISANJE ISTIH PROIZVODA (isti naziv + ista jedinica) - sabira komad i količinu
     const grupe = {};
+// 🔥 GRUPISANJE: normalizovan naziv (grill≈gril) + delimično poklapanje (gril ≈ gril pile) + ista jedinica + isto skladište
+const grupe = [];
 aktivneZalihe.forEach(p => {
-    const kljuc = (p.product_name || '').trim().toLowerCase() + '|' + (p.unit || '') + '|' + (p.storage_location || '');
-    if (!grupe[kljuc]) {
-        grupe[kljuc] = {
-            product_name: p.product_name,
+    const nazivNorm = normalizujNaziv(p.product_name);
+    const unit = p.unit || '';
+    const skladiste = p.storage_location || '';
+
+    let g = grupe.find(gr =>
+        gr.unit === unit &&
+        gr.storage_location === skladiste &&
+        (gr.nazivNorm.includes(nazivNorm) || nazivNorm.includes(gr.nazivNorm))
+    );
+
+    if (!g) {
+        g = {
+            nazivNorm: nazivNorm,
+            product_name: p.product_name, // naziv prvog unosa u grupi se prikazuje
             description: p.description || '',
             piece: 0,
             quantity: 0,
-            unit: p.unit,
-            storage_location: p.storage_location || '',
+            unit: unit,
+            storage_location: skladiste,
             najranijiIstek: null,
             originalIndexes: []
         };
+        grupe.push(g);
+    } else if (nazivNorm.length > g.nazivNorm.length) {
+        // ako je novi naziv duži/potpuniji (npr. "gril pile" stiže posle "gril"), koristi njega za prikaz
+        g.nazivNorm = nazivNorm;
+        g.product_name = p.product_name;
     }
-    const g = grupe[kljuc];
+
     g.piece += parseFloat(p.piece) || 0;
     g.quantity += parseFloat(p.quantity) || 0;
     g.originalIndexes.push(zalihe.indexOf(p));
+
     const expiry = new Date(p.entry_date);
     expiry.setMonth(expiry.getMonth() + p.shelf_life_months);
     if (!g.najranijiIstek || expiry < g.najranijiIstek) g.najranijiIstek = expiry;
 });
 
 // 🔥 SORTIRANO PO SKLADIŠTU, PA PO NAZIVU
-const grupisaneListe = Object.values(grupe).sort((a, b) => {
+const grupisaneListe = grupe.sort((a, b) => {
     const s = (a.storage_location || '').localeCompare(b.storage_location || '');
     return s !== 0 ? s : a.product_name.localeCompare(b.product_name);
 });
